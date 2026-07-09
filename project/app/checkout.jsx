@@ -1,5 +1,182 @@
 /* ИНДУСТРИЯ ЗДОРОВЬЯ — Tenders + News pages (per TZ) */
 
+/* Live tender lots from UZEX (etender.uzex.uz/lots/2/0), served from our
+   backend cache: GET /api/etender/lots?typeId=2. See EtenderModule on the API. */
+function useEtenderLotsCss() {
+  React.useEffect(() => {
+    const ID = "etl-css";
+    if (document.getElementById(ID)) return;
+    const s = document.createElement("style");
+    s.id = ID;
+    s.textContent = `
+.etl-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.etl-src{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--blue-700,#1749a6);background:var(--blue-50,#eef4ff);border:1px solid var(--blue-200,#cfe0fb);border-radius:8px;padding:6px 12px}
+.etl-src .dot{width:7px;height:7px;border-radius:50%;background:#15A06A;box-shadow:0 0 0 3px rgba(21,160,106,.18)}
+.etl-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.etl-search{height:42px;min-width:230px;border:1.5px solid var(--line);border-radius:10px;padding:0 14px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--ink);outline:none}
+.etl-search:focus{border-color:var(--blue-400,#4d88e0)}
+.etl-count{font-size:13px;color:var(--slate-500);white-space:nowrap}
+.etl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.etl-card{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r-lg,16px);background:var(--surface,#fff);padding:20px;transition:box-shadow .16s,border-color .16s;position:relative}
+.etl-card:hover{box-shadow:var(--sh-sm,0 6px 20px rgba(16,42,86,.08));border-color:var(--blue-200,#cfe0fb)}
+.etl-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.etl-no{font-size:12px;font-weight:700;color:var(--slate-500);font-variant-numeric:tabular-nums}
+.etl-deadline{font-size:11.5px;font-weight:700;border-radius:20px;padding:4px 10px;white-space:nowrap}
+.etl-deadline.ok{color:#15803d;background:#e7f6ec}
+.etl-deadline.soon{color:#b45309;background:#fdf1e0}
+.etl-deadline.urgent{color:#b42318;background:#fdeceb}
+.etl-name{font-size:14.5px;font-weight:700;line-height:1.4;color:var(--ink);margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:60px}
+.etl-meta{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.etl-row{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--slate-600);line-height:1.4}
+.etl-row svg{flex-shrink:0;color:var(--slate-400);margin-top:1px}
+.etl-cost{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.etl-cost-v{font-size:18px;font-weight:900;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.etl-cost-c{font-size:12px;font-weight:700;color:var(--slate-400)}
+.etl-open{font-size:12.5px;font-weight:700;color:var(--blue-600);white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.etl-open:hover{text-decoration:underline}
+.etl-skel{border:1px solid var(--line);border-radius:var(--r-lg,16px);background:var(--surface,#fff);padding:20px;height:210px}
+.etl-skel .b{background:linear-gradient(90deg,var(--bg-2,#f1f5f9) 25%,var(--line,#e2e8f0) 50%,var(--bg-2,#f1f5f9) 75%);background-size:200% 100%;animation:etlsh 1.3s infinite;border-radius:7px}
+@keyframes etlsh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.etl-state{text-align:center;padding:44px 20px;border:1px dashed var(--line);border-radius:var(--r-lg,16px);color:var(--slate-500);font-size:14px}
+.etl-more{display:flex;justify-content:center;margin-top:26px}
+@media(max-width:900px){.etl-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.etl-grid{grid-template-columns:1fr}.etl-name{min-height:0}}
+    `;
+    document.head.appendChild(s);
+  }, []);
+}
+
+function EtenderLotsBlock({ lang, lv }) {
+  const { useState, useEffect } = React;
+  useEtenderLotsCss();
+  const PAGE = 12;
+  const [lots, setLots] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [limit, setLimit] = useState(PAGE);
+  const [status, setStatus] = useState("loading"); // loading | ready | error
+  const [query, setQuery] = useState("");
+  const [term, setTerm] = useState("");
+
+  // debounce search input -> term
+  useEffect(() => {
+    const id = setTimeout(() => setTerm(query.trim()), 350);
+    return () => clearTimeout(id);
+  }, [query]);
+
+  useEffect(() => {
+    let alive = true;
+    setStatus((s) => (s === "ready" ? "ready" : "loading"));
+    const q = { typeId: 2, state: "active", limit, page: 1 };
+    if (term) q.search = term;
+    (window.api && window.api.listPublic ? window.api.listPublic("etender/lots", q) : Promise.reject(new Error("api")))
+      .then((res) => { if (!alive) return; setLots((res && res.data) || []); setTotal((res && res.total) || 0); setStatus("ready"); })
+      .catch(() => { if (alive) setStatus("error"); });
+    return () => { alive = false; };
+  }, [limit, term]);
+
+  const fmtCost = (v) => {
+    if (v === null || v === undefined || v === "") return "—";
+    const n = Number(v);
+    if (isNaN(n)) return String(v);
+    return n.toLocaleString("ru-RU", { maximumFractionDigits: 0 });
+  };
+  const fmtDate = (d) => {
+    if (!d) return "";
+    const x = new Date(d);
+    if (isNaN(x.getTime())) return "";
+    return String(x.getDate()).padStart(2, "0") + "." + String(x.getMonth() + 1).padStart(2, "0") + "." + x.getFullYear();
+  };
+  const deadline = (d) => {
+    if (!d) return null;
+    const days = Math.ceil((new Date(d).getTime() - Date.now()) / 86400000);
+    if (isNaN(days)) return null;
+    const cls = days <= 2 ? "urgent" : days <= 7 ? "soon" : "ok";
+    const label = days < 0 ? lv("завершён", "yakunlangan", "closed")
+      : days === 0 ? lv("сегодня", "bugun", "today")
+      : lv("остаётся ", "qoldi ", "") + days + lv(" дн.", " kun", "d left");
+    return { cls, label };
+  };
+  const IcnPin = <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>;
+  const IcnUser = <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
+  const IcnCal = <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>;
+
+  return (
+    <section className="section alt" id="etender-lots">
+      <div className="wrap">
+        <div className="etl-head reveal">
+          <div>
+            <span className="eyebrow line">{lv("Актуальные закупки", "Dolzarb xaridlar", "Live procurement")}</span>
+            <h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Тендерные лоты на бирже UZEX", "UZEX birjasidagi tender lotlari", "Tender lots on the UZEX exchange")}</h2>
+            <p style={{ fontSize: 14.5, color: "var(--slate-600)", maxWidth: 620, lineHeight: 1.6, marginTop: 10 }}>
+              {lv("Открытые тендерные лоты с портала государственных закупок etender.uzex.uz. Данные обновляются автоматически.",
+                "etender.uzex.uz davlat xaridlari portalidagi ochiq tender lotlari. Ma'lumotlar avtomatik yangilanadi.",
+                "Open tender lots from the etender.uzex.uz public procurement portal, refreshed automatically.")}
+            </p>
+          </div>
+          <span className="etl-src"><span className="dot"></span>etender.uzex.uz · UZEX</span>
+        </div>
+
+        <div className="etl-head reveal" style={{ marginBottom: 20 }}>
+          <input className="etl-search" value={query} onChange={(e) => { setQuery(e.target.value); }} placeholder={lv("Поиск: наименование, заказчик, №…", "Qidiruv: nomi, buyurtmachi, №…", "Search: name, customer, №…")} />
+          <span className="etl-count">{status === "ready" ? (lv("Найдено лотов: ", "Topilgan lotlar: ", "Lots found: ") + total) : ""}</span>
+        </div>
+
+        {status === "loading" &&
+          <div className="etl-grid">{Array.from({ length: 6 }).map((_, i) =>
+            <div className="etl-skel" key={i}>
+              <div className="b" style={{ height: 12, width: "40%", marginBottom: 16 }}></div>
+              <div className="b" style={{ height: 14, marginBottom: 8 }}></div>
+              <div className="b" style={{ height: 14, width: "80%", marginBottom: 22 }}></div>
+              <div className="b" style={{ height: 20, width: "55%" }}></div>
+            </div>)}
+          </div>}
+
+        {status === "error" &&
+          <div className="etl-state">
+            {lv("Не удалось загрузить лоты. Попробуйте обновить страницу позже.", "Lotlarni yuklab bo'lmadi. Keyinroq urinib ko'ring.", "Could not load lots. Please try again later.")}
+            <div style={{ marginTop: 14 }}><button className="btn btn-ghost" onClick={() => { setStatus("loading"); setLimit((l) => l); setTerm((tm) => tm + " "); setTimeout(() => setTerm(query.trim()), 0); }}>{lv("Повторить", "Qayta urinish", "Retry")}</button></div>
+          </div>}
+
+        {status === "ready" && lots.length === 0 &&
+          <div className="etl-state">{lv("По запросу лотов не найдено.", "So'rov bo'yicha lotlar topilmadi.", "No lots match your query.")}</div>}
+
+        {status === "ready" && lots.length > 0 &&
+          <React.Fragment>
+            <div className="etl-grid">
+              {lots.map((l) => {
+                const dl = deadline(l.endDate);
+                return (
+                  <div className="etl-card reveal" key={l.id}>
+                    <div className="etl-card-top">
+                      <span className="etl-no">№ {l.displayNo || l.externalId}</span>
+                      {dl && <span className={"etl-deadline " + dl.cls}>{dl.label}</span>}
+                    </div>
+                    <h3 className="etl-name" title={l.name}>{l.name}</h3>
+                    <div className="etl-meta">
+                      {l.sellerName && <div className="etl-row">{IcnUser}<span>{l.sellerName}</span></div>}
+                      {(l.regionName || l.districtName) && <div className="etl-row">{IcnPin}<span>{[l.regionName, l.districtName].filter(Boolean).join(", ")}</span></div>}
+                      {l.endDate && <div className="etl-row">{IcnCal}<span>{lv("до ", "gacha ", "until ")}{fmtDate(l.endDate)}</span></div>}
+                    </div>
+                    <div className="etl-cost">
+                      <div><span className="etl-cost-v">{fmtCost(l.cost)}</span> <span className="etl-cost-c">{l.currencyCode || ""}</span></div>
+                      <a className="etl-open" href={"https://etender.uzex.uz/lot/" + l.externalId} target="_blank" rel="noopener">{lv("На UZEX", "UZEX'da", "On UZEX")} ↗</a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {lots.length < total &&
+              <div className="etl-more">
+                <button className="btn btn-ghost btn-lg" onClick={() => setLimit((l) => l + PAGE)}>
+                  {lv("Показать ещё", "Yana ko'rsatish", "Show more")} ({total - lots.length})
+                </button>
+              </div>}
+          </React.Fragment>}
+      </div>
+    </section>
+  );
+}
+
 function CoTendersPage({ t, lang, go }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const [sent, setSent] = useState(false);
@@ -32,6 +209,8 @@ function CoTendersPage({ t, lang, go }) {
           </div>
         </div>
       </section>
+
+      <EtenderLotsBlock lang={lang} lv={lv} />
 
       <section className="section">
         <div className="wrap">
