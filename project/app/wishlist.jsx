@@ -1,0 +1,113 @@
+/* UzMedEx — FAQ page with accordion */
+const { useState: useFaqState } = React;
+
+const FAQ_DATA = [
+  {
+    cat: { ru: "Заказ и оплата", uz: "Buyurtma va to'lov", en: "Orders & payment" },
+    items: [
+      {
+        q: { ru: "Как оформить заказ оборудования?", uz: "Uskunani qanday buyurtma qilish mumkin?", en: "How do I place an equipment order?" },
+        a: { ru: "Добавьте позиции в корзину и отправьте запрос коммерческого предложения, либо позвоните менеджеру. В течение одного рабочего дня мы подтвердим наличие, актуальные цены и сроки поставки.", uz: "Pozitsiyalarni savatga qo'shing va tijorat taklifi so'rovini yuboring yoki menejerga qo'ng'iroq qiling. Bir ish kuni ichida mavjudlik, narx va muddatlarni tasdiqlaymiz.", en: "Add items to your cart and submit a quote request, or call a manager. Within one business day we confirm availability, current prices and delivery times." },
+      },
+      {
+        q: { ru: "Какие способы оплаты доступны для юридических лиц?", uz: "Yuridik shaxslar uchun qanday to'lov usullari mavjud?", en: "What payment methods are available for legal entities?" },
+        a: { ru: "Безналичный расчёт по договору (перечисление на расчётный счёт), оплата через бюджетное финансирование для госучреждений, лизинг и рассрочка. Работаем с НДС, предоставляем полный пакет бухгалтерских документов.", uz: "Shartnoma bo'yicha naqd pulsiz hisob-kitob, davlat muassasalari uchun byudjet moliyalashtirish, lizing va bo'lib to'lash. QQS bilan ishlaymiz.", en: "Bank transfer under contract, budget financing for state institutions, leasing and instalments. We work with VAT and provide a full set of accounting documents." },
+      },
+      {
+        q: { ru: "Можно ли оформить рассрочку или лизинг?", uz: "Bo'lib to'lash yoki lizing rasmiylashtirish mumkinmi?", en: "Can I arrange instalments or leasing?" },
+        a: { ru: "Да. Для бюджетных и частных медучреждений доступны программы рассрочки и лизинга на оборудование. Условия зависят от суммы заказа и обсуждаются индивидуально с менеджером.", uz: "Ha. Budjet va xususiy tibbiyot muassasalari uchun bo'lib to'lash va lizing dasturlari mavjud. Shartlar buyurtma summasiga bog'liq.", en: "Yes. Instalment and leasing programmes are available for public and private medical institutions. Terms depend on the order amount and are discussed individually." },
+      },
+    ],
+  },
+  {
+    cat: { ru: "Доставка и установка", uz: "Yetkazib berish va o'rnatish", en: "Delivery & installation" },
+    items: [
+      {
+        q: { ru: "В какие регионы вы доставляете?", uz: "Qaysi hududlarga yetkazib berasiz?", en: "Which regions do you deliver to?" },
+        a: { ru: "Доставка осуществляется во все 14 регионов Республики Узбекистан. По Ташкенту — 1–2 рабочих дня, в областные центры — 2–3 дня, в отдалённые районы — 3–5 дней.", uz: "Yetkazib berish O'zbekiston Respublikasining barcha 14 hududiga amalga oshiriladi. Toshkent bo'yicha — 1–2 ish kuni, viloyat markazlariga — 2–3 kun.", en: "We deliver to all 14 regions of Uzbekistan. Tashkent — 1–2 working days, regional centres — 2–3 days, remote districts — 3–5 days." },
+      },
+      {
+        q: { ru: "Выполняете ли вы монтаж и пусконаладку?", uz: "Montaj va ishga tushirishni bajarasizmi?", en: "Do you perform installation and commissioning?" },
+        a: { ru: "Да. Наш инженерный центр выполняет монтаж, пусконаладку и калибровку оборудования, а также обучение медперсонала работе с техникой. Услуга включается в КП по запросу.", uz: "Ha. Muhandislik markazimiz montaj, ishga tushirish va kalibrlashni, shuningdek tibbiy xodimlarni o'qitishni bajaradi.", en: "Yes. Our engineering centre performs installation, commissioning and calibration, plus staff training. The service is included in the quote on request." },
+      },
+    ],
+  },
+  {
+    cat: { ru: "Гарантия и сервис", uz: "Kafolat va servis", en: "Warranty & service" },
+    items: [
+      {
+        q: { ru: "Какая гарантия на оборудование?", uz: "Uskunaga qanday kafolat beriladi?", en: "What warranty comes with the equipment?" },
+        a: { ru: "На всё оборудование предоставляется официальная гарантия производителя — 24 месяца. В течение гарантийного срока устранение неисправностей и замена дефектных узлов выполняются бесплатно.", uz: "Barcha uskunalarga ishlab chiqaruvchining rasmiy kafolati — 24 oy beriladi. Kafolat muddatida ta'mirlash bepul.", en: "All equipment carries an official 24-month manufacturer's warranty. Fault rectification and replacement of defective parts are free during the warranty period." },
+      },
+      {
+        q: { ru: "Есть ли у вас сервисный центр?", uz: "Servis markazingiz bormi?", en: "Do you have a service centre?" },
+        a: { ru: "Да, авторизованный сервисный центр в Ташкенте со штатом из 18 сертифицированных инженеров. Выполняем гарантийное и постгарантийное обслуживание, плановое ТО по договору.", uz: "Ha, Toshkentda 18 sertifikatlangan muhandisdan iborat vakolatli servis markazi. Kafolatli va kafolatdan keyingi xizmat ko'rsatamiz.", en: "Yes, an authorized service centre in Tashkent staffed by 18 certified engineers. We provide warranty and post-warranty service and scheduled maintenance under contract." },
+      },
+    ],
+  },
+  {
+    cat: { ru: "Документы и сертификация", uz: "Hujjatlar va sertifikatlash", en: "Documents & certification" },
+    items: [
+      {
+        q: { ru: "Предоставляете ли вы регистрационные удостоверения МЗ РУз?", uz: "OʻzR SSV ro'yxatdan o'tkazish guvohnomalarini taqdim etasizmi?", en: "Do you provide MoH Uzbekistan registration certificates?" },
+        a: { ru: "Да. Всё оборудование поставляется с полным пакетом регистрационных удостоверений Министерства здравоохранения Республики Узбекистан и сертификатов соответствия.", uz: "Ha. Barcha uskunalar O'zbekiston Respublikasi Sog'liqni saqlash vazirligining ro'yxatdan o'tkazish guvohnomalari bilan yetkazib beriladi.", en: "Yes. All equipment is supplied with a full set of Ministry of Health registration certificates and conformity certificates." },
+      },
+      {
+        q: { ru: "Какие документы я получу при поставке?", uz: "Yetkazib berishda qanday hujjatlarni olaman?", en: "What documents will I receive on delivery?" },
+        a: { ru: "Счёт-фактуру, товарную накладную, регистрационное удостоверение МЗ РУз, сертификат соответствия, гарантийный талон и техническую документацию на русском языке.", uz: "Hisob-faktura, tovar yuk xati, SSV guvohnomasi, muvofiqlik sertifikati, kafolat taloni va texnik hujjatlar.", en: "An invoice, delivery note, MoH registration certificate, conformity certificate, warranty card and technical documentation." },
+      },
+    ],
+  },
+];
+
+function FaqItem({ item, lang }) {
+  const [open, setOpen] = useFaqState(false);
+  const lv = (o) => o[lang] || o.ru;
+  return (
+    <div className={"faq-item " + (open ? "open" : "")}>
+      <button className="faq-q" onClick={() => setOpen(!open)}>
+        <span>{lv(item.q)}</span>
+        <span className="faq-chev"><Icon name="chevronDown" size={20} /></span>
+      </button>
+      <div className="faq-a-wrap">
+        <div className="faq-a">{lv(item.a)}</div>
+      </div>
+    </div>
+  );
+}
+
+function FaqPage({ t, lang, go }) {
+  const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
+  return (
+    <div className="wrap" style={{ padding: "8px 0 70px" }}>
+      <div className="crumb">
+        <a onClick={() => go("home")}>{t.breadcrumb_home}</a>
+        <Icon name="chevronRight" size={14} />
+        <span className="cur">{lv("Частые вопросы", "Tez-tez beriladigan savollar", "FAQ")}</span>
+      </div>
+      <div style={{ maxWidth: 820, margin: "0 auto" }}>
+        <h1 className="info-title" style={{ textAlign: "center" }}>{lv("Частые вопросы", "Tez-tez beriladigan savollar", "Frequently asked questions")}</h1>
+        <p style={{ textAlign: "center", color: "var(--slate-500)", fontSize: 16, marginBottom: 40 }}>
+          {lv("Ответы на популярные вопросы о заказе, доставке, гарантии и документах.", "Buyurtma, yetkazib berish, kafolat va hujjatlar haqida savollarga javoblar.", "Answers about ordering, delivery, warranty and documents.")}
+        </p>
+        {FAQ_DATA.map((group, gi) => (
+          <div key={gi} className="faq-group">
+            <h3 className="faq-cat">{lv(group.cat.ru, group.cat.uz, group.cat.en)}</h3>
+            {group.items.map((item, ii) => <FaqItem key={ii} item={item} lang={lang} />)}
+          </div>
+        ))}
+        <div className="faq-cta">
+          <div>
+            <div className="faq-cta-t">{lv("Не нашли ответ?", "Javob topmadingizmi?", "Didn't find an answer?")}</div>
+            <div className="faq-cta-d">{lv("Наши менеджеры ответят на любой вопрос и подготовят КП.", "Menejerlarimiz har qanday savolga javob beradi.", "Our managers will answer any question and prepare a quote.")}</div>
+          </div>
+          <button className="btn btn-primary btn-lg" onClick={() => window.__openQuote && window.__openQuote()}>
+            <Icon name="phone" size={18} />{lv("Задать вопрос", "Savol berish", "Ask a question")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+Object.assign(window, { FaqPage });

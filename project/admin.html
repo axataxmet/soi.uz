@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ИНДУСТРИЯ ЗДОРОВЬЯ — Админ-панель</title>
+<link rel="icon" type="image/svg+xml" href="/assets/soi-mark.svg" />
+<link rel="apple-touch-icon" href="/assets/soi-mark.svg" />
+<meta name="theme-color" content="#0E4AC6" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/admin/styles.css" />
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React + Babel -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<!-- Store data (products + categories) -->
+<script src="/core/data.js"></script>
+<script src="/core/catalog-data.js"></script>
+<script src="/app/data.js"></script>
+<script src="/app/cms-store.js"></script>
+<script src="/app/store-overlay.js"></script>
+
+<!-- Excel parsing/writing -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<!-- Admin data + i18n -->
+<script src="/admin/i18n.js?v=1782600006"></script>
+
+<!-- API client + remote CMS overlay (routes select collections to the REST backend) -->
+<script>window.SOI_ADMIN = true;</script>
+<script src="/app/api-client.js?v=1782600002"></script>
+<script src="/app/catalog-admin-api.js?v=1782600002"></script>
+<script src="/app/cms-remote.js?v=1782600032"></script>
+
+<!-- React hooks shim (each Babel file needs its own scope) -->
+<script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+</script>
+
+<!-- Admin components -->
+<script type="text/babel" src="/admin/ui.jsx"></script>
+<script type="text/babel" src="/admin/cms-ui.jsx?v=1782600024"></script>
+<script type="text/babel" src="/admin/richtext.jsx"></script>
+<script type="text/babel" src="/admin/dashboard.jsx?v=1782600023"></script>
+<script type="text/babel" src="/admin/analytics.jsx?v=1782600006"></script>
+<script type="text/babel" src="/admin/product-form.jsx?v=1782600003"></script>
+<script type="text/babel" src="/admin/products.jsx?v=1782600003"></script>
+<script type="text/babel" src="/admin/catalog-manager.jsx?v=1782600002"></script>
+<script type="text/babel" src="/admin/manufacturers.jsx?v=1782600001"></script>
+<script type="text/babel" src="/admin/catalog-specs.jsx?v=1782600002"></script>
+<script type="text/babel" src="/admin/import.jsx?v=1782510000"></script>
+<script type="text/babel" src="/admin/homepage.jsx?v=1782600032"></script>
+<script type="text/babel" src="/admin/team.jsx?v=1782600020"></script>
+<script type="text/babel" src="/admin/documents.jsx?v=1782580000"></script>
+<script type="text/babel" src="/admin/news.jsx?v=1782510000"></script>
+<script type="text/babel" src="/admin/media.jsx"></script>
+<script type="text/babel" src="/admin/reviews.jsx?v=1782510000"></script>
+<script type="text/babel" src="/admin/seo.jsx?v=1782600024"></script>
+<script type="text/babel" src="/admin/submissions.jsx?v=1782550000"></script>
+<script type="text/babel" src="/admin/users.jsx?v=1782570000"></script>
+<script type="text/babel" src="/admin/navmenu.jsx"></script>
+<script type="text/babel" src="/admin/orders.jsx"></script>
+<script type="text/babel" src="/admin/cases.jsx?v=1782510000"></script>
+<script type="text/babel" src="/admin/misc.jsx?v=1782600024"></script>
+<script type="text/babel" src="/admin/app.jsx?v=1782600025"></script>
+</body>
+</html>

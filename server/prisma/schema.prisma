@@ -1,0 +1,524 @@
+// ИНДУСТРИЯ ЗДОРОВЬЯ — Prisma schema (PostgreSQL)
+// Multilingual fields are stored as JSON: { "ru": "...", "uz": "...", "en": "..." }
+// Media is stored in S3/MinIO; only URLs + metadata live in the DB.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────── Auth ───────────────────────────
+
+enum Role {
+  SUPERADMIN
+  ADMIN
+  EDITOR
+  CONTENT_MANAGER
+  SUBMISSIONS_MANAGER
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  passwordHash String
+  name         String
+  role         Role           @default(CONTENT_MANAGER)
+  isActive     Boolean        @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  refreshTokens RefreshToken[]
+  mediaFiles    MediaFile[]
+
+  @@map("users")
+}
+
+// Hashed refresh tokens for rotation / revocation.
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+// ─────────────────────────── Shared enums ───────────────────────────
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum ReviewType {
+  BUYER
+  SUPPLIER
+}
+
+enum SubmissionStatus {
+  NEW
+  IN_PROGRESS
+  DONE
+  REJECTED
+}
+
+// ─────────────────────────── Content ───────────────────────────
+
+model Review {
+  id          String        @id @default(cuid())
+  type        ReviewType    @default(BUYER)
+  company     Json          // { ru, uz, en }
+  region      Json?
+  description Json?
+  quote       Json?
+  body        Json?
+  logoUrl     String?
+  letterUrl   String?       // благодарственное письмо (PDF/изображение)
+  color       String?
+  status      PublishStatus @default(DRAFT)
+  date        DateTime?
+  order       Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([type])
+  @@index([status])
+  @@map("reviews")
+}
+
+// ─────────────────────────── Catalog (A3: dual classification) ───────────────────────────
+// Товар классифицируется НЕЗАВИСИМО по двум осям:
+//   1) тип товара:      TypeCategory → TypeSubcategory → ProductGroup (дерево из 3 уровней)
+//   2) направление медицины: SpecCategory (плоский список специальностей)
+// Товар привязывается к листовому уровню (ProductGroup) и к специальностям — обе связи
+// многие-ко-многим (ProductGroupItem / ProductSpec).
+//
+// Схема атрибутов НАСЛЕДУЕТСЯ вниз по дереву: attrSchema есть на каждом из трёх уровней,
+// и эффективный набор полей формы товара = merge(category → subcategory → group).
+// Общие поля (бренд, страна, гарантия, габариты, вес…) задаются выше, специфические
+// (channels, display, probe_types…) — на уровне группы. Формат attrSchema:
+//   { "fields": [ { "key", "label": {ru,uz,en}, "type", "unit"?, "required"?, "options"? } ] }
+// type ∈ text | textarea | number | boolean | select | multiselect.
+
+model TypeCategory {
+  id            String            @id @default(cuid())
+  name          Json              // { ru, uz, en }
+  slug          String            @unique // equipment | furniture | instruments | consumables
+  order         Int               @default(0)
+  active        Boolean           @default(true)
+  attrSchema    Json?             // общие поля уровня категории (наследуются ниже)
+  subcategories TypeSubcategory[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@map("type_categories")
+}
+
+model TypeSubcategory {
+  id         String         @id @default(cuid())
+  categoryId String
+  category   TypeCategory   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name       Json
+  slug       String         @unique
+  order      Int            @default(0)
+  attrSchema Json?          // поля уровня подкатегории (добавляются к унаследованным от категории)
+  groups     ProductGroup[]
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  @@index([categoryId])
+  @@map("type_subcategories")
+}
+
+// Товарная группа — третий (листовой) уровень дерева типов: ЭКГ-аппараты, УЗИ-сканеры,
+// кольпоскопы, мониторы пациента, кровати, расходные материалы… Товары привязываются к группе.
+model ProductGroup {
+  id           String             @id @default(cuid())
+  subcatId     String
+  subcat       TypeSubcategory    @relation(fields: [subcatId], references: [id], onDelete: Cascade)
+  name         Json
+  slug         String             @unique
+  order        Int                @default(0)
+  active       Boolean            @default(true)
+  attrSchema   Json?              // специфические поля группы (channels, display, probe_types…)
+  // Витринная видимость: группа появляется в навигации, когда накопит достаточно товаров.
+  // Поддерживается приложением (CatalogTypesService.recomputeVisibility), а не БД-триггером —
+  // Postgres GENERATED-колонки не могут ссылаться на другие таблицы.
+  productCount Int                @default(0)
+  visible      Boolean            @default(false)
+  products     ProductGroupItem[]
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  @@index([subcatId])
+  @@map("product_groups")
+}
+
+model SpecCategory {
+  id        String        @id @default(cuid())
+  name      Json
+  slug      String        @unique
+  order     Int           @default(0)
+  active    Boolean       @default(true)
+  products  ProductSpec[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("spec_categories")
+}
+
+// Привязка товара к товарной группе (ось «тип товара», многие-ко-многим).
+model ProductGroupItem {
+  productId String
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  groupId   String
+  group     ProductGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([productId, groupId])
+  @@index([groupId])
+  @@map("product_group_items")
+}
+
+model ProductSpec {
+  productId String
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  specId    String
+  spec      SpecCategory @relation(fields: [specId], references: [id], onDelete: Cascade)
+
+  @@id([productId, specId])
+  @@index([specId])
+  @@map("product_specs")
+}
+
+// Производитель (заменяет Brand; REST-путь /api/brands сохранён для совместимости с фронтом).
+model Manufacturer {
+  id        String    @id @default(cuid())
+  name      String
+  nameI18n  Json?
+  legalName String?
+  country   String?   // ISO 3166-1 alpha-2
+  inn       String?
+  website   String?
+  logoUrl   String?
+  fixed     Boolean   @default(false)
+  order     Int       @default(0)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@map("manufacturers")
+}
+
+enum ProductStatus {
+  ACTIVE
+  DRAFT
+  ARCHIVED
+}
+
+model Product {
+  id             String        @id @default(cuid())
+  sku            String        @unique
+  gtin           String?
+  name           Json          // { ru, uz, en }
+  description    Json?
+  manufacturerId String?
+  manufacturer   Manufacturer? @relation(fields: [manufacturerId], references: [id])
+  status         ProductStatus @default(DRAFT)
+  attrs          Json?         // гибкие атрибуты по типу товара (channels, display, battery_h, …)
+
+  // мерчандайзинг (доп. к схеме A3 — уже использовалось публичной витриной)
+  badge      String?
+  isNew      Boolean  @default(false)
+  inStock    Boolean  @default(true)
+  popularity Int      @default(60)
+  related    String[] @default([])
+
+  groups       ProductGroupItem[]
+  specs        ProductSpec[]
+  media        ProductMedia[]
+  compatAsEquip ProductCompatibility[] @relation("equipment")
+  compatAsConsumable ProductCompatibility[] @relation("consumable")
+  prices       ProductPrice[]
+  stocks       ProductStock[]
+  regDocuments RegDocument[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([manufacturerId])
+  @@index([status])
+  @@map("products")
+}
+
+enum MediaType {
+  PHOTO
+  VIDEO
+  INSTRUCTION
+  CERTIFICATE
+  INFOGRAPHIC
+}
+
+model ProductMedia {
+  id        String    @id @default(cuid())
+  productId String
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type      MediaType @default(PHOTO)
+  url       String
+  altText   String?
+  order     Int       @default(0)
+  isMain    Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  @@index([productId])
+  @@map("product_media")
+}
+
+// Совместимость расходников с оборудованием (многие-ко-многим, self-relation на Product).
+model ProductCompatibility {
+  id           String   @id @default(cuid())
+  equipmentId  String
+  equipment    Product  @relation("equipment", fields: [equipmentId], references: [id], onDelete: Cascade)
+  consumableId String
+  consumable   Product  @relation("consumable", fields: [consumableId], references: [id], onDelete: Cascade)
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  @@unique([equipmentId, consumableId])
+  @@index([consumableId])
+  @@map("product_compatibility")
+}
+
+// Продавец/склад — модель готова к мультивендорности, но сейчас используется один
+// внутренний продавец (ИНДУСТРИЯ ЗДОРОВЬЯ) и один склад; в админке не отображаются как отдельный раздел.
+model Seller {
+  id         String         @id @default(cuid())
+  name       String
+  isInternal Boolean        @default(true)
+  prices     ProductPrice[]
+  stocks     ProductStock[]
+  createdAt  DateTime       @default(now())
+
+  @@map("sellers")
+}
+
+model Warehouse {
+  id        String         @id @default(cuid())
+  name      String
+  city      String?
+  stocks    ProductStock[]
+  createdAt DateTime       @default(now())
+
+  @@map("warehouses")
+}
+
+model ProductPrice {
+  id              String   @id @default(cuid())
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sellerId        String
+  seller          Seller   @relation(fields: [sellerId], references: [id])
+  price           Decimal? @db.Decimal(14, 2)
+  oldPrice        Decimal? @db.Decimal(14, 2)
+  wholesalePrice  Decimal? @db.Decimal(14, 2)
+  priceOnRequest  Boolean  @default(false)
+  priceWithVat    Decimal? @db.Decimal(14, 2)
+  priceWithoutVat Decimal? @db.Decimal(14, 2)
+  currency        String   @default("UZS")
+  active          Boolean  @default(true)
+  updatedAt       DateTime @updatedAt
+
+  @@index([productId])
+  @@index([sellerId])
+  @@map("product_prices")
+}
+
+model ProductStock {
+  id          String    @id @default(cuid())
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sellerId    String
+  seller      Seller    @relation(fields: [sellerId], references: [id])
+  warehouseId String
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  qty         Int       @default(0)
+  reservedQty Int       @default(0)
+  updatedAt   DateTime  @updatedAt
+
+  @@index([productId])
+  @@map("product_stocks")
+}
+
+enum RegDocType {
+  RU // регистрационное удостоверение
+  CE
+  ISO
+  DECLARATION
+  CERTIFICATE
+}
+
+enum RiskClass {
+  CLASS_1
+  CLASS_2A
+  CLASS_2B
+  CLASS_3
+}
+
+// Статус наличия регудостоверения — без блокировки публикации (см. решение по A3).
+enum RegDocStatus {
+  PRESENT      // есть
+  ON_REQUEST   // по запросу
+  IN_PROGRESS  // в процессе
+  NOT_REQUIRED // не требуется
+  NO_DATA      // нет данных
+}
+
+model RegDocument {
+  id         String       @id @default(cuid())
+  productId  String
+  product    Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  type       RegDocType?
+  number     String?
+  classRisk  RiskClass?
+  issuedAt   DateTime?
+  validUntil DateTime?
+  issuer     String?
+  fileUrl    String?
+  status     RegDocStatus @default(NO_DATA)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@index([productId])
+  @@map("reg_documents")
+}
+
+model News {
+  id        String        @id @default(cuid())
+  type      String        @default("new") // new | article | guide | company | tender | case
+  slug      String?       @unique
+  title     Json
+  excerpt   Json?
+  body      Json?
+  coverUrl  String?
+  tags      String[]      @default([])
+  date      DateTime?
+  status    PublishStatus @default(DRAFT)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status])
+  @@map("news")
+}
+
+model Case {
+  id          String        @id @default(cuid())
+  title       Json
+  description Json?
+  tag         String?
+  type        String?       // "gov" | "private" — drives the /projects gov/private filter
+  region      String?
+  year        String?
+  imageUrl    String?
+  metrics     Json?
+  status      PublishStatus @default(PUBLISHED)
+  order       Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("cases")
+}
+
+model Document {
+  id        String   @id @default(cuid())
+  title     Json
+  fileUrl   String
+  fileType  String?
+  fileSize  Int?
+  category  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("documents")
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  name      String
+  role      Json?
+  photoUrl  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("team_members")
+}
+
+model Submission {
+  id        String           @id @default(cuid())
+  name      String
+  phone     String?
+  email     String?
+  message   String?
+  source    String?          // form id / page
+  status    SubmissionStatus @default(NEW)
+  meta      Json?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  @@index([status])
+  @@map("submissions")
+}
+
+// Key-value app settings (seo, contacts, homepage blocks, nav, etc.)
+// NOTE: CRM secrets live in CrmConfig below, NOT here — this table is served
+// to the public via a public-by-key endpoint, so nothing secret may go in it.
+model Setting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// amoCRM / Telegram relay config — admin-only, never exposed via a public route.
+// Singleton row (id fixed to 1). Sending happens server-side on submission create,
+// so these credentials never touch a visitor's browser.
+model CrmConfig {
+  id                Int      @id @default(1)
+  enabled           Boolean  @default(false)
+  mode              String   @default("proxy") // "proxy" | "direct"
+  proxyUrl          String?
+  subdomain         String?
+  token             String?
+  pipelineId        String?
+  statusId          String?
+  responsibleUserId String?
+  telegramToken     String?
+  telegramChatId    String?
+  updatedAt         DateTime @updatedAt
+
+  @@map("crm_config")
+}
+
+// Uploaded media registry (objects live in S3/MinIO).
+model MediaFile {
+  id           String   @id @default(cuid())
+  key          String   @unique // S3 object key
+  url          String
+  originalName String?
+  mimeType     String?
+  size         Int?
+  uploadedById String?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime @default(now())
+
+  @@map("media_files")
+}
