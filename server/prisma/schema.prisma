@@ -22,15 +22,15 @@ enum Role {
 }
 
 model User {
-  id           String         @id @default(cuid())
-  email        String         @unique
-  passwordHash String
-  name         String
-  role         Role           @default(CONTENT_MANAGER)
-  isActive     Boolean        @default(true)
-  lastLoginAt  DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  name          String
+  role          Role           @default(CONTENT_MANAGER)
+  isActive      Boolean        @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   refreshTokens RefreshToken[]
   mediaFiles    MediaFile[]
 
@@ -39,13 +39,13 @@ model User {
 
 // Hashed refresh tokens for rotation / revocation.
 model RefreshToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   tokenHash String
   expiresAt DateTime
   revokedAt DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 
   @@index([userId])
   @@map("refresh_tokens")
@@ -75,13 +75,13 @@ enum SubmissionStatus {
 model Review {
   id          String        @id @default(cuid())
   type        ReviewType    @default(BUYER)
-  company     Json          // { ru, uz, en }
+  company     Json // { ru, uz, en }
   region      Json?
   description Json?
   quote       Json?
   body        Json?
   logoUrl     String?
-  letterUrl   String?       // благодарственное письмо (PDF/изображение)
+  letterUrl   String? // благодарственное письмо (PDF/изображение)
   color       String?
   status      PublishStatus @default(DRAFT)
   date        DateTime?
@@ -110,11 +110,11 @@ model Review {
 
 model TypeCategory {
   id            String            @id @default(cuid())
-  name          Json              // { ru, uz, en }
+  name          Json // { ru, uz, en }
   slug          String            @unique // equipment | furniture | instruments | consumables
   order         Int               @default(0)
   active        Boolean           @default(true)
-  attrSchema    Json?             // общие поля уровня категории (наследуются ниже)
+  attrSchema    Json? // общие поля уровня категории (наследуются ниже)
   subcategories TypeSubcategory[]
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
@@ -129,7 +129,7 @@ model TypeSubcategory {
   name       Json
   slug       String         @unique
   order      Int            @default(0)
-  attrSchema Json?          // поля уровня подкатегории (добавляются к унаследованным от категории)
+  attrSchema Json? // поля уровня подкатегории (добавляются к унаследованным от категории)
   groups     ProductGroup[]
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
@@ -148,7 +148,7 @@ model ProductGroup {
   slug         String             @unique
   order        Int                @default(0)
   active       Boolean            @default(true)
-  attrSchema   Json?              // специфические поля группы (channels, display, probe_types…)
+  attrSchema   Json? // специфические поля группы (channels, display, probe_types…)
   // Витринная видимость: группа появляется в навигации, когда накопит достаточно товаров.
   // Поддерживается приложением (CatalogTypesService.recomputeVisibility), а не БД-триггером —
   // Postgres GENERATED-колонки не могут ссылаться на другие таблицы.
@@ -204,7 +204,7 @@ model Manufacturer {
   name      String
   nameI18n  Json?
   legalName String?
-  country   String?   // ISO 3166-1 alpha-2
+  country   String? // ISO 3166-1 alpha-2
   inn       String?
   website   String?
   logoUrl   String?
@@ -227,12 +227,12 @@ model Product {
   id             String        @id @default(cuid())
   sku            String        @unique
   gtin           String?
-  name           Json          // { ru, uz, en }
+  name           Json // { ru, uz, en }
   description    Json?
   manufacturerId String?
   manufacturer   Manufacturer? @relation(fields: [manufacturerId], references: [id])
   status         ProductStatus @default(DRAFT)
-  attrs          Json?         // гибкие атрибуты по типу товара (channels, display, battery_h, …)
+  attrs          Json? // гибкие атрибуты по типу товара (channels, display, battery_h, …)
 
   // мерчандайзинг (доп. к схеме A3 — уже использовалось публичной витриной)
   badge      String?
@@ -241,14 +241,14 @@ model Product {
   popularity Int      @default(60)
   related    String[] @default([])
 
-  groups       ProductGroupItem[]
-  specs        ProductSpec[]
-  media        ProductMedia[]
-  compatAsEquip ProductCompatibility[] @relation("equipment")
+  groups             ProductGroupItem[]
+  specs              ProductSpec[]
+  media              ProductMedia[]
+  compatAsEquip      ProductCompatibility[] @relation("equipment")
   compatAsConsumable ProductCompatibility[] @relation("consumable")
-  prices       ProductPrice[]
-  stocks       ProductStock[]
-  regDocuments RegDocument[]
+  prices             ProductPrice[]
+  stocks             ProductStock[]
+  regDocuments       RegDocument[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -373,11 +373,11 @@ enum RiskClass {
 
 // Статус наличия регудостоверения — без блокировки публикации (см. решение по A3).
 enum RegDocStatus {
-  PRESENT      // есть
-  ON_REQUEST   // по запросу
-  IN_PROGRESS  // в процессе
+  PRESENT // есть
+  ON_REQUEST // по запросу
+  IN_PROGRESS // в процессе
   NOT_REQUIRED // не требуется
-  NO_DATA      // нет данных
+  NO_DATA // нет данных
 }
 
 model RegDocument {
@@ -422,7 +422,7 @@ model Case {
   title       Json
   description Json?
   tag         String?
-  type        String?       // "gov" | "private" — drives the /projects gov/private filter
+  type        String? // "gov" | "private" — drives the /projects gov/private filter
   region      String?
   year        String?
   imageUrl    String?
@@ -467,7 +467,7 @@ model Submission {
   phone     String?
   email     String?
   message   String?
-  source    String?          // form id / page
+  source    String? // form id / page
   status    SubmissionStatus @default(NEW)
   meta      Json?
   createdAt DateTime         @default(now())
@@ -521,4 +521,63 @@ model MediaFile {
   createdAt    DateTime @default(now())
 
   @@map("media_files")
+}
+
+// ─────────────────────── e-Tender (UZEX) ────────────────────
+// Mirror of public lots from etender.uzex.uz. The public site's Angular app
+// calls POST https://apietender.uzex.uz/api/common/TradeList; EtenderAdapter
+// pulls that JSON on a schedule and caches it here so our pages never depend
+// on the upstream being reachable and never hit it from the visitor's browser.
+
+enum EtenderSyncStatus {
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+model EtenderLot {
+  id           String    @id @default(cuid())
+  externalId   Int       @unique // upstream lot id (`id`)
+  displayNo    String? // `display_no`
+  typeId       Int // trade system / route :typeId (1, 2, …)
+  name         String
+  startDate    DateTime? // `start_date`
+  endDate      DateTime? // `end_date`
+  clarificDate DateTime? // `clarific_date`
+  cost         Decimal?  @db.Decimal(24, 2)
+  sellerId     Int? // `seller_id`
+  sellerName   String? // `seller_name`
+  sellerTin    String? // `seller_tin`
+  regionName   String? // `region_name`
+  districtName String? // `district_name`
+  categoryName String? // `category_name`
+  currencyId   Int? // `currency_id`
+  currencyName String? // `currency_name`
+  currencyCode String? // `currency_codeabc` (e.g. UZS)
+  raw          Json // full original item, for fields we don't model yet
+  active       Boolean   @default(true) // false once it disappears upstream
+  syncedAt     DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([typeId, active])
+  @@index([endDate])
+  @@map("etender_lots")
+}
+
+model EtenderSyncLog {
+  id          String            @id @default(cuid())
+  typeId      Int
+  status      EtenderSyncStatus
+  fetched     Int               @default(0) // items pulled from upstream
+  upserted    Int               @default(0) // rows created or updated
+  deactivated Int               @default(0) // rows marked inactive (gone upstream)
+  totalCount  Int? // `total_count` reported upstream
+  durationMs  Int?
+  error       String?
+  startedAt   DateTime          @default(now())
+  finishedAt  DateTime?
+
+  @@index([typeId, startedAt])
+  @@map("etender_sync_logs")
 }

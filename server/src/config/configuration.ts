@@ -28,4 +28,11 @@ export default () => ({
   S3_ACCESS_KEY: process.env.S3_ACCESS_KEY,
   S3_SECRET_KEY: process.env.S3_SECRET_KEY,
   S3_BUCKET: process.env.S3_BUCKET || 'soi-media',
+  // e-tender (UZEX) sync
+  ETENDER_API_BASE: process.env.ETENDER_API_BASE || 'https://apietender.uzex.uz',
+  ETENDER_SYNC_ENABLED: process.env.ETENDER_SYNC_ENABLED || 'true',
+  ETENDER_SYNC_TYPES: process.env.ETENDER_SYNC_TYPES || '1,2',
+  ETENDER_SYNC_INTERVAL_MIN: parseInt(process.env.ETENDER_SYNC_INTERVAL_MIN || '30', 10),
+  ETENDER_SYNC_PAGE_SIZE: parseInt(process.env.ETENDER_SYNC_PAGE_SIZE || '50', 10),
+  ETENDER_SYNC_MAX_PAGES: parseInt(process.env.ETENDER_SYNC_MAX_PAGES || '40', 10),
 });

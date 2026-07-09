@@ -19,6 +19,7 @@ import { SubmissionsModule } from './submissions/submissions.module';
 import { SettingsModule } from './settings/settings.module';
 import { MediaModule } from './media/media.module';
 import { CrmModule } from './crm/crm.module';
+import { EtenderModule } from './etender/etender.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { CrmModule } from './crm/crm.module';
     SubmissionsModule,
     SettingsModule,
     CrmModule,
+    EtenderModule,
   ],
   controllers: [HealthController],
 })
