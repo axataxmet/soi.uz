@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { SubmissionsService } from './submissions.service';
 import {
@@ -24,6 +25,15 @@ export class SubmissionsController {
   @ApiOperation({ summary: 'Оставить заявку (публичный)' })
   create(@Body() dto: CreateSubmissionDto) {
     return this.submissions.createSubmission(dto);
+  }
+
+  @Public()
+  @Post('attachments')
+  @UseInterceptors(FilesInterceptor('files', 10))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Загрузить вложения формы (публичный) — PDF/DOC/DOCX/XLSX/JPG/PNG' })
+  uploadAttachments(@UploadedFiles() files: Express.Multer.File[]) {
+    return this.submissions.uploadAttachments(files);
   }
 
   @Get()
