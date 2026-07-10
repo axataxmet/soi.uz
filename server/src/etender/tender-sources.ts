@@ -93,12 +93,40 @@ export const XARID_SOURCES: XaridSource[] = [
   },
 ];
 
-// ── Sources still blocked behind external auth (pending a live capture) ────────
+// ── xt-xarid.uz (Hayot Birja) ─────────────────────────────────────────────────
+// Confirmed live & anonymous (2026-07-11) via JSON-RPC POST api.xt-xarid.uz/rpc
+// (method "ref", ref_tender_public / ref_selection_public). The JWT wall was a
+// different host (api.mocrm), not the public procedure lists. See XtXaridAdapter.
+export interface XtSource {
+  source: string;
+  kind: 'lot';
+  ref: string;
+  pathSegment: string;
+  site: string;
+  label: { ru: string; uz: string; en: string };
+}
+
+export const XT_SOURCES: XtSource[] = [
+  {
+    source: 'XT_TENDER',
+    kind: 'lot',
+    ref: 'ref_tender_public',
+    pathSegment: 'tender',
+    site: 'https://xt-xarid.uz',
+    label: { ru: 'XT-Xarid — Тендеры', uz: 'XT-Xarid — Tenderlar', en: 'XT-Xarid — Tenders' },
+  },
+  {
+    source: 'XT_SELECTION',
+    kind: 'lot',
+    ref: 'ref_selection_public',
+    pathSegment: 'selection',
+    site: 'https://xt-xarid.uz',
+    label: { ru: 'XT-Xarid — Отборы', uz: 'XT-Xarid — Tanlovlar', en: 'XT-Xarid — Selections' },
+  },
+];
+
+// ── Sources still pending a live capture ──────────────────────────────────────
 // xarid.uzex.uz /not-completed-deals: endpoint not yet captured.
-// xt-xarid.uz: api.mocrm.xt-xarid.uz responds "Access denied jwt" — requires a
-//   token; server-side sync is only possible if a public/guest token exists.
 export const PENDING_SOURCES = [
   { source: 'XARID_DEALS', site: 'https://xarid.uzex.uz', reason: 'not-completed-deals endpoint pending capture' },
-  { source: 'XT_TENDER', site: 'https://xt-xarid.uz', reason: 'API is JWT-gated (Access denied jwt)' },
-  { source: 'XT_SELECTION', site: 'https://xt-xarid.uz', reason: 'API is JWT-gated (Access denied jwt)' },
 ] as const;

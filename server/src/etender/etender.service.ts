@@ -9,9 +9,10 @@ import { paginate } from '../common/dto/pagination.dto';
 import { EtenderAdapter } from './etender.adapter';
 import { GovUzAdapter } from './govuz.adapter';
 import { XaridAdapter } from './xarid.adapter';
+import { XtXaridAdapter } from './xtxarid.adapter';
 import { EtenderLotQueryDto } from './dto/etender-query.dto';
 import { NormalizedEtenderLot, UzexTradeSource } from './etender.types';
-import { GOVUZ_SOURCES, GovUzSource, UZEX_SOURCES, XARID_SOURCES, XaridSource } from './tender-sources';
+import { GOVUZ_SOURCES, GovUzSource, UZEX_SOURCES, XARID_SOURCES, XaridSource, XT_SOURCES, XtSource } from './tender-sources';
 
 const CRON_NAME = 'etender-daily-sync';
 
@@ -37,6 +38,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     private readonly adapter: EtenderAdapter,
     private readonly govuz: GovUzAdapter,
     private readonly xarid: XaridAdapter,
+    private readonly xt: XtXaridAdapter,
     private readonly scheduler: SchedulerRegistry,
     config: ConfigService,
   ) {
@@ -62,7 +64,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     }
     const job = CronJob.from({ cronTime: this.cron, timeZone: this.tz, onTick: () => void this.syncAll('cron'), start: true });
     this.scheduler.addCronJob(CRON_NAME, job as any);
-    const active = [...UZEX_SOURCES, ...XARID_SOURCES, ...GOVUZ_SOURCES].filter((s) => this.isOn(s.source)).map((s) => s.source);
+    const active = [...UZEX_SOURCES, ...XARID_SOURCES, ...XT_SOURCES, ...GOVUZ_SOURCES].filter((s) => this.isOn(s.source)).map((s) => s.source);
     this.log.log(`tender daily sync scheduled: cron "${this.cron}" (${this.tz}) — sources: ${active.join(', ')}`);
 
     this.booting = setTimeout(() => {
@@ -105,6 +107,11 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
           if (this.isOn(cfg.source)) results.push(await this.syncXaridSource(cfg, trigger));
         }
       }
+      if (this.xt.enabled) {
+        for (const cfg of XT_SOURCES) {
+          if (this.isOn(cfg.source)) results.push(await this.syncXtSource(cfg, trigger));
+        }
+      }
       // gov.uz sources only run when the API route is configured (adapter enabled).
       if (this.govuz.enabled) {
         for (const cfg of GOVUZ_SOURCES) {
@@ -132,6 +139,13 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
   private async syncXaridSource(cfg: XaridSource, trigger: string) {
     return this.runSync(cfg.source, null, trigger, async () => {
       const lots = await this.xarid.fetch(cfg, this.pageSize, this.maxPages);
+      return { lots, total: lots.length };
+    });
+  }
+
+  private async syncXtSource(cfg: XtSource, trigger: string) {
+    return this.runSync(cfg.source, null, trigger, async () => {
+      const lots = await this.xt.fetch(cfg, this.pageSize, this.maxPages);
       return { lots, total: lots.length };
     });
   }
@@ -284,8 +298,9 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     const counts = new Map(grouped.map((g) => [g.source, g._count]));
     const uzex = UZEX_SOURCES.map((s) => ({ source: s.source, kind: s.kind, label: s.label, site: s.site, count: counts.get(s.source) || 0, ready: true }));
     const xarid = XARID_SOURCES.map((s) => ({ source: s.source, kind: s.kind, label: s.label, site: s.site, count: counts.get(s.source) || 0, ready: this.xarid.enabled }));
+    const xt = XT_SOURCES.map((s) => ({ source: s.source, kind: s.kind, label: s.label, site: s.site, count: counts.get(s.source) || 0, ready: this.xt.enabled }));
     const gov = GOVUZ_SOURCES.map((s) => ({ source: s.source, kind: s.kind, label: s.label, site: 'https://gov.uz', count: counts.get(s.source) || 0, ready: this.govuz.enabled }));
-    return [...uzex, ...xarid, ...gov];
+    return [...uzex, ...xarid, ...xt, ...gov];
   }
 
   getLot(source: string, externalId: string) {

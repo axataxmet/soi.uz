@@ -39,6 +39,9 @@ export default () => ({
   ETENDER_XARID_ENABLED: process.env.ETENDER_XARID_ENABLED || 'true',
   ETENDER_XARID_API_BASE: process.env.ETENDER_XARID_API_BASE || 'https://xarid-api-purchase.uzex.uz',
   ETENDER_XARID_LANG: process.env.ETENDER_XARID_LANG || 'ru',
+  ETENDER_XT_ENABLED: process.env.ETENDER_XT_ENABLED || 'true',
+  ETENDER_XT_API_BASE: process.env.ETENDER_XT_API_BASE || 'https://api.xt-xarid.uz',
+  ETENDER_XT_LANG: process.env.ETENDER_XT_LANG || 'ru',
   ETENDER_SYNC_CRON: process.env.ETENDER_SYNC_CRON || '0 20 * * *', // daily 20:00
   ETENDER_SYNC_TZ: process.env.ETENDER_SYNC_TZ || 'Asia/Tashkent',
   ETENDER_SYNC_PAGE_SIZE: parseInt(process.env.ETENDER_SYNC_PAGE_SIZE || '50', 10),
