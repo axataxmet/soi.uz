@@ -1,15 +1,18 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
-// Public query for cached e-tender lots (served from our DB, never upstream).
+// Public query for cached tender lots (served from our DB, never upstream).
 export class EtenderLotQueryDto extends PaginationDto {
-  @ApiPropertyOptional({ description: 'Тип торговой системы (route :typeId)' })
+  @ApiPropertyOptional({ description: 'Источник (ETENDER_TENDER, BIZNESXARID, UZMEDIMPEX_TENDER, …)' })
   @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  typeId?: number;
+  @IsString()
+  source?: string;
+
+  @ApiPropertyOptional({ description: 'Тип записи', enum: ['lot', 'news'] })
+  @IsOptional()
+  @IsIn(['lot', 'news'])
+  kind?: 'lot' | 'news';
 
   @ApiPropertyOptional({ description: 'Фильтр по региону (по названию, частичное совпадение)' })
   @IsOptional()

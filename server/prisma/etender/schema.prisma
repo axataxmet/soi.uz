@@ -21,14 +21,22 @@ enum EtenderSyncStatus {
   FAILED
 }
 
+// One procurement item from ANY source (UZEX etender/biznesxarid, xarid,
+// xt-xarid, gov.uz UzMedImpex news, …). `source` is the discriminator; the
+// natural key is (source, externalId) so ids from different platforms never
+// collide. Lot-only fields (cost, seller, dates) are nullable because news-type
+// sources (gov.uz) don't have them.
 model EtenderLot {
   id           String    @id @default(cuid())
-  externalId   Int       @unique // upstream lot id (`id`)
+  source       String // e.g. ETENDER_TENDER, BIZNESXARID, XARID_COMPETITION, UZMEDIMPEX_TENDER
+  kind         String    @default("lot") // "lot" | "news"
+  externalId   String // stable per-source id (lot id as string, or news slug/url)
+  sourceUrl    String? // link to open the item on the origin platform
   displayNo    String? // `display_no`
-  typeId       Int // trade system / route :typeId (1, 2, …)
+  typeId       Int? // upstream trade type where applicable (:typeId)
   name         String
   startDate    DateTime? // `start_date`
-  endDate      DateTime? // `end_date`
+  endDate      DateTime? // `end_date` / deadline
   clarificDate DateTime? // `clarific_date`
   cost         Decimal?  @db.Decimal(24, 2)
   sellerId     Int? // `seller_id`
@@ -46,14 +54,17 @@ model EtenderLot {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  @@index([typeId, active])
+  @@unique([source, externalId])
+  @@index([source, active])
+  @@index([kind, active])
   @@index([endDate])
   @@map("etender_lots")
 }
 
 model EtenderSyncLog {
   id          String            @id @default(cuid())
-  typeId      Int
+  source      String // which source this run synced
+  typeId      Int? // upstream trade type where applicable
   status      EtenderSyncStatus
   fetched     Int               @default(0) // items pulled from upstream
   upserted    Int               @default(0) // rows created or updated
@@ -64,6 +75,6 @@ model EtenderSyncLog {
   startedAt   DateTime          @default(now())
   finishedAt  DateTime?
 
-  @@index([typeId, startedAt])
+  @@index([source, startedAt])
   @@map("etender_sync_logs")
 }

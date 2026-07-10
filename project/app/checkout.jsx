@@ -16,6 +16,13 @@ function useEtenderLotsCss() {
 .etl-search{height:42px;min-width:230px;border:1.5px solid var(--line);border-radius:10px;padding:0 14px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--ink);outline:none}
 .etl-search:focus{border-color:var(--blue-400,#4d88e0)}
 .etl-count{font-size:13px;color:var(--slate-500);white-space:nowrap}
+.etl-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.etl-tab{font-size:13px;font-weight:600;color:var(--slate-600);background:var(--bg-2,#f4f7fb);border:1.5px solid var(--line);border-radius:20px;padding:7px 14px;cursor:pointer;font-family:inherit;transition:.14s;display:inline-flex;align-items:center;gap:7px}
+.etl-tab:hover{border-color:var(--blue-300,#9cc0f5)}
+.etl-tab.on{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
+.etl-tab .n{font-size:11px;font-weight:700;background:rgba(0,0,0,.08);border-radius:10px;padding:1px 7px}
+.etl-tab.on .n{background:rgba(255,255,255,.22)}
+.etl-srctag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--blue-700,#1749a6);background:var(--blue-50,#eef4ff);border-radius:5px;padding:2px 7px;white-space:nowrap}
 .etl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .etl-card{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r-lg,16px);background:var(--surface,#fff);padding:20px;transition:box-shadow .16s,border-color .16s;position:relative}
 .etl-card:hover{box-shadow:var(--sh-sm,0 6px 20px rgba(16,42,86,.08));border-color:var(--blue-200,#cfe0fb)}
@@ -56,6 +63,8 @@ function EtenderLotsBlock({ lang, lv }) {
   const [status, setStatus] = useState("loading"); // loading | ready | error
   const [query, setQuery] = useState("");
   const [term, setTerm] = useState("");
+  const [sources, setSources] = useState([]);
+  const [source, setSource] = useState(""); // "" = all sources
 
   // debounce search input -> term
   useEffect(() => {
@@ -63,16 +72,30 @@ function EtenderLotsBlock({ lang, lv }) {
     return () => clearTimeout(id);
   }, [query]);
 
+  // source registry (for tabs + per-card labels)
+  useEffect(() => {
+    let alive = true;
+    (window.api && window.api.listPublic ? window.api.listPublic("etender/sources") : Promise.resolve([]))
+      .then((res) => { if (alive) setSources(Array.isArray(res) ? res : []); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
   useEffect(() => {
     let alive = true;
     setStatus((s) => (s === "ready" ? "ready" : "loading"));
-    const q = { typeId: 2, state: "active", limit, page: 1 };
+    const q = { state: "active", limit, page: 1 };
+    if (source) q.source = source;
     if (term) q.search = term;
     (window.api && window.api.listPublic ? window.api.listPublic("etender/lots", q) : Promise.reject(new Error("api")))
       .then((res) => { if (!alive) return; setLots((res && res.data) || []); setTotal((res && res.total) || 0); setStatus("ready"); })
       .catch(() => { if (alive) setStatus("error"); });
     return () => { alive = false; };
-  }, [limit, term]);
+  }, [limit, term, source]);
+
+  const pickSource = (s) => { setSource(s); setLimit(PAGE); };
+  const srcLabel = (id) => { const s = sources.find((x) => x.source === id); return s ? (s.label[lang] || s.label.ru) : id; };
+  const tabs = sources.filter((s) => s.count > 0);
 
   const fmtCost = (v) => {
     if (v === null || v === undefined || v === "") return "—";
@@ -106,15 +129,25 @@ function EtenderLotsBlock({ lang, lv }) {
         <div className="etl-head reveal">
           <div>
             <span className="eyebrow line">{lv("Актуальные закупки", "Dolzarb xaridlar", "Live procurement")}</span>
-            <h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Тендерные лоты на бирже UZEX", "UZEX birjasidagi tender lotlari", "Tender lots on the UZEX exchange")}</h2>
+            <h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Актуальные тендерные лоты", "Dolzarb tender lotlari", "Live tender lots")}</h2>
             <p style={{ fontSize: 14.5, color: "var(--slate-600)", maxWidth: 620, lineHeight: 1.6, marginTop: 10 }}>
-              {lv("Открытые тендерные лоты с портала государственных закупок etender.uzex.uz. Данные обновляются автоматически.",
-                "etender.uzex.uz davlat xaridlari portalidagi ochiq tender lotlari. Ma'lumotlar avtomatik yangilanadi.",
-                "Open tender lots from the etender.uzex.uz public procurement portal, refreshed automatically.")}
+              {lv("Открытые лоты с площадок государственных закупок (etender, biznesxarid и др.). Данные обновляются автоматически.",
+                "Davlat xaridlari maydonchalaridan (etender, biznesxarid va b.) ochiq lotlar. Ma'lumotlar avtomatik yangilanadi.",
+                "Open lots from public-procurement platforms (etender, biznesxarid, …), refreshed automatically.")}
             </p>
           </div>
-          <span className="etl-src"><span className="dot"></span>etender.uzex.uz · UZEX</span>
+          <span className="etl-src"><span className="dot"></span>UZEX · gov.uz</span>
         </div>
+
+        {tabs.length > 1 &&
+          <div className="etl-tabs reveal">
+            <button className={"etl-tab" + (source === "" ? " on" : "")} onClick={() => pickSource("")}>{lv("Все", "Barchasi", "All")}</button>
+            {tabs.map((s) =>
+              <button key={s.source} className={"etl-tab" + (source === s.source ? " on" : "")} onClick={() => pickSource(s.source)}>
+                {s.label[lang] || s.label.ru}<span className="n">{s.count}</span>
+              </button>
+            )}
+          </div>}
 
         <div className="etl-head reveal" style={{ marginBottom: 20 }}>
           <input className="etl-search" value={query} onChange={(e) => { setQuery(e.target.value); }} placeholder={lv("Поиск: наименование, заказчик, №…", "Qidiruv: nomi, buyurtmachi, №…", "Search: name, customer, №…")} />
@@ -148,7 +181,7 @@ function EtenderLotsBlock({ lang, lv }) {
                 return (
                   <div className="etl-card reveal" key={l.id}>
                     <div className="etl-card-top">
-                      <span className="etl-no">№ {l.displayNo || l.externalId}</span>
+                      <span className="etl-no">{l.displayNo ? "№ " + l.displayNo : (source === "" ? <span className="etl-srctag">{srcLabel(l.source)}</span> : "№ " + l.externalId)}</span>
                       {dl && <span className={"etl-deadline " + dl.cls}>{dl.label}</span>}
                     </div>
                     <h3 className="etl-name" title={l.name}>{l.name}</h3>
@@ -158,8 +191,8 @@ function EtenderLotsBlock({ lang, lv }) {
                       {l.endDate && <div className="etl-row">{IcnCal}<span>{lv("до ", "gacha ", "until ")}{fmtDate(l.endDate)}</span></div>}
                     </div>
                     <div className="etl-cost">
-                      <div><span className="etl-cost-v">{fmtCost(l.cost)}</span> <span className="etl-cost-c">{l.currencyCode || ""}</span></div>
-                      <a className="etl-open" href={"https://etender.uzex.uz/lot/" + l.externalId} target="_blank" rel="noopener">{lv("На UZEX", "UZEX'da", "On UZEX")} ↗</a>
+                      <div>{l.kind === "news" ? <span className="etl-srctag">{srcLabel(l.source)}</span> : <React.Fragment><span className="etl-cost-v">{fmtCost(l.cost)}</span> <span className="etl-cost-c">{l.currencyCode || ""}</span></React.Fragment>}</div>
+                      <a className="etl-open" href={l.sourceUrl || "#"} target="_blank" rel="noopener">{lv("Открыть", "Ochish", "Open")} ↗</a>
                     </div>
                   </div>
                 );

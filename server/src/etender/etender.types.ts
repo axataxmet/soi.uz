@@ -51,11 +51,29 @@ export interface RawEtenderLot {
   [k: string]: unknown;
 }
 
-// Our normalized shape, ready to persist to the etender_lots table.
-export interface NormalizedEtenderLot {
-  externalId: number;
-  displayNo: string | null;
+export type SourceKind = 'lot' | 'news';
+
+// Config for a UZEX TradeList-backed source (etender, biznesxarid — same API,
+// distinguished by systemId/typeId). `site` builds the item link + Origin header.
+export interface UzexTradeSource {
+  source: string;
+  kind: 'lot';
+  systemId: number;
   typeId: number;
+  site: string;
+  label: { ru: string; uz: string; en: string };
+}
+
+// Our normalized shape, ready to persist to the etender_lots table. Multi-source:
+// natural key is (source, externalId). Lot-only fields are nullable so news-type
+// sources (gov.uz) fit the same shape.
+export interface NormalizedEtenderLot {
+  source: string;
+  kind: SourceKind;
+  externalId: string;
+  sourceUrl: string | null;
+  displayNo: string | null;
+  typeId: number | null;
   name: string;
   startDate: Date | null;
   endDate: Date | null;
@@ -70,5 +88,5 @@ export interface NormalizedEtenderLot {
   currencyId: number | null;
   currencyName: string | null;
   currencyCode: string | null;
-  raw: RawEtenderLot;
+  raw: unknown;
 }

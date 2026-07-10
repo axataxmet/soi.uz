@@ -1,16 +1,13 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EtenderTradeFilter, NormalizedEtenderLot, RawEtenderLot } from './etender.types';
+import { EtenderTradeFilter, NormalizedEtenderLot, RawEtenderLot, UzexTradeSource } from './etender.types';
 
-// EtenderAdapter — the only thing in the codebase that talks to the upstream
-// UZEX e-tender API. Endpoint WAS found in the site bundle, so this is a JSON
-// API adapter (no HTML parsing needed): POST /api/common/TradeList.
-//
-// Responsibilities: build the request, fetch with timeout+retry, tolerate the
-// upstream returning either a bare array or a { list: [...] } wrapper, map
-// snake_case rows to our normalized shape, and short-TTL cache identical
-// requests so repeated syncs / retries don't hammer the upstream.
-
+// EtenderAdapter — client for the UZEX TradeList API that backs the etender and
+// biznesxarid front-ends (both POST {apiBase}/api/common/TradeList; a source is
+// just a (systemId, typeId) pair). Endpoint was found in the site bundles, so
+// this is a JSON adapter (no HTML parsing). Handles timeout+retry, tolerates a
+// bare array or { list: [...] }, maps snake_case rows to our normalized shape,
+// and short-TTL caches identical requests.
 interface CacheEntry {
   at: number;
   rows: RawEtenderLot[];
@@ -30,13 +27,8 @@ export class EtenderAdapter {
     this.cacheTtlMs = Number(config.get('ETENDER_FETCH_CACHE_TTL_MS')) || 60_000;
   }
 
-  private cacheKey(filter: EtenderTradeFilter): string {
-    return JSON.stringify(filter);
-  }
-
-  // Raw POST to /api/common/TradeList with timeout + one retry, short-TTL cached.
-  private async fetchPage(filter: EtenderTradeFilter): Promise<RawEtenderLot[]> {
-    const key = this.cacheKey(filter);
+  private async fetchPage(filter: EtenderTradeFilter, origin: string): Promise<RawEtenderLot[]> {
+    const key = origin + '|' + JSON.stringify(filter);
     const hit = this.cache.get(key);
     if (hit && Date.now() - hit.at < this.cacheTtlMs) return hit.rows;
 
@@ -52,10 +44,9 @@ export class EtenderAdapter {
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            // Mimic the browser origin the API expects.
-            Origin: 'https://etender.uzex.uz',
-            Referer: 'https://etender.uzex.uz/',
-            'User-Agent': 'Mozilla/5.0 (compatible; SoiEtenderSync/1.0)',
+            Origin: origin,
+            Referer: origin + '/',
+            'User-Agent': 'Mozilla/5.0 (compatible; SoiTenderSync/1.0)',
           },
           body: JSON.stringify(filter),
         });
@@ -66,44 +57,33 @@ export class EtenderAdapter {
         return rows;
       } catch (e) {
         lastErr = e;
-        this.log.warn(`TradeList fetch failed (attempt ${attempt + 1}) TypeId=${filter.TypeId}: ${(e as Error).message}`);
+        this.log.warn(`TradeList fetch failed (attempt ${attempt + 1}) ${filter.System_Id}/${filter.TypeId}: ${(e as Error).message}`);
       } finally {
         clearTimeout(timer);
       }
     }
-    throw new ServiceUnavailableException(`e-tender upstream unavailable: ${(lastErr as Error)?.message || 'unknown'}`);
+    throw new ServiceUnavailableException(`UZEX upstream unavailable: ${(lastErr as Error)?.message || 'unknown'}`);
   }
 
-  // Fetch a single page of normalized lots plus the upstream total_count.
-  // page is 1-based; pageSize maps to inclusive From/To row-number bounds.
-  async fetchLots(
-    typeId: number,
-    page: number,
-    pageSize: number,
-    extra: Partial<EtenderTradeFilter> = {},
-  ): Promise<{ lots: NormalizedEtenderLot[]; total: number }> {
+  // One page for a source. page is 1-based; pageSize maps to inclusive From/To.
+  async fetchLots(cfg: UzexTradeSource, page: number, pageSize: number): Promise<{ lots: NormalizedEtenderLot[]; total: number }> {
     const from = (page - 1) * pageSize + 1;
     const to = page * pageSize;
-    const filter: EtenderTradeFilter = { System_Id: 0, ...extra, TypeId: typeId, From: from, To: to };
-    const rows = await this.fetchPage(filter);
+    const filter: EtenderTradeFilter = { System_Id: cfg.systemId, TypeId: cfg.typeId, From: from, To: to };
+    const rows = await this.fetchPage(filter, cfg.site);
     const total = rows.length ? Number(rows[0].total_count ?? rows.length) : 0;
-    return { lots: rows.map((r) => this.normalize(r, typeId)), total };
+    return { lots: rows.map((r) => this.normalize(r, cfg)), total };
   }
 
-  // Page through the whole result set for a typeId (bounded by maxPages).
-  async fetchAllLots(
-    typeId: number,
-    pageSize: number,
-    maxPages: number,
-    extra: Partial<EtenderTradeFilter> = {},
-  ): Promise<{ lots: NormalizedEtenderLot[]; total: number }> {
-    const first = await this.fetchLots(typeId, 1, pageSize, extra);
+  // Page through a source's whole result set (bounded by maxPages).
+  async fetchAllLots(cfg: UzexTradeSource, pageSize: number, maxPages: number): Promise<{ lots: NormalizedEtenderLot[]; total: number }> {
+    const first = await this.fetchLots(cfg, 1, pageSize);
     const total = first.total;
-    const byId = new Map<number, NormalizedEtenderLot>();
+    const byId = new Map<string, NormalizedEtenderLot>();
     for (const l of first.lots) byId.set(l.externalId, l);
     const pages = Math.min(maxPages, Math.max(1, Math.ceil(total / pageSize)));
     for (let p = 2; p <= pages; p++) {
-      const next = await this.fetchLots(typeId, p, pageSize, extra);
+      const next = await this.fetchLots(cfg, p, pageSize);
       for (const l of next.lots) byId.set(l.externalId, l);
       if (!next.lots.length) break;
     }
@@ -115,23 +95,24 @@ export class EtenderAdapter {
     const d = new Date(v);
     return isNaN(d.getTime()) ? null : d;
   }
-
   private str(v: unknown): string | null {
     if (v === null || v === undefined || v === '') return null;
     return String(v);
   }
-
   private num(v: unknown): number | null {
     if (v === null || v === undefined || v === '') return null;
     const n = Number(v);
     return isNaN(n) ? null : n;
   }
 
-  normalize(r: RawEtenderLot, typeId: number): NormalizedEtenderLot {
+  normalize(r: RawEtenderLot, cfg: UzexTradeSource): NormalizedEtenderLot {
     return {
-      externalId: Number(r.id),
+      source: cfg.source,
+      kind: 'lot',
+      externalId: String(r.id),
+      sourceUrl: `${cfg.site}/lot/${r.id}`,
       displayNo: this.str(r.display_no),
-      typeId,
+      typeId: cfg.typeId,
       name: this.str(r.name) ?? '',
       startDate: this.parseDate(r.start_date),
       endDate: this.parseDate(r.end_date),

@@ -32,7 +32,8 @@ export default () => ({
   ETENDER_DATABASE_URL: process.env.ETENDER_DATABASE_URL, // own Postgres schema (derived from DATABASE_URL if unset)
   ETENDER_API_BASE: process.env.ETENDER_API_BASE || 'https://apietender.uzex.uz',
   ETENDER_SYNC_ENABLED: process.env.ETENDER_SYNC_ENABLED || 'true',
-  ETENDER_SYNC_TYPES: process.env.ETENDER_SYNC_TYPES || '1,2',
+  ETENDER_SYNC_SOURCES: process.env.ETENDER_SYNC_SOURCES || '', // allow-list of source ids; empty = all
+  ETENDER_GOVUZ_NEWS_API: process.env.ETENDER_GOVUZ_NEWS_API || '', // gov.uz Yii2 route template ({authority}/{category}); empty = gov.uz off
   ETENDER_SYNC_CRON: process.env.ETENDER_SYNC_CRON || '0 20 * * *', // daily 20:00
   ETENDER_SYNC_TZ: process.env.ETENDER_SYNC_TZ || 'Asia/Tashkent',
   ETENDER_SYNC_PAGE_SIZE: parseInt(process.env.ETENDER_SYNC_PAGE_SIZE || '50', 10),
