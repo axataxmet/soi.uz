@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Controller, Get, Header, HttpCode, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { EtenderService } from './etender.service';
@@ -15,6 +15,9 @@ export class EtenderController {
 
   @Public()
   @Get('lots')
+  // Data refreshes once a day, so it is safe (and cheap under 1000+ traffic) to
+  // let browsers/proxies cache the list briefly.
+  @Header('Cache-Control', 'public, max-age=300')
   @ApiOperation({ summary: 'Список лотов e-tender (из кэша, публичный)' })
   listLots(@Query() q: EtenderLotQueryDto) {
     return this.etender.listLots(q);
@@ -22,6 +25,7 @@ export class EtenderController {
 
   @Public()
   @Get('lots/:externalId')
+  @Header('Cache-Control', 'public, max-age=300')
   @ApiOperation({ summary: 'Лот e-tender по внешнему id (из кэша, публичный)' })
   getLot(@Param('externalId', ParseIntPipe) externalId: number) {
     return this.etender.getLot(externalId);

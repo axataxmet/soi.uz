@@ -523,61 +523,7 @@ model MediaFile {
   @@map("media_files")
 }
 
-// ─────────────────────── e-Tender (UZEX) ────────────────────
-// Mirror of public lots from etender.uzex.uz. The public site's Angular app
-// calls POST https://apietender.uzex.uz/api/common/TradeList; EtenderAdapter
-// pulls that JSON on a schedule and caches it here so our pages never depend
-// on the upstream being reachable and never hit it from the visitor's browser.
-
-enum EtenderSyncStatus {
-  SUCCESS
-  PARTIAL
-  FAILED
-}
-
-model EtenderLot {
-  id           String    @id @default(cuid())
-  externalId   Int       @unique // upstream lot id (`id`)
-  displayNo    String? // `display_no`
-  typeId       Int // trade system / route :typeId (1, 2, …)
-  name         String
-  startDate    DateTime? // `start_date`
-  endDate      DateTime? // `end_date`
-  clarificDate DateTime? // `clarific_date`
-  cost         Decimal?  @db.Decimal(24, 2)
-  sellerId     Int? // `seller_id`
-  sellerName   String? // `seller_name`
-  sellerTin    String? // `seller_tin`
-  regionName   String? // `region_name`
-  districtName String? // `district_name`
-  categoryName String? // `category_name`
-  currencyId   Int? // `currency_id`
-  currencyName String? // `currency_name`
-  currencyCode String? // `currency_codeabc` (e.g. UZS)
-  raw          Json // full original item, for fields we don't model yet
-  active       Boolean   @default(true) // false once it disappears upstream
-  syncedAt     DateTime  @default(now())
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
-  @@index([typeId, active])
-  @@index([endDate])
-  @@map("etender_lots")
-}
-
-model EtenderSyncLog {
-  id          String            @id @default(cuid())
-  typeId      Int
-  status      EtenderSyncStatus
-  fetched     Int               @default(0) // items pulled from upstream
-  upserted    Int               @default(0) // rows created or updated
-  deactivated Int               @default(0) // rows marked inactive (gone upstream)
-  totalCount  Int? // `total_count` reported upstream
-  durationMs  Int?
-  error       String?
-  startedAt   DateTime          @default(now())
-  finishedAt  DateTime?
-
-  @@index([typeId, startedAt])
-  @@map("etender_sync_logs")
-}
+// NOTE: e-Tender (UZEX) models moved to their own isolated schema/client at
+// prisma/etender/schema.prisma (Postgres schema `etender`, separate connection
+// pool) so tender read load stays off the main pool and the module can later be
+// extracted into its own service. See src/etender/.

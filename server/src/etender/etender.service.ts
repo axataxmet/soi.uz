@@ -1,30 +1,38 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EtenderSyncStatus, Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { CronJob } from 'cron';
+// Types come from the ISOLATED etender client, not the main @prisma/client.
+import { EtenderSyncStatus, Prisma } from '../../prisma/etender/generated/client';
+import { EtenderPrismaService } from './etender-prisma.service';
 import { paginate } from '../common/dto/pagination.dto';
 import { EtenderAdapter } from './etender.adapter';
 import { EtenderLotQueryDto } from './dto/etender-query.dto';
 import { NormalizedEtenderLot } from './etender.types';
 
-// EtenderService — owns the sync loop, the PostgreSQL cache (etender_lots),
-// and the sync log (etender_sync_logs). The public API reads only from the DB;
-// only this service ever reaches the upstream, on a schedule.
+const CRON_NAME = 'etender-daily-sync';
+
+// EtenderService — owns the daily sync, the isolated etender Postgres cache
+// (etender_lots) and the sync log (etender_sync_logs). Public reads come from
+// this cache; only this service reaches the upstream, once a day.
 @Injectable()
 export class EtenderService implements OnModuleInit, OnModuleDestroy {
   private readonly log = new Logger(EtenderService.name);
   private readonly typeIds: number[];
   private readonly pageSize: number;
   private readonly maxPages: number;
-  private readonly intervalMs: number;
+  private readonly cron: string;
+  private readonly tz: string;
   private readonly enabled: boolean;
-  private timer?: NodeJS.Timeout;
+  private readonly listCacheTtlMs: number;
   private booting?: NodeJS.Timeout;
   private running = false;
+  private readonly listCache = new Map<string, { at: number; data: unknown }>();
 
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prisma: EtenderPrismaService,
     private readonly adapter: EtenderAdapter,
+    private readonly scheduler: SchedulerRegistry,
     config: ConfigService,
   ) {
     this.typeIds = (config.get<string>('ETENDER_SYNC_TYPES') || '1,2')
@@ -33,8 +41,10 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
       .filter((n) => Number.isFinite(n));
     this.pageSize = Number(config.get('ETENDER_SYNC_PAGE_SIZE')) || 50;
     this.maxPages = Number(config.get('ETENDER_SYNC_MAX_PAGES')) || 40;
-    this.intervalMs = (Number(config.get('ETENDER_SYNC_INTERVAL_MIN')) || 30) * 60_000;
+    this.cron = config.get<string>('ETENDER_SYNC_CRON') || '0 20 * * *'; // daily 20:00
+    this.tz = config.get<string>('ETENDER_SYNC_TZ') || 'Asia/Tashkent';
     this.enabled = String(config.get('ETENDER_SYNC_ENABLED') ?? 'true') !== 'false';
+    this.listCacheTtlMs = Number(config.get('ETENDER_LIST_CACHE_TTL_MS')) || 300_000; // 5 min
   }
 
   onModuleInit() {
@@ -42,15 +52,39 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
       this.log.log('e-tender sync disabled (ETENDER_SYNC_ENABLED=false)');
       return;
     }
-    // First run shortly after boot (don't block startup), then on an interval.
-    this.booting = setTimeout(() => void this.syncAll('boot'), 8_000);
-    this.timer = setInterval(() => void this.syncAll('interval'), this.intervalMs);
-    this.log.log(`e-tender sync scheduled every ${this.intervalMs / 60_000} min for types [${this.typeIds.join(', ')}]`);
+    const job = CronJob.from({
+      cronTime: this.cron,
+      timeZone: this.tz,
+      onTick: () => void this.syncAll('cron'),
+      start: true,
+    });
+    this.scheduler.addCronJob(CRON_NAME, job as any);
+    this.log.log(`e-tender daily sync scheduled: cron "${this.cron}" (${this.tz}) for types [${this.typeIds.join(', ')}]`);
+
+    // On a fresh deploy the cache is empty and the next 20:00 could be far off —
+    // populate once shortly after boot if there's nothing yet.
+    this.booting = setTimeout(() => {
+      void (async () => {
+        try {
+          const count = await this.prisma.etenderLot.count();
+          if (count === 0) {
+            this.log.log('e-tender cache empty on boot — running initial sync');
+            await this.syncAll('boot');
+          }
+        } catch (e) {
+          this.log.warn(`boot cache check failed: ${(e as Error).message}`);
+        }
+      })();
+    }, 8_000);
   }
 
   onModuleDestroy() {
     if (this.booting) clearTimeout(this.booting);
-    if (this.timer) clearInterval(this.timer);
+    try {
+      if (this.scheduler.doesExist('cron', CRON_NAME)) this.scheduler.getCronJob(CRON_NAME).stop();
+    } catch {
+      /* ignore */
+    }
   }
 
   // Sync every configured type. Overlap-guarded so a slow run can't stack.
@@ -67,11 +101,12 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
       }
     } finally {
       this.running = false;
+      this.listCache.clear(); // fresh data → drop cached read responses
     }
     return { ran: true, results };
   }
 
-  // Pull all lots for one typeId, upsert them, mark vanished ones inactive,
+  // Pull all lots for one typeId, upsert them, mark vanished/expired ones inactive,
   // and record a sync-log row whatever the outcome.
   async syncType(typeId: number, trigger = 'manual') {
     const startedAt = new Date();
@@ -168,8 +203,12 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  // ── Public reads (served from DB cache) ──────────────────────
+  // ── Public reads (served from the isolated DB cache, with a short TTL cache) ──
   async listLots(q: EtenderLotQueryDto) {
+    const key = JSON.stringify(q);
+    const hit = this.listCache.get(key);
+    if (hit && Date.now() - hit.at < this.listCacheTtlMs) return hit.data;
+
     const where: Prisma.EtenderLotWhereInput = {};
     if (q.typeId !== undefined) where.typeId = q.typeId;
     if (q.state === 'active') where.active = true;
@@ -191,7 +230,9 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
       }),
       this.prisma.etenderLot.count({ where }),
     ]);
-    return paginate(data, total, q.page, q.limit);
+    const result = paginate(data, total, q.page, q.limit);
+    this.listCache.set(key, { at: Date.now(), data: result });
+    return result;
   }
 
   getLot(externalId: number) {

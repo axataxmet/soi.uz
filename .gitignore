@@ -27,3 +27,6 @@ Thumbs.db
 
 # ── coverage / test output ──
 coverage/
+
+# e-tender isolated Prisma client (regenerated)
+server/prisma/etender/generated/
