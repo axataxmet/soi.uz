@@ -78,7 +78,9 @@ export const GOVUZ_SOURCES: GovUzSource[] = [
 export interface XaridSource {
   source: string;
   kind: 'lot';
+  mode: 'competitions' | 'deals';
   path: string;
+  apiBase?: string; // host override (deals live on a different sub-API)
   site: string;
   label: { ru: string; uz: string; en: string };
 }
@@ -87,9 +89,19 @@ export const XARID_SOURCES: XaridSource[] = [
   {
     source: 'XARID_COMPETITION',
     kind: 'lot',
+    mode: 'competitions',
     path: '/Common/GetCompetitions',
     site: 'https://xarid.uzex.uz',
     label: { ru: 'Xarid — Конкурсы', uz: 'Xarid — Tanlovlar', en: 'Xarid — Competitions' },
+  },
+  {
+    source: 'XARID_DEALS',
+    kind: 'lot',
+    mode: 'deals',
+    path: '/Common/GetNotCompletedLots',
+    apiBase: 'https://xarid-api-auction.uzex.uz',
+    site: 'https://xarid.uzex.uz',
+    label: { ru: 'Xarid — Незавершённые сделки', uz: 'Xarid — Yakunlanmagan bitimlar', en: 'Xarid — Not-completed deals' },
   },
 ];
 
@@ -125,8 +137,7 @@ export const XT_SOURCES: XtSource[] = [
   },
 ];
 
-// ── Sources still pending a live capture ──────────────────────────────────────
-// xarid.uzex.uz /not-completed-deals: endpoint not yet captured.
-export const PENDING_SOURCES = [
-  { source: 'XARID_DEALS', site: 'https://xarid.uzex.uz', reason: 'not-completed-deals endpoint pending capture' },
-] as const;
+// All requested sources are now wired. (Sub-systems of xarid's not-completed-deals
+// beyond auction — shop/national — and etender's fail-list can be added later as
+// extra XaridSource / UZEX entries if needed.)
+export const PENDING_SOURCES = [] as const;
