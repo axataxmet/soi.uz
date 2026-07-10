@@ -248,7 +248,8 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     const [data, total] = await this.prisma.$transaction([
       this.prisma.etenderLot.findMany({
         where,
-        orderBy: [{ endDate: 'desc' }, { syncedAt: 'desc' }],
+        // Live lots (with a deadline) first; news (null endDate) after.
+        orderBy: [{ endDate: { sort: 'desc', nulls: 'last' } }, { syncedAt: 'desc' }],
         skip: (q.page - 1) * q.limit,
         take: q.limit,
       }),

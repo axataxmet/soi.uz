@@ -189,6 +189,7 @@ function EtenderLotsBlock({ lang, lv }) {
                       {l.sellerName && <div className="etl-row">{IcnUser}<span>{l.sellerName}</span></div>}
                       {(l.regionName || l.districtName) && <div className="etl-row">{IcnPin}<span>{[l.regionName, l.districtName].filter(Boolean).join(", ")}</span></div>}
                       {l.endDate && <div className="etl-row">{IcnCal}<span>{lv("до ", "gacha ", "until ")}{fmtDate(l.endDate)}</span></div>}
+                      {!l.endDate && l.kind === "news" && l.startDate && <div className="etl-row">{IcnCal}<span>{fmtDate(l.startDate)}</span></div>}
                     </div>
                     <div className="etl-cost">
                       <div>{l.kind === "news" ? <span className="etl-srctag">{srcLabel(l.source)}</span> : <React.Fragment><span className="etl-cost-v">{fmtCost(l.cost)}</span> <span className="etl-cost-c">{l.currencyCode || ""}</span></React.Fragment>}</div>
