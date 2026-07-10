@@ -10,6 +10,7 @@ import { EtenderAdapter } from './etender.adapter';
 import { GovUzAdapter } from './govuz.adapter';
 import { XaridAdapter } from './xarid.adapter';
 import { XtXaridAdapter } from './xtxarid.adapter';
+import { MedicalFilter } from './medical-filter';
 import { EtenderLotQueryDto } from './dto/etender-query.dto';
 import { NormalizedEtenderLot, UzexTradeSource } from './etender.types';
 import { GOVUZ_SOURCES, GovUzSource, UZEX_SOURCES, XARID_SOURCES, XaridSource, XT_SOURCES, XtSource } from './tender-sources';
@@ -39,6 +40,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     private readonly govuz: GovUzAdapter,
     private readonly xarid: XaridAdapter,
     private readonly xt: XtXaridAdapter,
+    private readonly medical: MedicalFilter,
     private readonly scheduler: SchedulerRegistry,
     config: ConfigService,
   ) {
@@ -165,14 +167,19 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     try {
       const { lots, total: t } = await fetcher();
       total = t;
-      fetched = lots.length;
-      for (const lot of lots) {
+      const pulled = lots.length;
+      // Systematic medical filter BEFORE persisting — only medical procurement is
+      // stored, so the DB and the showcase stay on-domain.
+      const kept = this.medical.apply(lots, source);
+      fetched = kept.length;
+      for (const lot of kept) {
         await this.upsertLot(lot);
         upserted++;
       }
       // "Only active": a lot is active while it stays in the open feed. It leaves
-      // when it vanishes from the feed OR (for lots) its deadline passes.
-      const seen = lots.map((l) => l.externalId);
+      // when it vanishes from the feed OR (for lots) its deadline passes. Non-medical
+      // rows are never in `kept`, so any previously-stored ones get deactivated too.
+      const seen = kept.map((l) => l.externalId);
       const now = new Date();
       const gone = await this.prisma.etenderLot.updateMany({
         where: {
@@ -198,7 +205,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
           finishedAt: new Date(),
         },
       });
-      this.log.log(`sync ${source} (${trigger}): fetched=${fetched} upserted=${upserted} deactivated=${deactivated} total=${total}`);
+      this.log.log(`sync ${source} (${trigger}): pulled=${pulled} medical=${fetched} upserted=${upserted} deactivated=${deactivated} total=${total}`);
       return logRow;
     } catch (e) {
       const message = (e as Error)?.message || 'unknown error';

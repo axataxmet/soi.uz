@@ -22,14 +22,22 @@ export class XtXaridAdapter {
   private readonly timeoutMs: number;
   readonly enabled: boolean;
 
+  private readonly pageDelayMs: number;
+
   constructor(config: ConfigService) {
     this.base = (config.get<string>('ETENDER_XT_API_BASE') || 'https://api.xt-xarid.uz').replace(/\/$/, '');
     this.lang = config.get<string>('ETENDER_XT_LANG') || 'ru';
     this.timeoutMs = Number(config.get('ETENDER_HTTP_TIMEOUT_MS')) || 25_000;
     this.enabled = String(config.get('ETENDER_XT_ENABLED') ?? 'true') !== 'false';
+    this.pageDelayMs = Number(config.get('ETENDER_XT_PAGE_DELAY_MS')) || 350; // throttle: xt rate-limits (429)
   }
 
-  private async rpcRead(ref: string, limit: number, offset: number): Promise<any[]> {
+  private sleep(ms: number) {
+    return new Promise((r) => setTimeout(r, ms));
+  }
+
+  // One RPC read with a 429-aware retry (xt-xarid rate-limits rapid paging).
+  private async rpcRead(ref: string, limit: number, offset: number, attempt = 0): Promise<any[]> {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), this.timeoutMs);
     try {
@@ -46,6 +54,11 @@ export class XtXaridAdapter {
         },
         body: JSON.stringify({ id: 1, jsonrpc: '2.0', method: 'ref', params: { ref, op: 'read', limit, offset, filters: {}, fields: FIELDS } }),
       });
+      if (res.status === 429 && attempt < 3) {
+        clearTimeout(timer);
+        await this.sleep(1500 * (attempt + 1));
+        return this.rpcRead(ref, limit, offset, attempt + 1);
+      }
       if (!res.ok) throw new Error(`xt-xarid HTTP ${res.status}`);
       const data = await res.json();
       if (data?.error) throw new Error(`xt-xarid RPC error: ${data.error.message || 'unknown'}`);
@@ -67,6 +80,7 @@ export class XtXaridAdapter {
         if (!rows.length) break;
         for (const r of rows) { const n = this.map(r, cfg); if (n) byId.set(n.externalId, n); }
         if (rows.length < pageSize) break;
+        await this.sleep(this.pageDelayMs); // be polite between pages
       }
       return [...byId.values()];
     } catch (e) {

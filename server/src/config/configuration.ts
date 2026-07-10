@@ -33,6 +33,7 @@ export default () => ({
   ETENDER_API_BASE: process.env.ETENDER_API_BASE || 'https://apietender.uzex.uz',
   ETENDER_SYNC_ENABLED: process.env.ETENDER_SYNC_ENABLED || 'true',
   ETENDER_SYNC_SOURCES: process.env.ETENDER_SYNC_SOURCES || '', // allow-list of source ids; empty = all
+  ETENDER_MEDICAL_ONLY: process.env.ETENDER_MEDICAL_ONLY || 'true', // keep only medical lots (filter before save)
   ETENDER_GOVUZ_ENABLED: process.env.ETENDER_GOVUZ_ENABLED || 'true',
   ETENDER_GOVUZ_API_BASE: process.env.ETENDER_GOVUZ_API_BASE || 'https://api-portal.gov.uz',
   ETENDER_GOVUZ_LANG: process.env.ETENDER_GOVUZ_LANG || 'ru',
