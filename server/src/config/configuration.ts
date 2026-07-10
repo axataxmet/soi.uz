@@ -36,6 +36,9 @@ export default () => ({
   ETENDER_GOVUZ_ENABLED: process.env.ETENDER_GOVUZ_ENABLED || 'true',
   ETENDER_GOVUZ_API_BASE: process.env.ETENDER_GOVUZ_API_BASE || 'https://api-portal.gov.uz',
   ETENDER_GOVUZ_LANG: process.env.ETENDER_GOVUZ_LANG || 'ru',
+  ETENDER_XARID_ENABLED: process.env.ETENDER_XARID_ENABLED || 'true',
+  ETENDER_XARID_API_BASE: process.env.ETENDER_XARID_API_BASE || 'https://xarid-api-purchase.uzex.uz',
+  ETENDER_XARID_LANG: process.env.ETENDER_XARID_LANG || 'ru',
   ETENDER_SYNC_CRON: process.env.ETENDER_SYNC_CRON || '0 20 * * *', // daily 20:00
   ETENDER_SYNC_TZ: process.env.ETENDER_SYNC_TZ || 'Asia/Tashkent',
   ETENDER_SYNC_PAGE_SIZE: parseInt(process.env.ETENDER_SYNC_PAGE_SIZE || '50', 10),

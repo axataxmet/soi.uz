@@ -4,6 +4,7 @@ import { EtenderController } from './etender.controller';
 import { EtenderService } from './etender.service';
 import { EtenderAdapter } from './etender.adapter';
 import { GovUzAdapter } from './govuz.adapter';
+import { XaridAdapter } from './xarid.adapter';
 import { EtenderPrismaService } from './etender-prisma.service';
 
 // Self-contained multi-source tender module: its own Prisma client/pool (etender
@@ -12,7 +13,7 @@ import { EtenderPrismaService } from './etender-prisma.service';
 @Module({
   imports: [ScheduleModule.forRoot()],
   controllers: [EtenderController],
-  providers: [EtenderService, EtenderAdapter, GovUzAdapter, EtenderPrismaService],
+  providers: [EtenderService, EtenderAdapter, GovUzAdapter, XaridAdapter, EtenderPrismaService],
   exports: [EtenderService],
 })
 export class EtenderModule {}

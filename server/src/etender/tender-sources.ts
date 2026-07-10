@@ -72,14 +72,33 @@ export const GOVUZ_SOURCES: GovUzSource[] = [
   },
 ];
 
-// ── Sources blocked behind external auth (pending a live Network capture) ─────
-// xarid.uzex.uz: POST xarid-api-trade.uzex.uz/Common/GetCompetitions returns 404
-//   anonymously — needs the exact payload/headers from DevTools.
+// ── xarid.uzex.uz (Электронная система государственных закупок) ────────────────
+// Confirmed live & anonymous (2026-07-11): POST xarid-api-purchase.uzex.uz{path}
+// with { from, to }. See XaridAdapter.
+export interface XaridSource {
+  source: string;
+  kind: 'lot';
+  path: string;
+  site: string;
+  label: { ru: string; uz: string; en: string };
+}
+
+export const XARID_SOURCES: XaridSource[] = [
+  {
+    source: 'XARID_COMPETITION',
+    kind: 'lot',
+    path: '/Common/GetCompetitions',
+    site: 'https://xarid.uzex.uz',
+    label: { ru: 'Xarid — Конкурсы', uz: 'Xarid — Tanlovlar', en: 'Xarid — Competitions' },
+  },
+];
+
+// ── Sources still blocked behind external auth (pending a live capture) ────────
+// xarid.uzex.uz /not-completed-deals: endpoint not yet captured.
 // xt-xarid.uz: api.mocrm.xt-xarid.uz responds "Access denied jwt" — requires a
 //   token; server-side sync is only possible if a public/guest token exists.
 export const PENDING_SOURCES = [
-  { source: 'XARID_COMPETITION', site: 'https://xarid.uzex.uz', reason: 'endpoint 404 anonymously — needs Network capture' },
-  { source: 'XARID_DEALS', site: 'https://xarid.uzex.uz', reason: 'endpoint pending capture' },
+  { source: 'XARID_DEALS', site: 'https://xarid.uzex.uz', reason: 'not-completed-deals endpoint pending capture' },
   { source: 'XT_TENDER', site: 'https://xt-xarid.uz', reason: 'API is JWT-gated (Access denied jwt)' },
   { source: 'XT_SELECTION', site: 'https://xt-xarid.uz', reason: 'API is JWT-gated (Access denied jwt)' },
 ] as const;
