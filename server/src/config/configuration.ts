@@ -31,6 +31,7 @@ export default () => ({
   // e-tender (UZEX) — isolated schema/pool + daily sync
   ETENDER_DATABASE_URL: process.env.ETENDER_DATABASE_URL, // own Postgres schema (derived from DATABASE_URL if unset)
   ETENDER_API_BASE: process.env.ETENDER_API_BASE || 'https://apietender.uzex.uz',
+  ETENDER_HTTP_TIMEOUT_MS: parseInt(process.env.ETENDER_HTTP_TIMEOUT_MS || '40000', 10), // xarid-auction / xt pages can be slow
   ETENDER_SYNC_ENABLED: process.env.ETENDER_SYNC_ENABLED || 'true',
   ETENDER_SYNC_SOURCES: process.env.ETENDER_SYNC_SOURCES || '', // allow-list of source ids; empty = all
   ETENDER_MEDICAL_ONLY: process.env.ETENDER_MEDICAL_ONLY || 'true', // keep only medical lots (filter before save)
