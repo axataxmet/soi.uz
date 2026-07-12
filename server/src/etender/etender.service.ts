@@ -140,7 +140,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
 
   private async syncXaridSource(cfg: XaridSource, trigger: string) {
     return this.runSync(cfg.source, null, trigger, async () => {
-      const lots = await this.xarid.fetch(cfg, this.pageSize, this.maxPages);
+      const lots = await this.xarid.fetch(cfg, this.pageSize, cfg.maxPages ?? this.maxPages);
       return { lots, total: lots.length };
     });
   }

@@ -81,6 +81,7 @@ export interface XaridSource {
   mode: 'competitions' | 'deals';
   path: string;
   apiBase?: string; // host override (deals live on a different sub-API)
+  maxPages?: number; // per-source page cap (deals report a huge total_count on a slow API)
   site: string;
   label: { ru: string; uz: string; en: string };
 }
@@ -100,6 +101,7 @@ export const XARID_SOURCES: XaridSource[] = [
     mode: 'deals',
     path: '/Common/GetNotCompletedLots',
     apiBase: 'https://xarid-api-auction.uzex.uz',
+    maxPages: 4, // this API is slow and reports a huge total_count — only take the latest few pages
     site: 'https://xarid.uzex.uz',
     label: { ru: 'Xarid — Незавершённые сделки', uz: 'Xarid — Yakunlanmagan bitimlar', en: 'Xarid — Not-completed deals' },
   },
