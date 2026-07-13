@@ -53,9 +53,10 @@ function useEtenderLotsCss() {
   }, []);
 }
 
-function EtenderLotsBlock({ lang, lv }) {
+function EtenderLotsBlock({ lang, lv, facet = "source" }) {
   const { useState, useEffect } = React;
   useEtenderLotsCss();
+  const isCat = facet === "category"; // "source" = tabs by platform, "category" = by medical category
   const PAGE = 12;
   const [lots, setLots] = useState([]);
   const [total, setTotal] = useState(0);
@@ -63,8 +64,8 @@ function EtenderLotsBlock({ lang, lv }) {
   const [status, setStatus] = useState("loading"); // loading | ready | error
   const [query, setQuery] = useState("");
   const [term, setTerm] = useState("");
-  const [sources, setSources] = useState([]);
-  const [source, setSource] = useState(""); // "" = all sources
+  const [facets, setFacets] = useState([]); // normalized [{id,label,count}]
+  const [sel, setSel] = useState(""); // "" = all
 
   // debounce search input -> term
   useEffect(() => {
@@ -72,11 +73,12 @@ function EtenderLotsBlock({ lang, lv }) {
     return () => clearTimeout(id);
   }, [query]);
 
-  // source registry (for tabs + per-card labels)
+  // facet registry — platforms (/sources) or medical categories (/categories)
   useEffect(() => {
     let alive = true;
-    (window.api && window.api.listPublic ? window.api.listPublic("etender/sources") : Promise.resolve([]))
-      .then((res) => { if (alive) setSources(Array.isArray(res) ? res : []); })
+    const ep = isCat ? "etender/categories" : "etender/sources";
+    (window.api && window.api.listPublic ? window.api.listPublic(ep) : Promise.resolve([]))
+      .then((res) => { if (alive) setFacets(Array.isArray(res) ? res.map((x) => ({ id: x.source || x.category, label: x.label, count: x.count })) : []); })
       .catch(() => {});
     return () => { alive = false; };
   }, []);
@@ -85,17 +87,17 @@ function EtenderLotsBlock({ lang, lv }) {
     let alive = true;
     setStatus((s) => (s === "ready" ? "ready" : "loading"));
     const q = { state: "active", limit, page: 1 };
-    if (source) q.source = source;
+    if (sel) q[isCat ? "medCategory" : "source"] = sel;
     if (term) q.search = term;
     (window.api && window.api.listPublic ? window.api.listPublic("etender/lots", q) : Promise.reject(new Error("api")))
       .then((res) => { if (!alive) return; setLots((res && res.data) || []); setTotal((res && res.total) || 0); setStatus("ready"); })
       .catch(() => { if (alive) setStatus("error"); });
     return () => { alive = false; };
-  }, [limit, term, source]);
+  }, [limit, term, sel]);
 
-  const pickSource = (s) => { setSource(s); setLimit(PAGE); };
-  const srcLabel = (id) => { const s = sources.find((x) => x.source === id); return s ? (s.label[lang] || s.label.ru) : id; };
-  const tabs = sources.filter((s) => s.count > 0);
+  const pick = (s) => { setSel(s); setLimit(PAGE); };
+  const facetLabel = (id) => { const s = facets.find((x) => x.id === id); return s ? (s.label[lang] || s.label.ru) : id; };
+  const tabs = facets.filter((s) => s.count > 0);
 
   const fmtCost = (v) => {
     if (v === null || v === undefined || v === "") return "—";
@@ -124,26 +126,29 @@ function EtenderLotsBlock({ lang, lv }) {
   const IcnCal = <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>;
 
   return (
-    <section className="section alt" id="etender-lots">
+    <section className={"section " + (isCat ? "" : "alt")} id={isCat ? "etender-categories" : "etender-lots"}>
       <div className="wrap">
         <div className="etl-head reveal">
           <div>
-            <span className="eyebrow line">{lv("Актуальные закупки", "Dolzarb xaridlar", "Live procurement")}</span>
-            <h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Актуальные тендерные лоты", "Dolzarb tender lotlari", "Live tender lots")}</h2>
+            <span className="eyebrow line">{isCat ? lv("По категориям", "Kategoriyalar bo'yicha", "By category") : lv("Актуальные закупки", "Dolzarb xaridlar", "Live procurement")}</span>
+            <h2 className="h-sec" style={{ marginTop: 14 }}>{isCat ? lv("Тендеры по категориям", "Kategoriyalar bo'yicha tenderlar", "Tenders by category") : lv("Актуальные тендерные лоты", "Dolzarb tender lotlari", "Live tender lots")}</h2>
             <p style={{ fontSize: 14.5, color: "var(--slate-600)", maxWidth: 620, lineHeight: 1.6, marginTop: 10 }}>
-              {lv("Открытые лоты с площадок государственных закупок (etender, biznesxarid и др.). Данные обновляются автоматически.",
+              {isCat ? lv("Медицинские тендерные лоты, сгруппированные по типу: оборудование, мебель, инструменты, расходные материалы, лекарства.",
+                "Tibbiy tender lotlari turi bo'yicha: uskunalar, mebel, asboblar, sarf materiallari, dorilar.",
+                "Medical tender lots grouped by type: equipment, furniture, instruments, consumables, medicines.")
+              : lv("Открытые лоты с площадок государственных закупок (etender, biznesxarid и др.). Данные обновляются автоматически.",
                 "Davlat xaridlari maydonchalaridan (etender, biznesxarid va b.) ochiq lotlar. Ma'lumotlar avtomatik yangilanadi.",
                 "Open lots from public-procurement platforms (etender, biznesxarid, …), refreshed automatically.")}
             </p>
           </div>
-          <span className="etl-src"><span className="dot"></span>UZEX · gov.uz</span>
+          <span className="etl-src"><span className="dot"></span>{isCat ? lv("Мед. категории", "Tibbiy toifalar", "Med. categories") : "UZEX · gov.uz"}</span>
         </div>
 
         {tabs.length > 1 &&
           <div className="etl-tabs reveal">
-            <button className={"etl-tab" + (source === "" ? " on" : "")} onClick={() => pickSource("")}>{lv("Все", "Barchasi", "All")}</button>
+            <button className={"etl-tab" + (sel === "" ? " on" : "")} onClick={() => pick("")}>{lv("Все", "Barchasi", "All")}</button>
             {tabs.map((s) =>
-              <button key={s.source} className={"etl-tab" + (source === s.source ? " on" : "")} onClick={() => pickSource(s.source)}>
+              <button key={s.id} className={"etl-tab" + (sel === s.id ? " on" : "")} onClick={() => pick(s.id)}>
                 {s.label[lang] || s.label.ru}<span className="n">{s.count}</span>
               </button>
             )}
@@ -181,7 +186,7 @@ function EtenderLotsBlock({ lang, lv }) {
                 return (
                   <div className="etl-card reveal" key={l.id}>
                     <div className="etl-card-top">
-                      <span className="etl-no">{l.displayNo ? "№ " + l.displayNo : (source === "" ? <span className="etl-srctag">{srcLabel(l.source)}</span> : "№ " + l.externalId)}</span>
+                      <span className="etl-no">{l.displayNo ? "№ " + l.displayNo : (sel === "" ? <span className="etl-srctag">{facetLabel(isCat ? l.medCategory : l.source)}</span> : "№ " + l.externalId)}</span>
                       {dl && <span className={"etl-deadline " + dl.cls}>{dl.label}</span>}
                     </div>
                     <h3 className="etl-name" title={l.name}>{l.name}</h3>
@@ -192,7 +197,7 @@ function EtenderLotsBlock({ lang, lv }) {
                       {!l.endDate && l.kind === "news" && l.startDate && <div className="etl-row">{IcnCal}<span>{fmtDate(l.startDate)}</span></div>}
                     </div>
                     <div className="etl-cost">
-                      <div>{l.kind === "news" ? <span className="etl-srctag">{srcLabel(l.source)}</span> : <React.Fragment><span className="etl-cost-v">{fmtCost(l.cost)}</span> <span className="etl-cost-c">{l.currencyCode || ""}</span></React.Fragment>}</div>
+                      <div>{l.kind === "news" ? <span className="etl-srctag">{facetLabel(isCat ? l.medCategory : l.source)}</span> : <React.Fragment><span className="etl-cost-v">{fmtCost(l.cost)}</span> <span className="etl-cost-c">{l.currencyCode || ""}</span></React.Fragment>}</div>
                       <a className="etl-open" href={l.sourceUrl || "#"} target="_blank" rel="noopener">{lv("Открыть", "Ochish", "Open")} ↗</a>
                     </div>
                   </div>
@@ -213,7 +218,6 @@ function EtenderLotsBlock({ lang, lv }) {
 
 function CoTendersPage({ t, lang, go }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
-  const [sent, setSent] = useState(false);
   const steps = [
   { t: lv("Отправьте ТЗ или спецификацию", "TT yoki spetsifikatsiya yuboring", "Send a spec or requirements"), d: lv("Прикрепите техническое задание закупки или список позиций.", "Xarid texnik topshirig'ini yoki pozitsiyalar ro'yxatini biriktiring.", "Attach the procurement spec or list of items.") },
   { t: lv("Получите КП и спецификацию", "Taklif va spetsifikatsiya oling", "Receive a quote and specification"), d: lv("Менеджер подготовит коммерческое предложение под требования закупки.", "Menejer xarid talablariga mos taklif tayyorlaydi.", "A manager prepares a commercial offer to match the procurement.") },
@@ -231,18 +235,7 @@ function CoTendersPage({ t, lang, go }) {
         </div>
       </section>
 
-      <section className="section">
-        <div className="wrap">
-          <div className="tnd-stats reveal">
-            {[{ n: "60+", l: lv("госконтрактов", "davlat shartnomalari", "public contracts") },
-            { n: lv("4.2 млрд", "4.2 mlrd", "4.2B"), l: lv("сум поставок", "so'm yetkazib berish", "UZS delivered") },
-            { n: "14", l: lv("регионов", "hududlar", "regions") },
-            { n: "98%", l: lv("выполнено в срок", "muddatida", "on-time") }].map((s, i) =>
-            <div key={i} className="tnd-stat"><div className="ts-n">{s.n}</div><div className="ts-l">{s.l}</div></div>
-            )}
-          </div>
-        </div>
-      </section>
+      <EtenderLotsBlock lang={lang} lv={lv} facet="category" />
 
       <EtenderLotsBlock lang={lang} lv={lv} />
 
@@ -261,87 +254,6 @@ function CoTendersPage({ t, lang, go }) {
         </div>
       </section>
 
-      <section className="section alt">
-        <div className="wrap">
-          <div className="sec-head reveal"><span className="eyebrow line">{lv("Опыт", "Tajriba", "Track record")}</span><h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Выигранные тендеры", "G'alaba qozonilgan tenderlar", "Successful tenders")}</h2></div>
-          <div className="tnd-table reveal">
-            <table>
-              <thead><tr>
-                <th>{lv("Организация", "Tashkilot", "Organization")}</th>
-                <th style={{ textAlign: "right" }}>{lv("Сумма", "Summa", "Amount")}</th>
-                <th>{lv("Дата", "Sana", "Date")}</th>
-              </tr></thead>
-              <tbody>
-                {[{ org: lv("Республиканский онкологический центр", "Respublika onkologiya markazi", "Republican Oncology Centre"), cat: lv("Комплексное оснащение отделения", "Bo'limni to'liq jihozlash", "Department equipping"), sum: "2 140 000 000", date: "02.03.2026" },
-                { org: lv("Самаркандский гос. медицинский университет", "Samarqand davlat tibbiyot universiteti", "Samarkand State Medical University"), cat: lv("Хирургия и анестезиология", "Jarrohlik va anesteziologiya", "Surgery & anaesthesiology"), sum: "860 000 000", date: "14.04.2026" },
-                { org: lv("Ташкентская гор. клиническая больница №1", "Toshkent shahar klinik shifoxonasi №1", "Tashkent City Clinical Hospital №1"), cat: lv("Диагностика и мониторинг", "Diagnostika va monitoring", "Diagnostics & monitoring"), sum: "480 000 000", date: "28.05.2026" },
-                { org: lv("Ферганская областная больница", "Farg'ona viloyat shifoxonasi", "Fergana Regional Hospital"), cat: lv("Стерилизация и дезинфекция", "Sterilizatsiya va dezinfeksiya", "Sterilization & disinfection"), sum: "320 000 000", date: "10.12.2025" }].map((r, i) =>
-                <tr key={i}>
-                    <td><div style={{ fontWeight: 700 }}>{r.org}</div><div style={{ fontSize: 12.5, color: "var(--slate-400)", marginTop: 2 }}>{r.cat}</div></td>
-                    <td style={{ textAlign: "right", fontWeight: 800, whiteSpace: "nowrap" }}>{r.sum} <span style={{ fontSize: 11, color: "var(--slate-400)", fontWeight: 600 }}>{lv("сум", "so'm", "UZS")}</span></td>
-                    <td style={{ color: "var(--slate-400)", fontSize: 13, whiteSpace: "nowrap" }}>{r.date}</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="wrap">
-          <div className="grid-2" style={{ gap: 40, alignItems: "flex-start" }}>
-            <div className="reveal">
-              <h2 className="h-sec" style={{ fontSize: 28 }}>{lv("Что мы готовим для закупки", "Xarid uchun nimani tayyorlaymiz", "What we prepare for procurement")}</h2>
-              <div style={{ marginTop: 22, display: "flex", flexDirection: "column", gap: 12 }}>
-                {[lv("Коммерческое предложение (КП)", "Tijorat taklifi", "Commercial offer"),
-                lv("Техническую спецификацию", "Texnik spetsifikatsiya", "Technical specification"),
-                lv("Сертификаты и документы на оборудование", "Uskuna sertifikatlari va hujjatlari", "Equipment certificates and documents"),
-                lv("Карточку компании и реквизиты", "Kompaniya kartasi va rekvizitlar", "Company card and details"),
-                lv("Условия гарантии и сервиса", "Kafolat va servis shartlari", "Warranty and service terms")].map((d, i) =>
-                <div key={i} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-                    <CoIcon name="check" size={18} style={{ color: "var(--blue-600)", flexShrink: 0 }} />
-                    <span style={{ fontSize: 14.5, color: "var(--slate-700)" }}>{d}</span>
-                  </div>
-                )}
-              </div>
-              <div style={{ display: "flex", gap: 12, marginTop: 28, flexWrap: "wrap" }}>
-                <a className="btn btn-ghost" href="corp/company-card.pdf" target="_blank" rel="noopener">{lv("Скачать карточку компании", "Kompaniya kartasini yuklab olish", "Download company card")} <CoIcon name="download" size={15} /></a>
-                <a className="btn btn-ghost" onClick={() => go("catalog")} style={{ cursor: "pointer" }}>{lv("Тендерная корзина в каталоге", "Katalog tender savati", "Tender cart in the catalog")} →</a>
-              </div>
-            </div>
-
-            <div className="cform reveal" id="tender-form">
-              <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 18 }}>{lv("Отправить ТЗ", "TT yuborish", "Send a spec")}</h3>
-              {sent ?
-              <div style={{ padding: "30px 10px", textAlign: "center" }}>
-                  <div style={{ width: 52, height: 52, borderRadius: "50%", background: "var(--success-bg)", color: "var(--success)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}><CoIcon name="check" size={26} /></div>
-                  <div style={{ fontSize: 15.5, fontWeight: 700 }}>{lv("ТЗ отправлено!", "TT yuborildi!", "Spec sent!")}</div>
-                  <p style={{ fontSize: 13.5, color: "var(--slate-500)", marginTop: 6 }}>{lv("Менеджер по тендерам подготовит КП.", "Tender menejeri taklif tayyorlaydi.", "Our tender manager will prepare a quote.")}</p>
-                </div> :
-
-              <form onSubmit={(e) => {e.preventDefault();setSent(true);}}>
-                  <label>{lv("Организация", "Tashkilot", "Organization")} *</label>
-                  <input required placeholder={lv("Название учреждения", "Muassasa nomi", "Institution name")} />
-                  <div className="grid-2" style={{ gap: 0 }}>
-                    <div style={{ paddingRight: 8 }}><label>{lv("Имя", "Ism", "Name")} *</label><input required placeholder={lv("Контактное лицо", "Aloqa shaxsi", "Contact person")} /></div>
-                    <div style={{ paddingLeft: 8 }}><label>{lv("Телефон", "Telefon", "Phone")} *</label><input required type="tel" placeholder="+998 __ ___ __ __" /></div>
-                  </div>
-                  <label>{lv("Файл ТЗ", "TT fayli", "Spec file")}</label>
-                  <input type="file" style={{ padding: "9px 12px" }} />
-                  <label>{lv("Комментарий", "Izoh", "Comment")}</label>
-                  <textarea rows="3" placeholder={lv("Сроки, бюджет, перечень позиций…", "Muddatlar, byudjet, pozitsiyalar…", "Timelines, budget, list of items…")}></textarea>
-                  <label style={{ display: "flex", alignItems: "flex-start", gap: 9, fontWeight: 500, fontSize: 13, color: "var(--slate-500)", cursor: "pointer" }}>
-                    <input type="checkbox" required style={{ width: "auto", margin: "3px 0 0" }} />
-                    <span>{lv("Согласен с политикой конфиденциальности.", "Maxfiylik siyosatiga roziman.", "I agree with the privacy policy.")}</span>
-                  </label>
-                  <button className="btn btn-pri" style={{ width: "100%", justifyContent: "center" }} type="submit">{lv("Отправить ТЗ и получить КП", "TT yuborish va taklif olish", "Send spec and get a quote")}</button>
-                </form>
-              }
-            </div>
-          </div>
-        </div>
-      </section>
     </div>);
 
 }
