@@ -1,0 +1,588 @@
+/* ИНДУСТРИЯ ЗДОРОВЬЯ — «Обучение персонала работе с медицинским оборудованием» (ТЗ 2.0, RU-first) */
+
+function useSftCss() {
+  React.useEffect(() => {
+    const ID = "sft-css";
+    if (document.getElementById(ID)) return;
+    const s = document.createElement("style");
+    s.id = ID;
+    s.textContent = `
+.sft-badges{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.sft-badge{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--blue-700,#1749a6);background:var(--blue-50,#eef4ff);border:1px solid var(--blue-200,#cfe0fb);border-radius:8px;padding:7px 13px}
+.sft-anchor-link{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:700;color:var(--blue-600);margin-top:18px;cursor:pointer;background:none;border:none;padding:0;font-family:inherit}
+.sft-anchor-link:hover{text-decoration:underline}
+.sft-ready-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg,16px);box-shadow:var(--sh-sm,0 6px 24px rgba(16,42,86,.08));padding:26px;max-width:420px}
+.sft-ready-title{font-size:13px;font-weight:800;color:var(--slate-500);text-transform:uppercase;letter-spacing:.03em;margin-bottom:18px}
+.sft-ready-stage{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}
+.sft-ready-stage:last-of-type{border-bottom:none}
+.sft-ready-dot{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;margin-top:1px}
+.sft-ready-stage.done .sft-ready-dot{background:#e7f6ec;color:#15803d}
+.sft-ready-stage.active .sft-ready-dot{background:var(--blue-600);color:#fff;box-shadow:0 0 0 4px rgba(23,87,200,.15)}
+.sft-ready-stage.pending .sft-ready-dot{background:var(--bg-2,#f4f7fb);color:var(--slate-400)}
+.sft-ready-t{font-size:14px;font-weight:700;color:var(--ink)}
+.sft-ready-s{font-size:12.5px;color:var(--slate-500);margin-top:2px;line-height:1.4}
+.sft-ready-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.sft-ready-chip{font-size:11.5px;font-weight:700;color:var(--blue-700,#1749a6);background:var(--blue-50,#eef4ff);border-radius:20px;padding:5px 11px}
+.sft-flow{display:flex;flex-wrap:wrap;gap:0;align-items:stretch}
+.sft-flow-i{flex:1;min-width:150px;display:flex;flex-direction:column;align-items:center;text-align:center;padding:20px 14px;position:relative}
+.sft-flow-i:not(:last-child)::after{content:"";position:absolute;right:0;top:38px;width:1px;height:calc(100% - 60px);background:var(--line)}
+.sft-flow-ic{width:46px;height:46px;border-radius:12px;background:var(--blue-50,#eef4ff);color:var(--blue-600);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+.sft-flow-i.active .sft-flow-ic{background:var(--blue-600);color:#fff}
+.sft-flow-t{font-size:14.5px;font-weight:800;color:var(--ink);margin-bottom:5px}
+.sft-flow-s{font-size:12.5px;color:var(--slate-500);line-height:1.4}
+.sft-grid-6{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.sft-aud{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg,16px);padding:22px}
+.sft-aud h4{font-size:15.5px;font-weight:800;margin:0 0 8px;color:var(--ink)}
+.sft-aud p{font-size:13.5px;color:var(--slate-600);line-height:1.55;margin:0}
+.sft-topics{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 30px}
+.sft-topic{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}
+.sft-topic-ic{flex-shrink:0;width:30px;height:30px;border-radius:9px;background:var(--blue-50,#eef4ff);color:var(--blue-600);display:flex;align-items:center;justify-content:center;margin-top:1px}
+.sft-topic h4{font-size:14.5px;font-weight:700;margin:0 0 3px;color:var(--ink)}
+.sft-topic p{font-size:13px;color:var(--slate-500);line-height:1.45;margin:0}
+.sft-formats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.sft-format{border:1px solid var(--line);border-radius:var(--r-lg,16px);background:var(--surface);padding:22px}
+.sft-format h4{font-size:15px;font-weight:800;margin:0 0 8px;color:var(--ink)}
+.sft-format p{font-size:13.5px;color:var(--slate-600);line-height:1.55;margin:0}
+.sft-eq-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.sft-eq{display:block;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:18px 16px;text-align:center;transition:.16s;cursor:pointer;text-decoration:none}
+.sft-eq:hover{border-color:var(--blue-300,#9cc0f5);box-shadow:var(--sh-sm,0 6px 20px rgba(16,42,86,.08))}
+.sft-eq-ic{width:38px;height:38px;border-radius:10px;background:var(--blue-50,#eef4ff);color:var(--blue-600);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.sft-eq span{font-size:13px;font-weight:700;color:var(--ink);line-height:1.3;display:block}
+.sft-stage{border:1px solid var(--line);border-radius:var(--r-lg,16px);background:var(--surface);margin-bottom:12px;overflow:hidden}
+.sft-stage-h{display:flex;align-items:center;gap:14px;width:100%;padding:18px 22px;background:none;border:none;cursor:pointer;font-family:inherit;text-align:left}
+.sft-stage-n{flex-shrink:0;width:34px;height:34px;border-radius:9px;background:var(--blue-600);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.sft-stage-t{flex:1;font-size:15px;font-weight:800;color:var(--ink)}
+.sft-stage-ch{color:var(--slate-400);transition:transform .2s;flex-shrink:0}
+.sft-stage.open .sft-stage-ch{transform:rotate(180deg)}
+.sft-stage-body{padding:0 22px 20px 70px}
+.sft-stage-body .r{margin-top:10px;font-size:13.5px}
+.sft-stage-body .lbl{font-weight:800;color:var(--blue-700,#1749a6)}
+.sft-stage-body p{font-size:14px;color:var(--slate-600);line-height:1.6;margin:0}
+.sft-results{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.sft-result{display:flex;gap:12px;align-items:flex-start;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.sft-result-ic{flex-shrink:0;width:34px;height:34px;border-radius:9px;background:#e7f6ec;color:#15803d;display:flex;align-items:center;justify-content:center}
+.sft-result h4{font-size:14.5px;font-weight:800;margin:0 0 3px;color:var(--ink)}
+.sft-result p{font-size:13px;color:var(--slate-500);line-height:1.45;margin:0}
+.sft-svc{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.sft-svc-i{border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:20px}
+.sft-svc-i h4{font-size:14px;font-weight:800;margin:0 0 6px;color:var(--ink)}
+.sft-svc-i p{font-size:12.5px;color:var(--slate-500);line-height:1.5;margin:0}
+.sft-why{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.sft-why-i{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.sft-why-i h4{font-size:14.5px;font-weight:800;margin:0 0 6px;color:var(--ink)}
+.sft-why-i p{font-size:13px;color:var(--slate-600);line-height:1.5;margin:0}
+.sft-legal{background:var(--blue-50,#eef4ff);border:1px solid var(--blue-200,#cfe0fb);border-radius:14px;padding:20px 24px;display:flex;gap:14px;align-items:flex-start}
+.sft-legal-ic{flex-shrink:0;width:32px;height:32px;border-radius:9px;background:var(--blue-600);color:#fff;display:flex;align-items:center;justify-content:center}
+.sft-legal h4{font-size:14px;font-weight:800;margin:0 0 6px;color:var(--blue-700,#1749a6)}
+.sft-legal p{font-size:13.5px;color:var(--slate-700);line-height:1.6;margin:0}
+.sft-note{font-size:13px;color:var(--slate-500);line-height:1.6;margin-top:18px;padding:14px 16px;background:var(--bg-2,#f4f7fb);border-radius:10px;border:1px solid var(--line)}
+.sft-ctaband{margin:0;padding:32px 36px;border-radius:var(--r-lg,16px);background:linear-gradient(135deg,#0e4ac6,#1d7ed8);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.sft-ctaband h3{font-size:20px;font-weight:800;margin:0 0 6px;color:#fff}
+.sft-ctaband p{font-size:14px;opacity:.9;margin:0;max-width:520px;line-height:1.5}
+.sft-form-wrap{max-width:860px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg,16px);padding:clamp(24px,4vw,40px);box-shadow:var(--sh-sm,0 6px 24px rgba(16,42,86,.08))}
+.sft-form-sec{margin-bottom:22px}
+.sft-form-sec-h{font-size:12.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--blue-700,#1749a6);margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.sft-fgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.sft-field{display:flex;flex-direction:column;gap:6px}
+.sft-field.full{grid-column:1/-1}
+.sft-field label{font-size:13px;font-weight:600;color:var(--slate-700)}
+.sft-field label .req{color:#e0492f;margin-left:2px}
+.sft-input,.sft-select,.sft-textarea{height:44px;border:1.5px solid var(--line);border-radius:10px;padding:0 14px;font-size:14px;font-family:inherit;background:var(--bg,var(--surface));color:var(--ink);outline:none;transition:border-color .16s;width:100%;box-sizing:border-box}
+.sft-textarea{height:auto;padding:12px 14px;min-height:88px;resize:vertical}
+.sft-input:focus,.sft-select:focus,.sft-textarea:focus{border-color:var(--blue-400,#4d88e0)}
+.sft-input.err,.sft-select.err{border-color:#e0492f}
+.sft-errline{font-size:12px;color:#e0492f;font-weight:600}
+.sft-check{display:flex;align-items:center;gap:9px;font-size:13.5px;color:var(--slate-700);cursor:pointer;padding:6px 0}
+.sft-check input{width:17px;height:17px;flex-shrink:0;accent-color:var(--blue-600)}
+.sft-drop{display:block;border:1.5px dashed var(--blue-300,#9cc0f5);border-radius:12px;padding:22px;text-align:center;cursor:pointer;transition:.16s;background:var(--bg-2,#f8fafc)}
+.sft-drop:hover{border-color:var(--blue-500,#2b72e3);background:var(--blue-50,#eef4ff)}
+.sft-files{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+.sft-file{display:flex;align-items:center;gap:10px;font-size:13px;background:var(--bg-2,#f4f7fb);border:1px solid var(--line);border-radius:9px;padding:9px 12px}
+.sft-file .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sft-file button{border:none;background:none;color:var(--slate-400);cursor:pointer;flex-shrink:0;display:flex}
+.sft-form-ok{text-align:center;padding:36px 20px}
+.sft-form-ok .ic{width:64px;height:64px;border-radius:50%;background:rgba(21,160,106,.12);color:#15A06A;display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+.sft-form-ok h3{font-size:20px;font-weight:800;margin:0 0 8px}
+.sft-form-ok p{font-size:14.5px;color:var(--slate-600);max-width:440px;margin:0 auto;line-height:1.6}
+.sft-related{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+.sft-disc{font-size:12.5px;color:var(--slate-500);line-height:1.65;max-width:900px;margin:0 auto;padding:20px 24px;background:var(--bg-2,#f4f7fb);border:1px solid var(--line);border-radius:12px}
+@media(max-width:960px){.sft-grid-6,.sft-formats,.sft-results{grid-template-columns:repeat(2,1fr)}.sft-eq-grid{grid-template-columns:repeat(3,1fr)}.sft-svc,.sft-why{grid-template-columns:repeat(2,1fr)}.sft-flow{flex-direction:column}.sft-flow-i:not(:last-child)::after{display:none}}
+@media(max-width:560px){.sft-grid-6,.sft-formats,.sft-results,.sft-topics,.sft-svc,.sft-why,.sft-eq-grid,.sft-fgrid{grid-template-columns:1fr}.sft-ready-card{max-width:none}.sft-ctaband{flex-direction:column;align-items:flex-start}}
+    `;
+    document.head.appendChild(s);
+  }, []);
+}
+
+function useSftJsonLd(faq) {
+  React.useEffect(() => {
+    const ID = "sft-jsonld";
+    const old = document.getElementById(ID); if (old) old.remove();
+    const base = location.origin + location.pathname;
+    const data = [
+      { "@context": "https://schema.org", "@type": "Service",
+        name: "Обучение персонала работе с медицинским оборудованием",
+        provider: { "@type": "Organization", name: "ИНДУСТРИЯ ЗДОРОВЬЯ" },
+        areaServed: { "@type": "Country", name: "Узбекистан" },
+        serviceType: "Инструктаж по эксплуатации медицинского оборудования" },
+      { "@context": "https://schema.org", "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Главная", item: base + "#/" },
+          { "@type": "ListItem", position: 2, name: "Услуги", item: base + "#/services" },
+          { "@type": "ListItem", position: 3, name: "Обучение персонала" },
+        ] },
+      { "@context": "https://schema.org", "@type": "FAQPage",
+        mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) },
+    ];
+    const s = document.createElement("script");
+    s.id = ID; s.type = "application/ld+json";
+    s.textContent = JSON.stringify(data);
+    document.head.appendChild(s);
+    return () => { const el = document.getElementById(ID); if (el) el.remove(); };
+  }, []);
+}
+
+const sftScrollToForm = () => { const el = document.getElementById("sft-form"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); };
+const sftScrollToFormats = () => { const el = document.getElementById("sft-formats"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); };
+const sftTrack = (name, payload) => { try { window.__track && window.__track(name, payload || {}); } catch (e) {} };
+
+/* ── Заявка «Запросить инструктаж» ────────────────────────── */
+function SftForm() {
+  const { useState } = React;
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [err, setErr] = useState("");
+  const [files, setFiles] = useState([]);
+  const [touched, setTouched] = useState(false);
+  const [f, setF] = useState({
+    name: "", org: "", phone: "", email: "", city: "",
+    orgType: "", devName: "", devMaker: "", devModel: "", devQty: "",
+    devStatus: "", format: "", participants: "", date: "",
+    comment: "", consent: false,
+  });
+  const set = (k, v) => { if (!touched) setTouched(true); sftTrack("staff_training_form_start"); setF((s) => ({ ...s, [k]: v })); };
+
+  const ORG_TYPES = ["Клиника", "Государственное учреждение", "Лаборатория", "Диагностический центр", "Стоматология", "Роддом", "Другое"];
+  const DEV_STATUS = [["delivered", "Уже поставлено"], ["planned", "Планируется поставка"], ["repeat", "Требуется повторный инструктаж"], ["unknown", "Не знаю"]];
+  const FORMATS = [["onsite", "На объекте"], ["online", "Онлайн"], ["postinstall", "После монтажа"], ["repeat", "Повторный"], ["complex", "В рамках комплексного оснащения"]];
+
+  const onFiles = (list) => {
+    const allow = /\.(pdf|docx?|xlsx?|jpe?g|png)$/i;
+    const add = [...list].filter((x) => allow.test(x.name) && x.size <= 20 * 1024 * 1024);
+    if (add.length < list.length) setErr("Файл не загружен. Проверьте формат и размер и попробуйте снова.");
+    setFiles((prev) => [...prev, ...add].slice(0, 5));
+    if (add.length) sftTrack("staff_training_file_upload");
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setErr("");
+    if (!f.name.trim() || !f.org.trim() || !f.phone.trim()) { setErr("Заполните имя, организацию и телефон."); sftTrack("staff_training_form_error", { reason: "required" }); return; }
+    if (!f.devName.trim()) { setErr("Укажите наименование или категорию оборудования."); sftTrack("staff_training_form_error", { reason: "no_device" }); return; }
+    if (!f.consent) { setErr("Необходимо согласие на обработку персональных данных."); sftTrack("staff_training_form_error", { reason: "no_consent" }); return; }
+    setSending(true);
+    try {
+      let attachments = [];
+      if (files.length && window.api && window.api.req) {
+        const fd = new FormData();
+        files.forEach((file) => fd.append("files", file));
+        const res = await window.api.req("/submissions/attachments", { method: "POST", body: fd, noAuth: true });
+        attachments = (res && res.files) || [];
+      }
+      const statusLabel = (DEV_STATUS.find((x) => x[0] === f.devStatus) || [])[1] || "";
+      const formatLabel = (FORMATS.find((x) => x[0] === f.format) || [])[1] || "";
+      await window.api.create("submissions", {
+        name: f.name, phone: f.phone, email: f.email || undefined,
+        message: f.comment || undefined,
+        source: "Обучение персонала — Запросить инструктаж",
+        meta: {
+          org: f.org, city: f.city || undefined, orgType: f.orgType || undefined,
+          device: { name: f.devName, maker: f.devMaker || undefined, model: f.devModel || undefined, qty: f.devQty || undefined },
+          devStatus: statusLabel || undefined, format: formatLabel || undefined,
+          participants: f.participants || undefined, date: f.date || undefined,
+          attachments: attachments.length ? attachments : undefined,
+        },
+      });
+      sftTrack("staff_training_form_submit");
+      setSent(true);
+    } catch (ex) {
+      setErr("Не удалось отправить заявку. Данные сохранены в форме. Попробуйте снова или свяжитесь с нами по телефону.");
+      sftTrack("staff_training_form_error", { reason: "submit_failed" });
+    } finally { setSending(false); }
+  };
+
+  if (sent) return (
+    <div className="sft-form-wrap">
+      <div className="sft-form-ok">
+        <div className="ic"><CoIcon name="check" size={30} /></div>
+        <h3>Заявка отправлена</h3>
+        <p>Спасибо! Заявка отправлена. Мы свяжемся с вами для уточнения оборудования, формата и даты инструктажа.</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <form className="sft-form-wrap" onSubmit={submit} noValidate>
+      <div className="sft-form-sec">
+        <div className="sft-form-sec-h">Контактные данные</div>
+        <div className="sft-fgrid">
+          <div className="sft-field"><label>Имя<span className="req">*</span></label><input className="sft-input" value={f.name} onChange={(e) => set("name", e.target.value)} /></div>
+          <div className="sft-field"><label>Организация<span className="req">*</span></label><input className="sft-input" value={f.org} onChange={(e) => set("org", e.target.value)} /></div>
+          <div className="sft-field"><label>Телефон<span className="req">*</span></label><input className="sft-input" type="tel" placeholder="+998 __ ___ __ __" value={f.phone} onChange={(e) => set("phone", e.target.value)} /></div>
+          <div className="sft-field"><label>Email</label><input className="sft-input" type="email" value={f.email} onChange={(e) => set("email", e.target.value)} /></div>
+          <div className="sft-field full"><label>Город / регион</label><input className="sft-input" value={f.city} onChange={(e) => set("city", e.target.value)} /></div>
+        </div>
+      </div>
+
+      <div className="sft-form-sec">
+        <div className="sft-form-sec-h">Учреждение</div>
+        <div className="sft-fgrid">
+          <div className="sft-field full"><label>Тип учреждения</label>
+            <select className="sft-select" value={f.orgType} onChange={(e) => set("orgType", e.target.value)}>
+              <option value="">Выберите…</option>
+              {ORG_TYPES.map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="sft-form-sec">
+        <div className="sft-form-sec-h">Оборудование</div>
+        <div className="sft-fgrid">
+          <div className="sft-field full"><label>Наименование / категория<span className="req">*</span></label><input className="sft-input" value={f.devName} onChange={(e) => set("devName", e.target.value)} placeholder="Например: УЗИ-сканер, монитор пациента…" /></div>
+          <div className="sft-field"><label>Производитель</label><input className="sft-input" value={f.devMaker} onChange={(e) => set("devMaker", e.target.value)} /></div>
+          <div className="sft-field"><label>Модель</label><input className="sft-input" value={f.devModel} onChange={(e) => set("devModel", e.target.value)} /></div>
+          <div className="sft-field full"><label>Количество единиц</label><input className="sft-input" value={f.devQty} onChange={(e) => set("devQty", e.target.value)} /></div>
+        </div>
+      </div>
+
+      <div className="sft-form-sec">
+        <div className="sft-form-sec-h">Статус оборудования и формат</div>
+        <div className="sft-fgrid">
+          <div className="sft-field"><label>Статус оборудования</label>
+            <select className="sft-select" value={f.devStatus} onChange={(e) => set("devStatus", e.target.value)}>
+              <option value="">Выберите…</option>
+              {DEV_STATUS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          </div>
+          <div className="sft-field"><label>Формат инструктажа</label>
+            <select className="sft-select" value={f.format} onChange={(e) => set("format", e.target.value)}>
+              <option value="">Выберите…</option>
+              {FORMATS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div className="sft-form-sec">
+        <div className="sft-form-sec-h">Участники и дата</div>
+        <div className="sft-fgrid">
+          <div className="sft-field"><label>Количество участников</label><input className="sft-input" value={f.participants} onChange={(e) => set("participants", e.target.value)} /></div>
+          <div className="sft-field"><label>Желаемая дата / период</label><input className="sft-input" value={f.date} onChange={(e) => set("date", e.target.value)} /></div>
+        </div>
+      </div>
+
+      <div className="sft-form-sec">
+        <div className="sft-form-sec-h">Файлы</div>
+        <label className="sft-drop" htmlFor="sft-file-inp">
+          <div style={{ fontSize: 13.5, fontWeight: 600 }}>Список оборудования, фото шильдика, инструкция или документы</div>
+          <div style={{ marginTop: 4, fontSize: 12, color: "var(--slate-500)" }}>PDF, DOC, DOCX, XLS, XLSX, JPG, PNG · до 20 МБ на файл · до 5 файлов</div>
+        </label>
+        <input id="sft-file-inp" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
+        {files.length > 0 && (
+          <div className="sft-files">
+            {files.map((file, i) => (
+              <div className="sft-file" key={i}>
+                <CoIcon name="doc" size={15} />
+                <span className="nm">{file.name}</span>
+                <span style={{ color: "var(--slate-400)", fontSize: 12 }}>{Math.round(file.size / 1024)} KB</span>
+                <button type="button" onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))} aria-label="Убрать">✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="sft-form-sec">
+        <div className="sft-field full"><label>Комментарий</label>
+          <textarea className="sft-textarea" rows={3} placeholder="Задача, вопросы, условия площадки…" value={f.comment} onChange={(e) => set("comment", e.target.value)} />
+        </div>
+        <label className="sft-check" style={{ marginTop: 10 }}><input type="checkbox" checked={f.consent} onChange={(e) => set("consent", e.target.checked)} />Согласен с политикой конфиденциальности и обработкой персональных данных<span className="req">*</span></label>
+      </div>
+
+      {err && <div style={{ color: "#e0492f", fontSize: 13.5, marginBottom: 14, fontWeight: 600 }}>{err}</div>}
+      <button className="btn btn-pri btn-lg" type="submit" disabled={sending} style={{ width: "100%", justifyContent: "center" }}>
+        {sending ? "Отправка…" : "Запросить инструктаж"}
+      </button>
+    </form>
+  );
+}
+
+function StaffTrainingPage({ t, lang, go, goCat }) {
+  const { useState } = React;
+  const [stage, setStage] = useState(0);
+  const [faqOpen, setFaqOpen] = useState(-1);
+  useSftCss();
+
+  const READY_STAGES = [
+    ["done", "Поставка", "Оборудование и комплектующие переданы."],
+    ["done", "Монтаж", "Установка и подключение завершены или не требуются."],
+    ["done", "Проверка", "Работоспособность подтверждена."],
+    ["active", "Инструктаж", "Согласование участников и даты."],
+    ["pending", "Сервис", "Контакты и порядок поддержки переданы."],
+  ];
+  const FULL_CYCLE = [
+    ["Поставка", "Оборудование и документы"], ["Монтаж", "Установка и подключение"], ["Запуск", "Проверка готовности"],
+    ["Инструктаж", "Функции и эксплуатация"], ["Сервис", "Контакты и поддержка"],
+  ];
+  const AUDIENCES = [
+    ["Частные клиники", "Быстрый запуск оборудования после поставки и подготовка сотрудников к ежедневной эксплуатации."],
+    ["Государственные учреждения", "Организованный инструктаж отделений, кабинетов и ответственных сотрудников."],
+    ["Диагностические центры", "Освоение интерфейса, режимов и пользовательской документации диагностического оборудования."],
+    ["Лаборатории", "Запуск оборудования, рабочие режимы, требования эксплуатации и сервисный порядок."],
+    ["Реанимация и интенсивная терапия", "Инструктаж по системам мониторинга, поддержки дыхания и другому сложному оборудованию."],
+    ["Ответственные за оборудование", "Эксплуатация, сохранность, документация и взаимодействие с сервисом."],
+  ];
+  const TOPICS = [
+    ["Назначение оборудования", "Задачи оборудования и доступные пользователю функции."],
+    ["Комплектация", "Основные элементы, кабели, принадлежности и расходные материалы."],
+    ["Включение и завершение работы", "Включение, базовая настройка, штатное завершение и выключение."],
+    ["Основные режимы и функции", "Интерфейс, ключевые режимы и стандартные сценарии эксплуатации."],
+    ["Безопасная эксплуатация", "Размещение, электропитание, уход, ограничения и типовые ошибки."],
+    ["Документация", "Инструкция, паспорт, гарантийные условия и сервисные контакты."],
+    ["Базовый уход", "Очистка, хранение, визуальная проверка и расходные элементы."],
+    ["Обращение в сервис", "Куда обращаться при ошибках, неисправностях и технических вопросах."],
+  ];
+  const FORMATS_LIST = [
+    ["На объекте клиента", "После поставки, монтажа или запуска оборудования."],
+    ["При вводе в эксплуатацию", "Сразу после подтверждения работоспособности оборудования."],
+    ["Онлайн-консультация", "Для повторного разбора функций, документации или сервисного порядка."],
+    ["В рамках комплексного оснащения", "По нескольким группам оборудования в одном проекте."],
+    ["Повторный инструктаж", "При смене персонала, расширении оборудования или новых вопросах."],
+  ];
+  const EQUIPMENT = [
+    ["Диагностическое оборудование", "equipment"], ["Реанимационное оборудование", null],
+    ["Лабораторное оборудование", "equipment"], ["Стерилизационное оборудование", null],
+    ["Медицинская мебель с механизмами", "furniture"], ["Физиотерапия и реабилитация", null],
+    ["Процедурные и смотровые кабинеты", null], ["Системы мониторинга", null],
+    ["Оборудование для операционных", "equipment"], ["Оборудование для роддомов и неонатологии", null],
+  ];
+  const STAGES = [
+    ["Определяем оборудование и участников", "Согласуем перечень, формат, состав группы и ответственных.", "Понятен объём и состав участников."],
+    ["Проверяем документацию", "Готовим инструкцию, паспорт, гарантийные и сервисные материалы.", "Материалы готовы к передаче."],
+    ["Проводим демонстрацию", "Показываем функции, интерфейс, включение и завершение работы.", "Понятны базовые сценарии эксплуатации."],
+    ["Объясняем правила эксплуатации", "Безопасность, уход, ограничения и типовые ошибки.", "Снижены риски неправильного использования."],
+    ["Отвечаем на вопросы", "Разбираем практические ситуации сотрудников.", "Закрыты вопросы по ежедневной работе."],
+    ["Передаём сервисный порядок", "Объясняем, как подать заявку и куда обращаться.", "У клиента есть понятная поддержка."],
+  ];
+  const RESULTS = [
+    ["Быстрый запуск", "Сотрудники быстрее переходят к штатной эксплуатации."],
+    ["Понимание функций", "Понятны основные режимы, настройки и порядок работы."],
+    ["Снижение ошибок", "Инструктаж помогает избежать типовых ошибок."],
+    ["Разобранные документы", "Ответственные сотрудники понимают инструкции и гарантийные условия."],
+    ["Сервисная связь", "Понятно, куда обращаться при вопросах и неисправностях."],
+    ["Поддержка после запуска", "Возможна повторная консультация или инструктаж."],
+  ];
+  const SERVICE_LINK = [
+    ["Сервисный контакт", "Контакт для технических и сервисных вопросов."],
+    ["Порядок обращения", "Как подать заявку и какие данные приложить."],
+    ["Документы под рукой", "Инструкция, паспорт и гарантийные условия."],
+    ["Повторная поддержка", "Дополнительная консультация или повторный инструктаж."],
+  ];
+  const WHY_US = [
+    ["Знаем поставленное оборудование", "Понимаем комплектацию, назначение, документацию и условия эксплуатации."],
+    ["Связываем поставку, запуск и сервис", "Клиент получает понятный маршрут после поставки."],
+    ["Учитываем специфику учреждений", "Работаем с клиниками, кабинетами, отделениями и ответственными сотрудниками."],
+    ["Снижаем риск ошибок", "Персонал получает базовые правила работы, ухода и обращения."],
+    ["Передаём сервисный порядок", "После запуска клиент понимает, куда обращаться при технических вопросах."],
+  ];
+  const FAQ = [
+    ["Обучение проводится после каждой поставки?", "Объём зависит от типа оборудования, условий поставки и договорённостей. Для сложного оборудования инструктаж особенно важен после монтажа и запуска."],
+    ["Можно ли заказать инструктаж отдельно?", "Да, для новых сотрудников, повторного разбора функций или вопросов по уже поставленному оборудованию."],
+    ["Сколько сотрудников может участвовать?", "Количество согласуется заранее и зависит от типа оборудования, формата и площадки."],
+    ["Можно ли провести обучение онлайн?", "Да, для повторных консультаций, документации и отдельных функций оборудования."],
+    ["Какие документы получает клиент?", "Документы, предусмотренные поставкой: инструкция, паспорт, гарантийные условия и сервисные контакты."],
+    ["Обучение заменяет медицинскую квалификацию?", "Нет. Услуга относится к эксплуатации оборудования."],
+    ["Можно ли заказать повторный инструктаж?", "Да, при смене персонала, расширении оборудования или дополнительных вопросах."],
+    ["Что делать, если после обучения появились вопросы?", "Обратиться по сервисному контакту, переданному после поставки и инструктажа."],
+    ["Проводится ли обучение по оборудованию другого поставщика?", "Возможность рассматривается после анализа модели, документации и запроса клиента."],
+  ];
+
+  useSftJsonLd(FAQ.map(([q, a]) => ({ q, a })));
+
+  const IcnFunctions = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="7" height="7" rx="1" /><rect x="13" y="4" width="7" height="7" rx="1" /><rect x="4" y="13" width="7" height="7" rx="1" /><rect x="13" y="13" width="7" height="7" rx="1" /></svg>;
+
+  return (
+    <div>
+      <section className="page-hero">
+        <div className="pw"></div>
+        <div className="wrap">
+          <div className="sft-badges reveal" style={{ marginTop: 0, marginBottom: 18 }}>
+            <span className="sft-badge"><CoIcon name="check" size={14} />После поставки и запуска</span>
+          </div>
+          <h1 style={{ maxWidth: 760 }}>Обучение персонала работе с медицинским оборудованием</h1>
+          <p style={{ maxWidth: 720, marginTop: 16 }}>Проводим пользовательский инструктаж после поставки, монтажа или при повторном вводе оборудования: основные функции, безопасная эксплуатация, документация и сервисный порядок.</p>
+          <div className="hero-actions" style={{ marginTop: 26 }}>
+            <button className="btn btn-pri btn-lg" onClick={() => { sftTrack("staff_training_cta_click"); sftScrollToForm(); }}>Запросить инструктаж</button>
+            <button className="btn btn-ghost btn-lg" onClick={() => { sftTrack("staff_training_consult_click"); window.__openQuote && window.__openQuote(); }}>Получить консультацию</button>
+          </div>
+          <button className="sft-anchor-link" onClick={sftScrollToFormats}>Перейти к форматам обучения <CoIcon name="arrow" size={14} /></button>
+
+          <div className="sft-ready-card reveal" style={{ marginTop: 34 }}>
+            <div className="sft-ready-title">Готовность оборудования</div>
+            {READY_STAGES.map(([state, title, sub], i) => (
+              <div className={"sft-ready-stage " + state} key={i}>
+                <div className="sft-ready-dot">{state === "done" ? <CoIcon name="check" size={13} /> : i + 1}</div>
+                <div><div className="sft-ready-t">{title}</div><div className="sft-ready-s">{sub}</div></div>
+              </div>
+            ))}
+            <div className="sft-ready-foot">
+              {["Основные функции", "Безопасность", "Документация", "Сервис"].map((c) => <span className="sft-ready-chip" key={c}>{c}</span>)}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="sec-head reveal"><span className="eyebrow line">Полный цикл</span><h2 className="h-sec" style={{ marginTop: 14 }}>Обучение — часть полного цикла поставки</h2></div>
+          <p className="reveal" style={{ fontSize: 15, color: "var(--slate-600)", maxWidth: 820, lineHeight: 1.65, marginBottom: 28 }}>Для медицинского учреждения важно не только получить оборудование, но и правильно ввести его в работу. Поэтому инструктаж является частью полного цикла — от поставки и монтажа до передачи документов и дальнейшей сервисной поддержки.</p>
+          <div className="sft-flow reveal">
+            {FULL_CYCLE.map(([t2, s], i) => (
+              <div className={"sft-flow-i" + (t2 === "Инструктаж" ? " active" : "")} key={i}>
+                <div className="sft-flow-ic">{i === 3 ? IcnFunctions : <CoIcon name={["truck", "building", "check", "users", "phone"][i]} size={20} />}</div>
+                <div className="sft-flow-t">{t2}</div>
+                <div className="sft-flow-s">{s}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section alt">
+        <div className="wrap">
+          <div className="sec-head reveal"><span className="eyebrow line">Аудитория</span><h2 className="h-sec" style={{ marginTop: 14 }}>Кому подходит услуга</h2></div>
+          <div className="sft-grid-6">{AUDIENCES.map(([h, p], i) => <div className="sft-aud reveal" key={i}><h4>{h}</h4><p>{p}</p></div>)}</div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="sec-head reveal"><span className="eyebrow line">Содержание</span><h2 className="h-sec" style={{ marginTop: 14 }}>Что разбираем с персоналом</h2></div>
+          <div className="sft-topics">{TOPICS.map(([h, p], i) => <div className="sft-topic reveal" key={i}><div className="sft-topic-ic"><CoIcon name="check" size={15} /></div><div><h4>{h}</h4><p>{p}</p></div></div>)}</div>
+        </div>
+      </section>
+
+      <section className="section alt" id="sft-formats">
+        <div className="wrap">
+          <div className="sec-head reveal"><span className="eyebrow line">Форматы</span><h2 className="h-sec" style={{ marginTop: 14 }}>Форматы инструктажа</h2></div>
+          <div className="sft-formats">{FORMATS_LIST.map(([h, p], i) => <div className="sft-format reveal" key={i}><h4>{h}</h4><p>{p}</p></div>)}</div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="sec-head reveal"><span className="eyebrow line">Оборудование</span><h2 className="h-sec" style={{ marginTop: 14 }}>По каким категориям проводим инструктаж</h2></div>
+          <div className="sft-eq-grid">
+            {EQUIPMENT.map(([name, catId], i) => (
+              <a className="sft-eq reveal" key={i} onClick={() => { sftTrack("staff_training_catalog_click", { category: name }); catId ? goCat("listing", catId) : go("catalog"); }}>
+                <div className="sft-eq-ic"><CoIcon name="check" size={16} /></div>
+                <span>{name}</span>
+              </a>
+            ))}
+          </div>
+          <div className="sft-note reveal">Объём инструктажа определяется индивидуально — по модели, комплектации, назначению, документации производителя и условиям эксплуатации.</div>
+        </div>
+      </section>
+
+      <section className="section alt">
+        <div className="wrap">
+          <div className="sec-head reveal"><span className="eyebrow line">Процесс</span><h2 className="h-sec" style={{ marginTop: 14 }}>Как проходит инструктаж</h2></div>
+          {STAGES.map(([tt, doo, res], i) => (
+            <div className={"sft-stage reveal" + (stage === i ? " open" : "")} key={i}>
+              <button className="sft-stage-h" onClick={() => setStage(stage === i ? -1 : i)} aria-expanded={stage === i}>
+                <span className="sft-stage-n">{String(i + 1).padStart(2, "0")}</span><span className="sft-stage-t">{tt}</span><span className="sft-stage-ch"><CoIcon name="chev" size={18} /></span>
+              </button>
+              {stage === i && (
+                <div className="sft-stage-body">
+                  <div className="r"><p><span className="lbl">Что делаем: </span>{doo}</p></div>
+                  <div className="r"><p><span className="lbl">Результат: </span>{res}</p></div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="sec-head reveal"><span className="eyebrow line">Итог</span><h2 className="h-sec" style={{ marginTop: 14 }}>Что получает учреждение</h2></div>
+          <div className="sft-results">{RESULTS.map(([h, p], i) => <div className="sft-result reveal" key={i}><div className="sft-result-ic"><CoIcon name="check" size={16} /></div><div><h4>{h}</h4><p>{p}</p></div></div>)}</div>
+        </div>
+      </section>
+
+      <section className="section alt">
+        <div className="wrap">
+          <div className="sec-head reveal"><span className="eyebrow line">После инструктажа</span><h2 className="h-sec" style={{ marginTop: 14 }}>Сервисная связь</h2></div>
+          <p className="reveal" style={{ fontSize: 15, color: "var(--slate-600)", maxWidth: 780, lineHeight: 1.65, marginBottom: 22 }}>После инструктажа клиент получает сервисный контакт, порядок подачи заявки и перечень данных, которые необходимо указать при обращении.</p>
+          <div className="sft-svc">{SERVICE_LINK.map(([h, p], i) => <div className="sft-svc-i reveal" key={i}><h4>{h}</h4><p>{p}</p></div>)}</div>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="wrap">
+          <div className="sec-head reveal"><span className="eyebrow line">Доверие</span><h2 className="h-sec" style={{ marginTop: 14 }}>Почему ИНДУСТРИЯ ЗДОРОВЬЯ</h2></div>
+          <div className="sft-why">{WHY_US.map(([h, p], i) => <div className="sft-why-i reveal" key={i}><h4>{h}</h4><p>{p}</p></div>)}</div>
+          <div className="sft-legal reveal">
+            <div className="sft-legal-ic"><CoIcon name="shield" size={18} /></div>
+            <div>
+              <h4>Важно понимать</h4>
+              <p>Инструктаж относится к эксплуатации оборудования и не является медицинской образовательной программой, не заменяет профессиональную подготовку медицинского персонала и не предусматривает выдачу квалификации.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section alt"><div className="wrap">
+        <div className="sft-ctaband reveal">
+          <div><h3>Готовы обсудить инструктаж по вашему оборудованию?</h3><p>Оставьте заявку — уточним оборудование, формат и удобную дату.</p></div>
+          <button className="btn btn-lg" style={{ background: "#fff", color: "#0e4ac6" }} onClick={() => { sftTrack("staff_training_cta_click", { from: "band" }); sftScrollToForm(); }}>Запросить инструктаж</button>
+        </div>
+      </div></section>
+
+      <section className="section">
+        <div className="wrap" style={{ maxWidth: 860 }}>
+          <div className="sec-head center reveal"><h2 className="h-sec">Частые вопросы</h2></div>
+          <div className="faq-list">
+            {FAQ.map(([q, a], i) => (
+              <div className={"faq-it reveal" + (faqOpen === i ? " open" : "")} key={i}>
+                <button className="faq-q" onClick={() => setFaqOpen(faqOpen === i ? -1 : i)}>{q}<CoIcon name="chev" size={17} /></button>
+                {faqOpen === i && <div className="faq-a">{a}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section alt" id="sft-form">
+        <div className="wrap">
+          <div className="sec-head center reveal">
+            <span className="eyebrow">Заявка</span>
+            <h2 className="h-sec">Запросить инструктаж</h2>
+            <p style={{ fontSize: 15, color: "var(--slate-600)", maxWidth: 600, margin: "12px auto 0", lineHeight: 1.6 }}>Заполните данные об оборудовании и учреждении — мы предложим формат и согласуем дату.</p>
+          </div>
+          <SftForm />
+          <div className="sft-related">
+            <a className="btn btn-ghost" onClick={() => { sftTrack("staff_training_related_service_click", { to: "catalog" }); go("catalog"); }} style={{ cursor: "pointer" }}>Перейти в каталог <CoIcon name="arrow" size={14} /></a>
+            <a className="btn btn-ghost" onClick={() => { sftTrack("staff_training_related_service_click", { to: "services" }); go("directions"); }} style={{ cursor: "pointer" }}>Открыть сервис <CoIcon name="arrow" size={14} /></a>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" style={{ paddingTop: 0 }}>
+        <div className="wrap"><div className="sft-disc reveal">Информация на странице носит справочный характер. Обучение персонала относится к эксплуатации оборудования, пользовательской документации, базовым функциям, правилам безопасного использования и порядку обращения в сервис. Услуга не является медицинской образовательной программой, не заменяет профессиональную подготовку медицинского персонала и не предусматривает выдачу медицинской квалификации. Если производитель требует специальное сертифицированное обучение или допуск для конкретной модели, условия и исполнитель такого обучения определяются отдельно.</div></div>
+      </section>
+    </div>
+  );
+}
+
+window.StaffTrainingPage = StaffTrainingPage;

@@ -419,6 +419,7 @@ function CoBreadcrumbs({ lang, go, route }) {
     services:     [home, { label: services.label }],
     directions:   [home, { label: services.label }],
     registration: [home, services, { label: lv("Регистрация МИ", "TI roʻyxatga olish", "MD registration") }],
+    staffTraining: [home, services, { label: lv("Обучение персонала", "Xodimlarni oʻqitish", "Staff training") }],
     tenders:      [home, services, { label: lv("Тендеры и госзакупки", "Tender va davlat xaridlari", "Tenders & procurement") }],
     cases:        [home, { label: lv("Кейсы", "Keyslar", "Cases") }],
     projects:     [home, { label: lv("Кейсы", "Keyslar", "Cases") }],

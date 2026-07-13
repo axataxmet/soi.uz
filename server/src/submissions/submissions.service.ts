@@ -8,7 +8,7 @@ import { CrmService } from '../crm/crm.service';
 import { S3Service } from '../media/s3.service';
 
 // Public form attachments — wider whitelist than the admin media library (adds office docs).
-const ATTACH_MAX_SIZE = 15 * 1024 * 1024;
+const ATTACH_MAX_SIZE = 20 * 1024 * 1024;
 const ATTACH_MAX_FILES = 10;
 const ATTACH_RULES: { exts: string[]; mimes: string[]; magic: (b: Buffer) => boolean }[] = [
   { exts: ['.pdf'], mimes: ['application/pdf'], magic: (b) => b.subarray(0, 5).toString('ascii') === '%PDF-' },
@@ -32,7 +32,7 @@ export class SubmissionsService extends BaseCrudService {
     const out: { url: string; name: string; size: number; type: string }[] = [];
     for (const f of files) {
       if (!f.buffer) throw new BadRequestException('Файл не передан');
-      if (f.size > ATTACH_MAX_SIZE) throw new BadRequestException(`Файл «${f.originalname}» слишком большой (максимум 15 МБ)`);
+      if (f.size > ATTACH_MAX_SIZE) throw new BadRequestException(`Файл «${f.originalname}» слишком большой (максимум 20 МБ)`);
       const ext = extname(f.originalname || '').toLowerCase();
       const rule = ATTACH_RULES.find((r) => r.exts.includes(ext));
       if (!rule || !rule.magic(f.buffer)) {

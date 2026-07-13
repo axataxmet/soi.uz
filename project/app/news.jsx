@@ -6,17 +6,19 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
 } /*EDITMODE-END*/;
 
 /* ---- hash deep-link helpers (pretty URL slugs) ---- */
-const CORP_VIEWS = ["home", "about", "directions", "registration", "tenders", "documents", "news", "cases", "projects", "partners", "licenses", "services", "contacts", "catalog", "reviews"];
+const CORP_VIEWS = ["home", "about", "directions", "registration", "staffTraining", "tenders", "documents", "news", "cases", "projects", "partners", "licenses", "services", "contacts", "catalog", "reviews"];
 // pretty slug <-> internal corp view
 const CORP_SLUG_TO_VIEW = {
   about: "about", services: "directions", directions: "directions",
   "registration-medical-devices": "registration", registration: "registration",
+  "staff-training": "staffTraining",
   tenders: "tenders", documents: "documents", cases: "cases", projects: "projects",
   news: "news", contacts: "contacts", partners: "partners", licenses: "licenses",
   reviews: "reviews"
 };
 const CORP_VIEW_TO_SLUG = {
   directions: "services", registration: "registration-medical-devices", cases: "cases", projects: "projects",
+  staffTraining: "staff-training",
   about: "about", tenders: "tenders", documents: "documents", news: "news",
   contacts: "contacts", partners: "partners", licenses: "licenses", reviews: "reviews"
 };
@@ -216,6 +218,7 @@ function App() {
     const M = {
       catalog: lang === "uz" ? "Katalog" : lang === "en" ? "Catalog" : "Каталог",
       about: t.nav_about, directions: t.nav_services || t.nav_directions, registration: t.nav_registration,
+      staffTraining: lang === "uz" ? "Xodimlarni oʻqitish" : lang === "en" ? "Staff training" : "Обучение персонала",
       tenders: t.nav_tenders, documents: t.nav_documents, news: t.nav_news, projects: t.nav_projects,
       partners: t.nav_partners, licenses: t.nav_licenses, services: t.nav_services, contacts: t.nav_contacts,
       reviews: lang === "uz" ? "Sharhlar" : lang === "en" ? "Reviews" : "Отзывы и рекомендации"
@@ -248,6 +251,7 @@ function App() {
   if (v === "about") page = <AboutPage t={t} lang={lang} go={go} />;else
   if (v === "directions") page = <ServicesPage t={t} lang={lang} go={go} />;else
   if (v === "registration") page = <RegistrationPage t={t} lang={lang} go={go} />;else
+  if (v === "staffTraining") page = <StaffTrainingPage t={t} lang={lang} go={go} goCat={goCat} />;else
   if (v === "tenders") page = <CoTendersPage t={t} lang={lang} go={go} />;else
   if (v === "documents") page = <LicensesPage t={t} lang={lang} go={go} />;else
   if (v === "cases") page = <ProjectsPage t={t} lang={lang} go={go} />;else

@@ -434,15 +434,18 @@ function ServicesPage({ t, lang, go }) {
       <section className="section">
         <div className="wrap">
           <div className="grid-2" style={{ gap: 22 }}>
-            {D.SERVICES.map((s, i) =>
-            <div className="scard reveal" key={i} style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+            {D.SERVICES.map((s, i) => {
+              const linkView = s.t === "svc5_t" ? "staffTraining" : s.t === "svc4_t" ? "registration" : s.t === "svc6_t" ? "tenders" : null;
+              return (
+              <div className="scard reveal" key={i} style={{ display: "flex", gap: 20, alignItems: "flex-start", cursor: linkView ? "pointer" : "default" }} onClick={linkView ? () => go(linkView) : undefined}>
                 <div className="ic" style={{ flexShrink: 0, marginBottom: 0 }}><CoIcon name={s.ic} size={24} /></div>
                 <div>
                   <h3>{t[s.t]}</h3>
                   <p>{t[s.d]}</p>
                 </div>
               </div>
-            )}
+              );
+            })}
           </div>
 
           {/* RU registration highlight */}
