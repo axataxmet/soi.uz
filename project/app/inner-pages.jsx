@@ -5,7 +5,6 @@ function PageHero({ t, lang, go, title, sub }) {
     <section className="page-hero">
       <div className="pw"></div>
       <div className="wrap">
-        <div className="crumb"><a onClick={() => go("home")}>{t.nav_home}</a> / {title}</div>
         <h1 data-comment-anchor="2b7cd50f74-h1-9-9">{title}</h1>
         {sub && <p data-comment-anchor="77600593e5-p-10-17">{sub}</p>}
       </div>

@@ -229,7 +229,6 @@ function CoTendersPage({ t, lang, go }) {
       <section className="page-hero">
         <div className="pw"></div>
         <div className="wrap">
-          <div className="crumb"><a onClick={() => go("home")}>{t.nav_home}</a> / {t.nav_tenders}</div>
           <h1>{lv("Тендеры и государственные закупки", "Tender va davlat xaridlari", "Tenders & public procurement")}</h1>
           <p style={{ maxWidth: 660 }}>{lv("Готовим коммерческие предложения, спецификации и документы для участия в тендерах и закупках медицинских учреждений.", "Tibbiy muassasalar tenderlari va xaridlari uchun tijorat takliflari, spetsifikatsiyalar va hujjatlar tayyorlaymiz.", "We prepare commercial offers, specifications and documents for tenders and procurement by medical institutions.")}</p>
         </div>
@@ -380,11 +379,6 @@ function CoNewsPage({ t, lang, go, fromCatalog, goCatalog }) {
       <section className="page-hero">
         <div className="pw"></div>
         <div className="wrap">
-          <div className="crumb">
-              <a onClick={() => go("home")}>{t.nav_home}</a>
-              {fromCatalog && <> / <a onClick={() => goCatalog ? goCatalog() : go("catalog")}>{lv("Каталог", "Katalog", "Catalog")}</a></>}
-              {" / "}{t.nav_news}
-            </div>
           <h1>{lv("Новости и статьи", "Yangiliklar va maqolalar", "News & articles")}</h1>
           <p style={{ maxWidth: 620 }}>{lv("Поставки, проекты, изменения в регистрации медицинских изделий и обзоры оборудования.", "Yetkazib berish, loyihalar, ro'yxat o'zgarishlari va uskuna sharhlari.", "Supplies, projects, changes in device registration and equipment reviews.")}</p>
         </div>

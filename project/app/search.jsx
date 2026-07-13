@@ -455,9 +455,6 @@ function RegistrationPage({ t, lang, go }) {
       <section className="page-hero">
         <div className="pw"></div>
         <div className="wrap">
-          <div className="crumb">
-            <a onClick={() => go("home")}>{t.nav_home}</a> / <a onClick={() => go("services")}>Услуги</a> / <span className="cur">Регистрация медицинских изделий</span>
-          </div>
           <h1 style={{ maxWidth: 820 }}>Регистрация медицинских изделий в Узбекистане</h1>
           <p style={{ maxWidth: 780, marginTop: 16 }}>ИНДУСТРИЯ ЗДОРОВЬЯ сопровождает производителей, импортёров, дистрибьюторов и поставщиков медицинских изделий на всех этапах процедуры регистрации: от первичного анализа документов до подготовки досье, сопровождения подачи и коммуникации по замечаниям.</p>
           <div className="rmd-badges reveal">
