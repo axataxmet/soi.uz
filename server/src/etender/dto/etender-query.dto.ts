@@ -14,6 +14,11 @@ export class EtenderLotQueryDto extends PaginationDto {
   @IsIn(['lot', 'news'])
   kind?: 'lot' | 'news';
 
+  @ApiPropertyOptional({ description: 'Мед. категория', enum: ['equipment', 'furniture', 'instruments', 'consumables', 'drugs', 'other'] })
+  @IsOptional()
+  @IsIn(['equipment', 'furniture', 'instruments', 'consumables', 'drugs', 'other'])
+  medCategory?: string;
+
   @ApiPropertyOptional({ description: 'Фильтр по региону (по названию, частичное совпадение)' })
   @IsOptional()
   @IsString()

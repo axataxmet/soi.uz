@@ -11,6 +11,7 @@ import { GovUzAdapter } from './govuz.adapter';
 import { XaridAdapter } from './xarid.adapter';
 import { XtXaridAdapter } from './xtxarid.adapter';
 import { MedicalFilter } from './medical-filter';
+import { MED_CATEGORIES, MedCategoryClassifier } from './med-category';
 import { EtenderLotQueryDto } from './dto/etender-query.dto';
 import { NormalizedEtenderLot, UzexTradeSource } from './etender.types';
 import { GOVUZ_SOURCES, GovUzSource, UZEX_SOURCES, XARID_SOURCES, XaridSource, XT_SOURCES, XtSource } from './tender-sources';
@@ -41,6 +42,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     private readonly xarid: XaridAdapter,
     private readonly xt: XtXaridAdapter,
     private readonly medical: MedicalFilter,
+    private readonly medCat: MedCategoryClassifier,
     private readonly scheduler: SchedulerRegistry,
     config: ConfigService,
   ) {
@@ -233,6 +235,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     const data = {
       source: lot.source,
       kind: lot.kind,
+      medCategory: this.medCat.classify(lot),
       sourceUrl: lot.sourceUrl,
       displayNo: lot.displayNo,
       typeId: lot.typeId,
@@ -270,6 +273,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     const where: Prisma.EtenderLotWhereInput = {};
     if (q.source) where.source = q.source;
     if (q.kind) where.kind = q.kind;
+    if (q.medCategory) where.medCategory = q.medCategory;
     if (q.state === 'active') where.active = true;
     else if (q.state === 'closed') where.active = false;
     if (q.regionName) where.regionName = { contains: q.regionName, mode: 'insensitive' };
@@ -308,6 +312,17 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     const xt = XT_SOURCES.map((s) => ({ source: s.source, kind: s.kind, label: s.label, site: s.site, count: counts.get(s.source) || 0, ready: this.xt.enabled }));
     const gov = GOVUZ_SOURCES.map((s) => ({ source: s.source, kind: s.kind, label: s.label, site: 'https://gov.uz', count: counts.get(s.source) || 0, ready: this.govuz.enabled }));
     return [...uzex, ...xarid, ...xt, ...gov];
+  }
+
+  // Medical categories + live counts, for the category filter block on #/tenders.
+  async categories() {
+    const grouped = await this.prisma.etenderLot.groupBy({
+      by: ['medCategory'],
+      where: { active: true },
+      _count: true,
+    });
+    const counts = new Map(grouped.map((g) => [g.medCategory ?? 'other', g._count]));
+    return MED_CATEGORIES.map((c) => ({ category: c.id, label: c.label, count: counts.get(c.id) || 0 }));
   }
 
   getLot(source: string, externalId: string) {

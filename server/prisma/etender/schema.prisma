@@ -30,6 +30,7 @@ model EtenderLot {
   id           String    @id @default(cuid())
   source       String // e.g. ETENDER_TENDER, BIZNESXARID, XARID_COMPETITION, UZMEDIMPEX_TENDER
   kind         String    @default("lot") // "lot" | "news"
+  medCategory  String? // equipment | furniture | instruments | consumables | drugs | other
   externalId   String // stable per-source id (lot id as string, or news slug/url)
   sourceUrl    String? // link to open the item on the origin platform
   displayNo    String? // `display_no`
@@ -57,6 +58,7 @@ model EtenderLot {
   @@unique([source, externalId])
   @@index([source, active])
   @@index([kind, active])
+  @@index([medCategory, active])
   @@index([endDate])
   @@map("etender_lots")
 }

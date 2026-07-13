@@ -23,6 +23,14 @@ export class EtenderController {
   }
 
   @Public()
+  @Get('categories')
+  @Header('Cache-Control', 'public, max-age=300')
+  @ApiOperation({ summary: 'Мед. категории лотов + счётчики (публичный)' })
+  categories() {
+    return this.etender.categories();
+  }
+
+  @Public()
   @Get('lots')
   // Data refreshes once a day, so it is safe (and cheap under 1000+ traffic) to
   // let browsers/proxies cache the list briefly.
