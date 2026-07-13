@@ -132,7 +132,7 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
     { view: "registration",             label: lvh("Регистрация МИ",       "TI ro'yxati",                    "MD registration") },
     { view: "tenders",                  label: lvh("Тендеры и госзакупки", "Tender va davlat xaridlari",     "Tenders & procurement") },
     { view: "kits",                     label: lvh("Оснащение под ключ",   "Kalit ostida jihozlash",         "Turnkey equipping") },
-    { view: "info", params: { p: "training" }, label: lvh("Обучение персонала",   "Xodimlarni o'qitish",            "Staff training") },
+    { view: "staffTraining",            label: lvh("Обучение персонала",   "Xodimlarni o'qitish",            "Staff training") },
     { view: "info", params: { p: "service"  }, label: lvh("Сервис и поддержка",   "Servis va qo'llab-quvvatlash",   "Service & support") }] },
 
   { view: "cases",    label: lvh("Кейсы",    "Keyslar",   "Cases") },
