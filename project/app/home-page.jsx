@@ -19,8 +19,8 @@ function trTx(obj, field, lang) {
 
 const HERO_DEFAULTS = {
   badge: { ru: "Технологический партнёр здравоохранения", uz: "Sog'liqni saqlash texnologik hamkori", en: "Technology partner for healthcare" },
-  title1: { ru: "Экосистема оснащения", uz: "Zamonaviy tibbiyotni", en: "An ecosystem for" },
-  title2: { ru: "современной медицины", uz: "jihozlash ekotizimi", en: "equipping modern medicine" },
+  title1: { ru: "Поставщик и интегратор", uz: "Zamonaviy tibbiyotni", en: "An ecosystem for" },
+  title2: { ru: "медицинского оборудования", uz: "jihozlash ekotizimi", en: "equipping modern medicine" },
   subtitle: {
     ru: "ИНДУСТРИЯ ЗДОРОВЬЯ объединяет поставку оборудования, регистрацию медизделий, тендерное сопровождение, сервис и цифровые инструменты — единый партнёр для клиник, бизнеса и государства.",
     uz: "SOG'LIQ INDUSTRIYASI uskunalar yetkazib berish, tibbiy buyumlarni ro'yxatga olish, tender ko'magi, servis va raqamli vositalarni birlashtiradi — klinikalar, biznes va davlat uchun yagona hamkor.",
@@ -61,12 +61,12 @@ const CTA_DEFAULTS = {
 const SITE_CONTACTS_DEFAULTS = {
   phone: "+998 (77) 225-00-01",
   phone2: "+998 (77) 224-00-01",
-  email: "info@sogliqindustriyasi.uz",
-  address: "100069, Ташкент, Узбекистан, ул. МКАД, д. 16",
-  telegram: "https://t.me/uzmedex",
-  instagram: "https://instagram.com/uzmedex",
-  facebook: "https://facebook.com/uzmedex",
-  youtube: "https://youtube.com/@uzmedex",
+  email: "info@soi.uz",
+  address: "100069, Ташкент, Узбекистан, ул. МКАД, д.16",
+  telegram: "https://t.me/soi",
+  instagram: "https://instagram.com/soi",
+  facebook: "https://facebook.com/soi",
+  youtube: "https://youtube.com/@soi",
 };
 function useSiteContacts() {
   const [contacts, setContacts] = useState(() => window.CMS ? window.CMS.getSetting("site_contacts", SITE_CONTACTS_DEFAULTS) : SITE_CONTACTS_DEFAULTS);
