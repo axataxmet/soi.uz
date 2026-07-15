@@ -132,7 +132,7 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
     { view: "registration",             label: lvh("Регистрация МИ",       "TI ro'yxati",                    "MD registration") },
     { view: "tenders",                  label: lvh("Тендеры и госзакупки", "Tender va davlat xaridlari",     "Tenders & procurement") },
     { view: "staffTraining",            label: lvh("Обучение персонала",   "Xodimlarni o'qitish",            "Staff training") },
-    { view: "info", params: { p: "service"  }, label: lvh("Сервис и поддержка",   "Servis va qo'llab-quvvatlash",   "Service & support") }] },
+    { view: "serviceSupport",           label: lvh("Сервис и поддержка",   "Servis va qo'llab-quvvatlash",   "Service & support") }] },
 
   { view: "cases",    label: lvh("Кейсы",    "Keyslar",   "Cases") },
   { view: "contacts", label: lvh("Контакты", "Kontaktlar", "Contacts") },
@@ -419,6 +419,7 @@ function CoBreadcrumbs({ lang, go, route }) {
     directions:   [home, { label: services.label }],
     registration: [home, services, { label: lv("Регистрация МИ", "TI roʻyxatga olish", "MD registration") }],
     staffTraining: [home, services, { label: lv("Обучение персонала", "Xodimlarni oʻqitish", "Staff training") }],
+    serviceSupport: [home, services, { label: lv("Сервис и поддержка", "Servis va qo'llab-quvvatlash", "Service & support") }],
     tenders:      [home, services, { label: lv("Тендеры и госзакупки", "Tender va davlat xaridlari", "Tenders & procurement") }],
     cases:        [home, { label: lv("Кейсы", "Keyslar", "Cases") }],
     projects:     [home, { label: lv("Кейсы", "Keyslar", "Cases") }],
