@@ -455,6 +455,7 @@ model TeamMember {
   role      Json?
   photoUrl  String?
   order     Int      @default(0)
+  service   Boolean  @default(false) // показывать в блоке «Наши инженеры» на «Сервис и поддержка»
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

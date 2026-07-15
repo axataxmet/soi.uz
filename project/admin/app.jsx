@@ -76,6 +76,7 @@
     { view: "import",       label: "Импорт / Экспорт",  icon: "import" },
     { section: "Контент" },
     { view: "homepage",     label: "Главная страница",  icon: "home" },
+    { view: "servicepage",  label: "Сервис и поддержка", icon: "settings" },
     { view: "news",         label: "Новости",           icon: "news" },
     { view: "cases",        label: "Кейсы",             icon: "briefcase" },
     { view: "documents",    label: "Документы",         icon: "filetext" },
@@ -102,6 +103,7 @@
     specs: "/admin/specs",
     import: "/admin/import",
     homepage: "/admin/homepage",
+    servicepage: "/admin/service-support",
     news: "/admin/news",
     "news-new": "/admin/news/new",
     cases: "/admin/cases",
@@ -128,6 +130,8 @@
     directions: "specs",
     import: "import",
     homepage: "homepage",
+    "service-support": "servicepage",
+    servicepage: "servicepage",
     news: "news",
     cases: "cases",
     documents: "documents",
@@ -239,7 +243,7 @@
       dashboard: "Дашборд", analytics: "Аналитика",
       products: "Товары", "product-new": "Новый товар", "product-edit": "Редактировать товар",
       manufacturers: "Бренды", catalog: "Категории", specs: "Направления", import: "Импорт",
-      homepage: "Главная страница", news: "Новости", cases: "Кейсы",
+      homepage: "Главная страница", servicepage: "Сервис и поддержка", news: "Новости", cases: "Кейсы",
       documents: "Документы", team: "Команда",
       submissions: "Заявки", orders: "Заказы", reviews: "Отзывы",
       media: "Медиатека", navmenu: "Меню", users: "Пользователи",
@@ -257,6 +261,7 @@
       if (view === "specs")         return window.AdminCatalogSpecs  ? <AdminCatalogSpecs go={go} /> : null;
       if (view === "import")        return window.AdminImport        ? <AdminImport go={go} /> : null;
       if (view === "homepage")      return window.AdminHomepage      ? <AdminHomepage go={go} /> : null;
+      if (view === "servicepage")   return window.AdminServiceSupport ? <AdminServiceSupport go={go} /> : null;
       if (view === "news")          return window.AdminNews          ? <AdminNews go={go} /> : null;
       if (view === "news-new")      return window.AdminNews          ? <AdminNews go={go} /> : null;
       if (view === "cases")         return window.AdminCases         ? <AdminCases go={go} /> : null;

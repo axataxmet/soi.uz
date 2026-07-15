@@ -32,6 +32,7 @@ export class TeamService extends BaseCrudService {
       role: dto.role as Prisma.InputJsonValue,
       photoUrl: dto.photoUrl,
       order: dto.order,
+      service: dto.service,
     };
   }
 }

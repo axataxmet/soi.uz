@@ -117,7 +117,7 @@
       resource: "team",
       toFE: function (r) {
         if (!r) return r;
-        return { id: r.id, name: r.name, role: r.role, photo: r.photoUrl || "", order: r.order || 0, _remote: true };
+        return { id: r.id, name: r.name, role: r.role, photo: r.photoUrl || "", order: r.order || 0, service: !!r.service, _remote: true };
       },
       fetchAll: async function () {
         var res = await api.listPublic("team", { limit: 100 });
@@ -128,6 +128,7 @@
         return strip({
           name: it.name, role: pick3(it.role),
           order: typeof it.order === "number" ? it.order : undefined,
+          service: !!it.service,
           photoUrl: await resolveMedia(it.photo),
         });
       },
@@ -355,7 +356,7 @@
   };
 
   // ── settings (key-value): content settings routed to the API; internal flags stay local ──
-  var SETTINGS_REMOTE = { site_seo: 1, site_contacts: 1, nav_menu_custom: 1, homepage_impact: 1, homepage_hero: 1, homepage_cta: 1 };
+  var SETTINGS_REMOTE = { site_seo: 1, site_contacts: 1, nav_menu_custom: 1, homepage_impact: 1, homepage_hero: 1, homepage_cta: 1, service_hero: 1, service_equipment: 1, service_docs: 1 };
   var settingsCache = {}, settingsLoaded = false, settingsLoading = false;
   var _getSetting = CMS.getSetting ? CMS.getSetting.bind(CMS) : function (k, d) { return d; };
   var _setSetting = CMS.setSetting ? CMS.setSetting.bind(CMS) : function () {};

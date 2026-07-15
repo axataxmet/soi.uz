@@ -4,7 +4,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { S3Service } from './s3.service';
 
 const MAX_UPLOAD_SIZE = 15 * 1024 * 1024;
-const ALLOWED_UPLOADS: Record<string, { exts: string[]; magic: (buffer: Buffer) => boolean }> = {
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // hero/promo videos are far larger than images
+const ALLOWED_UPLOADS: Record<string, { exts: string[]; maxSize?: number; magic: (buffer: Buffer) => boolean }> = {
   'image/png': {
     exts: ['.png'],
     magic: (b) => b.length >= 8 && b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])),
@@ -20,6 +21,23 @@ const ALLOWED_UPLOADS: Record<string, { exts: string[]; magic: (buffer: Buffer) 
   'application/pdf': {
     exts: ['.pdf'],
     magic: (b) => b.length >= 5 && b.subarray(0, 5).toString('ascii') === '%PDF-',
+  },
+  // MP4/QuickTime family: ISO base media container ("ftyp" box at offset 4).
+  'video/mp4': {
+    exts: ['.mp4', '.m4v', '.mov'],
+    maxSize: MAX_VIDEO_SIZE,
+    magic: (b) => b.length >= 12 && b.subarray(4, 8).toString('ascii') === 'ftyp',
+  },
+  'video/quicktime': {
+    exts: ['.mov', '.mp4'],
+    maxSize: MAX_VIDEO_SIZE,
+    magic: (b) => b.length >= 12 && b.subarray(4, 8).toString('ascii') === 'ftyp',
+  },
+  // WebM is a Matroska container (EBML header 1A 45 DF A3).
+  'video/webm': {
+    exts: ['.webm'],
+    maxSize: MAX_VIDEO_SIZE,
+    magic: (b) => b.length >= 4 && b[0] === 0x1a && b[1] === 0x45 && b[2] === 0xdf && b[3] === 0xa3,
   },
 };
 
@@ -76,12 +94,15 @@ export class MediaService {
 
   private assertSafeUpload(file: Express.Multer.File) {
     if (!file || !file.buffer) throw new BadRequestException('Файл не передан');
-    if (file.size > MAX_UPLOAD_SIZE) throw new BadRequestException('Файл слишком большой (максимум 15 МБ)');
 
     const mime = (file.mimetype || '').toLowerCase();
     const rule = ALLOWED_UPLOADS[mime];
     if (!rule) {
-      throw new BadRequestException('Недопустимый тип файла. Разрешены PNG, JPG, WebP и PDF');
+      throw new BadRequestException('Недопустимый тип файла. Разрешены PNG, JPG, WebP, PDF и видео MP4/WebM');
+    }
+    const maxSize = rule.maxSize ?? MAX_UPLOAD_SIZE;
+    if (file.size > maxSize) {
+      throw new BadRequestException(`Файл слишком большой (максимум ${Math.round(maxSize / 1024 / 1024)} МБ)`);
     }
 
     const ext = extname(file.originalname || '').toLowerCase();

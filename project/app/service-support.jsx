@@ -15,6 +15,20 @@ function useSsCss() {
 .ss-photo::after{content:attr(data-label);position:absolute;bottom:10px;left:12px;font-size:11px;font-weight:600;color:#7d97c4;background:rgba(255,255,255,.7);padding:3px 8px;border-radius:6px}
 .ss-photo .ph-ic{opacity:.5}
 .ss-hero-photo{aspect-ratio:4/3;width:100%}
+/* full-bleed hero media (photo/video from admin) */
+.page-hero.ss-media{position:relative;overflow:hidden}
+.page-hero.ss-media .pw{display:none}
+.ss-hero-bg{position:absolute;inset:0;z-index:0;overflow:hidden}
+.ss-hero-bg img,.ss-hero-bg video{width:100%;height:100%;object-fit:cover;display:block}
+.ss-hero-bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(6,20,44,.86) 0%,rgba(6,20,44,.62) 52%,rgba(6,20,44,.30) 100%)}
+.page-hero.ss-media .wrap{position:relative;z-index:1}
+.page-hero.ss-media h1{color:#fff}
+.page-hero.ss-media p{color:rgba(255,255,255,.9)}
+.page-hero.ss-media .ss-badge{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#fff}
+.page-hero.ss-media .btn-ghost{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.45)}
+.ss-eq-img{aspect-ratio:16/10;width:100%;object-fit:cover;display:block}
+.ss-eng-img{aspect-ratio:1/1;width:100%;object-fit:cover;display:block}
+.ss-rev-logo-img{max-width:120px;max-height:34px;object-fit:contain;display:block}
 .ss-grid{display:grid;gap:16px}
 .ss-g3{grid-template-columns:repeat(3,1fr)}
 .ss-g4{grid-template-columns:repeat(4,1fr)}
@@ -150,6 +164,29 @@ function SsIcon({ name, size = 22 }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: p }} />;
 }
 
+/* CMS-настройка страницы (public GET /settings/:key). Для несохранённых ключей
+   backend отдаёт value:null — страхуемся дефолтом на месте вызова. */
+function useSsSetting(key, def) {
+  const [val, setVal] = React.useState(() => (window.CMS ? window.CMS.getSetting(key, def) : def));
+  React.useEffect(() => {
+    if (!window.CMS) return;
+    setVal(window.CMS.getSetting(key, def));
+    return window.CMS.on ? window.CMS.on("settings", () => setVal(window.CMS.getSetting(key, def))) : undefined;
+  }, [key]);
+  return val;
+}
+/* CMS-коллекция (team / reviews) с подпиской на догрузку из API. */
+function useSsCollection(name) {
+  const [items, setItems] = React.useState(() => (window.CMS ? window.CMS.list(name) : []));
+  React.useEffect(() => {
+    if (!window.CMS) return;
+    const read = () => setItems(window.CMS.list(name) || []);
+    read();
+    return window.CMS.on ? window.CMS.on(name, read) : undefined;
+  }, [name]);
+  return items;
+}
+
 /* ── Сервисная заявка ─────────────────────────────────── */
 function SsForm() {
   const { useState } = React;
@@ -283,13 +320,27 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
     ["Постгарантийное обслуживание", "clock"], ["Диагностика", "gauge"], ["Ремонт", "wrench"],
     ["Калибровка", "tools"], ["Обновление ПО", "chip"], ["Обучение персонала", "users"], ["Консультации специалистов", "headset"],
   ];
-  // catalog is demo data; equipment maps to the real "equipment" category where meaningful, else catalog root.
-  const EQUIPMENT = [
-    ["Ультразвуковые системы", "equipment"], ["Рентгеновское оборудование", "equipment"], ["Компьютерные томографы", "equipment"],
-    ["Магнитно-резонансные томографы", "equipment"], ["Маммографы", "equipment"], ["Эндоскопическое оборудование", "equipment"],
-    ["Лабораторное оборудование", "equipment"], ["Офтальмология", "equipment"], ["Реанимационное оборудование", "equipment"],
-    ["Стоматологическое оборудование", "equipment"],
-  ];
+  // Блоки 1/4/8 редактируются через админку «Сервис и поддержка» (settings), блоки
+  // 9/10 — через админки «Команда» и «Отзывы» (коллекции). Дефолты ниже показываются,
+  // пока в админке ничего не сохранено.
+  const heroMedia = useSsSetting("service_hero", null) || {};
+  const hasHeroMedia = !!heroMedia.url;
+  const EQUIPMENT_DEFAULTS = [
+    "Ультразвуковые системы", "Рентгеновское оборудование", "Компьютерные томографы",
+    "Магнитно-резонансные томографы", "Маммографы", "Эндоскопическое оборудование",
+    "Лабораторное оборудование", "Офтальмология", "Реанимационное оборудование",
+    "Стоматологическое оборудование",
+  ].map((name) => ({ name, photo: "", link: "" }));
+  const eqSetting = useSsSetting("service_equipment", null);
+  const equipment = ((eqSetting && Array.isArray(eqSetting.items)) ? eqSetting.items : EQUIPMENT_DEFAULTS).filter((it) => !it.hidden);
+  const docsSetting = useSsSetting("service_docs", null);
+  const team = useSsCollection("team");
+  const engineers = (team || []).filter((m) => m.service);
+  const allReviews = useSsCollection("reviews");
+  const cmsReviews = (allReviews || [])
+    .filter((r) => (r.status || "published") === "published")
+    .sort((a, b) => (b.date || "").localeCompare(a.date || ""))
+    .slice(0, 3);
   const FLOW = [
     ["Получение заявки", "Принимаем обращение по телефону, email или через форму."],
     ["Анализ обращения", "Уточняем оборудование, характер проблемы и приоритет."],
@@ -309,10 +360,12 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
     "Плановое техническое обслуживание", "Профилактические осмотры", "Приоритетное обслуживание",
     "Персональный инженер", "Снижение простоев оборудования", "Контроль технического состояния",
   ];
-  const DOCS = [
-    ["Руководства пользователя", "doc"], ["Каталоги", "clipboard"], ["Сертификаты", "award"], ["Инструкции", "doc"],
-    ["Программное обеспечение", "chip"], ["Часто задаваемые вопросы", "headset"], ["Полезные статьи", "star"],
-  ];
+  const DOC_ICONS = ["doc", "clipboard", "award", "doc", "chip", "headset", "star"];
+  const DOCS_DEFAULTS = [
+    "Руководства пользователя", "Каталоги", "Сертификаты", "Инструкции",
+    "Программное обеспечение", "Часто задаваемые вопросы", "Полезные статьи",
+  ].map((title) => ({ title, url: "" }));
+  const docs = (docsSetting && Array.isArray(docsSetting.items)) ? docsSetting.items : DOCS_DEFAULTS;
   // Placeholder engineers/reviews — generic (no fabricated real people/clients); to be filled via admin later.
   const ENGINEERS = [
     ["Сервисный инженер", "Диагностика и ремонт", "Опыт: 8+ лет", ["Ультразвук", "Рентген"]],
@@ -340,15 +393,29 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
 
   useSsJsonLd(FAQ.map(([q, a]) => ({ q, a })));
 
-  const eqLink = (catId) => { ssTrack("service_equipment_click", { category: catId }); catId ? goCat("listing", catId) : go("catalog"); };
+  // Карточка оборудования: своя ссылка из админки (#/… или https://…), иначе каталог.
+  const eqLink = (it) => {
+    ssTrack("service_equipment_click", { category: it.name });
+    const link = (it.link || "").trim();
+    if (/^https?:\/\//.test(link)) { window.open(link, "_blank", "noopener"); return; }
+    if (link.indexOf("#") === 0) { location.hash = link.slice(1); return; }
+    goCat("listing", "equipment");
+  };
 
   return (
     <div>
-      {/* Block 1 — Hero */}
-      <section className="page-hero" ref={heroRef}>
+      {/* Block 1 — Hero: фото/видео из админки растягивается фоном на весь блок */}
+      <section className={"page-hero" + (hasHeroMedia ? " ss-media" : "")} ref={heroRef}>
         <div className="pw"></div>
+        {hasHeroMedia && (
+          <div className="ss-hero-bg" aria-hidden="true">
+            {heroMedia.type === "video"
+              ? <video src={heroMedia.url} autoPlay muted loop playsInline preload="metadata" />
+              : <img src={heroMedia.url} alt="" loading="eager" />}
+          </div>
+        )}
         <div className="wrap">
-          <div className="ss-hero-grid">
+          <div className={hasHeroMedia ? "" : "ss-hero-grid"}>
             <div>
               <div className="ss-badges reveal"><span className="ss-badge"><CoIcon name="shield" size={14} />Полный цикл сопровождения</span></div>
               <h1 style={{ maxWidth: 620 }}>Сервис и поддержка медицинского оборудования</h1>
@@ -358,7 +425,7 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
                 <button className="btn btn-ghost btn-lg" onClick={() => { ssTrack("service_consult_click"); window.__openQuote ? window.__openQuote() : ssScrollTo("ss-form"); }}>Получить консультацию</button>
               </div>
             </div>
-            <div className="ss-photo ss-hero-photo reveal" data-label="Фото: инженер у оборудования"><span className="ph-ic">{SsPhotoIcon}</span></div>
+            {!hasHeroMedia && <div className="ss-photo ss-hero-photo reveal" data-label="Фото: инженер у оборудования"><span className="ph-ic">{SsPhotoIcon}</span></div>}
           </div>
         </div>
       </section>
@@ -396,10 +463,12 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
         <div className="wrap">
           <div className="sec-head reveal"><span className="eyebrow line">Оборудование</span><h2 className="h-sec" style={{ marginTop: 14 }}>Обслуживаемое оборудование</h2></div>
           <div className="ss-eq">
-            {EQUIPMENT.map(([name, catId], i) => (
-              <a className="ss-eq-c reveal" key={i} onClick={() => eqLink(catId)}>
-                <div className="ss-photo ss-eq-ph" data-label="Фото"><span className="ph-ic">{SsPhotoIcon}</span></div>
-                <span>{name}</span>
+            {equipment.map((it, i) => (
+              <a className="ss-eq-c reveal" key={i} onClick={() => eqLink(it)}>
+                {it.photo
+                  ? <img className="ss-eq-img" src={it.photo} alt={it.name} loading="lazy" />
+                  : <div className="ss-photo ss-eq-ph" data-label="Фото"><span className="ph-ic">{SsPhotoIcon}</span></div>}
+                <span>{it.name}</span>
               </a>
             ))}
           </div>
@@ -459,53 +528,89 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
         <div className="wrap">
           <div className="sec-head reveal"><span className="eyebrow line">База знаний</span><h2 className="h-sec" style={{ marginTop: 14 }}>Документация и база знаний</h2></div>
           <div className="ss-grid ss-g4">
-            {DOCS.map(([h, ic], i) => (
-              <div className="ss-card link reveal" key={i} onClick={() => { ssTrack("service_doc_click", { doc: h }); ssScrollTo("ss-form"); }}>
-                <div className="ss-ic"><SsIcon name={ic} /></div><h4 style={{ margin: 0 }}>{h}</h4>
+            {docs.map((it, i) => (
+              <div className="ss-card link reveal" key={i} onClick={() => {
+                ssTrack("service_doc_click", { doc: it.title });
+                const url = (it.url || "").trim();
+                if (/^https?:\/\//.test(url)) window.open(url, "_blank", "noopener");
+                else if (url.indexOf("#") === 0) location.hash = url.slice(1);
+                else ssScrollTo("ss-form");
+              }}>
+                <div className="ss-ic"><SsIcon name={DOC_ICONS[i % DOC_ICONS.length]} /></div><h4 style={{ margin: 0 }}>{it.title}</h4>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Block 9 — Наши инженеры (placeholder, CMS-editable later) */}
+      {/* Block 9 — Наши инженеры: сотрудники из админки «Команда» с флагом
+          «Показывать на странице Сервис и поддержка»; без них — заглушки. */}
       <section className="section alt">
         <div className="wrap">
           <div className="sec-head reveal"><span className="eyebrow line">Команда</span><h2 className="h-sec" style={{ marginTop: 14 }}>Наши инженеры</h2></div>
           <div className="ss-eng">
-            {ENGINEERS.map(([name, role, exp, chips], i) => (
-              <div className="ss-eng-c reveal" key={i}>
-                <div className="ss-photo ss-eng-ph" data-label="Фото сотрудника"><span className="ph-ic">{SsPhotoIcon}</span></div>
-                <div className="ss-eng-b">
-                  <h4>{name}</h4>
-                  <div className="role">{role}</div>
-                  <div className="exp">{exp}</div>
-                  <div className="ss-chips">{chips.map((c, j) => <span className="ss-chip" key={j}>{c}</span>)}</div>
+            {engineers.length > 0
+              ? engineers.map((m) => (
+                <div className="ss-eng-c reveal" key={m.id}>
+                  {m.photo
+                    ? <img className="ss-eng-img" src={m.photo} alt={m.name} loading="lazy" />
+                    : <div className="ss-photo ss-eng-ph" data-label="Фото сотрудника"><span className="ph-ic">{SsPhotoIcon}</span></div>}
+                  <div className="ss-eng-b">
+                    <h4>{m.name}</h4>
+                    <div className="role">{(m.role && (m.role.ru || m.role)) || "Сервисный инженер"}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+              : ENGINEERS.map(([name, role, exp, chips], i) => (
+                <div className="ss-eng-c reveal" key={i}>
+                  <div className="ss-photo ss-eng-ph" data-label="Фото сотрудника"><span className="ph-ic">{SsPhotoIcon}</span></div>
+                  <div className="ss-eng-b">
+                    <h4>{name}</h4>
+                    <div className="role">{role}</div>
+                    <div className="exp">{exp}</div>
+                    <div className="ss-chips">{chips.map((c, j) => <span className="ss-chip" key={j}>{c}</span>)}</div>
+                  </div>
+                </div>
+              ))}
           </div>
-          <div className="ss-placeholder-note">Фотографии, ФИО и сертификаты инженеров добавляются через админ-панель.</div>
+          {engineers.length === 0 && <div className="ss-placeholder-note">Сотрудники добавляются в админ-панели «Команда» (флажок «Показывать на странице „Сервис и поддержка"»).</div>}
         </div>
       </section>
 
-      {/* Block 10 — Отзывы клиентов (placeholder) */}
+      {/* Block 10 — Отзывы клиентов: опубликованные отзывы из админки «Отзывы». */}
       <section className="section">
         <div className="wrap">
           <div className="sec-head reveal"><span className="eyebrow line">Отзывы</span><h2 className="h-sec" style={{ marginTop: 14 }}>Отзывы клиентов</h2></div>
           <div className="ss-rev">
-            {REVIEWS.map(([org, txt], i) => (
-              <div className="ss-rev-c reveal" key={i}>
-                <div className="ss-photo ss-rev-obj" data-label="Фото объекта"><span className="ph-ic">{SsPhotoIcon}</span></div>
-                <div className="ss-rev-b">
-                  <div className="ss-photo ss-rev-logo" data-label=""><span className="ph-ic"><CoIcon name="building" size={16} /></span></div>
-                  <p>{txt}</p>
-                  <div className="ss-rev-org">{org}</div>
+            {cmsReviews.length > 0
+              ? cmsReviews.map((r) => {
+                const org = typeof r.company === "string" ? r.company : ((r.company && r.company.ru) || "");
+                const txt = typeof r.desc === "string" ? r.desc : ((r.desc && r.desc.ru) || "");
+                const region = typeof r.region === "string" ? r.region : ((r.region && r.region.ru) || "");
+                return (
+                  <div className="ss-rev-c reveal" key={r.id}>
+                    <div className="ss-rev-b" style={{ paddingTop: 20 }}>
+                      {r.logo
+                        ? <img className="ss-rev-logo-img" src={r.logo} alt={org} loading="lazy" />
+                        : <div className="ss-photo ss-rev-logo" data-label=""><span className="ph-ic"><CoIcon name="building" size={16} /></span></div>}
+                      <p>{txt}</p>
+                      <div className="ss-rev-org">{org}{region ? " · " + region : ""}</div>
+                    </div>
+                  </div>
+                );
+              })
+              : REVIEWS.map(([org, txt], i) => (
+                <div className="ss-rev-c reveal" key={i}>
+                  <div className="ss-photo ss-rev-obj" data-label="Фото объекта"><span className="ph-ic">{SsPhotoIcon}</span></div>
+                  <div className="ss-rev-b">
+                    <div className="ss-photo ss-rev-logo" data-label=""><span className="ph-ic"><CoIcon name="building" size={16} /></span></div>
+                    <p>{txt}</p>
+                    <div className="ss-rev-org">{org}</div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
           </div>
-          <div className="ss-placeholder-note">Логотипы, фото объектов и тексты отзывов добавляются через админ-панель.</div>
+          {cmsReviews.length === 0 && <div className="ss-placeholder-note">Отзывы публикуются через админ-панель «Отзывы» (статус «Опубликовано»).</div>}
         </div>
       </section>
 

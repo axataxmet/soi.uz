@@ -20,7 +20,8 @@ function AdminTeam() {
               {m.photo ? <img src={m.photo} alt="" style={{width:"100%",height:"100%",objectFit:"cover"}} /> : <AdminIcon name="users" size={28} color="var(--c-primary)" />}
             </div>
             <div style={{fontWeight:700,marginBottom:2}}>{m.name}</div>
-            <div style={{fontSize:12,color:"var(--c-muted)",marginBottom:12}}>{m.role?.ru || m.role || ""}</div>
+            <div style={{fontSize:12,color:"var(--c-muted)",marginBottom:m.service?4:12}}>{m.role?.ru || m.role || ""}</div>
+            {m.service && <div style={{fontSize:10.5,fontWeight:700,color:"var(--c-primary)",background:"var(--c-primary-light)",borderRadius:10,padding:"2px 8px",display:"inline-block",marginBottom:10}}>Сервис и поддержка</div>}
             <div className="adm-flex" style={{justifyContent:"center"}}>
               <button className="btn btn-ghost btn-icon" onClick={() => setEditing({...m,role:typeof m.role==="string"?{ru:m.role}:(m.role||{ru:""})})}><AdminIcon name="edit" size={14}/></button>
               <button className="btn btn-ghost btn-icon" onClick={() => setConfirm(m.id)}><AdminIcon name="trash" size={14}/></button>
@@ -34,6 +35,10 @@ function AdminTeam() {
           <Field label="Имя"><input className="adm-input" value={editing.name||""} onChange={e=>setEditing(i=>({...i,name:e.target.value}))}/></Field>
           <Field label="Должность (рус)"><input className="adm-input" value={editing.role?.ru||""} onChange={e=>setEditing(i=>({...i,role:{...(i.role||{}),ru:e.target.value}}))}/></Field>
           <ImageUpload label="Фото" value={editing.photo||""} onChange={v=>setEditing(i=>({...i,photo:v}))}/>
+          <label style={{display:"flex",alignItems:"center",gap:9,fontSize:13.5,cursor:"pointer",marginTop:4}}>
+            <input type="checkbox" checked={!!editing.service} onChange={e=>setEditing(i=>({...i,service:e.target.checked}))} style={{width:16,height:16}}/>
+            Показывать в блоке «Наши инженеры» на странице «Сервис и поддержка»
+          </label>
         </div>}
       </Modal>
       <Confirm open={!!confirm} danger message="Удалить сотрудника?" onConfirm={()=>del(confirm)} onCancel={()=>setConfirm(null)}/>

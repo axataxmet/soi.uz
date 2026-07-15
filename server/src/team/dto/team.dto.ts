@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { I18nDto } from '../../common/dto/i18n.dto';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
@@ -25,6 +25,11 @@ export class CreateTeamMemberDto {
   @Type(() => Number)
   @IsInt()
   order?: number;
+
+  @ApiPropertyOptional({ description: 'Показывать в блоке «Наши инженеры» на странице «Сервис и поддержка»', default: false })
+  @IsOptional()
+  @IsBoolean()
+  service?: boolean;
 }
 
 export class UpdateTeamMemberDto extends PartialType(CreateTeamMemberDto) {}
