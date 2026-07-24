@@ -188,8 +188,9 @@ function useSsCollection(name) {
 }
 
 /* ── Сервисная заявка ─────────────────────────────────── */
-function SsForm() {
+function SsForm({ lang }) {
   const { useState } = React;
+  const lv = (ru, uz, en) => (lang === "uz" ? uz : lang === "en" ? en : ru);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [err, setErr] = useState("");
@@ -200,7 +201,7 @@ function SsForm() {
   const onFiles = (list) => {
     const allow = /\.(pdf|docx?|xlsx?|jpe?g|png)$/i;
     const add = [...list].filter((x) => allow.test(x.name) && x.size <= 20 * 1024 * 1024);
-    if (add.length < list.length) setErr("Файл не загружен. Проверьте формат и размер и попробуйте снова.");
+    if (add.length < list.length) setErr(lv("Файл не загружен. Проверьте формат и размер и попробуйте снова.", "Fayl yuklanmadi. Format va hajmni tekshirib, qayta urinib ko‘ring.", "File not uploaded. Check the format and size and try again."));
     setFiles((prev) => [...prev, ...add].slice(0, 5));
     if (add.length) ssTrack("service_file_upload");
   };
@@ -208,9 +209,9 @@ function SsForm() {
   const submit = async (e) => {
     e.preventDefault();
     setErr("");
-    if (!f.name.trim() || !f.org.trim() || !f.phone.trim()) { setErr("Заполните имя, организацию и телефон."); ssTrack("service_form_error", { reason: "required" }); return; }
-    if (!f.eqType.trim() && !f.issue.trim()) { setErr("Укажите тип оборудования или опишите неисправность."); ssTrack("service_form_error", { reason: "no_device" }); return; }
-    if (!f.consent) { setErr("Необходимо согласие на обработку персональных данных."); ssTrack("service_form_error", { reason: "no_consent" }); return; }
+    if (!f.name.trim() || !f.org.trim() || !f.phone.trim()) { setErr(lv("Заполните имя, организацию и телефон.", "Ism, tashkilot va telefonni to‘ldiring.", "Fill in name, organization and phone.")); ssTrack("service_form_error", { reason: "required" }); return; }
+    if (!f.eqType.trim() && !f.issue.trim()) { setErr(lv("Укажите тип оборудования или опишите неисправность.", "Uskuna turini ko‘rsating yoki nosozlikni tavsiflang.", "Specify the equipment type or describe the fault.")); ssTrack("service_form_error", { reason: "no_device" }); return; }
+    if (!f.consent) { setErr(lv("Необходимо согласие на обработку персональных данных.", "Shaxsiy ma’lumotlarni qayta ishlashga rozilik kerak.", "Consent to personal data processing is required.")); ssTrack("service_form_error", { reason: "no_consent" }); return; }
     setSending(true);
     try {
       let attachments = [];
@@ -233,7 +234,7 @@ function SsForm() {
       ssTrack("service_form_submit");
       setSent(true);
     } catch (ex) {
-      setErr("Не удалось отправить заявку. Данные сохранены в форме. Попробуйте снова или свяжитесь с нами по телефону.");
+      setErr(lv("Не удалось отправить заявку. Данные сохранены в форме. Попробуйте снова или свяжитесь с нами по телефону.", "So‘rovni yuborib bo‘lmadi. Ma’lumotlar formada saqlangan. Qayta urinib ko‘ring yoki telefon orqali bog‘laning.", "Could not send the request. Your data is kept in the form. Try again or contact us by phone."));
       ssTrack("service_form_error", { reason: "submit_failed" });
     } finally { setSending(false); }
   };
@@ -242,8 +243,8 @@ function SsForm() {
     <div className="ss-form-wrap">
       <div className="ss-form-ok">
         <div className="ic"><CoIcon name="check" size={30} /></div>
-        <h3>Заявка отправлена</h3>
-        <p>Спасибо! Сервисная заявка принята. Инженер свяжется с вами для уточнения оборудования, характера неисправности и сроков выезда.</p>
+        <h3>{lv("Заявка отправлена", "So‘rov yuborildi", "Request sent")}</h3>
+        <p>{lv("Спасибо! Сервисная заявка принята. Инженер свяжется с вами для уточнения оборудования, характера неисправности и сроков выезда.", "Rahmat! Servis so‘rovi qabul qilindi. Muhandis uskuna, nosozlik xarakteri va tashrif muddatlarini aniqlashtirish uchun siz bilan bog‘lanadi.", "Thank you! The service request has been received. An engineer will contact you to clarify the equipment, the nature of the fault and visit timing.")}</p>
       </div>
     </div>
   );
@@ -251,19 +252,19 @@ function SsForm() {
   return (
     <form className="ss-form-wrap" onSubmit={submit} noValidate>
       <div className="ss-fgrid">
-        <div className="ss-field"><label>Имя<span className="req">*</span></label><input className="ss-input" value={f.name} onChange={(e) => set("name", e.target.value)} /></div>
-        <div className="ss-field"><label>Организация<span className="req">*</span></label><input className="ss-input" value={f.org} onChange={(e) => set("org", e.target.value)} /></div>
-        <div className="ss-field"><label>Телефон<span className="req">*</span></label><input className="ss-input" type="tel" placeholder="+998 __ ___ __ __" value={f.phone} onChange={(e) => set("phone", e.target.value)} /></div>
+        <div className="ss-field"><label>{lv("Имя", "Ism", "Name")}<span className="req">*</span></label><input className="ss-input" value={f.name} onChange={(e) => set("name", e.target.value)} /></div>
+        <div className="ss-field"><label>{lv("Организация", "Tashkilot", "Organization")}<span className="req">*</span></label><input className="ss-input" value={f.org} onChange={(e) => set("org", e.target.value)} /></div>
+        <div className="ss-field"><label>{lv("Телефон", "Telefon", "Phone")}<span className="req">*</span></label><input className="ss-input" type="tel" placeholder="+998 __ ___ __ __" value={f.phone} onChange={(e) => set("phone", e.target.value)} /></div>
         <div className="ss-field"><label>Email</label><input className="ss-input" type="email" value={f.email} onChange={(e) => set("email", e.target.value)} /></div>
-        <div className="ss-field"><label>Тип оборудования</label><input className="ss-input" value={f.eqType} onChange={(e) => set("eqType", e.target.value)} placeholder="УЗИ, рентген, лаборатория…" /></div>
-        <div className="ss-field"><label>Производитель</label><input className="ss-input" value={f.maker} onChange={(e) => set("maker", e.target.value)} /></div>
-        <div className="ss-field full"><label>Серийный номер</label><input className="ss-input" value={f.serial} onChange={(e) => set("serial", e.target.value)} /></div>
-        <div className="ss-field full"><label>Описание неисправности</label><textarea className="ss-textarea" rows={4} value={f.issue} onChange={(e) => set("issue", e.target.value)} placeholder="Что произошло, когда, при каких условиях…" /></div>
+        <div className="ss-field"><label>{lv("Тип оборудования", "Uskuna turi", "Equipment type")}</label><input className="ss-input" value={f.eqType} onChange={(e) => set("eqType", e.target.value)} placeholder={lv("УЗИ, рентген, лаборатория…", "UZI, rentgen, laboratoriya…", "Ultrasound, X-ray, lab…")} /></div>
+        <div className="ss-field"><label>{lv("Производитель", "Ishlab chiqaruvchi", "Manufacturer")}</label><input className="ss-input" value={f.maker} onChange={(e) => set("maker", e.target.value)} /></div>
+        <div className="ss-field full"><label>{lv("Серийный номер", "Seriya raqami", "Serial number")}</label><input className="ss-input" value={f.serial} onChange={(e) => set("serial", e.target.value)} /></div>
+        <div className="ss-field full"><label>{lv("Описание неисправности", "Nosozlik tavsifi", "Fault description")}</label><textarea className="ss-textarea" rows={4} value={f.issue} onChange={(e) => set("issue", e.target.value)} placeholder={lv("Что произошло, когда, при каких условиях…", "Nima, qachon, qanday sharoitda sodir bo‘ldi…", "What happened, when, under what conditions…")} /></div>
       </div>
       <div style={{ margin: "16px 0" }}>
         <label className="ss-drop" htmlFor="ss-file-inp">
-          <div style={{ fontSize: 13.5, fontWeight: 600 }}>Прикрепить файл (фото шильдика, документы, лог ошибок)</div>
-          <div style={{ marginTop: 4, fontSize: 12, color: "var(--slate-500)" }}>PDF, DOC, DOCX, XLS, XLSX, JPG, PNG · до 20 МБ · до 5 файлов</div>
+          <div style={{ fontSize: 13.5, fontWeight: 600 }}>{lv("Прикрепить файл (фото шильдика, документы, лог ошибок)", "Fayl biriktirish (shildik fotosi, hujjatlar, xatolik loglari)", "Attach a file (nameplate photo, documents, error logs)")}</div>
+          <div style={{ marginTop: 4, fontSize: 12, color: "var(--slate-500)" }}>{lv("PDF, DOC, DOCX, XLS, XLSX, JPG, PNG · до 20 МБ · до 5 файлов", "PDF, DOC, DOCX, XLS, XLSX, JPG, PNG · 20 MB gacha · 5 tagacha fayl", "PDF, DOC, DOCX, XLS, XLSX, JPG, PNG · up to 20 MB · up to 5 files")}</div>
         </label>
         <input id="ss-file-inp" type="file" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" style={{ display: "none" }} onChange={(e) => { onFiles(e.target.files); e.target.value = ""; }} />
         {files.length > 0 && (
@@ -272,16 +273,16 @@ function SsForm() {
               <div className="ss-file" key={i}>
                 <CoIcon name="doc" size={15} /><span className="nm">{file.name}</span>
                 <span style={{ color: "var(--slate-400)", fontSize: 12 }}>{Math.round(file.size / 1024)} KB</span>
-                <button type="button" onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))} aria-label="Убрать">✕</button>
+                <button type="button" onClick={() => setFiles((prev) => prev.filter((_, j) => j !== i))} aria-label={lv("Убрать", "Olib tashlash", "Remove")}>✕</button>
               </div>
             ))}
           </div>
         )}
       </div>
-      <label className="ss-check"><input type="checkbox" checked={f.consent} onChange={(e) => set("consent", e.target.checked)} />Согласен с политикой конфиденциальности и обработкой персональных данных<span className="req">*</span></label>
+      <label className="ss-check"><input type="checkbox" checked={f.consent} onChange={(e) => set("consent", e.target.checked)} />{lv("Согласен с политикой конфиденциальности и обработкой персональных данных", "Maxfiylik siyosati va shaxsiy ma’lumotlarni qayta ishlashga roziman", "I agree to the privacy policy and personal data processing")}<span className="req">*</span></label>
       {err && <div style={{ color: "#e0492f", fontSize: 13.5, margin: "10px 0", fontWeight: 600 }}>{err}</div>}
       <button className="btn btn-pri btn-lg" type="submit" disabled={sending} style={{ width: "100%", justifyContent: "center", marginTop: 8 }}>
-        {sending ? "Отправка…" : "Отправить заявку"}
+        {sending ? lv("Отправка…", "Yuborilmoqda…", "Sending…") : lv("Отправить заявку", "So‘rovni yuborish", "Send request")}
       </button>
     </form>
   );
@@ -295,6 +296,7 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
   const heroRef = React.useRef(null);
   useSsCss();
   const contacts = window.useSiteContacts ? window.useSiteContacts() : { phone: "+998 (77) 225-00-01", email: "info@soi.uz" };
+  const lv = (ru, uz, en) => (lang === "uz" ? uz : lang === "en" ? en : ru);
 
   // Show the sticky CTA once the hero has scrolled out of view. IntersectionObserver
   // is robust to whichever element is the scroll container (the .embed shell puts
@@ -308,17 +310,17 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
   }, []);
 
   const QUICK = [
-    ["Подать сервисную заявку", "Опишите оборудование и неисправность — инженер свяжется с вами.", "clipboard", () => ssScrollTo("ss-form")],
-    ["Вызвать инженера", "Выезд специалиста на объект для диагностики и ремонта.", "boot", () => ssScrollTo("ss-form")],
-    ["Получить консультацию", "Ответим на технические вопросы по эксплуатации и сервису.", "headset", () => (window.__openQuote ? window.__openQuote() : ssScrollTo("ss-form"))],
-    ["Заказать ТО", "Плановое техническое обслуживание оборудования.", "calendar", () => ssScrollTo("ss-form")],
-    ["Скачать документацию", "Руководства, инструкции и сервисные материалы.", "download", () => ssScrollTo("ss-docs")],
-    ["Заключить сервисный договор", "Долгосрочное сопровождение с приоритетным сервисом.", "shield", () => ssScrollTo("ss-contract")],
+    [lv("Подать сервисную заявку", "Servis so‘rovini yuborish", "Submit a service request"), lv("Опишите оборудование и неисправность — инженер свяжется с вами.", "Uskuna va nosozlikni tavsiflang — muhandis siz bilan bog‘lanadi.", "Describe the equipment and fault — an engineer will contact you."), "clipboard", () => ssScrollTo("ss-form")],
+    [lv("Вызвать инженера", "Muhandis chaqirish", "Call an engineer"), lv("Выезд специалиста на объект для диагностики и ремонта.", "Diagnostika va ta’mirlash uchun mutaxassisning obyektga tashrifi.", "A specialist visits your site for diagnostics and repair."), "boot", () => ssScrollTo("ss-form")],
+    [lv("Получить консультацию", "Konsultatsiya olish", "Get a consultation"), lv("Ответим на технические вопросы по эксплуатации и сервису.", "Foydalanish va servis bo‘yicha texnik savollarga javob beramiz.", "We answer technical questions about operation and service."), "headset", () => (window.__openQuote ? window.__openQuote() : ssScrollTo("ss-form"))],
+    [lv("Заказать ТО", "Texnik xizmat buyurtma qilish", "Order maintenance"), lv("Плановое техническое обслуживание оборудования.", "Uskunaning rejali texnik xizmati.", "Planned technical maintenance of equipment."), "calendar", () => ssScrollTo("ss-form")],
+    [lv("Скачать документацию", "Hujjatlarni yuklab olish", "Download documentation"), lv("Руководства, инструкции и сервисные материалы.", "Qo‘llanmalar, ko‘rsatmalar va servis materiallari.", "Manuals, instructions and service materials."), "download", () => ssScrollTo("ss-docs")],
+    [lv("Заключить сервисный договор", "Servis shartnomasini tuzish", "Sign a service contract"), lv("Долгосрочное сопровождение с приоритетным сервисом.", "Ustuvor servis bilan uzoq muddatli hamrohlik.", "Long-term support with priority service."), "shield", () => ssScrollTo("ss-contract")],
   ];
   const SERVICES = [
-    ["Монтаж оборудования", "building"], ["Ввод в эксплуатацию", "boot"], ["Гарантийное обслуживание", "shield"],
-    ["Постгарантийное обслуживание", "clock"], ["Диагностика", "gauge"], ["Ремонт", "wrench"],
-    ["Калибровка", "tools"], ["Обновление ПО", "chip"], ["Обучение персонала", "users"], ["Консультации специалистов", "headset"],
+    [lv("Монтаж оборудования", "Uskuna montaji", "Equipment installation"), "building"], [lv("Ввод в эксплуатацию", "Ishga tushirish", "Commissioning"), "boot"], [lv("Гарантийное обслуживание", "Kafolat xizmati", "Warranty service"), "shield"],
+    [lv("Постгарантийное обслуживание", "Kafolatdan keyingi xizmat", "Post-warranty service"), "clock"], [lv("Диагностика", "Diagnostika", "Diagnostics"), "gauge"], [lv("Ремонт", "Ta’mirlash", "Repair"), "wrench"],
+    [lv("Калибровка", "Kalibrlash", "Calibration"), "tools"], [lv("Обновление ПО", "Dasturiy ta’minotni yangilash", "Software update"), "chip"], [lv("Обучение персонала", "Xodimlarni o‘qitish", "Staff training"), "users"], [lv("Консультации специалистов", "Mutaxassislar konsultatsiyasi", "Specialist consultations"), "headset"],
   ];
   // Блоки 1/4/8 редактируются через админку «Сервис и поддержка» (settings), блоки
   // 9/10 — через админки «Команда» и «Отзывы» (коллекции). Дефолты ниже показываются,
@@ -326,10 +328,16 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
   const heroMedia = useSsSetting("service_hero", null) || {};
   const hasHeroMedia = !!heroMedia.url;
   const EQUIPMENT_DEFAULTS = [
-    "Ультразвуковые системы", "Рентгеновское оборудование", "Компьютерные томографы",
-    "Магнитно-резонансные томографы", "Маммографы", "Эндоскопическое оборудование",
-    "Лабораторное оборудование", "Офтальмология", "Реанимационное оборудование",
-    "Стоматологическое оборудование",
+    lv("Ультразвуковые системы", "Ultratovush tizimlari", "Ultrasound systems"),
+    lv("Рентгеновское оборудование", "Rentgen uskunalari", "X-ray equipment"),
+    lv("Компьютерные томографы", "Kompyuter tomograflar", "CT scanners"),
+    lv("Магнитно-резонансные томографы", "Magnit-rezonans tomograflar", "MRI scanners"),
+    lv("Маммографы", "Mammograflar", "Mammographs"),
+    lv("Эндоскопическое оборудование", "Endoskopik uskunalar", "Endoscopic equipment"),
+    lv("Лабораторное оборудование", "Laboratoriya uskunalari", "Laboratory equipment"),
+    lv("Офтальмология", "Oftalmologiya", "Ophthalmology"),
+    lv("Реанимационное оборудование", "Reanimatsiya uskunalari", "Resuscitation equipment"),
+    lv("Стоматологическое оборудование", "Stomatologiya uskunalari", "Dental equipment"),
   ].map((name) => ({ name, photo: "", link: "" }));
   const eqSetting = useSsSetting("service_equipment", null);
   const equipment = ((eqSetting && Array.isArray(eqSetting.items)) ? eqSetting.items : EQUIPMENT_DEFAULTS).filter((it) => !it.hidden);
@@ -342,53 +350,53 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
     .sort((a, b) => (b.date || "").localeCompare(a.date || ""))
     .slice(0, 3);
   const FLOW = [
-    ["Получение заявки", "Принимаем обращение по телефону, email или через форму."],
-    ["Анализ обращения", "Уточняем оборудование, характер проблемы и приоритет."],
-    ["Связь с заказчиком", "Согласуем детали, доступ на объект и удобное время."],
-    ["Диагностика", "Определяем причину неисправности и объём работ."],
-    ["Выезд инженера", "Сертифицированный специалист выезжает на объект."],
-    ["Выполнение работ", "Ремонт, настройка, замена узлов оригинальными запчастями."],
-    ["Проверка оборудования", "Тестируем работоспособность и параметры."],
-    ["Передача оборудования", "Сдаём оборудование и передаём отчёт о работах."],
+    [lv("Получение заявки", "So‘rovni qabul qilish", "Receiving the request"), lv("Принимаем обращение по телефону, email или через форму.", "Murojaatni telefon, email yoki forma orqali qabul qilamiz.", "We accept the request by phone, email or via the form.")],
+    [lv("Анализ обращения", "Murojaatni tahlil qilish", "Request analysis"), lv("Уточняем оборудование, характер проблемы и приоритет.", "Uskuna, muammo xarakteri va ustuvorlikni aniqlaymiz.", "We clarify the equipment, nature of the problem and priority.")],
+    [lv("Связь с заказчиком", "Buyurtmachi bilan bog‘lanish", "Contacting the client"), lv("Согласуем детали, доступ на объект и удобное время.", "Tafsilotlar, obyektga kirish va qulay vaqtni kelishamiz.", "We agree on details, site access and a convenient time.")],
+    [lv("Диагностика", "Diagnostika", "Diagnostics"), lv("Определяем причину неисправности и объём работ.", "Nosozlik sababi va ishlar hajmini aniqlaymiz.", "We determine the cause of the fault and the scope of work.")],
+    [lv("Выезд инженера", "Muhandis tashrifi", "Engineer visit"), lv("Сертифицированный специалист выезжает на объект.", "Sertifikatlangan mutaxassis obyektga chiqadi.", "A certified specialist visits the site.")],
+    [lv("Выполнение работ", "Ishlarni bajarish", "Performing the work"), lv("Ремонт, настройка, замена узлов оригинальными запчастями.", "Ta’mirlash, sozlash, tugunlarni original ehtiyot qismlar bilan almashtirish.", "Repair, adjustment, replacing units with original spare parts.")],
+    [lv("Проверка оборудования", "Uskunani tekshirish", "Equipment check"), lv("Тестируем работоспособность и параметры.", "Ishlash qobiliyati va parametrlarni sinaymiz.", "We test operability and parameters.")],
+    [lv("Передача оборудования", "Uskunani topshirish", "Handover"), lv("Сдаём оборудование и передаём отчёт о работах.", "Uskunani topshiramiz va ishlar hisobotini beramiz.", "We hand over the equipment and provide a work report.")],
   ];
   const WHY = [
-    ["Сертифицированные инженеры", "award"], ["Собственный сервисный центр", "building"], ["Оригинальные запасные части", "shield"],
-    ["Оперативный выезд", "boot"], ["Поддержка по всему Узбекистану", "globe"], ["Гарантия на работы", "check"],
-    ["Современное диагностическое оборудование", "gauge"], ["Индивидуальный подход", "users"],
+    [lv("Сертифицированные инженеры", "Sertifikatlangan muhandislar", "Certified engineers"), "award"], [lv("Собственный сервисный центр", "O‘z servis markazi", "Own service center"), "building"], [lv("Оригинальные запасные части", "Original ehtiyot qismlar", "Original spare parts"), "shield"],
+    [lv("Оперативный выезд", "Tezkor tashrif", "Prompt on-site visits"), "boot"], [lv("Поддержка по всему Узбекистану", "Butun O‘zbekiston bo‘ylab qo‘llab-quvvatlash", "Support across Uzbekistan"), "globe"], [lv("Гарантия на работы", "Ishlarga kafolat", "Warranty on work"), "check"],
+    [lv("Современное диагностическое оборудование", "Zamonaviy diagnostika uskunalari", "Modern diagnostic equipment"), "gauge"], [lv("Индивидуальный подход", "Individual yondashuv", "Individual approach"), "users"],
   ];
   const CONTRACT_BENEFITS = [
-    "Плановое техническое обслуживание", "Профилактические осмотры", "Приоритетное обслуживание",
-    "Персональный инженер", "Снижение простоев оборудования", "Контроль технического состояния",
+    lv("Плановое техническое обслуживание", "Rejali texnik xizmat", "Planned maintenance"), lv("Профилактические осмотры", "Profilaktik ko‘riklar", "Preventive inspections"), lv("Приоритетное обслуживание", "Ustuvor xizmat", "Priority service"),
+    lv("Персональный инженер", "Shaxsiy muhandis", "Personal engineer"), lv("Снижение простоев оборудования", "Uskuna to‘xtab qolishini kamaytirish", "Reduced equipment downtime"), lv("Контроль технического состояния", "Texnik holat nazorati", "Technical condition monitoring"),
   ];
   const DOC_ICONS = ["doc", "clipboard", "award", "doc", "chip", "headset", "star"];
   const DOCS_DEFAULTS = [
-    "Руководства пользователя", "Каталоги", "Сертификаты", "Инструкции",
-    "Программное обеспечение", "Часто задаваемые вопросы", "Полезные статьи",
+    lv("Руководства пользователя", "Foydalanuvchi qo‘llanmalari", "User manuals"), lv("Каталоги", "Kataloglar", "Catalogs"), lv("Сертификаты", "Sertifikatlar", "Certificates"), lv("Инструкции", "Ko‘rsatmalar", "Instructions"),
+    lv("Программное обеспечение", "Dasturiy ta’minot", "Software"), lv("Часто задаваемые вопросы", "Tez-tez so‘raladigan savollar", "FAQ"), lv("Полезные статьи", "Foydali maqolalar", "Useful articles"),
   ].map((title) => ({ title, url: "" }));
   const docs = (docsSetting && Array.isArray(docsSetting.items)) ? docsSetting.items : DOCS_DEFAULTS;
   // Placeholder engineers/reviews — generic (no fabricated real people/clients); to be filled via admin later.
   const ENGINEERS = [
-    ["Сервисный инженер", "Диагностика и ремонт", "Опыт: 8+ лет", ["Ультразвук", "Рентген"]],
-    ["Сервисный инженер", "Лабораторное оборудование", "Опыт: 6+ лет", ["Анализаторы", "Центрифуги"]],
-    ["Инженер-электроник", "Монтаж и пусконаладка", "Опыт: 10+ лет", ["КТ / МРТ", "Мониторинг"]],
-    ["Инженер по ПО", "Настройка и обновления", "Опыт: 5+ лет", ["Системы", "Калибровка"]],
+    [lv("Сервисный инженер", "Servis muhandisi", "Service engineer"), lv("Диагностика и ремонт", "Diagnostika va ta’mirlash", "Diagnostics and repair"), lv("Опыт: 8+ лет", "Tajriba: 8+ yil", "Experience: 8+ years"), [lv("Ультразвук", "Ultratovush", "Ultrasound"), lv("Рентген", "Rentgen", "X-ray")]],
+    [lv("Сервисный инженер", "Servis muhandisi", "Service engineer"), lv("Лабораторное оборудование", "Laboratoriya uskunalari", "Laboratory equipment"), lv("Опыт: 6+ лет", "Tajriba: 6+ yil", "Experience: 6+ years"), [lv("Анализаторы", "Analizatorlar", "Analyzers"), lv("Центрифуги", "Sentrifugalar", "Centrifuges")]],
+    [lv("Инженер-электроник", "Elektronika muhandisi", "Electronics engineer"), lv("Монтаж и пусконаладка", "Montaj va ishga tushirish", "Installation and commissioning"), lv("Опыт: 10+ лет", "Tajriba: 10+ yil", "Experience: 10+ years"), [lv("КТ / МРТ", "KT / MRT", "CT / MRI"), lv("Мониторинг", "Monitoring", "Monitoring")]],
+    [lv("Инженер по ПО", "Dasturiy ta’minot muhandisi", "Software engineer"), lv("Настройка и обновления", "Sozlash va yangilanishlar", "Setup and updates"), lv("Опыт: 5+ лет", "Tajriba: 5+ yil", "Experience: 5+ years"), [lv("Системы", "Tizimlar", "Systems"), lv("Калибровка", "Kalibrlash", "Calibration")]],
   ];
   const REVIEWS = [
-    ["Медицинское учреждение", "Отзыв клиента появится здесь после публикации в админ-панели."],
-    ["Диагностический центр", "Отзыв клиента появится здесь после публикации в админ-панели."],
-    ["Частная клиника", "Отзыв клиента появится здесь после публикации в админ-панели."],
+    [lv("Медицинское учреждение", "Tibbiyot muassasasi", "Medical institution"), lv("Отзыв клиента появится здесь после публикации в админ-панели.", "Mijoz sharhi admin-panelda chop etilgandan so‘ng shu yerda paydo bo‘ladi.", "A client review will appear here once published in the admin panel.")],
+    [lv("Диагностический центр", "Diagnostika markazi", "Diagnostic center"), lv("Отзыв клиента появится здесь после публикации в админ-панели.", "Mijoz sharhi admin-panelda chop etilgandan so‘ng shu yerda paydo bo‘ladi.", "A client review will appear here once published in the admin panel.")],
+    [lv("Частная клиника", "Xususiy klinika", "Private clinic"), lv("Отзыв клиента появится здесь после публикации в админ-панели.", "Mijoz sharhi admin-panelda chop etilgandan so‘ng shu yerda paydo bo‘ladi.", "A client review will appear here once published in the admin panel.")],
   ];
   const FAQ = [
-    ["Как оформить сервисную заявку?", "Заполните форму на этой странице, позвоните по сервисному телефону или напишите на email. Укажите оборудование, производителя и характер неисправности."],
-    ["Какие регионы обслуживаются?", "Сервисная поддержка доступна по всей территории Узбекистана. Сроки выезда зависят от региона и приоритета обращения."],
-    ["Как вызвать инженера на объект?", "Оформите заявку с пометкой о необходимости выезда. После анализа обращения и согласования времени инженер выезжает на объект."],
-    ["Как проходит гарантийное обслуживание?", "В течение гарантийного срока диагностика и устранение заводских неисправностей выполняются на условиях гарантии производителя."],
-    ["Можно ли заключить сервисный договор?", "Да. Сервисный договор включает плановое ТО, профилактику, приоритетное обслуживание и персонального инженера — оставьте запрос на коммерческое предложение."],
-    ["Как заказать запасные части?", "Укажите модель и серийный номер оборудования в заявке — подберём оригинальные запчасти и сроки поставки."],
-    ["Работаете ли с оборудованием, купленным не у вас?", "Да, возможность обслуживания рассматривается после анализа модели, документации и технического состояния."],
-    ["Есть ли экстренная поддержка?", "Для критичного оборудования предусмотрено приоритетное обслуживание; условия фиксируются в сервисном договоре."],
-    ["Какие документы получает клиент после работ?", "Отчёт о выполненных работах, при необходимости — акты, рекомендации по эксплуатации и гарантию на выполненные работы."],
-    ["Проводится ли обучение персонала?", "Да, инструктаж по эксплуатации оборудования проводится в рамках ввода в эксплуатацию и как отдельная услуга."],
+    [lv("Как оформить сервисную заявку?", "Servis so‘rovini qanday rasmiylashtirish mumkin?", "How do I submit a service request?"), lv("Заполните форму на этой странице, позвоните по сервисному телефону или напишите на email. Укажите оборудование, производителя и характер неисправности.", "Ushbu sahifadagi formani to‘ldiring, servis telefoniga qo‘ng‘iroq qiling yoki emailga yozing. Uskuna, ishlab chiqaruvchi va nosozlik xarakterini ko‘rsating.", "Fill in the form on this page, call the service phone or write to the email. Provide the equipment, manufacturer and the nature of the fault.")],
+    [lv("Какие регионы обслуживаются?", "Qaysi hududlarga xizmat ko‘rsatiladi?", "Which regions are served?"), lv("Сервисная поддержка доступна по всей территории Узбекистана. Сроки выезда зависят от региона и приоритета обращения.", "Servis qo‘llab-quvvatlashi O‘zbekistonning butun hududida mavjud. Tashrif muddatlari hudud va murojaat ustuvorligiga bog‘liq.", "Service support is available throughout Uzbekistan. Visit timing depends on the region and the request priority.")],
+    [lv("Как вызвать инженера на объект?", "Muhandisni obyektga qanday chaqirish mumkin?", "How do I call an engineer to the site?"), lv("Оформите заявку с пометкой о необходимости выезда. После анализа обращения и согласования времени инженер выезжает на объект.", "So‘rovni tashrif zarurligi belgisi bilan rasmiylashtiring. Murojaat tahlil qilinib, vaqt kelishilgandan so‘ng muhandis obyektga chiqadi.", "Submit a request marked as needing an on-site visit. After the request is reviewed and a time agreed, an engineer visits the site.")],
+    [lv("Как проходит гарантийное обслуживание?", "Kafolat xizmati qanday amalga oshiriladi?", "How does warranty service work?"), lv("В течение гарантийного срока диагностика и устранение заводских неисправностей выполняются на условиях гарантии производителя.", "Kafolat muddati davomida diagnostika va zavod nosozliklarini bartaraf etish ishlab chiqaruvchi kafolati shartlari asosida bajariladi.", "During the warranty period, diagnostics and fixing factory faults are done under the manufacturer’s warranty terms.")],
+    [lv("Можно ли заключить сервисный договор?", "Servis shartnomasini tuzish mumkinmi?", "Can I sign a service contract?"), lv("Да. Сервисный договор включает плановое ТО, профилактику, приоритетное обслуживание и персонального инженера — оставьте запрос на коммерческое предложение.", "Ha. Servis shartnomasi rejali texnik xizmat, profilaktika, ustuvor xizmat va shaxsiy muhandisni o‘z ichiga oladi — tijorat taklifi uchun so‘rov qoldiring.", "Yes. A service contract includes planned maintenance, prevention, priority service and a personal engineer — leave a request for a commercial proposal.")],
+    [lv("Как заказать запасные части?", "Ehtiyot qismlarni qanday buyurtma qilish mumkin?", "How do I order spare parts?"), lv("Укажите модель и серийный номер оборудования в заявке — подберём оригинальные запчасти и сроки поставки.", "So‘rovda uskuna modeli va seriya raqamini ko‘rsating — original ehtiyot qismlar va yetkazib berish muddatlarini tanlaymiz.", "Provide the model and serial number in the request — we will select original parts and delivery times.")],
+    [lv("Работаете ли с оборудованием, купленным не у вас?", "Sizdan sotib olinmagan uskuna bilan ishlaysizmi?", "Do you work with equipment not bought from you?"), lv("Да, возможность обслуживания рассматривается после анализа модели, документации и технического состояния.", "Ha, xizmat ko‘rsatish imkoniyati model, hujjatlar va texnik holat tahlil qilingandan so‘ng ko‘rib chiqiladi.", "Yes, the possibility of service is considered after analyzing the model, documentation and technical condition.")],
+    [lv("Есть ли экстренная поддержка?", "Shoshilinch qo‘llab-quvvatlash bormi?", "Is there emergency support?"), lv("Для критичного оборудования предусмотрено приоритетное обслуживание; условия фиксируются в сервисном договоре.", "Muhim uskunalar uchun ustuvor xizmat ko‘zda tutilgan; shartlar servis shartnomasida qayd etiladi.", "Priority service is provided for critical equipment; the terms are fixed in the service contract.")],
+    [lv("Какие документы получает клиент после работ?", "Ishlardan so‘ng mijoz qanday hujjatlarni oladi?", "What documents does the client get after the work?"), lv("Отчёт о выполненных работах, при необходимости — акты, рекомендации по эксплуатации и гарантию на выполненные работы.", "Bajarilgan ishlar hisoboti, zarur bo‘lsa — dalolatnomalar, foydalanish bo‘yicha tavsiyalar va bajarilgan ishlarga kafolat.", "A report of completed work and, if needed, acts, operating recommendations and a warranty on the work performed.")],
+    [lv("Проводится ли обучение персонала?", "Xodimlar o‘qitiladimi?", "Do you provide staff training?"), lv("Да, инструктаж по эксплуатации оборудования проводится в рамках ввода в эксплуатацию и как отдельная услуга.", "Ha, uskunadan foydalanish bo‘yicha instruktaj ishga tushirish doirasida va alohida xizmat sifatida o‘tkaziladi.", "Yes, operation briefing is provided as part of commissioning and as a separate service.")],
   ];
 
   useSsJsonLd(FAQ.map(([q, a]) => ({ q, a })));
@@ -417,15 +425,15 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
         <div className="wrap">
           <div className={hasHeroMedia ? "" : "ss-hero-grid"}>
             <div>
-              <div className="ss-badges reveal"><span className="ss-badge"><CoIcon name="shield" size={14} />Полный цикл сопровождения</span></div>
-              <h1 style={{ maxWidth: 620 }}>Сервис и поддержка медицинского оборудования</h1>
-              <p style={{ maxWidth: 640, marginTop: 16 }}>Полный цикл технического сопровождения медицинского оборудования — от ввода в эксплуатацию до модернизации и долгосрочного сервисного обслуживания.</p>
+              <div className="ss-badges reveal"><span className="ss-badge"><CoIcon name="shield" size={14} />{lv("Полный цикл сопровождения", "To‘liq hamrohlik sikli", "Full support cycle")}</span></div>
+              <h1 style={{ maxWidth: 620 }}>{lv("Сервис и поддержка медицинского оборудования", "Tibbiy uskunalar servisi va qo‘llab-quvvatlash", "Medical equipment service and support")}</h1>
+              <p style={{ maxWidth: 640, marginTop: 16 }}>{lv("Полный цикл технического сопровождения медицинского оборудования — от ввода в эксплуатацию до модернизации и долгосрочного сервисного обслуживания.", "Tibbiy uskunalarni to‘liq texnik hamrohlik qilish — ishga tushirishdan modernizatsiya va uzoq muddatli servis xizmatigacha.", "Full technical support of medical equipment — from commissioning to modernization and long-term service.")}</p>
               <div className="hero-actions" style={{ marginTop: 26 }}>
-                <button className="btn btn-pri btn-lg" onClick={() => { ssTrack("service_cta_click"); ssScrollTo("ss-form"); }}>Подать сервисную заявку</button>
-                <button className="btn btn-ghost btn-lg" onClick={() => { ssTrack("service_consult_click"); window.__openQuote ? window.__openQuote() : ssScrollTo("ss-form"); }}>Получить консультацию</button>
+                <button className="btn btn-pri btn-lg" onClick={() => { ssTrack("service_cta_click"); ssScrollTo("ss-form"); }}>{lv("Подать сервисную заявку", "Servis so‘rovini yuborish", "Submit a service request")}</button>
+                <button className="btn btn-ghost btn-lg" onClick={() => { ssTrack("service_consult_click"); window.__openQuote ? window.__openQuote() : ssScrollTo("ss-form"); }}>{lv("Получить консультацию", "Konsultatsiya olish", "Get a consultation")}</button>
               </div>
             </div>
-            {!hasHeroMedia && <div className="ss-photo ss-hero-photo reveal" data-label="Фото: инженер у оборудования"><span className="ph-ic">{SsPhotoIcon}</span></div>}
+            {!hasHeroMedia && <div className="ss-photo ss-hero-photo reveal" data-label={lv("Фото: инженер у оборудования", "Foto: uskuna yonidagi muhandis", "Photo: engineer by the equipment")}><span className="ph-ic">{SsPhotoIcon}</span></div>}
           </div>
         </div>
       </section>
@@ -433,13 +441,13 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
       {/* Block 2 — Быстрые действия */}
       <section className="section">
         <div className="wrap">
-          <div className="sec-head reveal"><span className="eyebrow line">Быстрые действия</span><h2 className="h-sec" style={{ marginTop: 14 }}>Решите задачу в один клик</h2></div>
+          <div className="sec-head reveal"><span className="eyebrow line">{lv("Быстрые действия", "Tezkor amallar", "Quick actions")}</span><h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Решите задачу в один клик", "Vazifani bir marta bosishda hal qiling", "Solve your task in one click")}</h2></div>
           <div className="ss-qa">
             {QUICK.map(([h, d, ic, act], i) => (
               <div className="ss-card link reveal" key={i} onClick={act}>
                 <div className="ss-ic"><SsIcon name={ic} /></div>
                 <h4>{h}</h4><p>{d}</p>
-                <span className="arr">Перейти <CoIcon name="arrow" size={14} /></span>
+                <span className="arr">{lv("Перейти", "O‘tish", "Open")} <CoIcon name="arrow" size={14} /></span>
               </div>
             ))}
           </div>
@@ -449,7 +457,7 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
       {/* Block 3 — Сервисные услуги */}
       <section className="section alt">
         <div className="wrap">
-          <div className="sec-head reveal"><span className="eyebrow line">Услуги</span><h2 className="h-sec" style={{ marginTop: 14 }}>Наши сервисные услуги</h2></div>
+          <div className="sec-head reveal"><span className="eyebrow line">{lv("Услуги", "Xizmatlar", "Services")}</span><h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Наши сервисные услуги", "Bizning servis xizmatlarimiz", "Our service offerings")}</h2></div>
           <div className="ss-svc">
             {SERVICES.map(([h, ic], i) => (
               <div className="ss-svc-i reveal" key={i}><div className="ss-ic"><SsIcon name={ic} /></div><h4>{h}</h4></div>
@@ -461,13 +469,13 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
       {/* Block 4 — Обслуживаемое оборудование */}
       <section className="section">
         <div className="wrap">
-          <div className="sec-head reveal"><span className="eyebrow line">Оборудование</span><h2 className="h-sec" style={{ marginTop: 14 }}>Обслуживаемое оборудование</h2></div>
+          <div className="sec-head reveal"><span className="eyebrow line">{lv("Оборудование", "Uskunalar", "Equipment")}</span><h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Обслуживаемое оборудование", "Xizmat ko‘rsatiladigan uskunalar", "Serviced equipment")}</h2></div>
           <div className="ss-eq">
             {equipment.map((it, i) => (
               <a className="ss-eq-c reveal" key={i} onClick={() => eqLink(it)}>
                 {it.photo
                   ? <img className="ss-eq-img" src={it.photo} alt={it.name} loading="lazy" />
-                  : <div className="ss-photo ss-eq-ph" data-label="Фото"><span className="ph-ic">{SsPhotoIcon}</span></div>}
+                  : <div className="ss-photo ss-eq-ph" data-label={lv("Фото", "Foto", "Photo")}><span className="ph-ic">{SsPhotoIcon}</span></div>}
                 <span>{it.name}</span>
               </a>
             ))}
@@ -478,7 +486,7 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
       {/* Block 5 — Как мы работаем */}
       <section className="section alt">
         <div className="wrap">
-          <div className="sec-head reveal"><span className="eyebrow line">Процесс</span><h2 className="h-sec" style={{ marginTop: 14 }}>Как мы работаем</h2></div>
+          <div className="sec-head reveal"><span className="eyebrow line">{lv("Процесс", "Jarayon", "Process")}</span><h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Как мы работаем", "Biz qanday ishlaymiz", "How we work")}</h2></div>
           <div className="ss-flow">
             {FLOW.map(([h, d], i) => (
               <div className="ss-flow-i reveal" key={i} onMouseEnter={() => setFlow(i)}>
@@ -493,7 +501,7 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
       {/* Block 6 — Почему выбирают нас */}
       <section className="section">
         <div className="wrap">
-          <div className="sec-head reveal"><span className="eyebrow line">Доверие</span><h2 className="h-sec" style={{ marginTop: 14 }}>Почему выбирают нас</h2></div>
+          <div className="sec-head reveal"><span className="eyebrow line">{lv("Доверие", "Ishonch", "Trust")}</span><h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Почему выбирают нас", "Nega bizni tanlashadi", "Why choose us")}</h2></div>
           <div className="ss-grid ss-g4">
             {WHY.map(([h, ic], i) => (
               <div className="ss-card reveal" key={i}><div className="ss-ic"><SsIcon name={ic} /></div><h4 style={{ margin: 0 }}>{h}</h4></div>
@@ -507,8 +515,8 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
         <div className="wrap">
           <div className="ss-contract reveal">
             <div>
-              <h2>Сервисные контракты</h2>
-              <p className="lead">Долгосрочное техническое сопровождение оборудования с плановым обслуживанием, профилактикой и приоритетным сервисом — минимум простоев и предсказуемые расходы.</p>
+              <h2>{lv("Сервисные контракты", "Servis shartnomalari", "Service contracts")}</h2>
+              <p className="lead">{lv("Долгосрочное техническое сопровождение оборудования с плановым обслуживанием, профилактикой и приоритетным сервисом — минимум простоев и предсказуемые расходы.", "Uskunaning rejali xizmat, profilaktika va ustuvor servis bilan uzoq muddatli texnik hamrohligi — minimal to‘xtab qolish va oldindan aniq xarajatlar.", "Long-term technical support with planned maintenance, prevention and priority service — minimal downtime and predictable costs.")}</p>
               <ul>
                 {CONTRACT_BENEFITS.map((b, i) => (
                   <li key={i}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg>{b}</li>
@@ -516,8 +524,8 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
               </ul>
             </div>
             <div className="card">
-              <div style={{ fontSize: 15, opacity: .9, marginBottom: 16 }}>Подберём условия под ваш парк оборудования и режим работы учреждения.</div>
-              <button className="btn btn-lg" style={{ background: "#fff", color: "#0e4ac6", width: "100%", justifyContent: "center" }} onClick={() => { ssTrack("service_contract_cta"); ssScrollTo("ss-form"); }}>Получить коммерческое предложение</button>
+              <div style={{ fontSize: 15, opacity: .9, marginBottom: 16 }}>{lv("Подберём условия под ваш парк оборудования и режим работы учреждения.", "Uskunalar parki va muassasa ish rejimiga mos shartlarni tanlaymiz.", "We tailor terms to your equipment fleet and the institution’s working hours.")}</div>
+              <button className="btn btn-lg" style={{ background: "#fff", color: "#0e4ac6", width: "100%", justifyContent: "center" }} onClick={() => { ssTrack("service_contract_cta"); ssScrollTo("ss-form"); }}>{lv("Получить коммерческое предложение", "Tijorat taklifini olish", "Get a commercial proposal")}</button>
             </div>
           </div>
         </div>
@@ -526,7 +534,7 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
       {/* Block 8 — Документация и база знаний */}
       <section className="section" id="ss-docs">
         <div className="wrap">
-          <div className="sec-head reveal"><span className="eyebrow line">База знаний</span><h2 className="h-sec" style={{ marginTop: 14 }}>Документация и база знаний</h2></div>
+          <div className="sec-head reveal"><span className="eyebrow line">{lv("База знаний", "Bilimlar bazasi", "Knowledge base")}</span><h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Документация и база знаний", "Hujjatlar va bilimlar bazasi", "Documentation and knowledge base")}</h2></div>
           <div className="ss-grid ss-g4">
             {docs.map((it, i) => (
               <div className="ss-card link reveal" key={i} onClick={() => {
@@ -547,23 +555,23 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
           «Показывать на странице Сервис и поддержка»; без них — заглушки. */}
       <section className="section alt">
         <div className="wrap">
-          <div className="sec-head reveal"><span className="eyebrow line">Команда</span><h2 className="h-sec" style={{ marginTop: 14 }}>Наши инженеры</h2></div>
+          <div className="sec-head reveal"><span className="eyebrow line">{lv("Команда", "Jamoa", "Team")}</span><h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Наши инженеры", "Bizning muhandislar", "Our engineers")}</h2></div>
           <div className="ss-eng">
             {engineers.length > 0
               ? engineers.map((m) => (
                 <div className="ss-eng-c reveal" key={m.id}>
                   {m.photo
                     ? <img className="ss-eng-img" src={m.photo} alt={m.name} loading="lazy" />
-                    : <div className="ss-photo ss-eng-ph" data-label="Фото сотрудника"><span className="ph-ic">{SsPhotoIcon}</span></div>}
+                    : <div className="ss-photo ss-eng-ph" data-label={lv("Фото сотрудника", "Xodim fotosi", "Staff photo")}><span className="ph-ic">{SsPhotoIcon}</span></div>}
                   <div className="ss-eng-b">
                     <h4>{m.name}</h4>
-                    <div className="role">{(m.role && (m.role.ru || m.role)) || "Сервисный инженер"}</div>
+                    <div className="role">{(m.role && (m.role[lang] || m.role.ru || m.role)) || lv("Сервисный инженер", "Servis muhandisi", "Service engineer")}</div>
                   </div>
                 </div>
               ))
               : ENGINEERS.map(([name, role, exp, chips], i) => (
                 <div className="ss-eng-c reveal" key={i}>
-                  <div className="ss-photo ss-eng-ph" data-label="Фото сотрудника"><span className="ph-ic">{SsPhotoIcon}</span></div>
+                  <div className="ss-photo ss-eng-ph" data-label={lv("Фото сотрудника", "Xodim fotosi", "Staff photo")}><span className="ph-ic">{SsPhotoIcon}</span></div>
                   <div className="ss-eng-b">
                     <h4>{name}</h4>
                     <div className="role">{role}</div>
@@ -573,20 +581,21 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
                 </div>
               ))}
           </div>
-          {engineers.length === 0 && <div className="ss-placeholder-note">Сотрудники добавляются в админ-панели «Команда» (флажок «Показывать на странице „Сервис и поддержка"»).</div>}
+          {engineers.length === 0 && <div className="ss-placeholder-note">{lv("Сотрудники добавляются в админ-панели «Команда» (флажок «Показывать на странице Сервис и поддержка»).", "Xodimlar «Jamoa» admin-panelida qo‘shiladi («Servis va qo‘llab-quvvatlash sahifasida ko‘rsatish» belgisi).", "Staff are added in the “Team” admin panel (the “Show on the Service & support page” checkbox).")}</div>}
         </div>
       </section>
 
       {/* Block 10 — Отзывы клиентов: опубликованные отзывы из админки «Отзывы». */}
       <section className="section">
         <div className="wrap">
-          <div className="sec-head reveal"><span className="eyebrow line">Отзывы</span><h2 className="h-sec" style={{ marginTop: 14 }}>Отзывы клиентов</h2></div>
+          <div className="sec-head reveal"><span className="eyebrow line">{lv("Отзывы", "Sharhlar", "Reviews")}</span><h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Отзывы клиентов", "Mijozlar sharhlari", "Client reviews")}</h2></div>
           <div className="ss-rev">
             {cmsReviews.length > 0
               ? cmsReviews.map((r) => {
-                const org = typeof r.company === "string" ? r.company : ((r.company && r.company.ru) || "");
-                const txt = typeof r.desc === "string" ? r.desc : ((r.desc && r.desc.ru) || "");
-                const region = typeof r.region === "string" ? r.region : ((r.region && r.region.ru) || "");
+                const pick = (v) => (typeof v === "string" ? v : (v && (v[lang] || v.ru)) || "");
+                const org = pick(r.company);
+                const txt = pick(r.desc);
+                const region = pick(r.region);
                 return (
                   <div className="ss-rev-c reveal" key={r.id}>
                     <div className="ss-rev-b" style={{ paddingTop: 20 }}>
@@ -601,7 +610,7 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
               })
               : REVIEWS.map(([org, txt], i) => (
                 <div className="ss-rev-c reveal" key={i}>
-                  <div className="ss-photo ss-rev-obj" data-label="Фото объекта"><span className="ph-ic">{SsPhotoIcon}</span></div>
+                  <div className="ss-photo ss-rev-obj" data-label={lv("Фото объекта", "Obyekt fotosi", "Site photo")}><span className="ph-ic">{SsPhotoIcon}</span></div>
                   <div className="ss-rev-b">
                     <div className="ss-photo ss-rev-logo" data-label=""><span className="ph-ic"><CoIcon name="building" size={16} /></span></div>
                     <p>{txt}</p>
@@ -610,14 +619,14 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
                 </div>
               ))}
           </div>
-          {cmsReviews.length === 0 && <div className="ss-placeholder-note">Отзывы публикуются через админ-панель «Отзывы» (статус «Опубликовано»).</div>}
+          {cmsReviews.length === 0 && <div className="ss-placeholder-note">{lv("Отзывы публикуются через админ-панель «Отзывы» (статус «Опубликовано»).", "Sharhlar «Sharhlar» admin-paneli orqali chop etiladi («Chop etilgan» holati).", "Reviews are published via the “Reviews” admin panel (status “Published”).")}</div>}
         </div>
       </section>
 
       {/* Block 11 — FAQ */}
       <section className="section alt">
         <div className="wrap" style={{ maxWidth: 860 }}>
-          <div className="sec-head center reveal"><h2 className="h-sec">Часто задаваемые вопросы</h2></div>
+          <div className="sec-head center reveal"><h2 className="h-sec">{lv("Часто задаваемые вопросы", "Tez-tez so‘raladigan savollar", "Frequently asked questions")}</h2></div>
           <div className="faq-list">
             {FAQ.map(([q, a], i) => (
               <div className={"faq-it reveal" + (faqOpen === i ? " open" : "")} key={i}>
@@ -633,33 +642,33 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
       <section className="section" id="ss-form">
         <div className="wrap">
           <div className="sec-head center reveal">
-            <span className="eyebrow">Заявка</span>
-            <h2 className="h-sec">Форма сервисной заявки</h2>
-            <p style={{ fontSize: 15, color: "var(--slate-600)", maxWidth: 600, margin: "12px auto 0", lineHeight: 1.6 }}>Опишите оборудование и неисправность — инженер сервисной службы свяжется с вами.</p>
+            <span className="eyebrow">{lv("Заявка", "So‘rov", "Request")}</span>
+            <h2 className="h-sec">{lv("Форма сервисной заявки", "Servis so‘rovi formasi", "Service request form")}</h2>
+            <p style={{ fontSize: 15, color: "var(--slate-600)", maxWidth: 600, margin: "12px auto 0", lineHeight: 1.6 }}>{lv("Опишите оборудование и неисправность — инженер сервисной службы свяжется с вами.", "Uskuna va nosozlikni tavsiflang — servis xizmati muhandisi siz bilan bog‘lanadi.", "Describe the equipment and fault — a service engineer will contact you.")}</p>
           </div>
-          <SsForm />
+          <SsForm lang={lang} />
         </div>
       </section>
 
       {/* Block 13 — Контакты сервисной службы */}
       <section className="section alt">
         <div className="wrap">
-          <div className="sec-head reveal"><span className="eyebrow line">Контакты</span><h2 className="h-sec" style={{ marginTop: 14 }}>Контакты сервисной службы</h2></div>
+          <div className="sec-head reveal"><span className="eyebrow line">{lv("Контакты", "Kontaktlar", "Contacts")}</span><h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Контакты сервисной службы", "Servis xizmati kontaktlari", "Service team contacts")}</h2></div>
           <div className="ss-contacts">
-            <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="phone" size={18} /></div><div><h4>Телефон</h4><a href={"tel:" + String(contacts.phone || "").replace(/[^+\d]/g, "")}>{contacts.phone}</a></div></div>
+            <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="phone" size={18} /></div><div><h4>{lv("Телефон", "Telefon", "Phone")}</h4><a href={"tel:" + String(contacts.phone || "").replace(/[^+\d]/g, "")}>{contacts.phone}</a></div></div>
             <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="mail" size={18} /></div><div><h4>Email</h4><a href={"mailto:" + contacts.email}>{contacts.email}</a></div></div>
-            <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="pin" size={18} /></div><div><h4>Адрес</h4><div className="v">{contacts.address || "100069, Ташкент, Узбекистан"}</div></div></div>
-            <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="clock" size={18} /></div><div><h4>Режим работы</h4><div className="v">Пн–Пт, 9:00–18:00</div></div></div>
+            <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="pin" size={18} /></div><div><h4>{lv("Адрес", "Manzil", "Address")}</h4><div className="v">{contacts.address || lv("100069, Ташкент, Узбекистан", "100069, Toshkent, O‘zbekiston", "100069, Tashkent, Uzbekistan")}</div></div></div>
+            <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="clock" size={18} /></div><div><h4>{lv("Режим работы", "Ish rejimi", "Working hours")}</h4><div className="v">{lv("Пн–Пт, 9:00–18:00", "Du–Ju, 9:00–18:00", "Mon–Fri, 9:00–18:00")}</div></div></div>
             {contacts.telegram && <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="globe" size={18} /></div><div><h4>Telegram</h4><a href={contacts.telegram} target="_blank" rel="noopener">{contacts.telegram.replace(/^https?:\/\//, "")}</a></div></div>}
-            <div className="ss-contact-i urgent"><div className="ss-ic"><CoIcon name="phone" size={18} /></div><div><h4>Экстренная линия</h4><a href={"tel:" + String(contacts.phone || "").replace(/[^+\d]/g, "")}>{contacts.phone}</a></div></div>
+            <div className="ss-contact-i urgent"><div className="ss-ic"><CoIcon name="phone" size={18} /></div><div><h4>{lv("Экстренная линия", "Shoshilinch liniya", "Emergency line")}</h4><a href={"tel:" + String(contacts.phone || "").replace(/[^+\d]/g, "")}>{contacts.phone}</a></div></div>
           </div>
-          <div className="ss-photo ss-map-ph" data-label="Карта — адрес сервисного центра"><span className="ph-ic"><CoIcon name="pin" size={26} /></span></div>
+          <div className="ss-photo ss-map-ph" data-label={lv("Карта — адрес сервисного центра", "Xarita — servis markazi manzili", "Map — service center address")}><span className="ph-ic"><CoIcon name="pin" size={26} /></span></div>
         </div>
       </section>
 
       {/* Sticky CTA */}
       <div className={"ss-sticky" + (sticky ? " show" : "")}>
-        <button className="btn btn-pri btn-lg" onClick={() => { ssTrack("service_cta_click", { from: "sticky" }); ssScrollTo("ss-form"); }}>Подать заявку</button>
+        <button className="btn btn-pri btn-lg" onClick={() => { ssTrack("service_cta_click", { from: "sticky" }); ssScrollTo("ss-form"); }}>{lv("Подать заявку", "So‘rov yuborish", "Submit a request")}</button>
       </div>
     </div>
   );
