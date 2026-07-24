@@ -3219,6 +3219,87 @@ html{scroll-padding-top:72px}
   .crumbs .wrap::-webkit-scrollbar,.co-crumbs-list::-webkit-scrollbar{display:none}
   .crumb-cur,.co-crumb-cur{max-width:60vw;overflow:hidden;text-overflow:ellipsis}
 }
+
+/* ============================================================
+   NVIDIA-restyle шапки (перенос бар-меню из soi-uz / :3000):
+   плавающая тёмная стеклянная панель + зелёные (лаймовые) акценты.
+   Всегда тёмная, независимо от светлой/тёмной темы тела — как первый
+   шаг миграции сайта на тёмный стиль. Токены: night #0b2d25, лайм #b8f500.
+   ============================================================ */
+.z-corp{--nv-night:#0b2d25;--nv-lime:#b8f500;--nv-lime-hi:#c5ff19}
+/* внешний элемент — прозрачный, задаёт отступ, чтобы панель «плавала» */
+.z-corp > nav.nav.co-nav,
+[data-theme="dark"] .z-corp > nav.nav.co-nav,
+.z-corp > nav.nav.co-nav.scrolled,
+[data-theme="dark"] .z-corp > nav.nav.co-nav.scrolled{
+  background:transparent!important;border:0!important;box-shadow:none!important;
+  padding:12px 14px 0;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+/* внутренняя стеклянная панель */
+.z-corp .co-nav .co-nav-wrap{
+  max-width:1200px;margin:0 auto;border-radius:16px;
+  background:rgba(9,32,26,.72);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 10px 30px rgba(0,0,0,.34);
+  backdrop-filter:saturate(150%) blur(18px);-webkit-backdrop-filter:saturate(150%) blur(18px);
+  height:60px!important;padding:0 16px;gap:16px}
+.z-corp .co-nav.scrolled .co-nav-wrap{height:56px!important}
+/* логотип — белый на тёмном */
+.z-corp .co-nav .co-brand-mark{filter:brightness(0) invert(1)}
+/* пункты меню — «пилюли», белый текст, зелёные акценты */
+.z-corp .co-nav .co-nav-links>a,
+.z-corp .co-nav .nav-dd-btn{
+  color:rgba(255,255,255,.85)!important;background:transparent!important;
+  border:0!important;border-radius:999px;font-weight:600}
+.z-corp .co-nav .co-nav-links>a:hover,
+.z-corp .co-nav .nav-dd-btn:hover,
+.z-corp .co-nav .nav-dd-btn.on{
+  background:rgba(255,255,255,.12)!important;color:#fff!important;box-shadow:none!important}
+.z-corp .co-nav .co-nav-links>a.on{background:rgba(255,255,255,.14)!important;color:#fff!important}
+/* Каталог (primary) — лаймовая кнопка с тёмным текстом */
+.z-corp .co-nav .co-nav-links>a.nav-primary{
+  background:var(--nv-lime)!important;color:#03120e!important;border:0!important;font-weight:800;
+  box-shadow:0 8px 22px rgba(184,245,0,.18)!important}
+.z-corp .co-nav .co-nav-links>a.nav-primary:hover{background:var(--nv-lime-hi)!important;color:#03120e!important}
+.z-corp .co-nav .nav-dd-chevron,
+.z-corp .co-nav .lang-dd-chevron{color:rgba(255,255,255,.45)}
+.z-corp .co-nav .nav-dd-btn.on .nav-dd-chevron,
+.z-corp .co-nav .lang-dd-btn[aria-expanded="true"] .lang-dd-chevron{color:var(--nv-lime-hi)}
+/* выпадающие меню — тёмное стекло, зелёная левая рамка при hover */
+.z-corp .co-nav .nav-dd-menu,
+.z-corp .co-nav .lang-dd-menu{
+  background:rgba(9,32,26,.96)!important;border:1px solid rgba(255,255,255,.10)!important;
+  border-radius:16px!important;box-shadow:0 18px 48px rgba(0,0,0,.44)!important;
+  backdrop-filter:saturate(150%) blur(18px);-webkit-backdrop-filter:saturate(150%) blur(18px)}
+.z-corp .co-nav .nav-dd-item,
+.z-corp .co-nav .lang-dd-item{
+  color:rgba(255,255,255,.82)!important;border-left:2px solid transparent;border-radius:8px}
+.z-corp .co-nav .nav-dd-item:hover,
+.z-corp .co-nav .lang-dd-item:hover,
+.z-corp .co-nav .lang-dd-item.on{
+  background:rgba(255,255,255,.06)!important;color:#fff!important;border-left-color:var(--nv-lime)}
+.z-corp .co-nav .lang-dd-item>span:last-child{color:var(--nv-lime-hi)!important}
+/* переключатели языка/темы, иконки-инструменты */
+.z-corp .co-nav .lang-dd-btn,
+.z-corp .co-nav .theme-btn,
+.z-corp .co-nav .co-act,
+[data-theme="dark"] .z-corp .co-nav .lang-dd-btn,
+[data-theme="dark"] .z-corp .co-nav .theme-btn,
+[data-theme="dark"] .z-corp .co-nav .co-act{color:rgba(255,255,255,.8)!important;background:transparent!important;border:0!important;border-radius:999px}
+.z-corp .co-nav .lang-dd-btn:hover,
+.z-corp .co-nav .theme-btn:hover,
+.z-corp .co-nav .co-act:hover,
+[data-theme="dark"] .z-corp .co-nav .lang-dd-btn:hover,
+[data-theme="dark"] .z-corp .co-nav .theme-btn:hover,
+[data-theme="dark"] .z-corp .co-nav .co-act:hover{background:rgba(255,255,255,.12)!important;color:var(--nv-lime-hi)!important}
+.z-corp .co-nav .nav-sep{background:rgba(255,255,255,.16)!important}
+/* бейджи-счётчики — лайм */
+.z-corp .co-nav .co-badge,
+.z-corp .co-nav .co-act-cart .co-badge{background:var(--nv-lime)!important;color:#03120e!important}
+/* каталожный поиск + мобильные действия в тёмной панели */
+.z-corp .co-nav .co-cat-search-trigger,
+.z-corp .co-nav .co-mobile-act{background:rgba(255,255,255,.08)!important;border:0!important;color:rgba(255,255,255,.85)!important}
+.z-corp .co-nav .co-cat-search-trigger:hover,
+.z-corp .co-nav .co-mobile-act:hover{background:rgba(255,255,255,.16)!important;color:var(--nv-lime-hi)!important}
 </style>
 <style>/* latin-ext */
 @font-face {
