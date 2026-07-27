@@ -478,17 +478,26 @@ function CoBreadcrumbs({ lang, go, route }) {
   );
 }
 
-function CoFooter({ t, lang, go }) {
+function CoFooter({ t, lang, go, setLang }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const contacts = useSiteContacts();
+  const [subscribed, setSubscribed] = React.useState(false);
+  const onSubscribe = (e) => {
+    e.preventDefault();
+    setSubscribed(true);
+    e.target.reset();
+  };
   return (
     <footer className="foot">
       <div className="wrap">
         <div className="fcols">
           <div>
-            <img className="foot-logo" src={LOGO_SRC} alt="" style={{ width: 48, height: 48, marginBottom: 14, filter: "brightness(0) invert(1)" }} />
+            <div className="f-brand">
+              <img className="foot-logo" src={LOGO_SRC} alt="" style={{ width: 40, height: 40 }} />
+              <span className="f-wordmark">{lv("ИНДУСТРИЯ ЗДОРОВЬЯ", "SOG'LIQ INDUSTRIYASI", "HEALTH INDUSTRY")}</span>
+            </div>
             <p className="fabout">{t.f_about}</p>
-            <a className="cb-phone" href={telHref(contacts.phone)} style={{ color: "#fff", fontWeight: 800, fontSize: 20 }}>{contacts.phone}</a>
+            <a className="cb-phone" href={telHref(contacts.phone)} style={{ fontWeight: 800, fontSize: 20 }}>{contacts.phone}</a>
           </div>
           <div>
             <h5>{lv("Компания", "Kompaniya", "Company")}</h5>
@@ -511,12 +520,37 @@ function CoFooter({ t, lang, go }) {
           </div>
           <div>
             <h5>{t.f_contacts}</h5>
-            <ul>
-              <li style={{ color: "#aab8c9" }}>{contacts.address}</li>
+            <ul className="foot-contact">
+              <li>{contacts.address}</li>
+              <li><a className="fc-map" href={contacts.mapUrl} target="_blank" rel="noopener">
+                <Icon name="pin" size={14} />
+                {lv("Показать на карте", "Xaritada ko'rsatish", "Show on map")}
+              </a></li>
               <li><a href={telHref(contacts.phone)}>{lv("Приёмная", "Qabulxona", "Reception")}: {contacts.phone}</a></li>
               <li><a href={telHref(contacts.phone2)}>{lv("Отдел продаж", "Sotuv bo'limi", "Sales")}: {contacts.phone2}</a></li>
               <li><a href={"mailto:" + contacts.email}>{contacts.email}</a></li>
             </ul>
+          </div>
+          <div className="foot-news-col">
+            <h5>{lv("Рассылка", "Yangiliklar", "Newsletter")}</h5>
+            <p>{lv("Новости, акции и поступления оборудования — не чаще раза в неделю.", "Yangiliklar, aksiyalar va yangi uskunalar — haftada bir martadan ko'p emas.", "Product updates and offers — no more than once a week.")}</p>
+            <form className="foot-news" onSubmit={onSubscribe}>
+              <input type="email" required placeholder={lv("Ваш email", "Emailingiz", "Your email")} aria-label={lv("Email для рассылки", "Yangiliklar uchun email", "Newsletter email")} />
+              <button type="submit" aria-label={lv("Подписаться", "Obuna bo'lish", "Subscribe")}>
+                <Icon name="arrowRight" size={16} />
+              </button>
+            </form>
+            {subscribed && (
+              <div className="foot-news-ok">
+                <Icon name="check" size={14} sw={2.6} />
+                {lv("Спасибо! Вы подписаны.", "Rahmat! Siz obuna bo'ldingiz.", "Thanks! You're subscribed.")}
+              </div>
+            )}
+            <div className="foot-lang" role="group" aria-label={lv("Язык сайта", "Sayt tili", "Site language")}>
+              <button type="button" className={lang === "ru" ? "on" : ""} onClick={() => setLang && setLang("ru")}>RU</button>
+              <button type="button" className={lang === "uz" ? "on" : ""} onClick={() => setLang && setLang("uz")}>UZ</button>
+              <button type="button" className={lang === "en" ? "on" : ""} onClick={() => setLang && setLang("en")}>EN</button>
+            </div>
           </div>
         </div>
         <div className="foot-disclaimer">

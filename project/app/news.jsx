@@ -282,7 +282,7 @@ function App() {
       <React.Fragment>
           <CoBreadcrumbs lang={lang} go={go} route={route} />
           <main key={v + lang}>{page}</main>
-          <CoFooter t={t} lang={lang} go={go} />
+          <CoFooter t={t} lang={lang} go={go} setLang={setLang} />
         </React.Fragment>
       }
       {!isCatalog &&

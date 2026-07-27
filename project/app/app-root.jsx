@@ -372,7 +372,7 @@ function App(props) {
       <StickyBar t={t} lang={lang} setLang={setLang} store={store} go={go} query={query} setQuery={setQuery} theme={theme} toggleTheme={toggleTheme} openMega={openMega} setOpenMega={setOpenMega} route={route} />
       {openMega && <MegaMenu t={t} lang={lang} go={go} onClose={() => setOpenMega(false)} />}
       <main className="app-main">{loading ? <PageSkeleton view={v} /> : <div key={routeKey} className="page-fade">{page}</div>}</main>
-      <Footer t={t} lang={lang} go={go} />
+      <Footer t={t} lang={lang} go={go} setLang={setLang} />
       <CompareBar t={t} lang={lang} store={store} go={go} />
       {quote && <QuoteModal t={t} lang={lang} product={quote.product} onClose={() => setQuote(null)} />}
       <QuickViewPortal t={t} lang={lang} store={store} go={go} />
