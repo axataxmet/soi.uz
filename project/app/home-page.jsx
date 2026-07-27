@@ -202,10 +202,84 @@ function HeroVideoSlot({ t, lang }) {
 
 }
 
+// ---- Hero slider slides (mirrors CLAUDE HP / localhost:3000 hero carousel) ----
+const HERO_SLIDES = [
+  {
+    id: "slide-equip",
+    theme: "dark",
+    video: "assets/hero-equip.mp4",
+    bg: "linear-gradient(120deg, #060a08 0%, #0e2c20 55%, #116a4b 100%)",
+    badge: { ru: "Комплексные поставки", uz: "Kompleks yetkazib berish", en: "Turnkey supply" },
+    title: { ru: "Комплексное оснащение медицинских учреждений", uz: "Tibbiyot muassasalarini kompleks jihozlash", en: "Comprehensive equipping of medical institutions" },
+    subtitle: { ru: "Медицинское оборудование, мебель и инструменты от ведущих производителей — с доставкой, монтажом и обучением персонала.", uz: "Yetakchi ishlab chiqaruvchilardan tibbiy uskunalar, mebel va asboblar — yetkazib berish, o'rnatish va o'qitish bilan.", en: "Medical equipment, furniture and instruments from leading manufacturers — with delivery, installation and staff training." },
+    ctas: [
+      { label: { ru: "Перейти в каталог", uz: "Katalogga o'tish", en: "Browse catalog" }, action: "catalog", style: "primary" },
+      { label: { ru: "Связаться с нами", uz: "Bog'lanish", en: "Contact us" }, action: "contacts", style: "ghost" },
+    ],
+  },
+  {
+    id: "slide-registration",
+    theme: "light",
+    bg: "linear-gradient(135deg, #f5f9f7 0%, #d6f5e3 55%, #b0eacc 100%)",
+    badge: { ru: "Услуга", uz: "Xizmat", en: "Service" },
+    title: { ru: "Регистрация медицинских изделий в Узбекистане", uz: "O'zbekistonda tibbiy buyumlarni ro'yxatdan o'tkazish", en: "Medical device registration in Uzbekistan" },
+    subtitle: { ru: "Полное сопровождение: досье, экспертиза, взаимодействие с регулятором — под ключ.", uz: "To'liq hamrohlik: hujjatlar, ekspertiza, regulyator bilan ishlash — kalit topshirish sharti bilan.", en: "Full support: dossier, expertise, regulator liaison — turnkey." },
+    ctas: [
+      { label: { ru: "Подробнее об услуге", uz: "Xizmat haqida batafsil", en: "Learn more" }, action: "registration", style: "primary" },
+    ],
+  },
+  {
+    id: "slide-service",
+    theme: "dark",
+    bg: "linear-gradient(120deg, #04100b 0%, #10543d 70%, #22a472 100%)",
+    badge: { ru: "Сервис", uz: "Servis", en: "Service" },
+    title: { ru: "Сервис и обучение персонала", uz: "Servis va xodimlarni o'qitish", en: "Maintenance and staff training" },
+    subtitle: { ru: "Пусконаладка, гарантийное и постгарантийное обслуживание, обучение работе с оборудованием.", uz: "Ishga tushirish, kafolatli va kafolatdan keyingi xizmat, uskunalar bilan ishlashga o'qitish.", en: "Commissioning, warranty and post-warranty service, equipment operation training." },
+    ctas: [
+      { label: { ru: "Сервисное обслуживание", uz: "Servis xizmati", en: "Maintenance" }, action: "services", style: "primary" },
+      { label: { ru: "Обучение персонала", uz: "Xodimlarni o'qitish", en: "Staff training" }, action: "services", style: "ghost" },
+    ],
+  },
+];
+
 function Hero({ t, lang, go }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
-  const hero = useHomeSetting("homepage_hero", HERO_DEFAULTS);
-  const htx = (field) => trTx(hero, field, lang);
+
+  const SLIDE_MS = 7000;
+  const [slideIdx, setSlideIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const parallaxRef = useRef(null);
+  const reduced = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // autoplay
+  useEffect(() => {
+    if (paused || reduced) return;
+    const id = setTimeout(() => setSlideIdx((i) => (i + 1) % HERO_SLIDES.length), SLIDE_MS);
+    return () => clearTimeout(id);
+  }, [slideIdx, paused, reduced]);
+
+  // parallax: background layers drift slower than the text (NVIDIA-style)
+  useEffect(() => {
+    if (reduced) return;
+    const el = parallaxRef.current;
+    if (!el) return;
+    let raf = 0;
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        const y = Math.min(window.scrollY, el.offsetHeight);
+        el.querySelectorAll("[data-hero-bg]").forEach((bg) => {
+          bg.style.transform = `translateY(${y * 0.35}px)`;
+        });
+      });
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); cancelAnimationFrame(raf); };
+  }, [reduced]);
+
+  const slide = HERO_SLIDES[slideIdx];
+  const sv = (obj) => obj[lang] || obj.ru || "";
 
   useEffect(() => {
     const id = "soi-chero-css";
@@ -213,100 +287,91 @@ function Hero({ t, lang, go }) {
     const s = document.createElement("style");
     s.id = id;
     s.textContent = `
-/* ── ИНДУСТРИЯ ЗДОРОВЬЯ Hero v3 — Corporate / Light (Stripe·Vercel) ── */
-.soi-chero { position:relative; overflow:hidden; padding:clamp(104px,12vw,170px) 0 clamp(64px,7vw,104px); background:var(--sx-bg); }
-.soi-chero-bg { position:absolute; inset:0; pointer-events:none; z-index:0; }
-.soi-chero-mesh { position:absolute; inset:-12% -6% 0; background:
-  radial-gradient(46% 42% at 18% 22%, rgba(29,126,216,.16), transparent 70%),
-  radial-gradient(42% 40% at 86% 16%, rgba(20,184,224,.13), transparent 68%),
-  radial-gradient(46% 52% at 72% 82%, rgba(100,84,212,.10), transparent 66%);
-  animation:soiCheroDrift 17s ease-in-out infinite alternate; }
-[data-theme="dark"] .soi-chero-mesh { background:
-  radial-gradient(46% 42% at 18% 22%, rgba(29,126,216,.32), transparent 70%),
-  radial-gradient(42% 40% at 86% 16%, rgba(20,184,224,.22), transparent 68%),
-  radial-gradient(46% 52% at 72% 82%, rgba(100,84,212,.20), transparent 66%); }
-@keyframes soiCheroDrift { 0%{transform:translate3d(0,0,0) scale(1);} 100%{transform:translate3d(-16px,9px,0) scale(1.05);} }
-.soi-chero-grid { position:absolute; inset:0;
-  background-image:linear-gradient(var(--sx-ink) 1px, transparent 1px), linear-gradient(90deg, var(--sx-ink) 1px, transparent 1px);
-  background-size:54px 54px; opacity:.025;
-  -webkit-mask-image:radial-gradient(ellipse 78% 70% at 50% 0%, #000 22%, transparent 76%);
-  mask-image:radial-gradient(ellipse 78% 70% at 50% 0%, #000 22%, transparent 76%); }
+/* ── ИНДУСТРИЯ ЗДОРОВЬЯ Hero v4 — full-bleed slider (ported from CLAUDE HP) ── */
+/* pull the hero up under the floating header so 100dvh fills exactly one screen */
+.soi-chero { position:relative; overflow:hidden; margin-top:calc(-1 * var(--soi-head-h, 0px)); }
+.soi-chero-stage { position:relative; min-height:100dvh; }
 
-.soi-chero-wrap { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 24px;
-  display:grid; grid-template-columns:1.04fr .96fr; gap:clamp(32px,5vw,72px); align-items:center; }
+/* each slide is stacked and crossfaded */
+.soi-chero-slide { position:absolute; inset:0; opacity:0; z-index:0;
+  transition:opacity .9s cubic-bezier(.16,1,.3,1); }
+.soi-chero-slide.on { opacity:1; z-index:1; }
 
-.soi-chero-badge { display:inline-flex; align-items:center; gap:9px; padding:7px 15px 7px 11px; border-radius:99px;
-  background:var(--sx-card); border:1px solid var(--sx-line); box-shadow:var(--sx-shadow);
-  font-size:13px; font-weight:700; color:var(--sx-ink-soft); letter-spacing:-.005em; }
-.soi-chero-badge .dot { width:8px; height:8px; border-radius:50%; background:var(--sx-green);
-  box-shadow:0 0 0 4px color-mix(in srgb,var(--sx-green) 22%, transparent); }
-.soi-chero-h1 { font-size:clamp(34px,5.1vw,62px); font-weight:800; line-height:1.04; letter-spacing:-.035em;
-  color:var(--sx-ink); margin:22px 0 0; }
-.soi-chero-h1 .accent { background:linear-gradient(110deg,var(--sx-blue),var(--sx-cyan));
-  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-.soi-chero-sub { font-size:clamp(16px,1.55vw,19px); line-height:1.6; color:var(--sx-mute); margin:22px 0 0; max-width:548px; }
-.soi-chero-cta { display:flex; flex-wrap:wrap; gap:13px; margin-top:34px; }
-.soi-chero-btn { display:inline-flex; align-items:center; gap:9px; height:54px; padding:0 26px; border-radius:14px;
-  font-family:inherit; font-size:15.5px; font-weight:700; cursor:pointer; border:1.5px solid transparent;
-  transition:transform .18s cubic-bezier(.16,1,.3,1), box-shadow .25s, filter .18s, border-color .2s, background .2s, color .2s; }
-.soi-chero-btn.primary { background:linear-gradient(135deg,var(--sx-blue-2),var(--sx-blue)); color:#fff; box-shadow:0 10px 30px rgba(14,74,198,.32); }
-.soi-chero-btn.primary:hover { transform:translateY(-2px); filter:brightness(1.07); box-shadow:0 14px 38px rgba(14,74,198,.42); }
-.soi-chero-btn.primary .arr { display:inline-flex; transition:transform .2s; }
-.soi-chero-btn.primary:hover .arr { transform:translateX(4px); }
-.soi-chero-btn.ghost { background:var(--sx-card); color:var(--sx-ink); border-color:var(--sx-line); box-shadow:var(--sx-shadow); }
-.soi-chero-btn.ghost:hover { transform:translateY(-2px); border-color:var(--sx-blue); color:var(--sx-blue); }
-.soi-chero-trust { display:flex; flex-wrap:wrap; gap:10px 22px; margin-top:32px; }
-.soi-chero-trust span { display:inline-flex; align-items:center; gap:8px; font-size:13.5px; font-weight:600; color:var(--sx-ink-soft); }
-.soi-chero-trust svg { color:var(--sx-green); flex-shrink:0; }
+/* background layer sits taller than the stage so parallax never bares the top */
+.soi-chero-bg { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.soi-chero-bg-inner { position:absolute; left:0; right:0; top:-33%; bottom:0; will-change:transform; }
+.soi-chero-vid { width:100%; height:100%; object-fit:cover; display:block; }
+.soi-chero-fill { width:100%; height:100%; }
 
-.soi-chero-right { position:relative; }
-.soi-chero-panel { position:relative; z-index:1; background:var(--sx-card); border:1px solid var(--sx-line);
-  border-radius:22px; padding:22px; box-shadow:var(--sx-shadow-lg); }
-.soi-chero-panel-head { display:flex; align-items:center; gap:11px; padding:2px 4px 17px; border-bottom:1px solid var(--sx-line-2); }
-.soi-chero-panel-mark { width:38px; height:38px; border-radius:11px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(135deg,var(--sx-blue),var(--sx-cyan)); color:#fff; font-weight:800; font-size:14px; letter-spacing:-.04em; }
-.soi-chero-panel-ttl { font-size:15px; font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; }
-.soi-chero-panel-sub { font-size:12.5px; color:var(--sx-mute); margin-top:1px; }
-.soi-chero-panel-live { margin-left:auto; display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; color:var(--sx-green); }
-.soi-chero-panel-live i { width:7px; height:7px; border-radius:50%; background:var(--sx-green); animation:soiCheroPulse 2s ease-in-out infinite; }
-@keyframes soiCheroPulse { 0%,100%{opacity:1;} 50%{opacity:.35;} }
-.soi-chero-pillars { display:flex; flex-direction:column; gap:5px; margin-top:13px; }
-.soi-chero-pillar { display:flex; align-items:center; gap:14px; padding:12px; border-radius:13px; cursor:pointer;
-  border:1px solid transparent; background:transparent; text-align:left; font-family:inherit; width:100%;
-  transition:background .2s, border-color .2s, transform .2s cubic-bezier(.16,1,.3,1); }
-.soi-chero-pillar:hover { background:var(--sx-bg-soft); border-color:var(--sx-line); transform:translateX(3px); }
-.soi-chero-pillar-ic { width:42px; height:42px; border-radius:12px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-  background:color-mix(in srgb,var(--pa,#0E4AC6) 12%, transparent); color:var(--pa,#0E4AC6); }
-.soi-chero-pillar-tx { flex:1; min-width:0; }
-.soi-chero-pillar-t { display:block; font-size:14.5px; font-weight:700; color:var(--sx-ink); letter-spacing:-.01em; }
-.soi-chero-pillar-d { display:block; font-size:12.5px; color:var(--sx-mute); margin-top:1px; }
-.soi-chero-pillar-arr { color:var(--sx-mute); opacity:0; transform:translateX(-4px); transition:opacity .2s, transform .2s; flex-shrink:0; }
-.soi-chero-pillar:hover .soi-chero-pillar-arr { opacity:1; transform:none; color:var(--pa,#0E4AC6); }
-
-.soi-chero-float { position:absolute; z-index:2; top:-20px; right:-16px; display:flex; align-items:center; gap:11px;
-  background:var(--sx-card); border:1px solid var(--sx-line); border-radius:15px; padding:12px 15px; box-shadow:var(--sx-shadow-lg);
-  animation:soiCheroFloat 5.5s ease-in-out infinite; }
-.soi-chero-float-ic { width:34px; height:34px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
-  background:color-mix(in srgb,var(--sx-green) 14%, transparent); color:var(--sx-green); }
-.soi-chero-float-t { font-size:13px; font-weight:800; color:var(--sx-ink); line-height:1.2; }
-.soi-chero-float-d { font-size:11.5px; color:var(--sx-mute); margin-top:1px; }
-@keyframes soiCheroFloat { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-9px);} }
-
-.soi-chero-in { opacity:0; animation:soiCheroIn .8s cubic-bezier(.16,1,.3,1) forwards; animation-delay:var(--d,0ms); }
-@keyframes soiCheroIn { from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:none;} }
-
-@media (max-width:920px){
-  .soi-chero-wrap { grid-template-columns:1fr; gap:44px; }
-  .soi-chero-float { display:none; }
+/* scrim: opaque under the text column, transparent to the right */
+.soi-chero-scrim { position:absolute; inset:0; }
+.soi-chero-slide.t-dark  .soi-chero-scrim { background:linear-gradient(90deg, rgba(0,0,0,.72) 0%, rgba(0,0,0,.45) 38%, rgba(0,0,0,0) 68%); }
+.soi-chero-slide.t-light .soi-chero-scrim { background:linear-gradient(90deg, rgba(255,255,255,.85) 0%, rgba(255,255,255,.55) 38%, rgba(255,255,255,0) 68%); }
+@media (max-width:640px){
+  .soi-chero-slide.t-dark  .soi-chero-scrim { background:rgba(0,0,0,.55); }
+  .soi-chero-slide.t-light .soi-chero-scrim { background:rgba(255,255,255,.72); }
 }
+
+/* text column, left-aligned like NVIDIA */
+.soi-chero-wrap { position:relative; z-index:1; min-height:100dvh; max-width:1200px; margin:0 auto;
+  padding:0 24px; display:flex; align-items:center; }
+.soi-chero-col { max-width:640px; padding:112px 0 96px; }
+.soi-chero-slide.t-dark  .soi-chero-col { color:#fff; }
+.soi-chero-slide.t-light .soi-chero-col { color:#0b2d25; }
+
+.soi-chero-badge { font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin:0 0 12px; }
+.soi-chero-slide.t-dark  .soi-chero-badge { color:#d0fa4d; }
+.soi-chero-slide.t-light .soi-chero-badge { color:#6f9600; }
+
+.soi-chero-h1 { font-size:clamp(30px,5vw,54px); font-weight:800; line-height:1.1; letter-spacing:-.03em; margin:0; }
+.soi-chero-sub { font-size:clamp(16px,1.6vw,20px); line-height:1.6; margin:16px 0 0; }
+.soi-chero-slide.t-dark  .soi-chero-sub { color:rgba(255,255,255,.9); }
+.soi-chero-slide.t-light .soi-chero-sub { color:#374151; }
+
+/* pill CTAs — lime primary with dark label, as on the source */
+.soi-chero-cta { display:flex; flex-wrap:wrap; gap:12px; margin-top:32px; }
+.soi-chero-btn { display:inline-flex; align-items:center; justify-content:center; gap:9px;
+  padding:14px 26px; border-radius:999px; font-family:inherit; font-size:15.5px; font-weight:700;
+  cursor:pointer; border:1px solid transparent; transition:background .2s, color .2s, border-color .2s, transform .18s; }
+.soi-chero-btn:hover { transform:translateY(-2px); }
+.soi-chero-btn.primary { background:#b8f500; color:#0b2d25; }
+.soi-chero-btn.primary:hover { background:#c5ff19; }
+.soi-chero-btn .arr { display:inline-flex; transition:transform .2s; }
+.soi-chero-btn.primary:hover .arr { transform:translateX(4px); }
+.soi-chero-slide.t-dark  .soi-chero-btn.ghost { background:transparent; color:#fff; border-color:rgba(255,255,255,.6); }
+.soi-chero-slide.t-dark  .soi-chero-btn.ghost:hover { border-color:#c5ff19; color:#c5ff19; }
+.soi-chero-slide.t-light .soi-chero-btn.ghost { background:transparent; color:#111827; border-color:rgba(17,24,39,.4); }
+.soi-chero-slide.t-light .soi-chero-btn.ghost:hover { border-color:#6f9600; color:#6f9600; }
+.soi-chero-btn:focus-visible { outline:2px solid #c5ff19; outline-offset:3px; }
+
+/* staggered reveal, replayed per slide */
+.soi-chero-anim { opacity:0; transform:translateY(16px);
+  transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); }
+.soi-chero-slide.on .soi-chero-anim { opacity:1; transform:none; }
+
+/* segmented progress bars with timer fill */
+.soi-chero-bars { position:absolute; bottom:32px; left:50%; transform:translateX(-50%); z-index:20;
+  display:flex; gap:12px; width:100%; max-width:1200px; padding:0 24px; }
+.soi-chero-bar { position:relative; height:16px; width:96px; max-width:20%; padding:0;
+  background:none; border:none; cursor:pointer; }
+.soi-chero-bar-track { position:absolute; left:0; top:50%; transform:translateY(-50%);
+  height:3px; width:100%; border-radius:999px; overflow:hidden; transition:background .2s; }
+.soi-chero-stage.t-dark  .soi-chero-bar-track { background:rgba(255,255,255,.25); }
+.soi-chero-stage.t-light .soi-chero-bar-track { background:rgba(17,24,39,.2); }
+.soi-chero-bar:hover .soi-chero-bar-track { background:rgba(197,255,25,.6); }
+.soi-chero-bar:focus-visible .soi-chero-bar-track { outline:2px solid #c5ff19; outline-offset:2px; }
+.soi-chero-bar-fill { position:absolute; inset:0 auto 0 0; display:block; background:#b8f500;
+  animation:soiCheroBar linear forwards; }
+@keyframes soiCheroBar { from{width:0;} to{width:100%;} }
+
 @media (max-width:520px){
-  .soi-chero-cta { gap:10px; }
-  .soi-chero-btn { width:100%; justify-content:center; }
-  .soi-chero-pillar-d { display:none; }
+  .soi-chero-btn { width:100%; }
 }
 @media (prefers-reduced-motion: reduce){
-  .soi-chero-mesh, .soi-chero-float, .soi-chero-panel-live i { animation:none; }
-  .soi-chero-in { opacity:1; animation:none; }
+  .soi-chero-slide { transition:none; }
+  .soi-chero-anim { opacity:1; transform:none; transition:none; }
+  .soi-chero-bar-fill { animation:none; width:100%; }
+}
 }
     `;
     document.head.appendChild(s);
@@ -316,99 +381,105 @@ function Hero({ t, lang, go }) {
     <svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>
   );
 
-  const pillars = [
-    { c: "#0E4AC6", v: "directions", t: lv("Медицинское оборудование", "Tibbiy uskunalar", "Medical equipment"),
-      d: lv("2 800+ позиций, 120+ брендов", "2 800+ pozitsiya, 120+ brend", "2,800+ items, 120+ brands"),
-      ic: (<><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="m3 8 9 5 9-5"/><path d="M12 13v8"/></>) },
-    { c: "#15A06A", v: "registration", t: lv("Регистрация МИ", "Tibbiy buyumlarni ro'yxatga olish", "Device registration"),
-      d: lv("Регистрация медизделий «под ключ»", "«Kalit ostida» ro'yxatga olish", "Turnkey MD registration"),
-      ic: (<><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="m9 15 2 2 4-4"/></>) },
-    { c: "#6454D4", v: "tenders", t: lv("Тендеры и госзакупки", "Tender va davlat xaridlari", "Tenders & procurement"),
-      d: lv("Сопровождение от спецификации до поставки", "Spetsifikatsiyadan yetkazishgacha", "Spec-to-supply support"),
-      ic: (<><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 12h6"/><path d="M9 16h6"/></>) },
-    { c: "#E0492F", v: "services", t: lv("Сервис и поддержка", "Servis va qo'llab-quvvatlash", "Service & support"),
-      d: lv("Монтаж, обучение, гарантия", "Montaj, o'qitish, kafolat", "Install, training, warranty"),
-      ic: (<><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></>) },
-    { c: "#14B8E0", v: "catalog", t: lv("Электронный каталог", "Elektron katalog", "E-catalog"),
-      d: lv("Подбор и заказ онлайн", "Onlayn tanlash va buyurtma", "Browse & order online"),
-      ic: (<><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></>) },
-  ];
+  const stageTheme = slide.theme === "dark" ? " t-dark" : " t-light";
 
   return (
-    <section className="soi-chero">
-      <div className="soi-chero-bg">
-        <div className="soi-chero-mesh" />
-        <div className="soi-chero-grid" />
-      </div>
-
-      <div className="soi-chero-wrap">
-        <div className="soi-chero-left">
-          <div className="soi-chero-badge soi-chero-in" style={{ "--d": "60ms" }}>
-            <span className="dot" />
-            {htx("badge")}
-          </div>
-
-          <h1 className="soi-chero-h1 soi-chero-in" style={{ "--d": "140ms" }}>
-            {htx("title1")}<br /><span className="accent">{htx("title2")}</span>
-          </h1>
-
-          <p className="soi-chero-sub soi-chero-in" style={{ "--d": "220ms" }}>
-            {htx("subtitle")}
-          </p>
-
-          <div className="soi-chero-cta soi-chero-in" style={{ "--d": "300ms" }}>
-            <button className="soi-chero-btn primary" onClick={() => go("about")}>
-              {htx("ctaPrimary")}
-              <span className="arr"><Svg s={18}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></Svg></span>
-            </button>
-            <button className="soi-chero-btn ghost" onClick={() => go("catalog")}>
-              <Svg s={18}><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></Svg>
-              {htx("ctaSecondary")}
-            </button>
-          </div>
-
-          <div className="soi-chero-trust soi-chero-in" style={{ "--d": "380ms" }}>
-            {[
-              htx("trust1"),
-              htx("trust2"),
-              htx("trust3"),
-            ].map((x, i) => (
-              <span key={i}><Svg s={16}><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="9"/></Svg>{x}</span>
-            ))}
-          </div>
-        </div>
-
-        <div className="soi-chero-right soi-chero-in" style={{ "--d": "440ms" }}>
-          <div className="soi-chero-float">
-            <div className="soi-chero-float-ic"><Svg s={18}><path d="m9 12 2 2 4-4"/><circle cx="12" cy="12" r="9"/></Svg></div>
-            <div>
-              <div className="soi-chero-float-t">{lv("Полный цикл", "To'liq sikl", "Full cycle")}</div>
-              <div className="soi-chero-float-d">{lv("оснащение «под ключ»", "«kalit ostida» jihozlash", "turnkey delivery")}</div>
-            </div>
-          </div>
-
-          <div className="soi-chero-panel">
-            <div className="soi-chero-panel-head">
-              <div className="soi-chero-panel-mark">SOI</div>
-              <div>
-                <div className="soi-chero-panel-ttl">{lv("Единая экосистема", "Yagona ekotizim", "Unified ecosystem")}</div>
-                <div className="soi-chero-panel-sub">{lv("Полный цикл оснащения медицины", "Tibbiyotni jihozlashning to'liq sikli", "Full medical-equipping cycle")}</div>
+    <section
+      className="soi-chero"
+      role="region"
+      aria-roledescription="carousel"
+      aria-label="Hero"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onKeyDown={(e) => {
+        if (e.key === "ArrowLeft") setSlideIdx((i) => (i - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+        if (e.key === "ArrowRight") setSlideIdx((i) => (i + 1) % HERO_SLIDES.length);
+      }}
+    >
+      <div className={"soi-chero-stage" + stageTheme} ref={parallaxRef}>
+        {HERO_SLIDES.map((s, i) => {
+          const on = i === slideIdx;
+          return (
+            <article
+              key={s.id}
+              className={"soi-chero-slide " + (s.theme === "dark" ? "t-dark" : "t-light") + (on ? " on" : "")}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${i + 1} / ${HERO_SLIDES.length}`}
+              aria-hidden={!on}
+            >
+              <div className="soi-chero-bg">
+                <div className="soi-chero-bg-inner" data-hero-bg>
+                  {s.video ? (
+                    <video
+                      className="soi-chero-vid"
+                      src={window.__asset(s.video)}
+                      autoPlay muted loop playsInline
+                      preload={i === 0 ? "auto" : "none"}
+                    />
+                  ) : (
+                    <div className="soi-chero-fill" style={{ background: s.bg }} />
+                  )}
+                </div>
+                <div className="soi-chero-scrim" />
               </div>
-              <span className="soi-chero-panel-live"><i />{lv("Онлайн", "Onlayn", "Online")}</span>
-            </div>
-            <div className="soi-chero-pillars">
-              {pillars.map((p, i) => (
-                <button key={i} className="soi-chero-pillar" style={{ "--pa": p.c }} onClick={() => go(p.v)}>
-                  <span className="soi-chero-pillar-ic"><Svg s={20}>{p.ic}</Svg></span>
-                  <span className="soi-chero-pillar-tx">
-                    <span className="soi-chero-pillar-t">{p.t}</span>
-                    <span className="soi-chero-pillar-d">{p.d}</span>
-                  </span>
-                  <span className="soi-chero-pillar-arr"><Svg s={18}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></Svg></span>
-                </button>
-              ))}
-            </div>
-          </div>
+
+              <div className="soi-chero-wrap">
+                <div className="soi-chero-col">
+                  <p className="soi-chero-badge soi-chero-anim" style={{ transitionDelay: on ? "150ms" : "0ms" }}>
+                    {sv(s.badge)}
+                  </p>
+                  <h1 className="soi-chero-h1 soi-chero-anim" style={{ transitionDelay: on ? "300ms" : "0ms" }}>
+                    {sv(s.title)}
+                  </h1>
+                  <p className="soi-chero-sub soi-chero-anim" style={{ transitionDelay: on ? "420ms" : "0ms" }}>
+                    {sv(s.subtitle)}
+                  </p>
+                  <div className="soi-chero-cta soi-chero-anim" style={{ transitionDelay: on ? "650ms" : "0ms" }}>
+                    {s.ctas.map((cta, ci) => (
+                      <button
+                        key={ci}
+                        className={"soi-chero-btn " + cta.style}
+                        onClick={() => go(cta.action)}
+                        tabIndex={on ? 0 : -1}
+                      >
+                        {sv(cta.label)}
+                        {cta.style === "primary" && (
+                          <span className="arr"><Svg s={18}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></Svg></span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </article>
+          );
+        })}
+
+        <div className="soi-chero-bars" role="tablist" aria-label={lv("Перейти к слайду", "Slaydga o'tish", "Go to slide")}>
+          {HERO_SLIDES.map((s, i) => (
+            <button
+              key={s.id}
+              role="tab"
+              aria-selected={i === slideIdx}
+              aria-label={`${lv("Слайд", "Slayd", "Slide")} ${i + 1}`}
+              className="soi-chero-bar"
+              onClick={() => setSlideIdx(i)}
+            >
+              <span className="soi-chero-bar-track">
+                {i === slideIdx && (
+                  <span
+                    key={slideIdx}
+                    className="soi-chero-bar-fill"
+                    style={{
+                      animationDuration: `${SLIDE_MS}ms`,
+                      animationPlayState: paused ? "paused" : "running",
+                    }}
+                  />
+                )}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
     </section>
@@ -1050,15 +1121,6 @@ function SoiEcosystem({ lang, go }) {
   return (
     <section className="sx-section">
       <div className="sx-wrap">
-        <div className="sx-head sx-rv">
-          <span className="sx-eyebrow">{_lv(lang, "Единая экосистема", "Yagona ekotizim", "One ecosystem")}</span>
-          <h2 className="sx-h2">{_lv(lang, "Вся медицинская инфраструктура — в одном месте", "Butun tibbiy infratuzilma — bir joyda", "All medical infrastructure — in one place")}</h2>
-          <p className="sx-sub">{_lv(lang,
-            "От поиска оборудования до регистрации изделий, тендеров и оснащения клиник «под ключ». ИНДУСТРИЯ ЗДОРОВЬЯ соединяет организации, поставщиков и сервисы в единую платформу.",
-            "Uskuna qidirishdan tibbiy buyumlarni ro'yxatga olish, tender va klinikalarni jihozlashgacha. SOG’LIQ INDUSTRIYASI tashkilotlar, yetkazib beruvchilar va xizmatlarni yagona platformaga birlashtiradi.",
-            "From equipment search to device registration, tenders and turnkey clinic setup. HEALTH INDUSTRY connects organizations, suppliers and services into one platform.")}</p>
-        </div>
-
         <div className="sx-bento">
           <div className="sx-tile big sx-rv" style={{ "--sx-accent": "#0E4AC6" }} onClick={() => navCat()}>
             <div className="sx-tile-ic"><Icon name="grid" size={24} /></div>
@@ -1075,18 +1137,18 @@ function SoiEcosystem({ lang, go }) {
           </div>
 
           {[
-            { area: "reg", accent: "#15A06A", ic: "check", n: null,
-              t: _lv(lang, "Регистрация медицинских изделий", "Tibbiy buyumlarni ro'yxatga olish", "Medical device registration"),
-              d: _lv(lang, "Сопровождение производителей и импортёров: подготовка досье и прохождение процедуры РУ в Узбекистане.", "Ishlab chiqaruvchilar va importchilarni qo'llab-quvvatlash: dosye tayyorlash va ro'yxatga olish.", "Support for manufacturers and importers: dossier preparation and the RC procedure in Uzbekistan."),
-              foot: _lv(lang, "Экспертное направление", "Ekspert yo'nalish", "Expert service"), nav: () => go("registration") },
+            { area: "reg", accent: "#15A06A", ic: "user", n: "1000+",
+              t: _lv(lang, "Обученных специалистов", "O'qitilgan mutaxassislar", "Trained specialists"),
+              d: _lv(lang, "Обучаем персонал клиник работе с поставленным оборудованием — очно и онлайн.", "Klinika xodimlarini yetkazib berilgan uskunalar bilan ishlashga o'rgatamiz — joyida va onlayn.", "We train clinic staff to operate the delivered equipment — on-site and online."),
+              foot: _lv(lang, "Обучение персонала", "Xodimlarni o'qitish", "Staff training"), nav: () => go("services") },
             { area: "tender", accent: "#6454D4", ic: "doc",
               t: _lv(lang, "Тендеры и госзакупки", "Tender va davlat xaridlari", "Tenders & procurement"),
               d: _lv(lang, "КП, спецификации и полный пакет документов под требования закупки.", "Taklif, spetsifikatsiya va to'liq hujjatlar to'plami.", "Quotes, specs and a full document package."),
               foot: _lv(lang, "Для закупщиков", "Xaridorlar uchun", "For buyers"), nav: () => go("tenders") },
-            { area: "service", accent: "#14B8E0", ic: "wrench",
-              t: _lv(lang, "Оснащение «под ключ»", "«Kalit ostida» jihozlash", "Turnkey equipping"),
-              d: _lv(lang, "Подбор, монтаж, пусконаладка и сервис.", "Tanlash, montaj, ishga tushirish va servis.", "Selection, installation, setup and service."),
-              foot: _lv(lang, "Полный цикл", "To'liq tsikl", "Full cycle"), nav: () => go("services") },
+            { area: "service", accent: "#14B8E0", ic: "wrench", n: "50+",
+              t: _lv(lang, "Успешно выполненных сервисных работ", "Muvaffaqiyatli bajarilgan servis ishlari", "Completed service jobs"),
+              d: _lv(lang, "Пусконаладка, плановое обслуживание и ремонт оборудования по всей стране.", "Ishga tushirish, rejali xizmat ko'rsatish va uskunalarni ta'mirlash butun mamlakat bo'ylab.", "Commissioning, scheduled maintenance and equipment repair across the country."),
+              foot: _lv(lang, "Сервис и поддержка", "Servis va qo'llab-quvvatlash", "Service & support"), nav: () => go("services") },
             { area: "brands", accent: "#E0492F", ic: "award", n: "120+",
               t: _lv(lang, "Мировые бренды", "Jahon brendlari", "Global brands"),
               d: _lv(lang, "Официальные поставки от производителей из 12 стран.", "12 mamlakatdan rasmiy yetkazib berish.", "Official supply from manufacturers across 12 countries."),
@@ -1102,6 +1164,327 @@ function SoiEcosystem({ lang, go }) {
               <h3>{x.t}</h3>
               <p>{x.d}</p>
               <div className="sx-tile-foot">{x.foot}<Icon name="arrowRight" size={15} className="sx-tile-arrow" /></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── «Экспертиза · 360° / Наши услуги» — ported from CLAUDE HP ServicesSection ── */
+const EXPERTISE_ITEMS = [
+  {
+    nav: "registration",
+    t: { ru: "Регистрация медицинских изделий", uz: "Tibbiy buyumlarni ro'yxatdan o'tkazish", en: "Medical device registration" },
+    d: { ru: "Досье, экспертиза и взаимодействие с регулятором — выводим изделие на рынок под ключ.", uz: "Hujjatlar, ekspertiza va regulyator bilan ishlash — buyumni bozorga kalit topshirish sharti bilan chiqaramiz.", en: "Dossier, expert review and regulator liaison — we bring your device to market turnkey." },
+    proof: { ru: "Сопровождение в соответствии с ПКМ №738", uz: "PKM №738 talablariga muvofiq hamrohlik", en: "Handled per Resolution No. 738" },
+    list: {
+      ru: ["Анализ изделия и документов", "Подготовка регистрационного досье", "Испытания и получение РУ"],
+      uz: ["Buyum va hujjatlarni tahlil qilish", "Ro'yxatga olish dosyesini tayyorlash", "Sinovlar va RU olish"],
+      en: ["Device and document review", "Preparing the registration dossier", "Testing and obtaining the certificate"],
+    },
+  },
+  {
+    nav: "tenders",
+    t: { ru: "Тендеры и государственные закупки", uz: "Tenderlar va davlat xaridlari", en: "Tenders and public procurement" },
+    d: { ru: "Готовим документацию и сопровождаем закупку на всех этапах — от лота до поставки.", uz: "Hujjatlarni tayyorlaymiz va xaridni barcha bosqichlarda kuzatib boramiz — lotdan yetkazib berishgacha.", en: "We prepare documentation and support the procurement at every stage — from lot to delivery." },
+    proof: { ru: "От технического задания до договора", uz: "Texnik topshiriqdan shartnomagacha", en: "From technical brief to signed contract" },
+    list: {
+      ru: ["Проверка требований закупки", "Подготовка технической части", "Сопровождение подачи заявки"],
+      uz: ["Xarid talablarini tekshirish", "Texnik qismni tayyorlash", "Ariza topshirishga hamrohlik"],
+      en: ["Reviewing procurement requirements", "Preparing the technical section", "Supporting the bid submission"],
+    },
+  },
+  {
+    nav: "services",
+    t: { ru: "Обучение персонала", uz: "Xodimlarni o'qitish", en: "Staff training" },
+    d: { ru: "Обучаем персонал работе с оборудованием — очно, на вашей площадке или онлайн.", uz: "Xodimlarni uskunalar bilan ishlashga o'qitamiz — joyingizda yoki onlayn.", en: "We train your staff to operate the equipment — on-site at your facility or online." },
+    proof: { ru: "Индивидуальная программа под ваше оборудование", uz: "Sizning uskunangizga moslashtirilgan dastur", en: "A program tailored to your equipment" },
+    list: {
+      ru: ["Разработка программы обучения", "Практические занятия на оборудовании", "Аттестация персонала"],
+      uz: ["O'quv dasturini ishlab chiqish", "Uskunada amaliy mashg'ulotlar", "Xodimlarni attestatsiyadan o'tkazish"],
+      en: ["Designing the training program", "Hands-on sessions on the equipment", "Staff certification"],
+    },
+  },
+  {
+    nav: "services",
+    t: { ru: "Сервисное обслуживание", uz: "Servis xizmati", en: "Maintenance service" },
+    d: { ru: "Пусконаладка, гарантийный и постгарантийный сервис с выездом в регионы.", uz: "Ishga tushirish, kafolatli va kafolatdan keyingi servis, viloyatlarga chiqish bilan.", en: "Commissioning, warranty and post-warranty service with visits across the regions." },
+    proof: { ru: "Гарантийная и постгарантийная поддержка", uz: "Kafolatli va kafolatdan keyingi qo'llab-quvvatlash", en: "Warranty and post-warranty support" },
+    list: {
+      ru: ["Пусконаладочные работы", "Плановое сервисное обслуживание", "Выезд инженера по заявке"],
+      uz: ["Ishga tushirish ishlari", "Rejali servis xizmati", "So'rov bo'yicha muhandis chiqishi"],
+      en: ["Commissioning works", "Scheduled maintenance service", "On-request engineer visits"],
+    },
+  },
+];
+
+function SoiExpertise({ lang, go }) {
+  useEffect(() => {
+    const id = "soi-expertise-css";
+    if (document.getElementById(id)) return;
+    const s = document.createElement("style");
+    s.id = id;
+    s.textContent = `
+.sxp { position:relative; overflow:hidden; background:#0b2d25; padding:clamp(64px,8vw,112px) 0; }
+.sxp-glow { position:absolute; top:-160px; right:-160px; width:520px; height:520px; border-radius:50%;
+  background:rgba(184,245,0,.10); filter:blur(80px); pointer-events:none; }
+.sxp-inner { position:relative; max-width:1200px; margin:0 auto; padding:0 24px; }
+
+.sxp-head { display:grid; gap:32px; margin-bottom:clamp(40px,5vw,64px); }
+@media(min-width:1024px){ .sxp-head { grid-template-columns:1.15fr .85fr; align-items:end; gap:64px; } }
+.sxp-kicker { margin:0 0 16px; font-size:12px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.16em; color:#c5ff19; }
+.sxp-h2 { margin:0; font-size:clamp(34px,5vw,60px); font-weight:800; line-height:.95;
+  letter-spacing:-.03em; color:#fff; }
+.sxp-sub { margin:0; max-width:28rem; font-size:15px; line-height:1.65; color:rgba(255,255,255,.55); }
+
+.sxp-grid { display:grid; gap:14px; }
+@media(min-width:640px){ .sxp-grid { grid-template-columns:1fr 1fr; } }
+@media(min-width:1024px){ .sxp-grid { display:flex; flex-wrap:nowrap; align-items:stretch; } }
+
+.sxp-card { position:relative; display:flex; flex-direction:column; overflow:hidden; text-align:left;
+  min-height:460px; padding:28px; border-radius:24px; cursor:pointer; font-family:inherit;
+  border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); color:#fff;
+  transition:flex-grow .5s ease, background .35s, border-color .35s, transform .35s; }
+@media(min-width:1024px){ .sxp-card { flex:1 1 0; } .sxp-card:hover { flex-grow:1.35; } }
+.sxp-card:hover { border-color:rgba(184,245,0,.5); background:rgba(255,255,255,.07); }
+.sxp-card.feat { background:#b8f500; border-color:transparent; color:#0b2d25; }
+.sxp-card.feat:hover { background:#c5ff19; }
+.sxp-card:focus-visible { outline:2px solid #c5ff19; outline-offset:3px; }
+
+.sxp-bignum { position:absolute; right:12px; bottom:-48px; font-size:9rem; font-weight:800; line-height:1;
+  user-select:none; pointer-events:none; color:rgba(255,255,255,.03); }
+.sxp-card.feat .sxp-bignum { color:rgba(11,45,37,.08); }
+
+.sxp-top { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.sxp-no { font-size:12px; font-weight:700; color:#c5ff19; }
+.sxp-card.feat .sxp-no { color:rgba(11,45,37,.6); }
+.sxp-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
+  border-radius:50%; border:1px solid rgba(255,255,255,.2); font-size:18px; color:#c5ff19;
+  transition:transform .3s, background .3s, border-color .3s, color .3s; }
+.sxp-card:hover .sxp-arrow { transform:rotate(45deg); background:#b8f500; border-color:#b8f500; color:#0b2d25; }
+.sxp-card.feat .sxp-arrow { border-color:rgba(11,45,37,.25); color:#0b2d25; }
+.sxp-card.feat:hover .sxp-arrow { background:transparent; }
+
+.sxp-t { position:relative; z-index:1; margin:40px 0 0; max-width:16rem; font-size:24px; font-weight:700;
+  line-height:1.2; letter-spacing:-.02em; }
+.sxp-d { position:relative; z-index:1; margin:12px 0 0; max-width:20rem; font-size:14px; line-height:1.6;
+  color:rgba(255,255,255,.55); }
+.sxp-card.feat .sxp-d { color:rgba(11,45,37,.7); }
+
+/* grid-rows 0fr→1fr: высота подстраивается ровно под контент */
+.sxp-expand { position:relative; z-index:1; display:grid; grid-template-rows:0fr;
+  transition:grid-template-rows .4s ease; }
+.sxp-card:hover .sxp-expand, .sxp-card:focus-visible .sxp-expand { grid-template-rows:1fr; }
+.sxp-expand-outer { overflow:hidden; }
+.sxp-expand-in { padding-top:16px; opacity:0; transition:opacity .3s ease .1s; }
+.sxp-card:hover .sxp-expand-in, .sxp-card:focus-visible .sxp-expand-in { opacity:1; }
+.sxp-comp { margin:0; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+  color:rgba(255,255,255,.35); }
+.sxp-card.feat .sxp-comp { color:rgba(11,45,37,.5); }
+.sxp-proof { margin:4px 0 0; font-size:13px; font-weight:500; color:#fff; }
+.sxp-card.feat .sxp-proof { color:#0b2d25; }
+.sxp-list { list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:6px; }
+.sxp-list li { display:flex; align-items:flex-start; gap:8px; font-size:12px; line-height:1.4;
+  color:rgba(255,255,255,.6); }
+.sxp-card.feat .sxp-list li { color:rgba(11,45,37,.7); }
+.sxp-dot { flex-shrink:0; width:6px; height:6px; margin-top:5px; border-radius:50%; background:#b8f500; }
+.sxp-card.feat .sxp-dot { background:#0b2d25; }
+
+.sxp-more { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between;
+  gap:8px; margin-top:auto; padding-top:16px; border-top:1px solid rgba(255,255,255,.1);
+  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#c5ff19; }
+.sxp-card.feat .sxp-more { border-top-color:rgba(11,45,37,.15); color:#0b2d25; }
+.sxp-more-arr { font-size:16px; transition:transform .3s; }
+.sxp-card:hover .sxp-more-arr { transform:translateX(4px); }
+
+@media (prefers-reduced-motion: reduce){
+  .sxp-card, .sxp-arrow, .sxp-expand, .sxp-expand-in, .sxp-more-arr { transition:none; }
+}
+    `;
+    document.head.appendChild(s);
+  }, []);
+
+  const L = (o) => (o && (o[lang] || o.ru)) || "";
+
+  return (
+    <section className="sxp">
+      <div className="sxp-glow" />
+      <div className="sxp-inner">
+        <div className="sxp-head sx-rv">
+          <div>
+            <p className="sxp-kicker">{_lv(lang, "Экспертиза · 360°", "Ekspertiza · 360°", "Expertise · 360°")}</p>
+            <h2 className="sxp-h2">{_lv(lang, "Наши услуги", "Bizning xizmatlar", "Our services")}</h2>
+          </div>
+          <p className="sxp-sub">{_lv(lang,
+            "Закрываем регуляторные, закупочные, технические и сервисные задачи в едином контуре ответственности.",
+            "Tartibga solish, xarid, texnik va servis vazifalarini yagona javobgarlik konturi doirasida hal qilamiz.",
+            "We cover regulatory, procurement, technical and service tasks within a single line of accountability.")}</p>
+        </div>
+
+        <div className="sxp-grid">
+          {EXPERTISE_ITEMS.map((it, i) => {
+            const no = String(i + 1).padStart(2, "0");
+            return (
+              <div
+                key={i}
+                className={"sxp-card sx-rv" + (i === 0 ? " feat" : "")}
+                style={{ "--i": i }}
+                role="button"
+                tabIndex={0}
+                onClick={() => go(it.nav)}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(it.nav); } }}
+              >
+                <span className="sxp-bignum" aria-hidden>{no}</span>
+                <div className="sxp-top">
+                  <span className="sxp-no">{no}</span>
+                  <span className="sxp-arrow" aria-hidden>↗</span>
+                </div>
+                <h3 className="sxp-t">{L(it.t)}</h3>
+                <p className="sxp-d">{L(it.d)}</p>
+                <div className="sxp-expand">
+                  <div className="sxp-expand-outer">
+                    <div className="sxp-expand-in">
+                      <p className="sxp-comp">{_lv(lang, "Компетенция", "Kompetensiya", "Competence")}</p>
+                      <p className="sxp-proof">{L(it.proof)}</p>
+                      <ul className="sxp-list">
+                        {L(it.list).map((d, di) => (
+                          <li key={di}><span className="sxp-dot" aria-hidden />{d}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div className="sxp-more">
+                  {_lv(lang, "Подробнее", "Batafsil", "Read more")}
+                  <span className="sxp-more-arr" aria-hidden>→</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── «Электронный каталог» — светлая секция с фото-карточками, ported from CLAUDE HP CatalogSection ── */
+const CATALOG_CARDS = [
+  { slug: "equipment",   catKey: "equipment",   t: { ru: "Медицинское оборудование", uz: "Tibbiy uskunalar", en: "Medical equipment" } },
+  { slug: "furniture",   catKey: "furniture",   t: { ru: "Медицинская мебель", uz: "Tibbiy mebel", en: "Medical furniture" } },
+  { slug: "instruments", catKey: "instruments", t: { ru: "Медицинские инструменты", uz: "Tibbiy asboblar", en: "Medical instruments" } },
+  { slug: "consumables", catKey: "consumables", t: { ru: "Расходные материалы", uz: "Sarflanadigan materiallar", en: "Consumables" } },
+];
+
+function SoiCatalogCards({ lang, go }) {
+  const cats = (window.DATA && window.DATA.CATEGORIES) || [];
+
+  useEffect(() => {
+    const id = "soi-catcards-css";
+    if (document.getElementById(id)) return;
+    const s = document.createElement("style");
+    s.id = id;
+    s.textContent = `
+.sxc { background:#f6f7f2; padding:clamp(64px,8vw,112px) 0; }
+[data-theme="dark"] .sxc { background:var(--sx-bg-soft); }
+.sxc-inner { max-width:1200px; margin:0 auto; padding:0 24px; }
+
+.sxc-head { display:grid; gap:32px; margin-bottom:clamp(40px,5vw,64px); }
+@media(min-width:1024px){ .sxc-head { grid-template-columns:1.3fr .7fr; align-items:end; gap:64px; } }
+.sxc-kicker { margin:0 0 16px; font-size:12px; font-weight:700; text-transform:uppercase;
+  letter-spacing:.16em; color:#6f9600; }
+.sxc-h2 { margin:0; font-size:clamp(30px,4.2vw,48px); font-weight:800; line-height:1.02;
+  letter-spacing:-.03em; color:#0b2d25; }
+[data-theme="dark"] .sxc-h2 { color:var(--sx-ink); }
+.sxc-sub { margin:0 0 24px; font-size:15px; line-height:1.65; color:#6b7280; }
+[data-theme="dark"] .sxc-sub { color:var(--sx-mute); }
+.sxc-cta { display:inline-flex; align-items:center; gap:12px; padding:13px 26px; border-radius:999px;
+  border:none; cursor:pointer; font-family:inherit; font-size:14px; font-weight:700;
+  background:#b8f500; color:#0b2d25; transition:background .2s, transform .18s; }
+.sxc-cta:hover { background:#c5ff19; transform:translateY(-2px); }
+.sxc-cta:focus-visible { outline:2px solid #6f9600; outline-offset:3px; }
+
+.sxc-grid { display:grid; gap:20px; grid-template-columns:1fr; }
+@media(min-width:640px){ .sxc-grid { grid-template-columns:1fr 1fr; } }
+@media(min-width:1024px){ .sxc-grid { grid-template-columns:repeat(4,1fr); } }
+
+.sxc-card { overflow:hidden; border-radius:24px; border:1px solid #e5e7eb; background:#fff;
+  cursor:pointer; text-align:left; padding:0; font-family:inherit; display:flex; flex-direction:column;
+  transition:box-shadow .3s, border-color .3s; }
+[data-theme="dark"] .sxc-card { background:var(--sx-card); border-color:var(--sx-line); }
+.sxc-card:hover { box-shadow:0 20px 50px rgba(18,53,46,.10); }
+.sxc-card:focus-visible { outline:2px solid #6f9600; outline-offset:3px; }
+.sxc-media { aspect-ratio:4/3; overflow:hidden; }
+.sxc-media img { display:block; width:100%; height:100%; object-fit:cover;
+  transition:transform .5s cubic-bezier(.16,1,.3,1); }
+.sxc-card:hover .sxc-media img { transform:scale(1.06); }
+
+.sxc-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:20px; }
+.sxc-no { font-size:12px; font-weight:700; color:#6f9600; }
+.sxc-t { margin:4px 0 0; font-size:18px; font-weight:700; line-height:1.3; color:#0b2d25; }
+[data-theme="dark"] .sxc-t { color:var(--sx-ink); }
+.sxc-arr { display:flex; align-items:center; justify-content:center; flex-shrink:0; width:44px; height:44px;
+  border-radius:50%; border:1px solid rgba(143,194,0,.4); color:#6f9600;
+  transition:transform .3s, background .3s, border-color .3s, color .3s; }
+.sxc-card:hover .sxc-arr { transform:rotate(45deg); background:#b8f500; border-color:#b8f500; color:#0b2d25; }
+
+@media (prefers-reduced-motion: reduce){
+  .sxc-card, .sxc-media img, .sxc-arr, .sxc-cta { transition:none; }
+  .sxc-card:hover .sxc-media img { transform:none; }
+}
+    `;
+    document.head.appendChild(s);
+  }, []);
+
+  // та же логика сопоставления категорий, что и в SoiCatalogPortal — чтобы оба блока вели одинаково
+  const goCard = (card) => {
+    const found = cats.find((c) => c.id === card.catKey);
+    go("catalog", found ? { cat: found.id } : {});
+  };
+
+  return (
+    <section className="sxc">
+      <div className="sxc-inner">
+        <div className="sxc-head sx-rv">
+          <div>
+            <p className="sxc-kicker">{_lv(lang, "Электронный каталог", "Elektron katalog", "Digital catalog")}</p>
+            <h2 className="sxc-h2">{_lv(lang, "Оборудование для современной медицины", "Zamonaviy tibbiyot uchun uskunalar", "Equipment for modern medicine")}</h2>
+          </div>
+          <div>
+            <p className="sxc-sub">{_lv(lang,
+              "Структурированный каталог решений для диагностики, лечения, реанимации и ежедневной работы медицинских учреждений.",
+              "Tibbiyot muassasalarining diagnostika, davolash, reanimatsiya va kundalik ish uchun yechimlar katalogi.",
+              "A structured catalog of solutions for diagnostics, treatment, intensive care and the daily work of medical institutions.")}</p>
+            <button className="sxc-cta" onClick={() => go("catalog", {})}>
+              {_lv(lang, "Открыть весь каталог", "Butun katalogni ochish", "Open the full catalog")}
+              <Icon name="arrowRight" size={18} />
+            </button>
+          </div>
+        </div>
+
+        <div className="sxc-grid">
+          {CATALOG_CARDS.map((card, i) => (
+            <div
+              key={card.slug}
+              className="sxc-card sx-rv"
+              style={{ "--i": i }}
+              role="button"
+              tabIndex={0}
+              onClick={() => goCard(card)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goCard(card); } }}
+            >
+              <div className="sxc-media">
+                <img src={window.__asset("assets/catalog/" + card.slug + ".jpg")} alt="" loading="lazy" />
+              </div>
+              <div className="sxc-foot">
+                <div>
+                  <span className="sxc-no">{String(i + 1).padStart(2, "0")}</span>
+                  <h3 className="sxc-t">{_lv(lang, card.t.ru, card.t.uz, card.t.en)}</h3>
+                </div>
+                <span className="sxc-arr" aria-hidden><Icon name="arrowRight" size={18} /></span>
+              </div>
             </div>
           ))}
         </div>
@@ -1637,6 +2020,8 @@ function HomePage({ t, lang, store, go }) {
       <SoiPlatformCSS />
       <Hero t={t} lang={lang} go={go} />
       <SoiEcosystem lang={lang} go={go} />
+      <SoiExpertise lang={lang} go={go} />
+      <SoiCatalogCards lang={lang} go={go} />
       <SoiDirections lang={lang} go={go} />
       <SoiCatalogPortal lang={lang} go={go} />
       <SoiImpact lang={lang} />
@@ -1654,6 +2039,6 @@ Object.assign(window, { HomePage, Footer, Hero, CategoryGrid, FeaturedRow, Trust
    identically regardless of which shell calls them. */
 Object.assign(window, {
   SoiPlatformCSS, useSoiReveal, SoiHero: Hero,
-  SoiEcosystem, SoiDirections, SoiCatalogPortal, SoiImpact, SoiBrands, SoiCases, SoiReviews, SoiNews, SoiFinalCTA,
+  SoiEcosystem, SoiExpertise, SoiCatalogCards, SoiDirections, SoiCatalogPortal, SoiImpact, SoiBrands, SoiCases, SoiReviews, SoiNews, SoiFinalCTA,
   SoiCaseModal: CaseModal,
 });

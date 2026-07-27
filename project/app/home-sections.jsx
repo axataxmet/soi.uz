@@ -48,7 +48,8 @@ function CoHomePage({ t, lang, go }) {
   // (loaded before this file), so the corp shell and catalog shell render the identical design.
   window.useSoiReveal();
   const SoiPlatformCSS = window.SoiPlatformCSS, SoiHero = window.SoiHero,
-    SoiEcosystem = window.SoiEcosystem,
+    SoiEcosystem = window.SoiEcosystem, SoiExpertise = window.SoiExpertise,
+    SoiCatalogCards = window.SoiCatalogCards,
     SoiDirections = window.SoiDirections, SoiCatalogPortal = window.SoiCatalogPortal,
     SoiImpact = window.SoiImpact, SoiBrands = window.SoiBrands,
     SoiCases = window.SoiCases, SoiReviews = window.SoiReviews, SoiNews = window.SoiNews, SoiFinalCTA = window.SoiFinalCTA;
@@ -57,6 +58,8 @@ function CoHomePage({ t, lang, go }) {
       <SoiPlatformCSS />
       <SoiHero t={t} lang={lang} go={go} />
       <SoiEcosystem lang={lang} go={go} />
+      <SoiExpertise lang={lang} go={go} />
+      <SoiCatalogCards lang={lang} go={go} />
       <SoiDirections lang={lang} go={go} />
       <SoiImpact lang={lang} />
       <SoiCases lang={lang} go={go} />

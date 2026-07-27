@@ -30,3 +30,6 @@ coverage/
 
 # e-tender isolated Prisma client (regenerated)
 server/prisma/etender/generated/
+
+# stray copied directory, unrelated to this project
+project/app/Claude/

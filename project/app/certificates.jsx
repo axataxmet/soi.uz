@@ -121,25 +121,45 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
   // Новая структура шапки главной: О компании ▾ · Услуги ▾ · Кейсы · Контакты · Каталог.
   // (Спецификация: главная — режим доверия к компании; каталог — режим поиска.)
   const corpNav = [
-  { id: "company", label: lvh("О компании", "Kompaniya haqida", "Company"), children: [
-    { view: "about",     label: lvh("О «ИНДУСТРИЯ ЗДОРОВЬЯ»", "SOG’LIQ INDUSTRIYASI haqida", "About HEALTH INDUSTRY") },
-    { view: "documents", label: lvh("Документы",               "Hujjatlar",                 "Documents") },
-    { view: "partners",  label: lvh("Бренды / партнёры",       "Brendlar / hamkorlar",     "Brands / partners") },
-    { view: "reviews",   label: lvh("Отзывы",                  "Sharhlar",                  "Reviews") },
-    { view: "news",      label: lvh("Новости",                 "Yangiliklar",               "News") }] },
+  { id: "company", label: lvh("О компании", "Kompaniya haqida", "About"), children: [
+    { view: "about",     label: lvh("Об ИНДУСТРИЯ ЗДОРОВЬЯ",  "SOG’LIQ INDUSTRIYASI haqida",   "About HEALTH INDUSTRY") },
+    { view: "documents", label: lvh("Документы компании",      "Kompaniya hujjatlari",          "Company documents") },
+    { view: "projects",  label: lvh("Реализованные проекты",   "Amalga oshirilgan loyihalar",   "Completed projects") },
+    { view: "reviews",   label: lvh("Отзывы и рекомендации",   "Fikrlar va tavsiyalar",         "Reviews and recommendations") },
+    { view: "partners",  label: lvh("Партнёры",                "Hamkorlar",                     "Partners") },
+    { view: "news",      label: lvh("Новости",                 "Yangiliklar",                   "News") }] },
 
   { id: "services", label: lvh("Услуги", "Xizmatlar", "Services"), children: [
-    { view: "registration",             label: lvh("Регистрация МИ",       "TI ro'yxati",                    "MD registration") },
-    { view: "tenders",                  label: lvh("Тендеры и госзакупки", "Tender va davlat xaridlari",     "Tenders & procurement") },
-    { view: "staffTraining",            label: lvh("Обучение персонала",   "Xodimlarni o'qitish",            "Staff training") },
-    { view: "serviceSupport",           label: lvh("Сервис и поддержка",   "Servis va qo'llab-quvvatlash",   "Service & support") }] },
+    { view: "registration",   label: lvh("Регистрация медицинских изделий", "Tibbiy buyumlarni ro‘yxatdan o‘tkazish", "Medical device registration") },
+    { view: "tenders",        label: lvh("Тендеры и государственные закупки", "Tenderlar va davlat xaridlari",        "Tenders and public procurement") },
+    { view: "staffTraining",  label: lvh("Обучение персонала",   "Xodimlarni o‘qitish", "Staff training") },
+    { view: "serviceSupport", label: lvh("Сервисное обслуживание", "Servis xizmati",    "Maintenance service") }] },
 
-  { view: "cases",    label: lvh("Кейсы",    "Keyslar",   "Cases") },
-  { view: "contacts", label: lvh("Контакты", "Kontaktlar", "Contacts") },
-  { view: "catalog",  label: lvh("Каталог",  "Katalog",   "Catalog"), primary: true }];
+  // Каталог: подменю повторяет структуру 3000. Категории резолвятся по клику
+  // (catKey) — если каталог из API ещё не загружен, открывается общий каталог.
+  { id: "catalog", label: lvh("Каталог", "Katalog", "Catalog"), children: [
+    { view: "catalog", label: lvh("Каталог по направлениям медицины", "Tibbiyot yo‘nalishlari bo‘yicha katalog", "Catalog by medical specialty") },
+    { view: "catalog", catKey: "equipment",   label: lvh("Медицинское оборудование", "Tibbiy uskunalar",        "Medical equipment") },
+    { view: "catalog", catKey: "furniture",   label: lvh("Медицинская мебель",       "Tibbiy mebel",            "Medical furniture") },
+    { view: "catalog", catKey: "instruments", label: lvh("Медицинские инструменты",  "Tibbiy asboblar",         "Medical instruments") },
+    { view: "catalog", catKey: "consumables", label: lvh("Расходные материалы",      "Sarflanadigan materiallar", "Consumables") },
+    { view: "catalog", label: lvh("Прочие товары",        "Boshqa tovarlar",           "Other products") },
+    { view: "catalog", label: lvh("Каталог / прайс-лист", "Katalog / narxlar ro‘yxati", "Catalog / price list") }] },
+
+  { view: "contacts", label: lvh("Контакты", "Kontaktlar", "Contacts") }];
 
 
-  const [openDd, setOpenDd] = useState(null); // null | "company" | "services"
+  const [openDd, setOpenDd] = useState(null); // null | "company" | "services" | "catalog"
+
+  // Категории каталога приходят из API, поэтому id резолвим в момент клика:
+  // не нашли — открываем общий каталог (тот же приём, что в SoiCatalogPortal).
+  const navParams = (child) => {
+    if (child.params) return child.params;
+    if (!child.catKey) return {};
+    const cats = (window.DATA && window.DATA.CATEGORIES) || [];
+    const found = cats.find((c) => c.id === child.catKey);
+    return found ? { cat: found.id } : {};
+  };
 
   const searchPh = lang === "uz" ? "Uskuna, brend yoki artikul boʻyicha qidirish" : lang === "en" ? "Search equipment, brand or SKU" : "Поиск по оборудованию, бренду или артикулу";
   const searchShort = lang === "uz" ? "Izlash..." : lang === "en" ? "Search..." : "Искать...";
@@ -249,7 +269,7 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
               <div className="nav-dd-menu">
                 {item.children.map((child, idx) =>
                 <button key={idx}
-                  onClick={() => { go(child.view, child.params || {}); setOpenDd(null); }}
+                  onClick={() => { go(child.view, navParams(child)); setOpenDd(null); }}
                   className="nav-dd-item">
                   {child.label}
                 </button>
@@ -392,7 +412,7 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
         ).map((it) =>
         it._heading
           ? <div key={it.key} style={{ padding: "12px 0 4px", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-muted, #64748b)", fontWeight: 600 }}>{it.label}</div>
-          : <a key={it.key} className={route.view === it.view ? "on" : ""} onClick={() => { go(it.view, it.params || {}); setDrawer(false); }} style={it.primary ? { color: "var(--blue-600, #1757c8)", fontWeight: 600 } : undefined}>{it.label}</a>
+          : <a key={it.key} className={route.view === it.view ? "on" : ""} onClick={() => { go(it.view, navParams(it)); setDrawer(false); }} style={it.primary ? { color: "var(--blue-600, #1757c8)", fontWeight: 600 } : undefined}>{it.label}</a>
         )}
       </aside>
     </>);
@@ -421,17 +441,17 @@ function CoBreadcrumbs({ lang, go, route }) {
     staffTraining: [home, services, { label: lv("Обучение персонала", "Xodimlarni oʻqitish", "Staff training") }],
     serviceSupport: [home, services, { label: lv("Сервис и поддержка", "Servis va qo'llab-quvvatlash", "Service & support") }],
     tenders:      [home, services, { label: lv("Тендеры и госзакупки", "Tender va davlat xaridlari", "Tenders & procurement") }],
-    cases:        [home, { label: lv("Кейсы", "Keyslar", "Cases") }],
-    projects:     [home, { label: lv("Кейсы", "Keyslar", "Cases") }],
-    partners:     [home, company, { label: lv("Бренды и заводы-производители", "Brendlar va ishlab chiqaruvchi zavodlar", "Brands and manufacturers") }],
+    cases:        [home, company, { label: lv("Реализованные проекты", "Amalga oshirilgan loyihalar", "Completed projects") }],
+    projects:     [home, company, { label: lv("Реализованные проекты", "Amalga oshirilgan loyihalar", "Completed projects") }],
+    partners:     [home, company, { label: lv("Партнёры", "Hamkorlar", "Partners") }],
     contacts:     [home, { label: lv("Контакты", "Kontaktlar", "Contacts") }],
   };
   const crumbs = MAP[v] || null;
   const ldKey = crumbs ? crumbs.map((c) => c.label).join("|") : "";
   useEffect(() => {
-    if (!window.__setCrumbsLD) return;
-    // на главной (и прочих без крошек) — чистим разметку
-    window.__setCrumbsLD(crumbs ? crumbs.map((c) => ({ label: c.label, url: c.url })) : null);
+    // BreadcrumbList JSON-LD снят намеренно: крошки повторяют вариант с 3000, где
+    // микроразметки нет. Каталожные крошки продолжают писать свою разметку сами.
+    if (window.__setCrumbsLD) window.__setCrumbsLD(null);
     // корп-страницы не являются canonical брендов — снимаем ссылку, если осталась
     if (window.__setCanonical) window.__setCanonical(null);
   }, [ldKey]);
