@@ -6,7 +6,7 @@ import { PrismaClient } from '../../prisma/etender/generated/client';
 // Resolve the etender DB URL. Prefer an explicit ETENDER_DATABASE_URL; otherwise
 // derive it from the main DATABASE_URL by pointing at the `etender` schema, so a
 // single Postgres instance serves both today while staying trivially separable.
-function etenderDbUrl(): string {
+export function etenderDbUrl(): string {
   if (process.env.ETENDER_DATABASE_URL) return process.env.ETENDER_DATABASE_URL;
   const base = process.env.DATABASE_URL || '';
   const [core, query = ''] = base.split('?');

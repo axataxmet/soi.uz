@@ -27,7 +27,12 @@ export class SettingsController {
 
   @Public()
   @Get(':key')
-  @ApiOperation({ summary: 'Настройка по ключу (например seo, contacts)' })
+  @ApiOperation({
+    summary: 'Настройка по ключу (например seo, contacts)',
+    description:
+      'Всегда 200. Если настройка не задана, возвращается {"key": "...", "value": null} — ' +
+      'это признак «не сконфигурировано», а не значение: подставляйте свои значения по умолчанию.',
+  })
   get(@Param('key') key: string) {
     return this.settings.get(key);
   }

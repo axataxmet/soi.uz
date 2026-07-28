@@ -372,14 +372,23 @@
   }
   // Public visitors aren't admin, so the bulk /settings list (admin-only) never runs for them;
   // fetch the individual whitelisted key instead via the public GET /settings/:key route.
-  var settingKeyLoading = {};
+  var settingKeyLoading = {}, settingKeyFailedAt = {};
+  // getSetting runs on every render that reads a setting (~36 calls over a few
+  // navigations), so a failed fetch must not be retried per call — without a
+  // cooldown one API blip turns into one request per render.
+  var SETTING_RETRY_MS = 30000;
   function ensureSettingKey(key) {
     if (key in settingsCache || settingKeyLoading[key]) return;
+    var failedAt = settingKeyFailedAt[key];
+    if (failedAt && Date.now() - failedAt < SETTING_RETRY_MS) return;
     settingKeyLoading[key] = true;
     api.getSetting(key).then(function (res) {
       settingsCache[key] = res && typeof res === "object" && "value" in res ? res.value : res;
-      settingKeyLoading[key] = false; CMS.emit("settings");
-    }).catch(function (e) { settingKeyLoading[key] = false; console.warn("[cms-remote] setting fetch failed:", key, e && e.message); });
+      settingKeyLoading[key] = false; delete settingKeyFailedAt[key]; CMS.emit("settings");
+    }).catch(function (e) {
+      settingKeyLoading[key] = false; settingKeyFailedAt[key] = Date.now();
+      console.warn("[cms-remote] setting fetch failed:", key, e && e.message);
+    });
   }
   CMS.getSetting = function (key, def) {
     if (SETTINGS_REMOTE[key]) {

@@ -13,8 +13,9 @@
 | `project/lib/` | вендорные React/ReactDOM |
 | `project/dev-server.js` | статический dev-сервер с SPA-fallback |
 | `server/` | REST API: NestJS + Prisma + PostgreSQL ([подробности](server/README.md)) |
+| `tests/` | тесты фронтенда (jest + jsdom) |
 | `docker-compose.yml` | Postgres, MinIO, API |
-| `extracted/`, `design-system/` | вспомогательные материалы, в рантайме не используются |
+| `design-system/` | справочные материалы, в рантайме не используются |
 
 Сборки нет: JSX компилируется в браузере через `@babel/standalone`, поэтому
 файлы подключаются в HTML вручную и версионируются через `?v=<timestamp>`.
@@ -34,7 +35,15 @@ npm run db:seed             # суперадмин + демо-контент
 npm run start:dev           # → http://localhost:4000/api
 
 # 2. Фронтенд (в другом терминале, из корня)
-node project/dev-server.js  # → http://localhost:3456
+npm install                 # только для тестов, сборки нет
+npm run dev                 # → http://localhost:3456
+```
+
+## Тесты
+
+```bash
+npm test                    # фронтенд (jsdom): логика CMS-настроек
+npm --prefix server test    # бэкенд: etender URL, settings, валидация загрузок
 ```
 
 | Что | Адрес |

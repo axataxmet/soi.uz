@@ -1,0 +1,15 @@
+{
+  "name": "soi-uz",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ИНДУСТРИЯ ЗДОРОВЬЯ — сайт и админ-панель. Тесты для фронтенда; сборки нет, JSX компилируется в браузере.",
+  "scripts": {
+    "dev": "node project/dev-server.js",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}
