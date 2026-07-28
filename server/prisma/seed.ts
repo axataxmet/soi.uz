@@ -1,3 +1,6 @@
+// Nest loads .env through @nestjs/config, but this script runs under bare ts-node —
+// without this import DATABASE_URL is undefined and the seed dies on the first query.
+import 'dotenv/config';
 import {
   PrismaClient,
   Role,

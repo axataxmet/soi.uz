@@ -393,7 +393,7 @@ function App(props) {
 const _root_el = document.getElementById("root");
 if (_root_el) {
   const _root = ReactDOM.createRoot(_root_el);
-  _root.render(<App />);
+  _root.render(<RootErrorBoundary><App /></RootErrorBoundary>);
   // Remove splash after first paint
   requestAnimationFrame(() => requestAnimationFrame(() => {
     if (window.__splashDone) window.__splashDone();

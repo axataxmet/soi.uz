@@ -320,4 +320,6 @@ function App() {
 
 }
 
-ReactDOM.createRoot(document.getElementById("si-root")).render(<App />);
+ReactDOM.createRoot(document.getElementById("si-root")).render(
+  <RootErrorBoundary><App /></RootErrorBoundary>
+);

@@ -348,5 +348,7 @@
     );
   }
 
-  ReactDOM.createRoot(document.getElementById("root")).render(<AdminApp />);
+  ReactDOM.createRoot(document.getElementById("root")).render(
+    <RootErrorBoundary><AdminApp /></RootErrorBoundary>
+  );
 })();

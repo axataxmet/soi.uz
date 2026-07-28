@@ -14,8 +14,8 @@ cd server
 cp .env.example .env          # отредактируйте секреты (JWT_*, пароли)
 npm install
 
-# 3. Применить схему к БД и сгенерировать клиент
-npx prisma migrate dev --name init
+# 3. Применить обе схемы к БД и сгенерировать клиенты
+npm run prisma:deploy      # public (основная) + etender — обе обязательны
 npm run prisma:generate
 
 # 4. Заполнить БД (суперадмин + примеры)
@@ -24,6 +24,15 @@ npm run db:seed
 # 5. Запустить API
 npm run start:dev
 ```
+
+> `npm run prisma:deploy` применяет **две** схемы: основную и `prisma/etender`
+> (Postgres-схема `etender`, отдельный клиент). Пропустите её — и раздел
+> «Тендеры» на сайте вернёт 500: `table etender.etender_lots does not exist`.
+>
+> `ETENDER_DATABASE_URL` можно не задавать: если он пуст, URL выводится из
+> `DATABASE_URL` подстановкой `?schema=etender` — и в рантайме, и в Prisma CLI
+> (через `scripts/etender-db-url.js`). Заполняйте его, только если тендеры
+> переезжают в отдельную базу.
 
 - API: `http://localhost:4000/api`
 - Swagger / OpenAPI: `http://localhost:4000/api/docs`
@@ -38,37 +47,35 @@ npm run start:dev
 docker compose up -d        # postgres + minio + api (миграции применятся на старте)
 ```
 
-## Локальный запуск без Docker (macOS / Homebrew)
+## Локальный запуск без Docker
 
-На этой машине порт 5432 занят PostgreSQL 18 (EnterpriseDB), поэтому наш
-кластер Postgres 16 (Homebrew) поднят на **5433**. `.env` уже настроен под него
-(`DATABASE_URL=postgresql://aa@localhost:5433/soi?schema=public`).
+Postgres и MinIO могут быть подняты нативно — `.env` по умолчанию настроен
+именно на это:
 
-```bash
-# 1. Запустить наш Postgres 16 на 5433 (LC_ALL обязателен — macOS-баг)
-LC_ALL=en_US.UTF-8 /opt/homebrew/opt/postgresql@16/bin/pg_ctl \
-  -D /opt/homebrew/var/postgresql@16 -o "-p 5433" \
-  -l /opt/homebrew/var/postgresql@16/server-5433.log start
-
-# 2. (однократно) база + схема + данные
-/opt/homebrew/opt/postgresql@16/bin/createdb -h localhost -p 5433 soi   # если ещё нет
-cd server && npm install
-npx prisma migrate dev --name init
-npm run db:seed
-
-# 3. Запустить API
-npm run start:dev          # → http://localhost:4000/api/docs
+```
+DATABASE_URL=postgresql://soi:soi_password@localhost:5432/soi?schema=public
+ETENDER_DATABASE_URL=          # пусто → выводится из DATABASE_URL
 ```
 
-Остановить Postgres: `/opt/homebrew/opt/postgresql@16/bin/pg_ctl -D /opt/homebrew/var/postgresql@16 stop`.
-Логин: `admin@soi.uz` / `ChangeMe123!`.
+```bash
+cd server && npm install
+npm run prisma:deploy      # обе схемы
+npm run db:seed
+npm run start:dev          # → http://localhost:4000/api/docs
+```
 
 **MinIO без Docker** (для медиа; `.env` уже под него — minioadmin/minioadmin, :9000):
 ```bash
 MINIO_ROOT_USER=minioadmin MINIO_ROOT_PASSWORD=minioadmin \
   minio server /tmp/soi-minio-data --address :9000 --console-address :9001 &
 ```
-Бакет `soi-media` создаётся автоматически при старте API.
+
+Бакет `soi-media` создаётся при старте API. Политика публичного чтения
+переустанавливается на каждом старте — бакет, созданный вручную через консоль
+MinIO, иначе остаётся приватным и все медиа-URL отвечают 403.
+
+Без MinIO загрузки в dev не ломаются: файлы падают в `server/uploads/` и
+раздаются с `/uploads` (см. `MEDIA_LOCAL_FALLBACK`). В production fallback выключен.
 
 ## Эндпоинты (Phase 1–2)
 

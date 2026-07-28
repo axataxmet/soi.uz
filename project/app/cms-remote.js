@@ -384,7 +384,9 @@
   CMS.getSetting = function (key, def) {
     if (SETTINGS_REMOTE[key]) {
       if (isAdmin()) ensureSettings(); else ensureSettingKey(key);
-      return key in settingsCache ? settingsCache[key] : def;
+      // A setting absent from the DB comes back as {value: null}; fall back to the
+      // caller's default instead of handing out null, which callers don't expect.
+      return settingsCache[key] != null ? settingsCache[key] : def;
     }
     return _getSetting(key, def);
   };

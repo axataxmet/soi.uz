@@ -65,17 +65,20 @@ export class S3Service implements OnModuleInit {
   async onModuleInit() {
     if (!this.endpoint) return;
     try {
-      await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }));
-    } catch {
       try {
+        await this.client.send(new HeadBucketCommand({ Bucket: this.bucket }));
+      } catch {
         await this.client.send(new CreateBucketCommand({ Bucket: this.bucket }));
-        await this.client.send(
-          new PutBucketPolicyCommand({ Bucket: this.bucket, Policy: publicReadPolicy(this.bucket) }),
-        );
         this.logger.log(`Bucket "${this.bucket}" created`);
-      } catch (e) {
-        this.logger.warn(`Media storage not ready (bucket init skipped): ${(e as Error).message}`);
       }
+      // Applied on every boot, not just on create: a bucket provisioned by hand
+      // (MinIO console, mc, ops script) otherwise stays private and every media
+      // URL the API hands out answers 403.
+      await this.client.send(
+        new PutBucketPolicyCommand({ Bucket: this.bucket, Policy: publicReadPolicy(this.bucket) }),
+      );
+    } catch (e) {
+      this.logger.warn(`Media storage not ready (bucket init skipped): ${(e as Error).message}`);
     }
   }
 
