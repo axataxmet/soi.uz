@@ -23,6 +23,14 @@ export class EtenderController {
   }
 
   @Public()
+  @Get('stats')
+  @Header('Cache-Control', 'public, max-age=300')
+  @ApiOperation({ summary: 'Счётчики лотов для витрины: активные, новые за сегодня, закрываются за неделю (публичный)' })
+  stats() {
+    return this.etender.stats();
+  }
+
+  @Public()
   @Get('categories')
   @Header('Cache-Control', 'public, max-age=300')
   @ApiOperation({ summary: 'Мед. категории лотов + счётчики (публичный)' })

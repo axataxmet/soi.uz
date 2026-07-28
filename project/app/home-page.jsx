@@ -948,32 +948,124 @@ function SoiPlatformCSS() {
 .sx-link { display:inline-flex; align-items:center; gap:6px; font-size:15px; font-weight:700; color:var(--sx-blue); cursor:pointer; transition:gap .2s, color .2s; }
 .sx-link:hover { gap:11px; color:var(--sx-blue-2); }
 
-/* ── bento ecosystem ────────────────────────────────── */
-.sx-bento { display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:minmax(168px,auto); gap:18px;
+/* ── ecosystem bento ────────────────────────────────────
+   Deep-ground tiles reading as one island on the light page. Each tile carries a
+   hue of its own (--eco-h/--eco-a); everything inside is built from white alphas
+   over that ground, so a tile stays coherent whatever its colour. */
+.eco-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:16px;
   grid-template-areas:
-    "catalog catalog reg     reg"
-    "catalog catalog tender  service"
-    "brands  brands  equip   equip"; }
-.sx-tile { position:relative; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:26px; overflow:hidden; cursor:pointer; transition:transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s, border-color .3s; display:flex; flex-direction:column; }
-.sx-tile:hover { transform:translateY(-4px); box-shadow:var(--sx-shadow-lg); border-color:color-mix(in srgb, var(--sx-accent,#0E4AC6) 45%, var(--sx-line)); }
-.sx-tile::after { content:""; position:absolute; inset:0; border-radius:inherit; opacity:0; transition:opacity .35s; background:radial-gradient(120% 90% at 0% 0%, color-mix(in srgb,var(--sx-accent,#0E4AC6) 12%, transparent), transparent 60%); pointer-events:none; }
-.sx-tile:hover::after { opacity:1; }
-.sx-tile.big { grid-area:catalog; padding:34px; }
-.sx-tile.reg { grid-area:reg; } .sx-tile.tender { grid-area:tender; } .sx-tile.service { grid-area:service; }
-.sx-tile.brands { grid-area:brands; } .sx-tile.equip { grid-area:equip; }
-.sx-tile-ic { width:46px; height:46px; border-radius:13px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--sx-accent,#0E4AC6) 12%, transparent); color:var(--sx-accent,#0E4AC6); margin-bottom:auto; }
-.sx-tile h3 { font-size:19px; font-weight:800; letter-spacing:-.01em; color:var(--sx-ink); margin:20px 0 8px; }
-.sx-tile.big h3 { font-size:27px; margin-top:24px; }
-.sx-tile p { font-size:14.5px; line-height:1.55; color:var(--sx-mute); }
-.sx-tile.big p { font-size:16px; max-width:440px; }
-.sx-tile-foot { display:flex; align-items:center; gap:8px; margin-top:18px; font-size:13.5px; font-weight:700; color:color-mix(in srgb, var(--sx-accent,#0E4AC6) 62%, #0B1B33); }
-[data-theme="dark"] .sx-tile-foot { color:color-mix(in srgb, var(--sx-accent,#0E4AC6) 70%, #FFFFFF); }
-.sx-tile-arrow { margin-left:auto; color:var(--sx-mute); transition:transform .3s, color .3s; }
-.sx-tile:hover .sx-tile-arrow { transform:translate(3px,-3px); color:var(--sx-accent,#0E4AC6); }
-.sx-bignum { font-size:54px; font-weight:800; letter-spacing:-.03em; line-height:1; background:linear-gradient(120deg,var(--sx-blue),var(--sx-cyan)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-.sx-big-cats { display:flex; flex-wrap:wrap; gap:8px; margin-top:22px; }
-.sx-big-cat { display:inline-flex; align-items:center; gap:7px; padding:8px 13px; border-radius:10px; background:var(--sx-bg-soft); border:1px solid var(--sx-line); font-size:13px; font-weight:600; color:var(--sx-ink-soft); transition:.2s; }
-.sx-big-cat:hover { border-color:var(--sx-blue); color:var(--sx-blue); }
+    "catalog  catalog  catalog  training training training"
+    "tender   tender   tender   tender   tender   tender"
+    "brands   brands   service  service  delivery delivery"; }
+.eco-t { --eco-h:#0B2E7A; --eco-a:#5C9DFF;
+  position:relative; grid-area:var(--eco-area); isolation:isolate; display:flex; flex-direction:column;
+  padding:26px; border-radius:22px; overflow:hidden; color:#fff;
+  background:
+    radial-gradient(120% 120% at 100% 0%, color-mix(in srgb, var(--eco-a) 26%, transparent), transparent 58%),
+    linear-gradient(150deg, color-mix(in srgb, var(--eco-h) 88%, #000) 0%, var(--eco-h) 55%, color-mix(in srgb, var(--eco-h) 72%, #000) 100%);
+  box-shadow:0 1px 0 0 rgba(255,255,255,.10) inset, 0 18px 40px -22px color-mix(in srgb, var(--eco-h) 80%, #000); }
+.eco-t.catalog { --eco-area:catalog; --eco-h:#0B2E7A; --eco-a:#5C9DFF; }
+.eco-t.training { --eco-area:training; --eco-h:#0A4A33; --eco-a:#37D89B; }
+.eco-t.tender { --eco-area:tender; --eco-h:#2B1D6B; --eco-a:#A98BFF; }
+.eco-t.brands { --eco-area:brands; --eco-h:#5C2410; --eco-a:#FF9257; }
+.eco-t.service { --eco-area:service; --eco-h:#0A3A52; --eco-a:#43CFF0; }
+.eco-t.delivery { --eco-area:delivery; --eco-h:#0E2E63; --eco-a:#6FB0FF; }
+
+/* head: icon + optional corner badge */
+.eco-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+.eco-ic { width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+  background:color-mix(in srgb, var(--eco-a) 22%, transparent); color:var(--eco-a); border:1px solid color-mix(in srgb, var(--eco-a) 26%, transparent); }
+.eco-badge { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border-radius:11px; font-size:12px; font-weight:700;
+  background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.14); color:rgba(255,255,255,.86); }
+.eco-badge b { font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; color:#fff; }
+
+/* numbers + copy */
+.eco-num { margin-top:20px; font-size:clamp(38px,4.4vw,54px); font-weight:800; line-height:.95; letter-spacing:-.035em;
+  font-variant-numeric:tabular-nums; color:#fff; }
+.eco-num span { color:var(--eco-a); }
+.eco-t h3 { margin:12px 0 0; font-size:19px; font-weight:800; letter-spacing:-.012em; line-height:1.25; color:#fff; text-wrap:balance; }
+.eco-t.catalog h3 { font-size:23px; }
+.eco-t p { margin:9px 0 0; font-size:14px; line-height:1.55; color:rgba(255,255,255,.72); max-width:44ch; }
+
+/* metric strip — hidden entirely when the editor leaves it blank */
+.eco-metrics { display:flex; flex-wrap:wrap; gap:9px; margin-top:20px; }
+.eco-m { flex:1 1 96px; min-width:96px; padding:11px 13px; border-radius:13px;
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.11); }
+.eco-m-v { font-size:20px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:#fff; }
+.eco-m-l { margin-top:3px; font-size:11.5px; line-height:1.35; color:rgba(255,255,255,.62); }
+
+/* actions */
+.eco-foot { margin-top:auto; padding-top:20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.eco-cta { display:inline-flex; align-items:center; gap:9px; padding:11px 17px; border-radius:12px; border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.10); color:#fff; font-size:13.5px; font-weight:700; cursor:pointer; text-align:left;
+  transition:background .2s, border-color .2s, gap .2s; }
+.eco-cta:hover { background:rgba(255,255,255,.17); border-color:rgba(255,255,255,.3); gap:13px; }
+.eco-cta.solid { background:var(--eco-a); border-color:transparent; color:#08182F; }
+.eco-cta.solid:hover { background:color-mix(in srgb, var(--eco-a) 84%, #fff); }
+.eco-t :is(a,button):focus-visible { outline:2px solid #fff; outline-offset:3px; border-radius:12px; }
+
+/* catalog tile: search + category chips carrying real counts */
+.eco-search { display:flex; align-items:center; gap:10px; margin-top:22px; padding:12px 14px; border-radius:13px;
+  background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.14); color:rgba(255,255,255,.55); font-size:13.5px; cursor:pointer; width:100%;
+  text-align:left; font-family:inherit; }
+.eco-search svg { flex:0 0 auto; }
+.eco-search:hover { background:rgba(255,255,255,.14); }
+.eco-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.eco-chip { display:inline-flex; align-items:center; gap:8px; padding:9px 12px; border-radius:11px; cursor:pointer;
+  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.9); font-size:12.5px; font-weight:600;
+  transition:background .2s, border-color .2s; }
+.eco-chip:hover { background:rgba(255,255,255,.15); border-color:color-mix(in srgb, var(--eco-a) 55%, transparent); }
+.eco-chip i { font-style:normal; font-size:11px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
+
+/* tender strip: three columns — counters, live lot table, newest lot */
+.eco-t.tender { padding:28px; }
+.eco-live { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border-radius:999px; font-size:11.5px; font-weight:700;
+  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); color:rgba(255,255,255,.82); }
+.eco-live::before { content:""; width:7px; height:7px; border-radius:50%; background:#3BE38B; box-shadow:0 0 0 0 rgba(59,227,139,.6); animation:ecoPulse 2.4s ease-out infinite; }
+@keyframes ecoPulse { 70% { box-shadow:0 0 0 7px rgba(59,227,139,0); } 100% { box-shadow:0 0 0 0 rgba(59,227,139,0); } }
+.eco-tender-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,.85fr); gap:20px; margin-top:22px; align-items:start; }
+.eco-lots { border-radius:16px; overflow:hidden; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.11); }
+.eco-lots-h { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.10);
+  font-size:12px; font-weight:700; color:rgba(255,255,255,.8); }
+.eco-lot { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; padding:11px 14px; border-bottom:1px solid rgba(255,255,255,.07); }
+.eco-lot:last-child { border-bottom:0; }
+.eco-lot-n { font-size:12.5px; font-weight:600; color:rgba(255,255,255,.92); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.eco-lot-c { font-size:11px; color:rgba(255,255,255,.5); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.eco-lot-s { font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums; color:#fff; text-align:right; white-space:nowrap; }
+.eco-lot-d { font-size:11px; font-variant-numeric:tabular-nums; color:var(--eco-a); text-align:right; white-space:nowrap; }
+.eco-new { padding:16px; border-radius:16px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); display:flex; flex-direction:column; height:100%; }
+.eco-new-t { margin-top:10px; font-size:14px; font-weight:700; line-height:1.35; color:#fff; }
+.eco-new-c { margin-top:6px; font-size:11.5px; color:rgba(255,255,255,.58); }
+.eco-new-s { margin-top:12px; font-size:22px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:#fff; }
+.eco-sources { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:20px; }
+.eco-src { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border-radius:10px; font-size:12px; font-weight:600;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.11); color:rgba(255,255,255,.78); }
+.eco-src::before { content:""; width:6px; height:6px; border-radius:50%; background:#3BE38B; }
+.eco-src.off::before { background:rgba(255,255,255,.3); }
+.eco-src i { font-style:normal; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.45); }
+.eco-srcs-l { font-size:11.5px; color:rgba(255,255,255,.45); margin-right:2px; }
+
+/* brand wall + delivery network */
+.eco-brands { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+.eco-brand { display:inline-flex; align-items:center; justify-content:center; height:38px; padding:0 14px; border-radius:10px;
+  background:rgba(255,255,255,.92); color:#14243C; font-size:12.5px; font-weight:800; letter-spacing:.01em; }
+.eco-brand img { max-height:20px; max-width:78px; object-fit:contain; }
+.eco-net { margin-top:18px; width:100%; height:118px; display:block; }
+.eco-net .lnk { stroke:color-mix(in srgb, var(--eco-a) 55%, transparent); stroke-width:1; fill:none; }
+.eco-net .nd { fill:var(--eco-a); }
+.eco-net .hub { fill:#fff; }
+
+@media (max-width:1080px) {
+  .eco-grid { grid-template-columns:repeat(2,1fr);
+    grid-template-areas:"catalog catalog" "training training" "tender tender" "brands service" "delivery delivery"; }
+  .eco-tender-cols { grid-template-columns:1fr; }
+}
+@media (max-width:680px) {
+  .eco-grid { grid-template-columns:1fr;
+    grid-template-areas:"catalog" "training" "tender" "brands" "service" "delivery"; gap:14px; }
+  .eco-t, .eco-t.tender { padding:22px; border-radius:18px; }
+  .eco-m { flex:1 1 100%; }
+}
 
 /* ── directions ─────────────────────────────────────── */
 .sx-dir-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; }
@@ -1115,15 +1207,15 @@ function SoiPlatformCSS() {
 .sx-cp-btn:focus-visible,
 .sx-btn:focus-visible { outline:3px solid #1d7ed8; outline-offset:3px; }
 .sx-cp-tile:focus-visible,
-.sx-tile:focus-visible,
 .sx-dir:focus-visible,
 .sx-bpill:focus-visible,
 .sx-case:focus-visible,
 .sx-ncard:focus-visible { outline:2px solid var(--sx-blue,#1d7ed8); outline-offset:2px; border-radius:inherit; }
 .soi-search-input:focus-visible { outline:2px solid var(--sx-blue,#1d7ed8); outline-offset:0; }
 @media (prefers-reduced-motion: reduce) {
-  .sx-cp-btn, .sx-cp-tile, .sx-tile, .sx-dir, .sx-bpill, .sx-case, .sx-ncard,
+  .sx-cp-btn, .sx-cp-tile, .eco-t, .eco-cta, .eco-chip, .sx-dir, .sx-bpill, .sx-case, .sx-ncard,
   .sx-btn { transition:none !important; transform:none !important; }
+  .eco-live::before { animation:none !important; }
 }
 
 /* ── responsive ─────────────────────────────────────── */
@@ -1150,57 +1242,339 @@ function SoiPlatformCSS() {
 /* helper: localized */
 function _lv(lang, ru, uz, en) { return lang === "uz" ? uz : lang === "en" ? en : ru; }
 
+/* ── Ecosystem bento ────────────────────────────────────────────────────────
+   Six entry points into the business, each tile carrying its own hue. Figures
+   come from two places: whatever the API can prove (tender counters, brand wall,
+   catalog size) is live; the rest are editable in admin → «Главная страница».
+   A metric left blank in the admin renders nothing rather than a zero. */
+
+const ECO_DEFAULTS = {
+  catalog_num: "2 800", catalog_unit: "+",
+  training_num: "1000", training_unit: "+",
+  training_m1_v: "15", training_m1_l: { ru: "новых курсов", uz: "yangi kurs", en: "new courses" },
+  training_m2_v: "320", training_m2_l: { ru: "обучены в этом месяце", uz: "shu oyda o'qitildi", en: "trained this month" },
+  training_m3_v: "98%", training_m3_l: { ru: "удовлетворённость", uz: "qoniqish darajasi", en: "satisfaction" },
+  service_num: "50", service_unit: "+",
+  service_m1_v: "3", service_m1_l: { ru: "инженера на выезде", uz: "chiqadigan muhandis", en: "engineers on site" },
+  service_m2_v: "5", service_m2_l: { ru: "заявки в работе", uz: "ishdagi ariza", en: "jobs in progress" },
+  service_m3_v: "97%", service_m3_l: { ru: "довольных клиентов", uz: "mamnun mijoz", en: "satisfied clients" },
+  brands_num: "120", brands_unit: "+",
+  delivery_num: "14", delivery_unit: "",
+  delivery_m1_v: "24 ч", delivery_m1_l: { ru: "среднее время сборки", uz: "o'rtacha yig'ish vaqti", en: "avg. handling time" },
+  delivery_m2_v: "97%", delivery_m2_l: { ru: "доставок в срок", uz: "o'z vaqtida yetkazish", en: "on-time delivery" },
+};
+
+/* Live figures. One small request per source; every one of them may fail without
+   taking the block down — the tiles simply fall back to their editable numbers. */
+function useEcoPulse() {
+  const [pulse, setPulse] = useState({ stats: null, sources: [], cats: [], lots: [], brands: [], products: null });
+  useEffect(() => {
+    const api = window.api;
+    if (!api || !api.listPublic) return;
+    let alive = true;
+    const put = (patch) => { if (alive) setPulse((p) => ({ ...p, ...patch })); };
+    const ok = (p, fn) => p.then(fn).catch(() => {});
+
+    ok(api.listPublic("etender/stats"), (r) => put({ stats: r }));
+    ok(api.listPublic("etender/sources"), (r) => put({ sources: Array.isArray(r) ? r : [] }));
+    ok(api.listPublic("etender/categories"), (r) => put({ cats: Array.isArray(r) ? r : [] }));
+    ok(api.listPublic("etender/lots", { state: "active", limit: 4, page: 1 }), (r) => put({ lots: (r && r.data) || [] }));
+    ok(api.listPublic("brands", { limit: 6, page: 1 }), (r) => put({ brands: (r && r.data) || (Array.isArray(r) ? r : []) }));
+    ok(api.listPublic("products", { limit: 1, page: 1 }), (r) => put({ products: (r && r.total) || 0 }));
+    return () => { alive = false; };
+  }, []);
+  return pulse;
+}
+
+/* 14,2 млрд UZS — procurement sums run to eleven digits, so they are only
+   readable rounded to a unit. */
+function ecoSum(value, code, lang) {
+  const v = Number(value);
+  if (!isFinite(v) || v <= 0) return "";
+  const unit = (k) => _lv(lang, { b: "млрд", m: "млн" }[k], { b: "mlrd", m: "mln" }[k], { b: "bn", m: "mn" }[k]);
+  const cut = (n) => n.toFixed(1).replace(/\.0$/, "").replace(".", _lv(lang, ",", ",", "."));
+  const cur = code || "UZS";
+  if (v >= 1e9) return `${cut(v / 1e9)} ${unit("b")} ${cur}`;
+  if (v >= 1e6) return `${cut(v / 1e6)} ${unit("m")} ${cur}`;
+  return `${Math.round(v).toLocaleString("ru-RU")} ${cur}`;
+}
+
+function ecoDate(d) {
+  if (!d) return "";
+  const t = new Date(d);
+  return isNaN(t) ? "" : t.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function ecoAgo(iso, lang) {
+  if (!iso) return "";
+  const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (!isFinite(min) || min < 0) return "";
+  if (min < 1) return _lv(lang, "только что", "hozirgina", "just now");
+  if (min < 60) return _lv(lang, `${min} мин назад`, `${min} daqiqa oldin`, `${min} min ago`);
+  const h = Math.floor(min / 60);
+  if (h < 24) return _lv(lang, `${h} ч назад`, `${h} soat oldin`, `${h} h ago`);
+  const d = Math.floor(h / 24);
+  return _lv(lang, `${d} дн назад`, `${d} kun oldin`, `${d} d ago`);
+}
+
+function EcoMetrics({ items }) {
+  const shown = items.filter((m) => m.v !== "" && m.v != null);
+  if (!shown.length) return null;
+  return (
+    <div className="eco-metrics">
+      {shown.map((m, i) => (
+        <div className="eco-m" key={i}>
+          <div className="eco-m-v">{m.v}</div>
+          <div className="eco-m-l">{m.l}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* Supply network: 14 regions around the Tashkent hub. Deliberately a diagram of
+   reach, not a map — an approximated national outline would be worse than none. */
+const ECO_NODES = [
+  [26, 62], [52, 44], [58, 78], [86, 33], [92, 70], [120, 55], [128, 86],
+  [156, 40], [168, 72], [196, 58], [214, 84], [238, 46], [258, 74], [284, 60],
+];
+function EcoNetwork() {
+  const hub = ECO_NODES[9];
+  return (
+    <svg className="eco-net" viewBox="0 0 310 118" role="presentation" focusable="false">
+      {ECO_NODES.map((n, i) => (i === 9 ? null : (
+        <path key={"l" + i} className="lnk" d={`M${hub[0]} ${hub[1]} Q ${(hub[0] + n[0]) / 2} ${Math.min(hub[1], n[1]) - 16} ${n[0]} ${n[1]}`} opacity=".45" />
+      )))}
+      {ECO_NODES.map((n, i) => (
+        <circle key={"n" + i} className={i === 9 ? "hub" : "nd"} cx={n[0]} cy={n[1]} r={i === 9 ? 5 : 3} opacity={i === 9 ? 1 : 0.8} />
+      ))}
+    </svg>
+  );
+}
+
 function SoiEcosystem({ lang, go }) {
-  const cats = (window.DATA && window.DATA.CATEGORIES || []).slice(0, 4);
-  const navCat = (id) => go("catalog", id ? { cat: id } : {});
+  const eco = useHomeSetting("homepage_ecosystem", ECO_DEFAULTS);
+  const pulse = useEcoPulse();
+  const tx = (f) => trTx(eco, f, lang) || trTx(ECO_DEFAULTS, f, lang);
+  /* A key the editor has saved wins even when it is empty — clearing a metric in
+     the admin is how you hide it. Only a key that was never configured at all
+     falls back to the default, so a fresh install still shows a full block. */
+  const val = (f) => (eco && Object.prototype.hasOwnProperty.call(eco, f) ? eco[f] : ECO_DEFAULTS[f]);
+
+  const cats = (window.DATA && window.DATA.CATEGORIES || []).slice(0, 5);
+  const st = pulse.stats;
+  const lots = pulse.lots.slice(0, 4);
+  const srcs = pulse.sources.filter((s) => s.count > 0).slice(0, 4);
+  const newest = pulse.lots[0];
+
+  /* The live counters are only shown once they stop contradicting the headline
+     claim — an empty catalog reporting «6» beside «2 800+» reads as a bug. */
+  const liveProducts = pulse.products != null && pulse.products >= 100 ? pulse.products : null;
+  const brandWall = pulse.brands.filter((b) => b && b.name).slice(0, 5);
+  const showWall = brandWall.length >= 3;
+
+  const catTotal = pulse.cats.reduce((a, c) => a + (c.count || 0), 0);
+
   return (
     <section className="sx-section">
       <div className="sx-wrap">
-        <div className="sx-bento">
-          <div className="sx-tile big sx-rv" style={{ "--sx-accent": "#0E4AC6" }} onClick={() => navCat()}>
-            <div className="sx-tile-ic"><Icon name="grid" size={24} /></div>
-            <div className="sx-bignum">2 800+</div>
+        <div className="eco-grid">
+
+          {/* ── catalog ── */}
+          <article className="eco-t catalog sx-rv">
+            <div className="eco-head">
+              <div className="eco-ic"><Icon name="grid" size={22} /></div>
+              {liveProducts && (
+                <div className="eco-badge">
+                  <b>{liveProducts.toLocaleString("ru-RU")}</b>
+                  {_lv(lang, "товаров", "mahsulot", "items")}
+                </div>
+              )}
+            </div>
+            <div className="eco-num">{val("catalog_num")}<span>{val("catalog_unit")}</span></div>
             <h3>{_lv(lang, "Электронный каталог оборудования", "Elektron uskunalar katalogi", "Electronic equipment catalog")}</h3>
-            <p>{_lv(lang, "Медтехника, мебель, инструменты и расходные материалы. Поиск по бренду, направлению медицины и наличию на складе.", "Tibbiy texnika, mebel, asboblar va sarf materiallari. Brend, yo'nalish va ombordagi mavjudlik bo'yicha qidiruv.", "Equipment, furniture, instruments and consumables. Search by brand, specialty and stock availability.")}</p>
-            <div className="sx-big-cats">
+            <p>{_lv(lang,
+              "Медтехника, мебель, инструменты и расходные материалы от ведущих мировых производителей.",
+              "Tibbiy texnika, mebel, asboblar va sarf materiallari — yetakchi jahon ishlab chiqaruvchilaridan.",
+              "Equipment, furniture, instruments and consumables from leading global manufacturers.")}</p>
+            <button className="eco-search" onClick={() => go("catalog")}>
+              <Icon name="search" size={16} />
+              {_lv(lang, "Поиск оборудования, бренда, категории…", "Uskuna, brend, kategoriya qidirish…", "Search equipment, brand, category…")}
+            </button>
+            <div className="eco-chips">
               {cats.map((c) => (
-                <span className="sx-big-cat" key={c.id} onClick={(e) => { e.stopPropagation(); navCat(c.id); }}>
-                  <Icon name={c.icon} size={15} />{_lv(lang, c.ru, c.uz || c.ru, c.en || c.ru)}
-                </span>
+                <button className="eco-chip" key={c.id} onClick={() => go("catalog", { cat: c.id })}>
+                  <Icon name={c.icon} size={14} />
+                  {_lv(lang, c.ru, c.uz || c.ru, c.en || c.ru)}
+                  {c.count ? <i>{c.count}</i> : null}
+                </button>
               ))}
             </div>
-          </div>
-
-          {[
-            { area: "reg", accent: "#15A06A", ic: "user", n: "1000+",
-              t: _lv(lang, "Обученных специалистов", "O'qitilgan mutaxassislar", "Trained specialists"),
-              d: _lv(lang, "Обучаем персонал клиник работе с поставленным оборудованием — очно и онлайн.", "Klinika xodimlarini yetkazib berilgan uskunalar bilan ishlashga o'rgatamiz — joyida va onlayn.", "We train clinic staff to operate the delivered equipment — on-site and online."),
-              foot: _lv(lang, "Обучение персонала", "Xodimlarni o'qitish", "Staff training"), nav: () => go("services") },
-            { area: "tender", accent: "#6454D4", ic: "doc",
-              t: _lv(lang, "Тендеры и госзакупки", "Tender va davlat xaridlari", "Tenders & procurement"),
-              d: _lv(lang, "КП, спецификации и полный пакет документов под требования закупки.", "Taklif, spetsifikatsiya va to'liq hujjatlar to'plami.", "Quotes, specs and a full document package."),
-              foot: _lv(lang, "Для закупщиков", "Xaridorlar uchun", "For buyers"), nav: () => go("tenders") },
-            { area: "service", accent: "#14B8E0", ic: "wrench", n: "50+",
-              t: _lv(lang, "Успешно выполненных сервисных работ", "Muvaffaqiyatli bajarilgan servis ishlari", "Completed service jobs"),
-              d: _lv(lang, "Пусконаладка, плановое обслуживание и ремонт оборудования по всей стране.", "Ishga tushirish, rejali xizmat ko'rsatish va uskunalarni ta'mirlash butun mamlakat bo'ylab.", "Commissioning, scheduled maintenance and equipment repair across the country."),
-              foot: _lv(lang, "Сервис и поддержка", "Servis va qo'llab-quvvatlash", "Service & support"), nav: () => go("services") },
-            { area: "brands", accent: "#E0492F", ic: "award", n: "120+",
-              t: _lv(lang, "Мировые бренды", "Jahon brendlari", "Global brands"),
-              d: _lv(lang, "Официальные поставки от производителей из 12 стран.", "12 mamlakatdan rasmiy yetkazib berish.", "Official supply from manufacturers across 12 countries."),
-              foot: _lv(lang, "Все бренды", "Barcha brendlar", "All brands"), nav: () => go("partners") },
-            { area: "equip", accent: "#0E4AC6", ic: "pin", n: "14",
-              t: _lv(lang, "Доставка по всей стране", "Butun mamlakat bo'ylab", "Nationwide delivery"),
-              d: _lv(lang, "Поставка, логистика и сопровождение в 14 регионах Узбекистана.", "14 hududda yetkazib berish va qo'llab-quvvatlash.", "Delivery and support across 14 regions of Uzbekistan."),
-              foot: _lv(lang, "География поставок", "Yetkazish geografiyasi", "Delivery map"), nav: () => go("services") },
-          ].map((x, i) => (
-            <div className={"sx-tile " + x.area + " sx-rv"} key={x.area} style={{ "--sx-accent": x.accent, "--i": (i % 3) }} onClick={x.nav}>
-              <div className="sx-tile-ic"><Icon name={x.ic} size={22} /></div>
-              {x.n && <div className="sx-bignum" style={{ fontSize: 38, marginTop: 14 }}>{x.n}</div>}
-              <h3>{x.t}</h3>
-              <p>{x.d}</p>
-              <div className="sx-tile-foot">{x.foot}<Icon name="arrowRight" size={15} className="sx-tile-arrow" /></div>
+            <div className="eco-foot">
+              <button className="eco-cta solid" onClick={() => go("catalog")}>
+                {_lv(lang, "Перейти в каталог", "Katalogga o'tish", "Open the catalog")}<Icon name="arrowRight" size={15} />
+              </button>
             </div>
-          ))}
+          </article>
+
+          {/* ── training ── */}
+          <article className="eco-t training sx-rv">
+            <div className="eco-head"><div className="eco-ic"><Icon name="user" size={22} /></div></div>
+            <div className="eco-num">{val("training_num")}<span>{val("training_unit")}</span></div>
+            <h3>{_lv(lang, "Обученных специалистов", "O'qitilgan mutaxassislar", "Trained specialists")}</h3>
+            <p>{_lv(lang,
+              "Обучаем персонал клиник работе с поставленным оборудованием — очно и онлайн.",
+              "Klinika xodimlarini yetkazib berilgan uskunalar bilan ishlashga o'rgatamiz — joyida va onlayn.",
+              "We train clinic staff to operate the delivered equipment — on-site and online.")}</p>
+            <EcoMetrics items={[
+              { v: val("training_m1_v"), l: tx("training_m1_l") },
+              { v: val("training_m2_v"), l: tx("training_m2_l") },
+              { v: val("training_m3_v"), l: tx("training_m3_l") },
+            ]} />
+            <div className="eco-foot">
+              <button className="eco-cta" onClick={() => go("services")}>
+                {_lv(lang, "Обучение персонала", "Xodimlarni o'qitish", "Staff training")}<Icon name="arrowRight" size={15} />
+              </button>
+            </div>
+          </article>
+
+          {/* ── tenders: the one fully live tile ── */}
+          <article className="eco-t tender sx-rv">
+            <div className="eco-head">
+              <div className="eco-ic"><Icon name="doc" size={22} /></div>
+              {st && st.lastSyncAt && (
+                <div className="eco-live">
+                  LIVE · {_lv(lang, "обновлено", "yangilandi", "updated")} {ecoAgo(st.lastSyncAt, lang)}
+                </div>
+              )}
+            </div>
+            <h3 style={{ fontSize: 23, marginTop: 18 }}>
+              {_lv(lang, "Тендеры и государственные закупки", "Tender va davlat xaridlari", "Tenders & public procurement")}
+            </h3>
+            <p>{_lv(lang,
+              "Актуальные лоты с государственных площадок, документация и требования закупок — в одном месте.",
+              "Davlat maydonchalaridagi dolzarb lotlar, hujjatlar va xarid talablari — bir joyda.",
+              "Live lots from state platforms, documentation and procurement requirements — in one place.")}</p>
+
+            <div className="eco-tender-cols">
+              <div>
+                <EcoMetrics items={[
+                  { v: st ? st.active : "", l: _lv(lang, "активных лотов", "faol lot", "active lots") },
+                  { v: st ? st.newToday : "", l: _lv(lang, "новых сегодня", "bugun yangi", "new today") },
+                  { v: st ? st.endingWeek : "", l: _lv(lang, "закрываются за неделю", "hafta ichida yopiladi", "closing this week") },
+                ]} />
+                {catTotal > 0 && (
+                  <div className="eco-sources" style={{ marginTop: 14 }}>
+                    <span className="eco-srcs-l">{_lv(lang, "Площадки:", "Maydonchalar:", "Platforms:")}</span>
+                    {srcs.map((s) => (
+                      <span className={"eco-src" + (s.ready ? "" : " off")} key={s.source}>
+                        {(s.label && (s.label[lang] || s.label.ru) || s.source).split(" — ")[0]}
+                        <i>{s.count}</i>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="eco-lots">
+                <div className="eco-lots-h">
+                  <span>{_lv(lang, "Актуальные лоты", "Dolzarb lotlar", "Current lots")}</span>
+                  <span style={{ color: "rgba(255,255,255,.45)", fontWeight: 600 }}>
+                    {_lv(lang, "сумма · дедлайн", "summa · muddat", "sum · deadline")}
+                  </span>
+                </div>
+                {lots.length === 0 && (
+                  <div className="eco-lot"><span className="eco-lot-c">{_lv(lang, "Загружаем лоты…", "Lotlar yuklanmoqda…", "Loading lots…")}</span></div>
+                )}
+                {lots.map((l) => (
+                  <div className="eco-lot" key={l.id}>
+                    <span className="eco-lot-n" title={l.name}>{l.name}</span>
+                    <span className="eco-lot-s">{ecoSum(l.cost, l.currencyCode, lang)}</span>
+                    <span className="eco-lot-c">{l.sellerName || l.regionName || ""}</span>
+                    <span className="eco-lot-d">{ecoDate(l.endDate)}</span>
+                  </div>
+                ))}
+              </div>
+
+              {newest && (
+                <div className="eco-new">
+                  <div className="eco-badge" style={{ alignSelf: "flex-start" }}>
+                    <Icon name="star" size={13} />{_lv(lang, "Новое поступление", "Yangi tushum", "Latest lot")}
+                  </div>
+                  <div className="eco-new-t">{newest.name}</div>
+                  <div className="eco-new-c">{newest.sellerName || newest.regionName}</div>
+                  <div className="eco-new-s">{ecoSum(newest.cost, newest.currencyCode, lang)}</div>
+                  <div className="eco-new-c">
+                    {_lv(lang, "до", "gacha", "until")} {ecoDate(newest.endDate)}
+                  </div>
+                  <div className="eco-foot">
+                    <button className="eco-cta solid" onClick={() => go("tenders")}>
+                      {_lv(lang, "Открыть платформу", "Platformani ochish", "Open the platform")}<Icon name="arrowRight" size={15} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </article>
+
+          {/* ── brands ── */}
+          <article className="eco-t brands sx-rv">
+            <div className="eco-head"><div className="eco-ic"><Icon name="award" size={22} /></div></div>
+            <div className="eco-num">{val("brands_num")}<span>{val("brands_unit")}</span></div>
+            <h3>{_lv(lang, "Мировые бренды", "Jahon brendlari", "Global brands")}</h3>
+            <p>{_lv(lang, "Официальные поставки от производителей из 12 стран.", "12 mamlakat ishlab chiqaruvchilaridan rasmiy yetkazib berish.", "Official supply from manufacturers across 12 countries.")}</p>
+            {showWall && (
+              <div className="eco-brands">
+                {brandWall.map((b) => (
+                  <span className="eco-brand" key={b.id || b.name}>
+                    {b.logoUrl ? <img src={b.logoUrl} alt={b.name} loading="lazy" /> : b.name}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="eco-foot">
+              <button className="eco-cta" onClick={() => go("partners")}>
+                {_lv(lang, "Все бренды", "Barcha brendlar", "All brands")}<Icon name="arrowRight" size={15} />
+              </button>
+            </div>
+          </article>
+
+          {/* ── service ── */}
+          <article className="eco-t service sx-rv">
+            <div className="eco-head"><div className="eco-ic"><Icon name="wrench" size={22} /></div></div>
+            <div className="eco-num">{val("service_num")}<span>{val("service_unit")}</span></div>
+            <h3>{_lv(lang, "Успешно выполненных сервисных работ", "Muvaffaqiyatli bajarilgan servis ishlari", "Completed service jobs")}</h3>
+            <p>{_lv(lang, "Пусконаладка, плановое обслуживание и ремонт оборудования по всей стране.", "Ishga tushirish, rejali xizmat va ta'mirlash butun mamlakat bo'ylab.", "Commissioning, maintenance and repair across the country.")}</p>
+            <EcoMetrics items={[
+              { v: val("service_m1_v"), l: tx("service_m1_l") },
+              { v: val("service_m2_v"), l: tx("service_m2_l") },
+              { v: val("service_m3_v"), l: tx("service_m3_l") },
+            ]} />
+            <div className="eco-foot">
+              <button className="eco-cta" onClick={() => go("services")}>
+                {_lv(lang, "Сервис и поддержка", "Servis va qo'llab-quvvatlash", "Service & support")}<Icon name="arrowRight" size={15} />
+              </button>
+            </div>
+          </article>
+
+          {/* ── delivery ── */}
+          <article className="eco-t delivery sx-rv">
+            <div className="eco-head"><div className="eco-ic"><Icon name="pin" size={22} /></div></div>
+            <div className="eco-num">{val("delivery_num")}<span>{val("delivery_unit")}</span></div>
+            <h3>{_lv(lang, "Доставка по всей стране", "Butun mamlakat bo'ylab yetkazish", "Nationwide delivery")}</h3>
+            <p>{_lv(lang, "Поставка, логистика и сопровождение в 14 регионах Узбекистана.", "14 hududda yetkazib berish, logistika va qo'llab-quvvatlash.", "Delivery, logistics and support across 14 regions of Uzbekistan.")}</p>
+            <EcoNetwork />
+            <EcoMetrics items={[
+              { v: val("delivery_m1_v"), l: tx("delivery_m1_l") },
+              { v: val("delivery_m2_v"), l: tx("delivery_m2_l") },
+            ]} />
+            <div className="eco-foot">
+              <button className="eco-cta" onClick={() => go("services")}>
+                {_lv(lang, "География поставок", "Yetkazish geografiyasi", "Delivery map")}<Icon name="arrowRight" size={15} />
+              </button>
+            </div>
+          </article>
+
         </div>
       </div>
     </section>

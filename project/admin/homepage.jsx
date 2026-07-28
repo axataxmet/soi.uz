@@ -46,6 +46,24 @@ function AdminHomepage() {
     btn2: { ru: "Перейти в каталог", uz: "Katalogga o'tish", en: "Browse catalog" },
   });
 
+  // Bento «Экосистема». Tender counters on that block come live from the API and
+  // are deliberately absent here — only the figures nobody can measure for us.
+  const [eco, setEco] = useSettings("homepage_ecosystem", {
+    catalog_num: "2 800", catalog_unit: "+",
+    training_num: "1000", training_unit: "+",
+    training_m1_v: "15", training_m1_l: { ru: "новых курсов", uz: "yangi kurs", en: "new courses" },
+    training_m2_v: "320", training_m2_l: { ru: "обучены в этом месяце", uz: "shu oyda o'qitildi", en: "trained this month" },
+    training_m3_v: "98%", training_m3_l: { ru: "удовлетворённость", uz: "qoniqish darajasi", en: "satisfaction" },
+    service_num: "50", service_unit: "+",
+    service_m1_v: "3", service_m1_l: { ru: "инженера на выезде", uz: "chiqadigan muhandis", en: "engineers on site" },
+    service_m2_v: "5", service_m2_l: { ru: "заявки в работе", uz: "ishdagi ariza", en: "jobs in progress" },
+    service_m3_v: "97%", service_m3_l: { ru: "довольных клиентов", uz: "mamnun mijoz", en: "satisfied clients" },
+    brands_num: "120", brands_unit: "+",
+    delivery_num: "14", delivery_unit: "",
+    delivery_m1_v: "24 ч", delivery_m1_l: { ru: "среднее время сборки", uz: "o'rtacha yig'ish vaqti", en: "avg. handling time" },
+    delivery_m2_v: "97%", delivery_m2_l: { ru: "доставок в срок", uz: "o'z vaqtida yetkazish", en: "on-time delivery" },
+  });
+
   const save = (setter, val) => cmsOp(() => setter(val), toast, "Сохранено");
 
   // Guard against pre-migration settings that were still plain strings —
@@ -58,6 +76,8 @@ function AdminHomepage() {
   const setIL = (k, v) => setImpact(im => ({ ...im, [k]: { ...asObj(im[k]), [lang]: v } }));
   const setC = (k, v) => setCta(c => ({ ...c, [k]: v }));
   const setCL = (k, v) => setCta(c => ({ ...c, [k]: { ...asObj(c[k]), [lang]: v } }));
+  const setE = (k, v) => setEco(x => ({ ...x, [k]: v }));
+  const setEL = (k, v) => setEco(x => ({ ...x, [k]: { ...asObj(x[k]), [lang]: v } }));
 
   const LangTabs = () => (
     <div className="adm-tabs" style={{ marginBottom: 12 }}>
@@ -78,7 +98,7 @@ function AdminHomepage() {
       </div>
 
       <div className="adm-tabs">
-        {[["hero","Герой"],["impact","Impact"],["cta","CTA"]].map(([k,l]) => (
+        {[["hero","Герой"],["eco","Экосистема"],["impact","Impact"],["cta","CTA"]].map(([k,l]) => (
           <div key={k} className={`adm-tab ${tab===k?"active":""}`} onClick={() => setTab(k)}>{l}</div>
         ))}
       </div>
@@ -125,6 +145,72 @@ function AdminHomepage() {
                 </Field>
               </div>
               <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => save(setHero, hero)}><AdminIcon name="save" size={14} /> Сохранить Hero</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tab === "eco" && (
+        <div className="adm-card">
+          <div className="adm-card-head"><span className="adm-card-title">Блок «Экосистема» (6 плиток)</span></div>
+          <div className="adm-card-body">
+            <div className="adm-form">
+              <LangTabs />
+              <div className="adm-page-sub" style={{ marginBottom: 12 }}>
+                Крупные числа плиток. Счётчики тендеров берутся из системы автоматически и здесь не редактируются.
+              </div>
+              <div className="adm-form-row cols3">
+                {[["catalog","Каталог"],["training","Обучение"],["service","Сервис"]].map(([k,l]) => (
+                  <div key={k} style={{ display: "flex", gap: 8 }}>
+                    <Field label={`${l}: число`}>
+                      <input className="adm-input" value={eco[`${k}_num`] || ""} onChange={e => setE(`${k}_num`, e.target.value)} />
+                    </Field>
+                    <Field label="ед.">
+                      <input className="adm-input" placeholder="+" value={eco[`${k}_unit`] || ""} onChange={e => setE(`${k}_unit`, e.target.value)} />
+                    </Field>
+                  </div>
+                ))}
+              </div>
+              <div className="adm-form-row cols3">
+                {[["brands","Бренды"],["delivery","Доставка"]].map(([k,l]) => (
+                  <div key={k} style={{ display: "flex", gap: 8 }}>
+                    <Field label={`${l}: число`}>
+                      <input className="adm-input" value={eco[`${k}_num`] || ""} onChange={e => setE(`${k}_num`, e.target.value)} />
+                    </Field>
+                    <Field label="ед.">
+                      <input className="adm-input" placeholder="+" value={eco[`${k}_unit`] || ""} onChange={e => setE(`${k}_unit`, e.target.value)} />
+                    </Field>
+                  </div>
+                ))}
+              </div>
+
+              <hr className="adm-divider" />
+              <div className="adm-page-sub" style={{ marginBottom: 12 }}>
+                Мелкие метрики внутри плиток. Оставьте значение пустым — метрика исчезнет со страницы, вёрстка не сломается.
+              </div>
+              {[
+                ["Обучение", "training", 3],
+                ["Сервис", "service", 3],
+                ["Доставка", "delivery", 2],
+              ].map(([label, key, count]) => (
+                <div key={key} style={{ marginBottom: 18 }}>
+                  <div className="adm-label" style={{ marginBottom: 8 }}>{label}</div>
+                  {Array.from({ length: count }, (_, i) => i + 1).map(n => (
+                    <div key={n} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+                      <Field label={`Метрика ${n}: значение`}>
+                        <input className="adm-input" placeholder="98%" value={eco[`${key}_m${n}_v`] || ""} onChange={e => setE(`${key}_m${n}_v`, e.target.value)} />
+                      </Field>
+                      <Field label="подпись">
+                        <input className="adm-input" placeholder="Подпись" value={eco[`${key}_m${n}_l`]?.[lang] || ""} onChange={e => setEL(`${key}_m${n}_l`, e.target.value)} />
+                      </Field>
+                    </div>
+                  ))}
+                </div>
+              ))}
+
+              <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => save(setEco, eco)}>
+                <AdminIcon name="save" size={14} /> Сохранить «Экосистему»
+              </button>
             </div>
           </div>
         </div>

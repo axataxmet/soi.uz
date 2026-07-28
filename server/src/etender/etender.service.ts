@@ -325,6 +325,29 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     return MED_CATEGORIES.map((c) => ({ category: c.id, label: c.label, count: counts.get(c.id) || 0 }));
   }
 
+  /* Compact counters for the homepage tile. The same figures could be derived by
+     pulling every active lot, but that is ~87 KB over the wire for three numbers —
+     these are four aggregate queries and a payload under 1 KB. */
+  async stats() {
+    const now = new Date();
+    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAhead = new Date(dayStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+    const activeLot = { active: true };
+
+    const [active, newToday, endingWeek, lastSync] = await Promise.all([
+      this.prisma.etenderLot.count({ where: activeLot }),
+      this.prisma.etenderLot.count({ where: { ...activeLot, startDate: { gte: dayStart } } }),
+      this.prisma.etenderLot.count({ where: { ...activeLot, endDate: { gte: now, lte: weekAhead } } }),
+      this.prisma.etenderSyncLog.findFirst({
+        where: { finishedAt: { not: null } },
+        orderBy: { finishedAt: 'desc' },
+        select: { finishedAt: true },
+      }),
+    ]);
+
+    return { active, newToday, endingWeek, lastSyncAt: lastSync?.finishedAt ?? null };
+  }
+
   getLot(source: string, externalId: string) {
     return this.prisma.etenderLot.findUnique({ where: { source_externalId: { source, externalId } } });
   }
