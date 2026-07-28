@@ -1050,10 +1050,12 @@ function SoiPlatformCSS() {
 .eco-brand { display:inline-flex; align-items:center; justify-content:center; height:38px; padding:0 14px; border-radius:10px;
   background:rgba(255,255,255,.92); color:#14243C; font-size:12.5px; font-weight:800; letter-spacing:.01em; }
 .eco-brand img { max-height:20px; max-width:78px; object-fit:contain; }
-.eco-net { margin-top:18px; width:100%; height:118px; display:block; }
-.eco-net .lnk { stroke:color-mix(in srgb, var(--eco-a) 55%, transparent); stroke-width:1; fill:none; }
-.eco-net .nd { fill:var(--eco-a); }
-.eco-net .hub { fill:#fff; }
+.eco-map { margin-top:18px; width:100%; height:auto; display:block; overflow:visible; }
+.eco-map-land { fill:color-mix(in srgb, var(--eco-a) 13%, transparent); stroke:color-mix(in srgb, var(--eco-a) 72%, transparent);
+  stroke-width:1.3; stroke-linejoin:round; }
+.eco-map-route { fill:none; stroke:color-mix(in srgb, var(--eco-a) 42%, transparent); stroke-width:.9; }
+.eco-map-dot { fill:var(--eco-a); }
+.eco-map-hub { fill:#fff; }
 
 @media (max-width:1080px) {
   .eco-grid { grid-template-columns:repeat(2,1fr);
@@ -1332,21 +1334,33 @@ function EcoMetrics({ items }) {
   );
 }
 
-/* Supply network: 14 regions around the Tashkent hub. Deliberately a diagram of
-   reach, not a map — an approximated national outline would be worse than none. */
-const ECO_NODES = [
-  [26, 62], [52, 44], [58, 78], [86, 33], [92, 70], [120, 55], [128, 86],
-  [156, 40], [168, 72], [196, 58], [214, 84], [238, 46], [258, 74], [284, 60],
+/* Uzbekistan outline. Border ring is Natural Earth (public domain), reprojected
+   to this viewBox with a cos(lat) correction so the country keeps its true
+   proportions rather than being stretched by a raw lon/lat plot.
+   Nodes are the 14 delivery regions at their real coordinates; Tashkent (index
+   10) is the hub every route runs from. */
+const ECO_MAP_PATH = "M185.5 191.9 L186 177.7 L162.7 167.7 L144.4 156.2 L132.9 145.3 L112.9 129.1 L104.3 105.1 L98.4 100.8 L79.5 101.9 L72.8 97.1 L70.9 78.5 L47.3 66.2 L32.5 79.7 L17.6 87.8 L20.5 99.5 L0.7 99.9 L0 13.8 L45.1 0 L48.4 2 L75.5 18.7 L89.9 27.6 L106.6 48.6 L127.1 45.2 L157.2 43.4 L178.1 60.4 L176.8 83.8 L185.4 84 L188.9 103.1 L211.2 103.9 L216 114.9 L222.5 114.8 L230.2 98.1 L253.3 81.8 L263.3 77.5 L268.5 79.8 L253.8 94.9 L266.8 103.7 L279.2 97.9 L300 110.2 L277.6 127 L264.2 124.7 L257 125.3 L254.5 118.8 L258.2 108 L234.7 113.4 L229.2 128.4 L220.8 141.3 L206.2 140.2 L201.7 150.5 L214.5 156 L218.3 173.4 L208.5 197 L195.3 192.1 Z";
+const ECO_MAP_NODES = [
+  [64.5, 73], [82.3, 94.2], [77.6, 98.2], [148.7, 135.8], [165.6, 128.5],
+  [172.7, 157], [198.8, 195.3], [193.2, 138.6], [208.6, 127.6], [225.1, 119],
+  [233.2, 99.8], [275.7, 107.3], [287.5, 112.2], [277.7, 121.3],
 ];
-function EcoNetwork() {
-  const hub = ECO_NODES[9];
+const ECO_HUB = 10;
+
+function EcoUzMap({ lang }) {
+  const hub = ECO_MAP_NODES[ECO_HUB];
   return (
-    <svg className="eco-net" viewBox="0 0 310 118" role="presentation" focusable="false">
-      {ECO_NODES.map((n, i) => (i === 9 ? null : (
-        <path key={"l" + i} className="lnk" d={`M${hub[0]} ${hub[1]} Q ${(hub[0] + n[0]) / 2} ${Math.min(hub[1], n[1]) - 16} ${n[0]} ${n[1]}`} opacity=".45" />
+    <svg className="eco-map" viewBox="-4 -4 308 205" role="img" focusable="false">
+      <title>
+        {_lv(lang, "Карта Узбекистана: 14 регионов доставки", "O'zbekiston xaritasi: 14 ta yetkazish hududi", "Map of Uzbekistan: 14 delivery regions")}
+      </title>
+      <path className="eco-map-land" d={ECO_MAP_PATH} />
+      {ECO_MAP_NODES.map((n, i) => (i === ECO_HUB ? null : (
+        <path key={"r" + i} className="eco-map-route"
+          d={`M${hub[0]} ${hub[1]} Q ${(hub[0] + n[0]) / 2} ${(hub[1] + n[1]) / 2 - 14} ${n[0]} ${n[1]}`} />
       )))}
-      {ECO_NODES.map((n, i) => (
-        <circle key={"n" + i} className={i === 9 ? "hub" : "nd"} cx={n[0]} cy={n[1]} r={i === 9 ? 5 : 3} opacity={i === 9 ? 1 : 0.8} />
+      {ECO_MAP_NODES.map((n, i) => (
+        <circle key={"n" + i} className={i === ECO_HUB ? "eco-map-hub" : "eco-map-dot"} cx={n[0]} cy={n[1]} r={i === ECO_HUB ? 4.4 : 2.6} />
       ))}
     </svg>
   );
@@ -1563,7 +1577,7 @@ function SoiEcosystem({ lang, go }) {
             <div className="eco-num">{val("delivery_num")}<span>{val("delivery_unit")}</span></div>
             <h3>{_lv(lang, "Доставка по всей стране", "Butun mamlakat bo'ylab yetkazish", "Nationwide delivery")}</h3>
             <p>{_lv(lang, "Поставка, логистика и сопровождение в 14 регионах Узбекистана.", "14 hududda yetkazib berish, logistika va qo'llab-quvvatlash.", "Delivery, logistics and support across 14 regions of Uzbekistan.")}</p>
-            <EcoNetwork />
+            <EcoUzMap lang={lang} />
             <EcoMetrics items={[
               { v: val("delivery_m1_v"), l: tx("delivery_m1_l") },
               { v: val("delivery_m2_v"), l: tx("delivery_m2_l") },
