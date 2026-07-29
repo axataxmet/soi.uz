@@ -995,7 +995,9 @@ function SoiPlatformCSS() {
 .eco-m { flex:1 1 96px; min-width:96px; padding:11px 13px; border-radius:13px;
   background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.11); }
 .eco-m-v { font-size:20px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:#fff; }
-.eco-m-l { margin-top:3px; font-size:11.5px; line-height:1.35; color:rgba(255,255,255,.62); }
+/* "закрываются" is wider than a third of a phone screen — let it break rather
+   than spill out of its card. */
+.eco-m-l { margin-top:3px; font-size:11.5px; line-height:1.35; color:rgba(255,255,255,.62); overflow-wrap:anywhere; }
 
 /* actions */
 .eco-foot { padding-top:20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
@@ -1020,33 +1022,41 @@ function SoiPlatformCSS() {
 .eco-chip:hover { background:rgba(255,255,255,.15); border-color:color-mix(in srgb, var(--eco-a) 55%, transparent); }
 .eco-chip i { font-style:normal; font-size:11px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
 
-/* tender strip: three columns — counters, live lot table, newest lot */
-.eco-t.tender { padding:28px; }
+/* tender strip: KPIs read first at full width, then the lot table beside the
+   newest lot — one path out of the block, in the card. */
+.eco-t.tender { padding:24px; }
+.eco-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
+.eco-kpis .eco-m { flex:none; min-width:0; padding:12px 14px; }
+.eco-kpis .eco-m-v { font-size:28px; line-height:1.05; letter-spacing:-.03em; }
+.eco-kpis .eco-m-l { margin-top:2px; }
 .eco-live { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border-radius:999px; font-size:11.5px; font-weight:700;
   background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); color:rgba(255,255,255,.82); }
 .eco-live::before { content:""; width:7px; height:7px; border-radius:50%; background:#3BE38B; box-shadow:0 0 0 0 rgba(59,227,139,.6); animation:ecoPulse 2.4s ease-out infinite; }
 @keyframes ecoPulse { 70% { box-shadow:0 0 0 7px rgba(59,227,139,0); } 100% { box-shadow:0 0 0 0 rgba(59,227,139,0); } }
-.eco-tender-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,.85fr); gap:20px; margin-top:22px; align-items:start; }
+.eco-tender-cols { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:14px; margin-top:14px; align-items:stretch; }
 .eco-lots { border-radius:16px; overflow:hidden; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.11); }
-.eco-lots-h { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; border-bottom:1px solid rgba(255,255,255,.10);
-  font-size:12px; font-weight:700; color:rgba(255,255,255,.8); }
-.eco-lot { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:4px 12px; padding:11px 14px; border-bottom:1px solid rgba(255,255,255,.07); }
+.eco-lots-h { display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding:11px 13px; border-bottom:1px solid rgba(255,255,255,.10);
+  font-size:12px; font-weight:700; color:rgba(255,255,255,.82); }
+/* Which platforms feed the list — proof of integration, stated rather than
+   offered as a second thing to click. */
+.eco-lots-src { font-size:10.5px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:rgba(255,255,255,.4); }
+.eco-lot { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:3px 12px; padding:9px 13px; border-bottom:1px solid rgba(255,255,255,.07); }
 .eco-lot:last-child { border-bottom:0; }
 .eco-lot-n { font-size:12.5px; font-weight:600; color:rgba(255,255,255,.92); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .eco-lot-c { font-size:11px; color:rgba(255,255,255,.5); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .eco-lot-s { font-size:12.5px; font-weight:700; font-variant-numeric:tabular-nums; color:#fff; text-align:right; white-space:nowrap; }
-.eco-lot-d { font-size:11px; font-variant-numeric:tabular-nums; color:var(--eco-a); text-align:right; white-space:nowrap; }
-.eco-new { padding:16px; border-radius:16px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); display:flex; flex-direction:column; height:100%; }
-.eco-new-t { margin-top:10px; font-size:14px; font-weight:700; line-height:1.35; color:#fff; }
-.eco-new-c { margin-top:6px; font-size:11.5px; color:rgba(255,255,255,.58); }
-.eco-new-s { margin-top:12px; font-size:22px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:#fff; }
-.eco-sources { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:20px; }
-.eco-src { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border-radius:10px; font-size:12px; font-weight:600;
-  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.11); color:rgba(255,255,255,.78); }
-.eco-src::before { content:""; width:6px; height:6px; border-radius:50%; background:#3BE38B; }
-.eco-src.off::before { background:rgba(255,255,255,.3); }
-.eco-src i { font-style:normal; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.45); }
-.eco-srcs-l { font-size:11.5px; color:rgba(255,255,255,.45); margin-right:2px; }
+.eco-lot-d { font-size:11px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.55); text-align:right; white-space:nowrap; }
+/* Urgency is semantic, not the tile accent — a closing lot has to read as such
+   before anyone parses the date. */
+.eco-lot-d.urgent, .eco-new-d.urgent { color:#FFB25C; font-weight:700; }
+.eco-new { padding:15px; border-radius:15px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); display:flex; flex-direction:column; }
+.eco-new-l { display:inline-flex; align-items:center; gap:6px; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--eco-a); }
+/* Procurement titles run to 180+ characters; unclamped, one lot decides how tall
+   the whole strip is. Two lines here, the full name in the tooltip. */
+.eco-new-t { margin-top:9px; font-size:13.5px; font-weight:700; line-height:1.35; color:#fff;
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.eco-new-s { margin-top:auto; padding-top:12px; font-size:21px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:#fff; }
+.eco-new-d { margin-top:3px; font-size:11.5px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.58); }
 
 /* brand wall + delivery network */
 .eco-brands { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
@@ -1085,6 +1095,12 @@ function SoiPlatformCSS() {
     grid-template-areas:"catalog" "training" "tender" "brands" "service" "delivery"; gap:14px; }
   .eco-t, .eco-t.tender { padding:22px; border-radius:18px; }
   .eco-m { flex:1 1 100%; }
+  /* KPIs stay three-up on a phone — stacking them would undo the height the
+     block just gained — so they shed padding and a couple of type steps. */
+  .eco-kpis { gap:8px; }
+  .eco-kpis .eco-m { padding:10px; }
+  .eco-kpis .eco-m-v { font-size:23px; }
+  .eco-kpis .eco-m-l { font-size:10.5px; }
 }
 
 /* ── directions ─────────────────────────────────────── */
@@ -1280,7 +1296,7 @@ const ECO_DEFAULTS = {
 /* Live figures. One small request per source; every one of them may fail without
    taking the block down — the tiles simply fall back to their editable numbers. */
 function useEcoPulse() {
-  const [pulse, setPulse] = useState({ stats: null, sources: [], cats: [], lots: [], brands: [], products: null });
+  const [pulse, setPulse] = useState({ stats: null, sources: [], lots: [], brands: [], products: null });
   useEffect(() => {
     const api = window.api;
     if (!api || !api.listPublic) return;
@@ -1290,7 +1306,6 @@ function useEcoPulse() {
 
     ok(api.listPublic("etender/stats"), (r) => put({ stats: r }));
     ok(api.listPublic("etender/sources"), (r) => put({ sources: Array.isArray(r) ? r : [] }));
-    ok(api.listPublic("etender/categories"), (r) => put({ cats: Array.isArray(r) ? r : [] }));
     ok(api.listPublic("etender/lots", { state: "active", limit: 4, page: 1 }), (r) => put({ lots: (r && r.data) || [] }));
     ok(api.listPublic("brands", { limit: 6, page: 1 }), (r) => put({ brands: (r && r.data) || (Array.isArray(r) ? r : []) }));
     ok(api.listPublic("products", { limit: 1, page: 1 }), (r) => put({ products: (r && r.total) || 0 }));
@@ -1318,6 +1333,22 @@ function ecoDate(d) {
   return isNaN(t) ? "" : t.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
+/* A date tells you nothing at a glance; "через 2 дн" does. Inside a week the
+   deadline counts down, and the last three days read as urgent. */
+function ecoDeadline(iso, lang) {
+  if (!iso) return { text: "", urgent: false };
+  const t = new Date(iso);
+  if (isNaN(t)) return { text: "", urgent: false };
+  const days = Math.ceil((t.getTime() - Date.now()) / 86400000);
+  // `countdown` marks a phrase like "через 2 дн" — callers that already print the
+  // date append it only then, instead of showing the same date twice.
+  if (days < 0) return { text: ecoDate(iso), urgent: false, countdown: false };
+  if (days === 0) return { text: _lv(lang, "сегодня", "bugun", "today"), urgent: true, countdown: true };
+  if (days === 1) return { text: _lv(lang, "завтра", "ertaga", "tomorrow"), urgent: true, countdown: true };
+  if (days <= 7) return { text: _lv(lang, `через ${days} дн`, `${days} kundan`, `in ${days} d`), urgent: days <= 3, countdown: true };
+  return { text: ecoDate(iso), urgent: false, countdown: false };
+}
+
 function ecoAgo(iso, lang) {
   if (!iso) return "";
   const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
@@ -1330,11 +1361,11 @@ function ecoAgo(iso, lang) {
   return _lv(lang, `${d} дн назад`, `${d} kun oldin`, `${d} d ago`);
 }
 
-function EcoMetrics({ items }) {
+function EcoMetrics({ items, className }) {
   const shown = items.filter((m) => m.v !== "" && m.v != null);
   if (!shown.length) return null;
   return (
-    <div className="eco-metrics">
+    <div className={"eco-metrics" + (className ? " " + className : "")}>
       {shown.map((m, i) => (
         <div className="eco-m" key={i}>
           <div className="eco-m-v">{m.v}</div>
@@ -1398,8 +1429,15 @@ function SoiEcosystem({ lang, go }) {
 
   const cats = (window.DATA && window.DATA.CATEGORIES || []).slice(0, 5);
   const st = pulse.stats;
-  const lots = pulse.lots.slice(0, 4);
-  const srcs = pulse.sources.filter((s) => s.count > 0).slice(0, 4);
+  // A preview, not the list — the full feed lives on the tenders page.
+  const lots = pulse.lots.slice(0, 3);
+  /* Several feeds share a platform (Etender runs both tenders and selections),
+     so label by platform and drop the repeats. */
+  const srcs = [...new Set(
+    pulse.sources
+      .filter((s) => s.count > 0)
+      .map((s) => ((s.label && (s.label[lang] || s.label.ru)) || s.source).split(" — ")[0].trim()),
+  )].slice(0, 4);
   const newest = pulse.lots[0];
 
   /* The live counters are only shown once they stop contradicting the headline
@@ -1408,7 +1446,6 @@ function SoiEcosystem({ lang, go }) {
   const brandWall = pulse.brands.filter((b) => b && b.name).slice(0, 5);
   const showWall = brandWall.length >= 3;
 
-  const catTotal = pulse.cats.reduce((a, c) => a + (c.count || 0), 0);
 
   return (
     <section className="sx-section">
@@ -1471,75 +1508,70 @@ function SoiEcosystem({ lang, go }) {
           {/* ── tenders: the one fully live tile ── */}
           <article className="eco-t tender sx-rv">
             <div className="eco-head">
-              <div className="eco-ic"><Icon name="doc" size={22} /></div>
+              {/* A pulse, not a document: this tile is a live feed, not paperwork.
+                  (The site icon set has no "chart" — that one lives in the admin.) */}
+              <div className="eco-ic"><Icon name="pulse" size={22} /></div>
               {st && st.lastSyncAt && (
                 <div className="eco-live">
                   LIVE · {_lv(lang, "обновлено", "yangilandi", "updated")} {ecoAgo(st.lastSyncAt, lang)}
                 </div>
               )}
             </div>
-            <h3 style={{ fontSize: 23, marginTop: 18 }}>
+            <h3 style={{ fontSize: 23, marginTop: 16 }}>
               {_lv(lang, "Тендеры и государственные закупки", "Tender va davlat xaridlari", "Tenders & public procurement")}
             </h3>
             <p>{_lv(lang,
-              "Актуальные лоты с государственных площадок, документация и требования закупок — в одном месте.",
-              "Davlat maydonchalaridagi dolzarb lotlar, hujjatlar va xarid talablari — bir joyda.",
-              "Live lots from state platforms, documentation and procurement requirements — in one place.")}</p>
+              "Актуальные лоты с государственных площадок — в одном сервисе.",
+              "Davlat maydonchalaridagi dolzarb lotlar — bitta xizmatda.",
+              "Live lots from the state platforms — in one service.")}</p>
+
+            {/* Key figures come before the list: the scale of the feed, then what is in it. */}
+            <EcoMetrics className="eco-kpis" items={[
+              { v: st ? st.active : "", l: _lv(lang, "активных лотов", "faol lot", "active lots") },
+              { v: st ? st.newToday : "", l: _lv(lang, "новых сегодня", "bugun yangi", "new today") },
+              { v: st ? st.endingWeek : "", l: _lv(lang, "закрываются за неделю", "hafta ichida yopiladi", "closing this week") },
+            ]} />
 
             <div className="eco-tender-cols">
-              <div>
-                <EcoMetrics items={[
-                  { v: st ? st.active : "", l: _lv(lang, "активных лотов", "faol lot", "active lots") },
-                  { v: st ? st.newToday : "", l: _lv(lang, "новых сегодня", "bugun yangi", "new today") },
-                  { v: st ? st.endingWeek : "", l: _lv(lang, "закрываются за неделю", "hafta ichida yopiladi", "closing this week") },
-                ]} />
-                {catTotal > 0 && (
-                  <div className="eco-sources" style={{ marginTop: 14 }}>
-                    <span className="eco-srcs-l">{_lv(lang, "Площадки:", "Maydonchalar:", "Platforms:")}</span>
-                    {srcs.map((s) => (
-                      <span className={"eco-src" + (s.ready ? "" : " off")} key={s.source}>
-                        {(s.label && (s.label[lang] || s.label.ru) || s.source).split(" — ")[0]}
-                        <i>{s.count}</i>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-
               <div className="eco-lots">
                 <div className="eco-lots-h">
-                  <span>{_lv(lang, "Актуальные лоты", "Dolzarb lotlar", "Current lots")}</span>
-                  <span style={{ color: "rgba(255,255,255,.45)", fontWeight: 600 }}>
-                    {_lv(lang, "сумма · дедлайн", "summa · muddat", "sum · deadline")}
-                  </span>
+                  <span>{_lv(lang, "Последние тендеры", "Songgi tenderlar", "Latest tenders")}</span>
+                  {srcs.length > 0 && <span className="eco-lots-src">{srcs.join(" · ")}</span>}
                 </div>
                 {lots.length === 0 && (
                   <div className="eco-lot"><span className="eco-lot-c">{_lv(lang, "Загружаем лоты…", "Lotlar yuklanmoqda…", "Loading lots…")}</span></div>
                 )}
-                {lots.map((l) => (
-                  <div className="eco-lot" key={l.id}>
-                    <span className="eco-lot-n" title={l.name}>{l.name}</span>
-                    <span className="eco-lot-s">{ecoSum(l.cost, l.currencyCode, lang)}</span>
-                    <span className="eco-lot-c">{l.sellerName || l.regionName || ""}</span>
-                    <span className="eco-lot-d">{ecoDate(l.endDate)}</span>
-                  </div>
-                ))}
+                {lots.map((l) => {
+                  const dl = ecoDeadline(l.endDate, lang);
+                  return (
+                    <div className="eco-lot" key={l.id}>
+                      <span className="eco-lot-n" title={l.name}>{l.name}</span>
+                      <span className="eco-lot-s">{ecoSum(l.cost, l.currencyCode, lang)}</span>
+                      <span className="eco-lot-c">{l.sellerName || l.regionName || ""}</span>
+                      <span className={"eco-lot-d" + (dl.urgent ? " urgent" : "")}>{dl.text}</span>
+                    </div>
+                  );
+                })}
               </div>
 
               {newest && (
                 <div className="eco-new">
-                  <div className="eco-badge" style={{ alignSelf: "flex-start" }}>
-                    <Icon name="star" size={13} />{_lv(lang, "Новое поступление", "Yangi tushum", "Latest lot")}
-                  </div>
-                  <div className="eco-new-t">{newest.name}</div>
-                  <div className="eco-new-c">{newest.sellerName || newest.regionName}</div>
+                  <span className="eco-new-l">
+                    <Icon name="star" size={12} />{_lv(lang, "Новое поступление", "Yangi tushum", "Latest lot")}
+                  </span>
+                  <div className="eco-new-t" title={newest.name}>{newest.name}</div>
                   <div className="eco-new-s">{ecoSum(newest.cost, newest.currencyCode, lang)}</div>
-                  <div className="eco-new-c">
-                    {_lv(lang, "до", "gacha", "until")} {ecoDate(newest.endDate)}
-                  </div>
+                  {(() => {
+                    const dl = ecoDeadline(newest.endDate, lang);
+                    return (
+                      <div className={"eco-new-d" + (dl.urgent ? " urgent" : "")}>
+                        {_lv(lang, "до", "gacha", "until")} {ecoDate(newest.endDate)}{dl.countdown ? " · " + dl.text : ""}
+                      </div>
+                    );
+                  })()}
                   <div className="eco-foot">
                     <button className="eco-cta solid" onClick={() => go("tenders")}>
-                      {_lv(lang, "Открыть платформу", "Platformani ochish", "Open the platform")}<Icon name="arrowRight" size={15} />
+                      {_lv(lang, "Все тендеры", "Barcha tenderlar", "All tenders")}<Icon name="arrowRight" size={15} />
                     </button>
                   </div>
                 </div>
