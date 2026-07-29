@@ -60,8 +60,6 @@ function AdminHomepage() {
     service_m3_v: "97%", service_m3_l: { ru: "довольных клиентов", uz: "mamnun mijoz", en: "satisfied clients" },
     brands_num: "120", brands_unit: "+",
     delivery_num: "14", delivery_unit: "",
-    delivery_m1_v: "24 ч", delivery_m1_l: { ru: "среднее время сборки", uz: "o'rtacha yig'ish vaqti", en: "avg. handling time" },
-    delivery_m2_v: "97%", delivery_m2_l: { ru: "доставок в срок", uz: "o'z vaqtida yetkazish", en: "on-time delivery" },
   });
 
   const save = (setter, val) => cmsOp(() => setter(val), toast, "Сохранено");
@@ -191,7 +189,6 @@ function AdminHomepage() {
               {[
                 ["Обучение", "training", 3],
                 ["Сервис", "service", 3],
-                ["Доставка", "delivery", 2],
               ].map(([label, key, count]) => (
                 <div key={key} style={{ marginBottom: 18 }}>
                   <div className="adm-label" style={{ marginBottom: 8 }}>{label}</div>

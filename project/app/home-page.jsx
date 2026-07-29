@@ -1050,12 +1050,29 @@ function SoiPlatformCSS() {
 .eco-brand { display:inline-flex; align-items:center; justify-content:center; height:38px; padding:0 14px; border-radius:10px;
   background:rgba(255,255,255,.92); color:#14243C; font-size:12.5px; font-weight:800; letter-spacing:.01em; }
 .eco-brand img { max-height:20px; max-width:78px; object-fit:contain; }
-.eco-map { margin-top:18px; width:100%; height:auto; display:block; overflow:visible; }
+/* Sits last in the tile with no footer under it, so it takes the slack and
+   anchors to the bottom instead of leaving a gap. */
+.eco-map { margin-top:auto; padding-top:18px; width:100%; height:auto; display:block; overflow:visible; }
 .eco-map-land { fill:color-mix(in srgb, var(--eco-a) 13%, transparent); stroke:color-mix(in srgb, var(--eco-a) 72%, transparent);
   stroke-width:1.3; stroke-linejoin:round; }
-.eco-map-route { fill:none; stroke:color-mix(in srgb, var(--eco-a) 42%, transparent); stroke-width:.9; }
-.eco-map-dot { fill:var(--eco-a); }
+/* Two strokes per route: a faint permanent corridor, and a short dash running
+   along it from Tashkent outward — a delivery leaving, not decoration. */
+.eco-map-route { fill:none; stroke:color-mix(in srgb, var(--eco-a) 26%, transparent); stroke-width:.9; }
+/* pathLength="1" normalises every route, so a short hop to Sirdaryo and a long
+   run to Karakalpakstan take the same time instead of the dash racing. */
+.eco-map-flow { fill:none; stroke:color-mix(in srgb, var(--eco-a) 92%, transparent); stroke-width:1.5; stroke-linecap:round;
+  stroke-dasharray:.06 .94; stroke-dashoffset:1; animation:ecoFlow 3.6s linear infinite; }
+.eco-map-dot { fill:var(--eco-a); opacity:.55; animation:ecoLand 3.6s ease-in-out infinite; }
 .eco-map-hub { fill:#fff; }
+.eco-map-ping { fill:none; stroke:#fff; stroke-width:1.2; opacity:0; animation:ecoPing 3.6s ease-out infinite; }
+@keyframes ecoFlow { to { stroke-dashoffset:0; } }
+@keyframes ecoLand { 0%,62% { opacity:.55; r:2.6; } 78% { opacity:1; r:3.6; } 100% { opacity:.55; r:2.6; } }
+@keyframes ecoPing { 0% { r:4.4; opacity:.7; } 55%,100% { r:15; opacity:0; } }
+@media (prefers-reduced-motion: reduce) {
+  .eco-map-flow { animation:none; stroke-dasharray:none; stroke-dashoffset:0; stroke-width:.9; opacity:.5; }
+  .eco-map-dot { animation:none; opacity:.85; }
+  .eco-map-ping { display:none; }
+}
 
 @media (max-width:1080px) {
   .eco-grid { grid-template-columns:repeat(2,1fr);
@@ -1261,9 +1278,8 @@ const ECO_DEFAULTS = {
   service_m2_v: "5", service_m2_l: { ru: "заявки в работе", uz: "ishdagi ariza", en: "jobs in progress" },
   service_m3_v: "97%", service_m3_l: { ru: "довольных клиентов", uz: "mamnun mijoz", en: "satisfied clients" },
   brands_num: "120", brands_unit: "+",
+  // The delivery tile carries the map alone — no metrics, no CTA.
   delivery_num: "14", delivery_unit: "",
-  delivery_m1_v: "24 ч", delivery_m1_l: { ru: "среднее время сборки", uz: "o'rtacha yig'ish vaqti", en: "avg. handling time" },
-  delivery_m2_v: "97%", delivery_m2_l: { ru: "доставок в срок", uz: "o'z vaqtida yetkazish", en: "on-time delivery" },
 };
 
 /* Live figures. One small request per source; every one of them may fail without
@@ -1355,13 +1371,24 @@ function EcoUzMap({ lang }) {
         {_lv(lang, "Карта Узбекистана: 14 регионов доставки", "O'zbekiston xaritasi: 14 ta yetkazish hududi", "Map of Uzbekistan: 14 delivery regions")}
       </title>
       <path className="eco-map-land" d={ECO_MAP_PATH} />
+      {ECO_MAP_NODES.map((n, i) => {
+        if (i === ECO_HUB) return null;
+        const d = `M${hub[0]} ${hub[1]} Q ${(hub[0] + n[0]) / 2} ${(hub[1] + n[1]) / 2 - 14} ${n[0]} ${n[1]}`;
+        // Staggered so the routes fire in turn instead of pulsing in unison.
+        const delay = `${(i * 0.24).toFixed(2)}s`;
+        return (
+          <g key={"r" + i}>
+            <path className="eco-map-route" d={d} />
+            <path className="eco-map-flow" d={d} pathLength="1" style={{ animationDelay: delay }} />
+          </g>
+        );
+      })}
+      <circle className="eco-map-ping" cx={hub[0]} cy={hub[1]} r="4.4" />
       {ECO_MAP_NODES.map((n, i) => (i === ECO_HUB ? null : (
-        <path key={"r" + i} className="eco-map-route"
-          d={`M${hub[0]} ${hub[1]} Q ${(hub[0] + n[0]) / 2} ${(hub[1] + n[1]) / 2 - 14} ${n[0]} ${n[1]}`} />
+        <circle key={"n" + i} className="eco-map-dot" cx={n[0]} cy={n[1]} r="2.6"
+          style={{ animationDelay: `${(i * 0.24).toFixed(2)}s` }} />
       )))}
-      {ECO_MAP_NODES.map((n, i) => (
-        <circle key={"n" + i} className={i === ECO_HUB ? "eco-map-hub" : "eco-map-dot"} cx={n[0]} cy={n[1]} r={i === ECO_HUB ? 4.4 : 2.6} />
-      ))}
+      <circle className="eco-map-hub" cx={hub[0]} cy={hub[1]} r="4.4" />
     </svg>
   );
 }
@@ -1578,15 +1605,6 @@ function SoiEcosystem({ lang, go }) {
             <h3>{_lv(lang, "Доставка по всей стране", "Butun mamlakat bo'ylab yetkazish", "Nationwide delivery")}</h3>
             <p>{_lv(lang, "Поставка, логистика и сопровождение в 14 регионах Узбекистана.", "14 hududda yetkazib berish, logistika va qo'llab-quvvatlash.", "Delivery, logistics and support across 14 regions of Uzbekistan.")}</p>
             <EcoUzMap lang={lang} />
-            <EcoMetrics items={[
-              { v: val("delivery_m1_v"), l: tx("delivery_m1_l") },
-              { v: val("delivery_m2_v"), l: tx("delivery_m2_l") },
-            ]} />
-            <div className="eco-foot">
-              <button className="eco-cta" onClick={() => go("services")}>
-                {_lv(lang, "География поставок", "Yetkazish geografiyasi", "Delivery map")}<Icon name="arrowRight" size={15} />
-              </button>
-            </div>
           </article>
 
         </div>
