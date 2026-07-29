@@ -6,6 +6,7 @@ import { EtenderAdapter } from './etender.adapter';
 import { GovUzAdapter } from './govuz.adapter';
 import { XaridAdapter } from './xarid.adapter';
 import { XtXaridAdapter } from './xtxarid.adapter';
+import { FarmaAdapter } from './farma.adapter';
 import { MedicalFilter } from './medical-filter';
 import { MedCategoryClassifier } from './med-category';
 import { EtenderPrismaService } from './etender-prisma.service';
@@ -16,7 +17,7 @@ import { EtenderPrismaService } from './etender-prisma.service';
 @Module({
   imports: [ScheduleModule.forRoot()],
   controllers: [EtenderController],
-  providers: [EtenderService, EtenderAdapter, GovUzAdapter, XaridAdapter, XtXaridAdapter, MedicalFilter, MedCategoryClassifier, EtenderPrismaService],
+  providers: [EtenderService, EtenderAdapter, GovUzAdapter, XaridAdapter, XtXaridAdapter, FarmaAdapter, MedicalFilter, MedCategoryClassifier, EtenderPrismaService],
   exports: [EtenderService],
 })
 export class EtenderModule {}

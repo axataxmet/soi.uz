@@ -10,11 +10,12 @@ import { EtenderAdapter } from './etender.adapter';
 import { GovUzAdapter } from './govuz.adapter';
 import { XaridAdapter } from './xarid.adapter';
 import { XtXaridAdapter } from './xtxarid.adapter';
+import { FarmaAdapter } from './farma.adapter';
 import { MedicalFilter } from './medical-filter';
 import { MED_CATEGORIES, MedCategoryClassifier } from './med-category';
 import { EtenderLotQueryDto } from './dto/etender-query.dto';
 import { NormalizedEtenderLot, UzexTradeSource } from './etender.types';
-import { GOVUZ_SOURCES, GovUzSource, UZEX_SOURCES, XARID_SOURCES, XaridSource, XT_SOURCES, XtSource } from './tender-sources';
+import { FARMA_SOURCES, FarmaSource, GOVUZ_SOURCES, GovUzSource, TENDER_PLATFORMS, UZEX_SOURCES, XARID_SOURCES, XaridSource, XT_SOURCES, XtSource } from './tender-sources';
 
 const CRON_NAME = 'etender-daily-sync';
 
@@ -41,6 +42,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     private readonly govuz: GovUzAdapter,
     private readonly xarid: XaridAdapter,
     private readonly xt: XtXaridAdapter,
+    private readonly farma: FarmaAdapter,
     private readonly medical: MedicalFilter,
     private readonly medCat: MedCategoryClassifier,
     private readonly scheduler: SchedulerRegistry,
@@ -68,7 +70,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     }
     const job = CronJob.from({ cronTime: this.cron, timeZone: this.tz, onTick: () => void this.syncAll('cron'), start: true });
     this.scheduler.addCronJob(CRON_NAME, job as any);
-    const active = [...UZEX_SOURCES, ...XARID_SOURCES, ...XT_SOURCES, ...GOVUZ_SOURCES].filter((s) => this.isOn(s.source)).map((s) => s.source);
+    const active = [...UZEX_SOURCES, ...XARID_SOURCES, ...XT_SOURCES, ...GOVUZ_SOURCES, ...FARMA_SOURCES].filter((s) => this.isOn(s.source)).map((s) => s.source);
     this.log.log(`tender daily sync scheduled: cron "${this.cron}" (${this.tz}) — sources: ${active.join(', ')}`);
 
     this.booting = setTimeout(() => {
@@ -122,6 +124,11 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
           if (this.isOn(cfg.source)) results.push(await this.syncGovUzSource(cfg, trigger));
         }
       }
+      if (this.farma.enabled) {
+        for (const cfg of FARMA_SOURCES) {
+          if (this.isOn(cfg.source)) results.push(await this.syncFarmaSource(cfg, trigger));
+        }
+      }
     } finally {
       this.running = false;
       this.listCache.clear(); // fresh data → drop cached read responses
@@ -152,6 +159,10 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
       const lots = await this.xt.fetch(cfg, this.pageSize, this.maxPages);
       return { lots, total: lots.length };
     });
+  }
+
+  private async syncFarmaSource(cfg: FarmaSource, trigger: string) {
+    return this.runSync(cfg.source, null, trigger, () => this.farma.fetchAllLots(cfg, this.pageSize, this.maxPages));
   }
 
   // Shared per-source sync: fetch → upsert → deactivate vanished/expired → log.
@@ -322,6 +333,29 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     const xt = XT_SOURCES.map((s) => ({ source: s.source, kind: s.kind, label: s.label, site: s.site, count: counts.get(s.source) || 0, ready: this.xt.enabled }));
     const gov = GOVUZ_SOURCES.map((s) => ({ source: s.source, kind: s.kind, label: s.label, site: 'https://gov.uz', count: counts.get(s.source) || 0, ready: this.govuz.enabled }));
     return [...uzex, ...xarid, ...xt, ...gov];
+  }
+
+  /* Platforms as a visitor understands them: four names, each summing the feeds
+     underneath it. `ready` says the connector runs, which is not the same as
+     having lots — Farma is wired but currently publishes none. */
+  async platforms() {
+    const grouped = await this.prisma.etenderLot.groupBy({ by: ['source'], where: { active: true }, _count: true });
+    const counts = new Map(grouped.map((g) => [g.source, g._count]));
+    const wired = new Set([
+      ...UZEX_SOURCES.map((s) => s.source),
+      ...(this.xarid.enabled ? XARID_SOURCES.map((s) => s.source) : []),
+      ...(this.xt.enabled ? XT_SOURCES.map((s) => s.source) : []),
+      ...(this.govuz.enabled ? GOVUZ_SOURCES.map((s) => s.source) : []),
+      ...(this.farma.enabled ? FARMA_SOURCES.map((s) => s.source) : []),
+    ]);
+    return TENDER_PLATFORMS.map((p) => ({
+      id: p.id,
+      name: p.name,
+      site: p.site,
+      description: p.description,
+      count: p.sources.reduce((a, s) => a + (counts.get(s) || 0), 0),
+      ready: p.sources.some((s) => wired.has(s)),
+    }));
   }
 
   /* Medical categories with live counts and money. The homepage shows both —

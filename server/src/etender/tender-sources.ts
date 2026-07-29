@@ -139,7 +139,100 @@ export const XT_SOURCES: XtSource[] = [
   },
 ];
 
+/* ── farma.uzex.uz ────────────────────────────────────────────────────────────
+   Separate API host (api-farma.uzex.uz/ETenderCommon/GetList, POST
+   {status_id, from, to}) but the rows come back in exactly the UZEX TradeList
+   shape, so FarmaAdapter reuses EtenderAdapter's field mapping. status_id 4 is
+   the open-tender list the site's own page requests; it currently returns none,
+   the platform has no live tenders yet. */
+export interface FarmaSource {
+  source: string;
+  kind: 'lot';
+  statusId: number;
+  site: string;
+  label: { ru: string; uz: string; en: string };
+}
+
+export const FARMA_SOURCES: FarmaSource[] = [
+  {
+    source: 'FARMA_TENDER',
+    kind: 'lot',
+    statusId: 4,
+    site: 'https://farma.uzex.uz',
+    label: { ru: 'Farma.UZEX — Тендеры', uz: 'Farma.UZEX — Tenderlar', en: 'Farma.UZEX — Tenders' },
+  },
+];
+
 // All requested sources are now wired. (Sub-systems of xarid's not-completed-deals
 // beyond auction — shop/national — and etender's fail-list can be added later as
 // extra XaridSource / UZEX entries if needed.)
 export const PENDING_SOURCES = [] as const;
+
+/* ── Platforms ────────────────────────────────────────────────────────────────
+   What a visitor calls a "площадка" is not what we call a source: one platform
+   publishes several feeds (UZEX runs etender, xarid and biznesxarid; XT-Xarid
+   splits tenders from selections). The site speaks in platforms, the sync keeps
+   working in sources, and this map is the only place the two meet. */
+export interface TenderPlatform {
+  id: string;
+  name: string;
+  site: string;
+  description: { ru: string; uz: string; en: string };
+  sources: string[];
+}
+
+export const TENDER_PLATFORMS: TenderPlatform[] = [
+  {
+    id: 'uzex',
+    name: 'Uzex',
+    site: 'https://xarid.uzex.uz/home',
+    description: {
+      ru: 'Национальная система электронных государственных закупок',
+      uz: 'Elektron davlat xaridlari milliy tizimi',
+      en: 'National electronic public procurement system',
+    },
+    sources: ['ETENDER_SELECTION', 'ETENDER_TENDER', 'BIZNESXARID', 'XARID_COMPETITION', 'XARID_DEALS'],
+  },
+  {
+    id: 'xt-xarid',
+    name: 'XT-Xarid',
+    site: 'https://xt-xarid.uz',
+    description: {
+      ru: 'Электронная торговая площадка',
+      uz: 'Elektron savdo maydonchasi',
+      en: 'Electronic trading platform',
+    },
+    sources: ['XT_TENDER', 'XT_SELECTION'],
+  },
+  {
+    id: 'uzmedimpex',
+    name: 'UzMedImpex',
+    site: 'https://uzmedimpex.uz',
+    description: {
+      ru: 'ГУ Центр закупок',
+      uz: 'Xaridlar markazi DM',
+      en: 'State procurement centre',
+    },
+    // Collected via the gov.uz portal feed, which is where this centre publishes.
+    sources: ['UZMEDIMPEX_TENDER', 'UZMEDIMPEX_SELECTION', 'UZMEDIMPEX_MARKETING'],
+  },
+  {
+    id: 'farma',
+    name: 'Farma.UZEX',
+    site: 'https://farma.uzex.uz',
+    description: {
+      ru: 'Электронная площадка закупок лекарственных средств и медицинских изделий',
+      uz: 'Dori vositalari va tibbiy buyumlar xaridlari maydonchasi',
+      en: 'Procurement platform for medicines and medical devices',
+    },
+    sources: ['FARMA_TENDER'],
+  },
+];
+
+export const PLATFORM_BY_SOURCE: Record<string, TenderPlatform> = TENDER_PLATFORMS.reduce(
+  (acc, p) => {
+    p.sources.forEach((s) => (acc[s] = p));
+    return acc;
+  },
+  {} as Record<string, TenderPlatform>,
+);

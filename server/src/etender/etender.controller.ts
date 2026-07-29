@@ -23,6 +23,14 @@ export class EtenderController {
   }
 
   @Public()
+  @Get('platforms')
+  @Header('Cache-Control', 'public, max-age=300')
+  @ApiOperation({ summary: 'Площадки мониторинга: название, описание, ссылка и число активных лотов (публичный)' })
+  platforms() {
+    return this.etender.platforms();
+  }
+
+  @Public()
   @Get('stats')
   @Header('Cache-Control', 'public, max-age=300')
   @ApiOperation({ summary: 'Счётчики лотов для витрины: активные, новые за сегодня, закрываются за неделю (публичный)' })
