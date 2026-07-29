@@ -972,7 +972,10 @@ function SoiPlatformCSS() {
 .eco-t.delivery { --eco-area:delivery; --eco-h:#0E2E63; --eco-a:#6FB0FF; }
 
 /* head: icon + optional corner badge */
-.eco-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+/* The slack collects under the icon, so every tile reads as "mark on top,
+   content block anchored to the bottom" instead of pooling a void above the CTA
+   whenever a tile carries less content than its neighbour. */
+.eco-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:auto; }
 .eco-ic { width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
   background:color-mix(in srgb, var(--eco-a) 22%, transparent); color:var(--eco-a); border:1px solid color-mix(in srgb, var(--eco-a) 26%, transparent); }
 .eco-badge { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border-radius:11px; font-size:12px; font-weight:700;
@@ -995,7 +998,7 @@ function SoiPlatformCSS() {
 .eco-m-l { margin-top:3px; font-size:11.5px; line-height:1.35; color:rgba(255,255,255,.62); }
 
 /* actions */
-.eco-foot { margin-top:auto; padding-top:20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.eco-foot { padding-top:20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .eco-cta { display:inline-flex; align-items:center; gap:9px; padding:11px 17px; border-radius:12px; border:1px solid rgba(255,255,255,.16);
   background:rgba(255,255,255,.10); color:#fff; font-size:13.5px; font-weight:700; cursor:pointer; text-align:left;
   transition:background .2s, border-color .2s, gap .2s; }
@@ -1050,9 +1053,7 @@ function SoiPlatformCSS() {
 .eco-brand { display:inline-flex; align-items:center; justify-content:center; height:38px; padding:0 14px; border-radius:10px;
   background:rgba(255,255,255,.92); color:#14243C; font-size:12.5px; font-weight:800; letter-spacing:.01em; }
 .eco-brand img { max-height:20px; max-width:78px; object-fit:contain; }
-/* Sits last in the tile with no footer under it, so it takes the slack and
-   anchors to the bottom instead of leaving a gap. */
-.eco-map { margin-top:auto; padding-top:18px; width:100%; height:auto; display:block; overflow:visible; }
+.eco-map { padding-top:18px; width:100%; height:auto; display:block; overflow:visible; }
 .eco-map-land { fill:color-mix(in srgb, var(--eco-a) 13%, transparent); stroke:color-mix(in srgb, var(--eco-a) 72%, transparent);
   stroke-width:1.3; stroke-linejoin:round; }
 /* Two strokes per route: a faint permanent corridor, and a short dash running
@@ -1270,13 +1271,7 @@ function _lv(lang, ru, uz, en) { return lang === "uz" ? uz : lang === "en" ? en 
 const ECO_DEFAULTS = {
   catalog_num: "2 800", catalog_unit: "+",
   training_num: "1000", training_unit: "+",
-  training_m1_v: "15", training_m1_l: { ru: "новых курсов", uz: "yangi kurs", en: "new courses" },
-  training_m2_v: "320", training_m2_l: { ru: "обучены в этом месяце", uz: "shu oyda o'qitildi", en: "trained this month" },
-  training_m3_v: "98%", training_m3_l: { ru: "удовлетворённость", uz: "qoniqish darajasi", en: "satisfaction" },
   service_num: "50", service_unit: "+",
-  service_m1_v: "3", service_m1_l: { ru: "инженера на выезде", uz: "chiqadigan muhandis", en: "engineers on site" },
-  service_m2_v: "5", service_m2_l: { ru: "заявки в работе", uz: "ishdagi ariza", en: "jobs in progress" },
-  service_m3_v: "97%", service_m3_l: { ru: "довольных клиентов", uz: "mamnun mijoz", en: "satisfied clients" },
   brands_num: "120", brands_unit: "+",
   // The delivery tile carries the map alone — no metrics, no CTA.
   delivery_num: "14", delivery_unit: "",
@@ -1396,7 +1391,6 @@ function EcoUzMap({ lang }) {
 function SoiEcosystem({ lang, go }) {
   const eco = useHomeSetting("homepage_ecosystem", ECO_DEFAULTS);
   const pulse = useEcoPulse();
-  const tx = (f) => trTx(eco, f, lang) || trTx(ECO_DEFAULTS, f, lang);
   /* A key the editor has saved wins even when it is empty — clearing a metric in
      the admin is how you hide it. Only a key that was never configured at all
      falls back to the default, so a fresh install still shows a full block. */
@@ -1467,11 +1461,6 @@ function SoiEcosystem({ lang, go }) {
               "Обучаем персонал клиник работе с поставленным оборудованием — очно и онлайн.",
               "Klinika xodimlarini yetkazib berilgan uskunalar bilan ishlashga o'rgatamiz — joyida va onlayn.",
               "We train clinic staff to operate the delivered equipment — on-site and online.")}</p>
-            <EcoMetrics items={[
-              { v: val("training_m1_v"), l: tx("training_m1_l") },
-              { v: val("training_m2_v"), l: tx("training_m2_l") },
-              { v: val("training_m3_v"), l: tx("training_m3_l") },
-            ]} />
             <div className="eco-foot">
               <button className="eco-cta" onClick={() => go("services")}>
                 {_lv(lang, "Обучение персонала", "Xodimlarni o'qitish", "Staff training")}<Icon name="arrowRight" size={15} />
@@ -1586,11 +1575,6 @@ function SoiEcosystem({ lang, go }) {
             <div className="eco-num">{val("service_num")}<span>{val("service_unit")}</span></div>
             <h3>{_lv(lang, "Успешно выполненных сервисных работ", "Muvaffaqiyatli bajarilgan servis ishlari", "Completed service jobs")}</h3>
             <p>{_lv(lang, "Пусконаладка, плановое обслуживание и ремонт оборудования по всей стране.", "Ishga tushirish, rejali xizmat va ta'mirlash butun mamlakat bo'ylab.", "Commissioning, maintenance and repair across the country.")}</p>
-            <EcoMetrics items={[
-              { v: val("service_m1_v"), l: tx("service_m1_l") },
-              { v: val("service_m2_v"), l: tx("service_m2_l") },
-              { v: val("service_m3_v"), l: tx("service_m3_l") },
-            ]} />
             <div className="eco-foot">
               <button className="eco-cta" onClick={() => go("services")}>
                 {_lv(lang, "Сервис и поддержка", "Servis va qo'llab-quvvatlash", "Service & support")}<Icon name="arrowRight" size={15} />
