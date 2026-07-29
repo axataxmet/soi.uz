@@ -28,4 +28,14 @@ export class EtenderLotQueryDto extends PaginationDto {
   @IsOptional()
   @IsIn(['active', 'all', 'closed'])
   state?: 'active' | 'all' | 'closed' = 'active';
+
+  @ApiPropertyOptional({
+    description:
+      'Порядок: fresh — недавно опубликованные, closing — ближайшие по дедлайну. ' +
+      'По умолчанию дедлайн по убыванию (лоты с запасом времени первыми).',
+    enum: ['fresh', 'closing'],
+  })
+  @IsOptional()
+  @IsIn(['fresh', 'closing'])
+  sort?: 'fresh' | 'closing';
 }

@@ -1022,8 +1022,8 @@ function SoiPlatformCSS() {
 .eco-chip:hover { background:rgba(255,255,255,.15); border-color:color-mix(in srgb, var(--eco-a) 55%, transparent); }
 .eco-chip i { font-style:normal; font-size:11px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
 
-/* tender strip: KPIs read first at full width, then the lot table beside the
-   newest lot — one path out of the block, in the card. */
+/* tender strip: KPIs read first at full width, then what was just published
+   beside what closes next — one path out of the block, in the card. */
 .eco-t.tender { padding:24px; }
 .eco-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
 .eco-kpis .eco-m { flex:none; min-width:0; padding:12px 14px; }
@@ -1296,7 +1296,7 @@ const ECO_DEFAULTS = {
 /* Live figures. One small request per source; every one of them may fail without
    taking the block down — the tiles simply fall back to their editable numbers. */
 function useEcoPulse() {
-  const [pulse, setPulse] = useState({ stats: null, sources: [], lots: [], brands: [], products: null });
+  const [pulse, setPulse] = useState({ stats: null, sources: [], lots: [], closing: null, brands: [], products: null });
   useEffect(() => {
     const api = window.api;
     if (!api || !api.listPublic) return;
@@ -1306,7 +1306,11 @@ function useEcoPulse() {
 
     ok(api.listPublic("etender/stats"), (r) => put({ stats: r }));
     ok(api.listPublic("etender/sources"), (r) => put({ sources: Array.isArray(r) ? r : [] }));
-    ok(api.listPublic("etender/lots", { state: "active", limit: 4, page: 1 }), (r) => put({ lots: (r && r.data) || [] }));
+    /* Two orderings, because the table and the card answer different questions:
+       what has just been published, and what closes next. Asking once and
+       reusing the first row for both is how the card ended up repeating it. */
+    ok(api.listPublic("etender/lots", { state: "active", limit: 3, page: 1, sort: "fresh" }), (r) => put({ lots: (r && r.data) || [] }));
+    ok(api.listPublic("etender/lots", { state: "active", limit: 1, page: 1, sort: "closing" }), (r) => put({ closing: ((r && r.data) || [])[0] || null }));
     ok(api.listPublic("brands", { limit: 6, page: 1 }), (r) => put({ brands: (r && r.data) || (Array.isArray(r) ? r : []) }));
     ok(api.listPublic("products", { limit: 1, page: 1 }), (r) => put({ products: (r && r.total) || 0 }));
     return () => { alive = false; };
@@ -1438,7 +1442,11 @@ function SoiEcosystem({ lang, go }) {
       .filter((s) => s.count > 0)
       .map((s) => ((s.label && (s.label[lang] || s.label.ru)) || s.source).split(" — ")[0].trim()),
   )].slice(0, 4);
-  const newest = pulse.lots[0];
+  /* The card shows the lot closing soonest — a different lot from the "just
+     published" table, and a reason to click that the table does not already
+     give. Calling it "новое поступление" contradicted the counter beside it,
+     which reads 0 on any day nothing was published. */
+  const closing = pulse.closing;
 
   /* The live counters are only shown once they stop contradicting the headline
      claim — an empty catalog reporting «6» beside «2 800+» reads as a bug. */
@@ -1554,18 +1562,18 @@ function SoiEcosystem({ lang, go }) {
                 })}
               </div>
 
-              {newest && (
+              {closing && (
                 <div className="eco-new">
                   <span className="eco-new-l">
-                    <Icon name="star" size={12} />{_lv(lang, "Новое поступление", "Yangi tushum", "Latest lot")}
+                    <Icon name="clock" size={12} />{_lv(lang, "Ближайший дедлайн", "Eng yaqin muddat", "Closing next")}
                   </span>
-                  <div className="eco-new-t" title={newest.name}>{newest.name}</div>
-                  <div className="eco-new-s">{ecoSum(newest.cost, newest.currencyCode, lang)}</div>
+                  <div className="eco-new-t" title={closing.name}>{closing.name}</div>
+                  <div className="eco-new-s">{ecoSum(closing.cost, closing.currencyCode, lang)}</div>
                   {(() => {
-                    const dl = ecoDeadline(newest.endDate, lang);
+                    const dl = ecoDeadline(closing.endDate, lang);
                     return (
                       <div className={"eco-new-d" + (dl.urgent ? " urgent" : "")}>
-                        {_lv(lang, "до", "gacha", "until")} {ecoDate(newest.endDate)}{dl.countdown ? " · " + dl.text : ""}
+                        {_lv(lang, "до", "gacha", "until")} {ecoDate(closing.endDate)}{dl.countdown ? " · " + dl.text : ""}
                       </div>
                     );
                   })()}

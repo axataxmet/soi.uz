@@ -284,11 +284,21 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
         { displayNo: { contains: q.search, mode: 'insensitive' } },
       ];
     }
+    /* Default keeps live lots (with a deadline) first and news last. The two
+       explicit orders exist because "latest" and "closing soonest" are different
+       lots, and a caller that says one and shows the other is simply wrong. */
+    if (q.sort === 'closing') where.endDate = { gte: new Date(), ...(where.endDate as object) };
+    const orderBy: Prisma.EtenderLotOrderByWithRelationInput[] =
+      q.sort === 'fresh'
+        ? [{ startDate: { sort: 'desc', nulls: 'last' } }, { syncedAt: 'desc' }]
+        : q.sort === 'closing'
+          ? [{ endDate: { sort: 'asc', nulls: 'last' } }]
+          : [{ endDate: { sort: 'desc', nulls: 'last' } }, { syncedAt: 'desc' }];
+
     const [data, total] = await this.prisma.$transaction([
       this.prisma.etenderLot.findMany({
         where,
-        // Live lots (with a deadline) first; news (null endDate) after.
-        orderBy: [{ endDate: { sort: 'desc', nulls: 'last' } }, { syncedAt: 'desc' }],
+        orderBy,
         skip: (q.page - 1) * q.limit,
         take: q.limit,
       }),
