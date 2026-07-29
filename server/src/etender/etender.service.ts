@@ -324,15 +324,24 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     return [...uzex, ...xarid, ...xt, ...gov];
   }
 
-  // Medical categories + live counts, for the category filter block on #/tenders.
+  /* Medical categories with live counts and money. The homepage shows both —
+     they tell different stories: consumables are 4 lots but the second-largest
+     budget. Aggregated here so the tile never pulls every lot to add them up. */
   async categories() {
     const grouped = await this.prisma.etenderLot.groupBy({
       by: ['medCategory'],
       where: { active: true },
       _count: true,
+      _sum: { cost: true },
     });
     const counts = new Map(grouped.map((g) => [g.medCategory ?? 'other', g._count]));
-    return MED_CATEGORIES.map((c) => ({ category: c.id, label: c.label, count: counts.get(c.id) || 0 }));
+    const sums = new Map(grouped.map((g) => [g.medCategory ?? 'other', Number(g._sum.cost ?? 0)]));
+    return MED_CATEGORIES.map((c) => ({
+      category: c.id,
+      label: c.label,
+      count: counts.get(c.id) || 0,
+      sum: sums.get(c.id) || 0,
+    }));
   }
 
   /* Compact counters for the homepage tile. The same figures could be derived by
@@ -344,10 +353,15 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     const weekAhead = new Date(dayStart.getTime() + 7 * 24 * 60 * 60 * 1000);
     const activeLot = { active: true };
 
-    const [active, newToday, endingWeek, lastSync] = await Promise.all([
+    const weekAgo = new Date(dayStart.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const [active, newToday, newWeek, endingWeek, platforms, totalSum, lastSync] = await Promise.all([
       this.prisma.etenderLot.count({ where: activeLot }),
       this.prisma.etenderLot.count({ where: { ...activeLot, startDate: { gte: dayStart } } }),
+      this.prisma.etenderLot.count({ where: { ...activeLot, startDate: { gte: weekAgo } } }),
       this.prisma.etenderLot.count({ where: { ...activeLot, endDate: { gte: now, lte: weekAhead } } }),
+      this.prisma.etenderLot.groupBy({ by: ['source'], where: activeLot, _count: true }),
+      this.prisma.etenderLot.aggregate({ where: activeLot, _sum: { cost: true } }),
       this.prisma.etenderSyncLog.findFirst({
         where: { finishedAt: { not: null } },
         orderBy: { finishedAt: 'desc' },
@@ -355,7 +369,15 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
       }),
     ]);
 
-    return { active, newToday, endingWeek, lastSyncAt: lastSync?.finishedAt ?? null };
+    return {
+      active,
+      newToday,
+      newWeek,
+      endingWeek,
+      platforms: platforms.length,
+      totalSum: Number(totalSum._sum.cost ?? 0),
+      lastSyncAt: lastSync?.finishedAt ?? null,
+    };
   }
 
   getLot(source: string, externalId: string) {

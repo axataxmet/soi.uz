@@ -53,7 +53,7 @@ function useEtenderLotsCss() {
   }, []);
 }
 
-function EtenderLotsBlock({ lang, lv, facet = "source" }) {
+function EtenderLotsBlock({ lang, lv, facet = "source", initialSel = "" }) {
   const { useState, useEffect } = React;
   useEtenderLotsCss();
   const isCat = facet === "category"; // "source" = tabs by platform, "category" = by medical category
@@ -65,7 +65,8 @@ function EtenderLotsBlock({ lang, lv, facet = "source" }) {
   const [query, setQuery] = useState("");
   const [term, setTerm] = useState("");
   const [facets, setFacets] = useState([]); // normalized [{id,label,count}]
-  const [sel, setSel] = useState(""); // "" = all
+  // Preselected when the homepage opens the feed on one category.
+  const [sel, setSel] = useState(initialSel || ""); // "" = all
 
   // debounce search input -> term
   useEffect(() => {
@@ -216,7 +217,7 @@ function EtenderLotsBlock({ lang, lv, facet = "source" }) {
   );
 }
 
-function CoTendersPage({ t, lang, go }) {
+function CoTendersPage({ t, lang, go, initialCat }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const steps = [
   { t: lv("Отправьте ТЗ или спецификацию", "TT yoki spetsifikatsiya yuboring", "Send a spec or requirements"), d: lv("Прикрепите техническое задание закупки или список позиций.", "Xarid texnik topshirig'ini yoki pozitsiyalar ro'yxatini biriktiring.", "Attach the procurement spec or list of items.") },
@@ -234,7 +235,7 @@ function CoTendersPage({ t, lang, go }) {
         </div>
       </section>
 
-      <EtenderLotsBlock lang={lang} lv={lv} facet="category" />
+      <EtenderLotsBlock lang={lang} lv={lv} facet="category" initialSel={initialCat} />
 
       <EtenderLotsBlock lang={lang} lv={lv} />
 

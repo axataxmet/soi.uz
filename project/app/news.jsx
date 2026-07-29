@@ -153,11 +153,13 @@ function App() {
   }, [theme]);
   const toggleTheme = () => setTheme((th) => th === "dark" ? "light" : "dark");
 
-  const go = (view) => {
+  // `opts` carries a preselection into the target page — today only the tender
+  // category, so the homepage tiles can open the feed already filtered.
+  const go = (view, opts) => {
     // "brands" — прямой запрос каталожной витрины; "partners" — корп-страница
     // «Бренды и заводы-производители» (единые данные /api/brands, admin/brands).
     if (view === "brands") { goCat("brands", "", "", "company"); return; }
-    setRoute({ view });
+    setRoute({ view, ...(opts && opts.cat ? { cat: opts.cat } : {}) });
     if (view === "catalog") {setCatNav({ sub: "home", param: "", q: "", from: null });setHashSafe("#/catalog");} else
     setHashSafe(corpHash(view));
     window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
@@ -256,7 +258,7 @@ function App() {
   if (v === "registration") page = <RegistrationPage t={t} lang={lang} go={go} />;else
   if (v === "staffTraining") page = <StaffTrainingPage t={t} lang={lang} go={go} goCat={goCat} />;else
   if (v === "serviceSupport") page = <ServiceSupportPage t={t} lang={lang} go={go} goCat={goCat} />;else
-  if (v === "tenders") page = <CoTendersPage t={t} lang={lang} go={go} />;else
+  if (v === "tenders") page = <CoTendersPage t={t} lang={lang} go={go} initialCat={route.cat} />;else
   if (v === "documents") page = <LicensesPage t={t} lang={lang} go={go} />;else
   if (v === "cases") page = <ProjectsPage t={t} lang={lang} go={go} />;else
   if (v === "news") page = <CoNewsPage t={t} lang={lang} go={go} fromCatalog={route.from === "catalog"} goCatalog={() => go("catalog")} />;else
