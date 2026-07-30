@@ -957,25 +957,53 @@ function SoiPlatformCSS() {
     "catalog  catalog  catalog  training training training"
     "tender   tender   tender   tender   tender   tender"
     "brands   brands   service  service  delivery delivery"; }
-.eco-t { --eco-h:#0B2E7A; --eco-a:#5C9DFF;
+/* One recipe for every tile: the section's own hue in --eco-h, its accent in
+   --eco-a, and identical depth on top — same radius, same diagonal, same inner
+   glow, same shadow. The hues are the brand values; the gradient darkens them
+   so a tile reads as a deep field rather than a flat swatch of colour. */
+.eco-t { --eco-h:#0B4EDB; --eco-a:#5C9DFF;
   position:relative; grid-area:var(--eco-area); isolation:isolate; display:flex; flex-direction:column;
   padding:26px; border-radius:22px; overflow:hidden; color:#fff;
   background:
-    radial-gradient(120% 120% at 100% 0%, color-mix(in srgb, var(--eco-a) 26%, transparent), transparent 58%),
-    linear-gradient(150deg, color-mix(in srgb, var(--eco-h) 88%, #000) 0%, var(--eco-h) 55%, color-mix(in srgb, var(--eco-h) 72%, #000) 100%);
-  box-shadow:0 1px 0 0 rgba(255,255,255,.10) inset, 0 18px 40px -22px color-mix(in srgb, var(--eco-h) 80%, #000); }
-.eco-t.catalog { --eco-area:catalog; --eco-h:#0B2E7A; --eco-a:#5C9DFF; }
-.eco-t.training { --eco-area:training; --eco-h:#0A4A33; --eco-a:#37D89B; }
-.eco-t.tender { --eco-area:tender; --eco-h:#2B1D6B; --eco-a:#A98BFF; }
-.eco-t.brands { --eco-area:brands; --eco-h:#5C2410; --eco-a:#FF9257; }
-.eco-t.service { --eco-area:service; --eco-h:#0A3A52; --eco-a:#43CFF0; }
-.eco-t.delivery { --eco-area:delivery; --eco-h:#0E2E63; --eco-a:#6FB0FF; }
+    radial-gradient(115% 115% at 100% 0%, color-mix(in srgb, var(--eco-a) 22%, transparent), transparent 60%),
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--eco-h) 60%, #05070F) 0%,
+      color-mix(in srgb, var(--eco-h) 82%, #05070F) 52%,
+      color-mix(in srgb, var(--eco-h) 44%, #05070F) 100%);
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,.10) inset,
+    0 0 0 1px color-mix(in srgb, var(--eco-a) 14%, transparent) inset,
+    0 20px 44px -24px color-mix(in srgb, var(--eco-h) 70%, #000); }
+.eco-t.catalog { --eco-area:catalog; --eco-h:#0B4EDB; --eco-a:#5C9DFF; }
+.eco-t.training { --eco-area:training; --eco-h:#008C5E; --eco-a:#37D89B; }
+.eco-t.tender { --eco-area:tender; --eco-h:#4C2D91; --eco-a:#A98BFF; }
+.eco-t.brands { --eco-area:brands; --eco-h:#C25A06; --eco-a:#FF9257; }
+.eco-t.service { --eco-area:service; --eco-h:#006C96; --eco-a:#43CFF0; }
+.eco-t.delivery { --eco-area:delivery; --eco-h:#0A4A96; --eco-a:#6FB0FF; }
+
+/* ── shared across tiles — keep OUT of any per-section block ──────────────
+   These belong to no single tile: .eco-live is the tenders badge, .eco-brand
+   dresses the brand wall. Twice now they were deleted by a wholesale rewrite of
+   the tenders CSS because they happened to sit inside it. */
+.eco-live { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border-radius:999px; font-size:11.5px; font-weight:700;
+  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); color:rgba(255,255,255,.82); white-space:nowrap; }
+.eco-live::before { content:""; width:7px; height:7px; border-radius:50%; background:#3BE38B; box-shadow:0 0 0 0 rgba(59,227,139,.6); animation:ecoPulse 2.4s ease-out infinite; }
+@keyframes ecoPulse { 70% { box-shadow:0 0 0 7px rgba(59,227,139,0); } 100% { box-shadow:0 0 0 0 rgba(59,227,139,0); } }
+.eco-brands { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+.eco-brand { display:inline-flex; align-items:center; justify-content:center; height:38px; padding:0 14px; border-radius:10px;
+  background:rgba(255,255,255,.92); color:#14243C; font-size:12.5px; font-weight:800; letter-spacing:.01em; }
+.eco-brand img { max-height:20px; max-width:78px; object-fit:contain; }
+
+/* Optional photo behind a tile: the scrim keeps text legible whatever the shot,
+   and the tile looks deliberate when no photo is set at all. */
+.eco-photo { position:absolute; inset:0; z-index:-1; background-size:cover; background-position:center; opacity:.42; }
+.eco-photo::after { content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--eco-h) 55%, transparent) 0%, color-mix(in srgb, var(--eco-h) 88%, #05070F) 82%); }
 
 /* head: icon + optional corner badge */
-/* The slack collects under the icon, so every tile reads as "mark on top,
-   content block anchored to the bottom" instead of pooling a void above the CTA
-   whenever a tile carries less content than its neighbour. */
-.eco-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; margin-bottom:auto; }
+/* Content starts at the top in every tile, so icon, figure and heading line up
+   across a row; the slack falls to the bottom, where the CTA holds the baseline. */
+.eco-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
 .eco-ic { width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
   background:color-mix(in srgb, var(--eco-a) 22%, transparent); color:var(--eco-a); border:1px solid color-mix(in srgb, var(--eco-a) 26%, transparent); }
 .eco-badge { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border-radius:11px; font-size:12px; font-weight:700;
@@ -1000,7 +1028,7 @@ function SoiPlatformCSS() {
 .eco-m-l { margin-top:3px; font-size:11.5px; line-height:1.35; color:rgba(255,255,255,.62); overflow-wrap:anywhere; }
 
 /* actions */
-.eco-foot { padding-top:20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.eco-foot { margin-top:auto; padding-top:20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 .eco-cta { display:inline-flex; align-items:center; gap:9px; padding:11px 17px; border-radius:12px; border:1px solid rgba(255,255,255,.16);
   background:rgba(255,255,255,.10); color:#fff; font-size:13.5px; font-weight:700; cursor:pointer; text-align:left;
   transition:background .2s, border-color .2s, gap .2s; }
@@ -1022,22 +1050,10 @@ function SoiPlatformCSS() {
 .eco-chip:hover { background:rgba(255,255,255,.15); border-color:color-mix(in srgb, var(--eco-a) 55%, transparent); }
 .eco-chip i { font-style:normal; font-size:11px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
 
-/* ── tenders: a monitoring service, shown as one ──────────
-   Five counters, then three panels: which platforms we watch, what the feed
-   is made of. Every figure here is aggregated
-   server-side; nothing on this tile is illustrative. */
-/* Restored with the tile rewrite: replacing the old tender CSS block wholesale
-   also took these with it — the LIVE pill, and .eco-brand, which dresses the
-   brand wall on a different tile entirely. */
-.eco-live { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border-radius:999px; font-size:11.5px; font-weight:700;
-  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); color:rgba(255,255,255,.82); white-space:nowrap; }
-.eco-live::before { content:""; width:7px; height:7px; border-radius:50%; background:#3BE38B; box-shadow:0 0 0 0 rgba(59,227,139,.6); animation:ecoPulse 2.4s ease-out infinite; }
-@keyframes ecoPulse { 70% { box-shadow:0 0 0 7px rgba(59,227,139,0); } 100% { box-shadow:0 0 0 0 rgba(59,227,139,0); } }
-.eco-brands { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
-.eco-brand { display:inline-flex; align-items:center; justify-content:center; height:38px; padding:0 14px; border-radius:10px;
-  background:rgba(255,255,255,.92); color:#14243C; font-size:12.5px; font-weight:800; letter-spacing:.01em; }
-.eco-brand img { max-height:20px; max-width:78px; object-fit:contain; }
-
+/* ── tenders: one monitoring panel, not cards inside cards ────────────────
+   Four counters, then two lists separated by a hairline. Everything sits on the
+   tile's own ground — the only boxes are the KPI cells, because a figure needs
+   an edge to read as a figure. */
 .eco-t.tender { padding:24px; }
 .tnd-top { display:grid; grid-template-columns:auto 1fr auto; align-items:start; gap:14px; }
 .tnd-titles { min-width:0; }
@@ -1046,50 +1062,44 @@ function SoiPlatformCSS() {
 .eco-t.tender > p { margin-top:10px; max-width:62ch; }
 
 .tnd-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:18px; }
-.tnd-kpi { padding:12px 13px; border-radius:13px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.11); }
+.tnd-kpi { padding:12px 13px; border-radius:13px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.11);
+  transition:background .18s ease, border-color .18s ease; }
+.tnd-kpi:hover { background:rgba(255,255,255,.11); border-color:color-mix(in srgb, var(--eco-a) 40%, transparent); }
 .tnd-kpi-v { font-size:25px; font-weight:800; line-height:1.05; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
 .tnd-kpi-l { margin-top:3px; font-size:11px; line-height:1.32; color:rgba(255,255,255,.62); }
 
-.tnd-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:12px; margin-top:12px; align-items:stretch; }
-.tnd-panel { border-radius:16px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.11); padding:14px 15px; display:flex; flex-direction:column; }
-.tnd-panel-h { display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:12.5px; font-weight:700; color:rgba(255,255,255,.86); }
-.tnd-panel-h span { font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:rgba(255,255,255,.42); font-variant-numeric:tabular-nums; }
+/* two sections, side by side, parted by a rule rather than by borders */
+.tnd-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:0 28px; margin-top:20px; align-items:start; }
+.tnd-sec { min-width:0; }
+.tnd-sec + .tnd-sec { padding-left:28px; margin-left:-28px; border-left:1px solid rgba(255,255,255,.10); }
+.tnd-sec-h { display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding-bottom:8px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+  font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.5); }
+.tnd-sec-h b { font-weight:700; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
 
-/* platforms — each row links out to the source it is quoting */
-.tnd-srcs { display:flex; flex-direction:column; gap:1px; margin-top:8px; }
-.tnd-src { display:grid; grid-template-columns:auto 1fr auto; align-items:baseline; gap:9px; padding:7px 0;
-  border-bottom:1px solid rgba(255,255,255,.06); color:rgba(255,255,255,.9); text-decoration:none; transition:color .18s; }
-.tnd-src:last-of-type { border-bottom:0; }
-.tnd-src:hover { color:#fff; }
-.tnd-src:hover .tnd-src-n { text-decoration:underline; }
-.tnd-src:focus-visible { outline:2px solid #fff; outline-offset:2px; border-radius:6px; }
-.tnd-src::before { content:""; width:6px; height:6px; border-radius:50%; background:#3BE38B; align-self:center; }
-.tnd-src.off::before { background:rgba(255,255,255,.28); }
-.tnd-src-n { font-size:12.5px; font-weight:600; }
-.tnd-src-d { grid-column:2; font-size:10.5px; line-height:1.35; color:rgba(255,255,255,.45); margin-top:2px; }
-.tnd-src i { font-style:normal; font-size:11.5px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
-.tnd-src.off i { color:rgba(255,255,255,.32); }
-.tnd-foot { margin-top:auto; padding-top:12px; font-size:11px; line-height:1.4; color:rgba(255,255,255,.45); }
-
-/* categories */
-.tnd-cats { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
-.tnd-cat {
-  display:flex; flex-direction:column; gap:3px; padding:10px 11px; border-radius:12px; cursor:pointer;
-  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); color:inherit; font:inherit; text-align:left;
-  transition:background .18s, border-color .18s;
-}
-.tnd-cat:hover { background:rgba(255,255,255,.13); border-color:color-mix(in srgb, var(--eco-a) 50%, transparent); }
-.tnd-cat:focus-visible { outline:2px solid #fff; outline-offset:2px; }
-.tnd-cat.wide { grid-column:1 / -1; }
-.tnd-cat.zero { opacity:.5; }
-.tnd-cat-h { display:flex; align-items:center; gap:7px; font-size:11.5px; line-height:1.25; color:rgba(255,255,255,.74); }
-.tnd-cat-h svg { flex:0 0 auto; }
-.tnd-cat-v { font-size:18px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
-.tnd-cat-s { font-size:11px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
+/* rows — platforms and categories share one shape */
+.tnd-row { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px;
+  width:100%; padding:9px 8px; margin:0 -8px; border:0; background:transparent; color:inherit; font:inherit; text-align:left;
+  border-radius:9px; text-decoration:none; transition:background .18s ease, color .18s ease; }
+a.tnd-row, button.tnd-row { cursor:pointer; }
+.tnd-row + .tnd-row { box-shadow:0 -1px 0 0 rgba(255,255,255,.06); }
+.tnd-row:hover { background:rgba(255,255,255,.09); }
+.tnd-row:focus-visible { outline:2px solid #fff; outline-offset:-2px; }
+.tnd-row-n { font-size:13px; font-weight:600; color:rgba(255,255,255,.9); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tnd-row-v { font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; color:#fff; }
+.tnd-row.zero .tnd-row-n, .tnd-row.zero .tnd-row-v { color:rgba(255,255,255,.45); }
+.tnd-dot { width:7px; height:7px; border-radius:50%; background:#3BE38B; }
+.tnd-dot.off { background:rgba(255,255,255,.28); }
+.tnd-row .tnd-ic { width:16px; height:16px; display:flex; align-items:center; justify-content:center; color:var(--eco-a); }
+.tnd-row.zero .tnd-ic { color:rgba(255,255,255,.35); }
+.tnd-note { margin-top:12px; font-size:11px; line-height:1.4; color:rgba(255,255,255,.42); }
 
 @media (max-width:1080px) {
   .tnd-kpis { grid-template-columns:repeat(2,1fr); }
-  .tnd-cols { grid-template-columns:1fr; }
+  /* Stacked, the divider moves from the side to the top and the sections need
+     a gap — otherwise the note under the platforms butts into the next heading. */
+  .tnd-cols { grid-template-columns:1fr; gap:22px 0; }
+  .tnd-sec + .tnd-sec { padding-left:0; margin-left:0; border-left:0; }
 }
 @media (max-width:680px) {
   .tnd-top { grid-template-columns:auto 1fr; }
@@ -1323,6 +1333,7 @@ const ECO_DEFAULTS = {
   catalog_num: "2 800", catalog_unit: "+",
   training_num: "1000", training_unit: "+",
   service_num: "50", service_unit: "+",
+  training_photo: "", service_photo: "",
   brands_num: "120", brands_unit: "+",
   // The delivery tile carries the map alone — no metrics, no CTA.
   delivery_num: "14", delivery_unit: "",
@@ -1533,6 +1544,7 @@ function SoiEcosystem({ lang, go }) {
 
           {/* ── training ── */}
           <article className="eco-t training sx-rv">
+            {val("training_photo") ? <div className="eco-photo" style={{ backgroundImage: `url(${val("training_photo")})` }} /> : null}
             <div className="eco-head"><div className="eco-ic"><Icon name="user" size={22} /></div></div>
             <div className="eco-num">{val("training_num")}<span>{val("training_unit")}</span></div>
             <h3>{_lv(lang, "Обученных специалистов", "O'qitilgan mutaxassislar", "Trained specialists")}</h3>
@@ -1588,57 +1600,50 @@ function SoiEcosystem({ lang, go }) {
             </div>
 
             <div className="tnd-cols">
-              <div className="tnd-panel">
-                <div className="tnd-panel-h">
+              <div className="tnd-sec">
+                <div className="tnd-sec-h">
                   {_lv(lang, "Площадки мониторинга", "Kuzatilayotgan maydonchalar", "Platforms watched")}
-                  <span>{srcs.length}</span>
+                  <b>{srcs.length}</b>
                 </div>
-                <div className="tnd-srcs">
-                  {srcs.map((s) => (
-                    <a
-                      className={"tnd-src" + (s.count ? "" : " off")}
-                      key={s.id}
-                      href={s.site}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      title={s.site}
-                    >
-                      <span className="tnd-src-n">{s.name}</span>
-                      <i>{s.count || "—"}</i>
-                      <span className="tnd-src-d">{s.description && (s.description[lang] || s.description.ru)}</span>
-                    </a>
-                  ))}
-                </div>
-                <div className="tnd-foot">
+                {srcs.map((s) => (
+                  <a
+                    className={"tnd-row" + (s.count ? "" : " zero")}
+                    key={s.id}
+                    href={s.site}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={s.site}
+                  >
+                    <span className={"tnd-dot" + (s.count ? "" : " off")} />
+                    <span className="tnd-row-n">{s.name}</span>
+                    <span />
+                  </a>
+                ))}
+                <div className="tnd-note">
                   {_lv(lang, "Данные обновляются ежедневно.", "Ma'lumotlar har kuni yangilanadi.", "Data refreshes daily.")}
                 </div>
               </div>
 
-              <div className="tnd-panel">
-                <div className="tnd-panel-h">
+              <div className="tnd-sec">
+                <div className="tnd-sec-h">
                   {_lv(lang, "Категории закупок", "Xarid kategoriyalari", "Procurement categories")}
-                  <span>{st ? st.active : ""}</span>
+                  <b>{st ? st.active : ""}</b>
                 </div>
-                <div className="tnd-cats">
-                  {tndCats.map((c, i) => (
-                    <button
-                      className={"tnd-cat" + (i === tndCats.length - 1 ? " wide" : "") + (c.count ? "" : " zero")}
-                      key={c.id}
-                      onClick={() => go("tenders", { cat: c.id })}
-                      title={_lv(lang, "Открыть тендеры: ", "Tenderlarni ochish: ", "Open tenders: ") + c.label}
-                    >
-                      <span className="tnd-cat-h"><Icon name={c.icon} size={14} />{c.label}</span>
-                      <span className="tnd-cat-v">{c.count}</span>
-                      <span className="tnd-cat-s">{ecoShortSum(c.sum, lang)}</span>
-                    </button>
-                  ))}
-                </div>
+                {tndCats.map((c) => (
+                  <button
+                    className={"tnd-row" + (c.count ? "" : " zero")}
+                    key={c.id}
+                    onClick={() => go("tenders", { cat: c.id })}
+                    title={_lv(lang, "Открыть тендеры: ", "Tenderlarni ochish: ", "Open tenders: ") + c.label}
+                  >
+                    <span className="tnd-ic"><Icon name={c.icon} size={15} /></span>
+                    <span className="tnd-row-n">{c.label}</span>
+                    <span className="tnd-row-v">{c.count}</span>
+                  </button>
+                ))}
               </div>
-
             </div>
 
-            {/* The only way out of the tile — it used to live inside the
-                closing-lot card, which is gone. */}
             <div className="eco-foot" style={{ paddingTop: 14 }}>
               <button className="eco-cta solid" onClick={() => go("tenders")}>
                 {_lv(lang, "Все тендеры", "Barcha tenderlar", "All tenders")}<Icon name="arrowRight" size={15} />
@@ -1656,7 +1661,11 @@ function SoiEcosystem({ lang, go }) {
               <div className="eco-brands">
                 {brandWall.map((b) => (
                   <span className="eco-brand" key={b.id || b.name}>
-                    {b.logoUrl ? <img src={b.logoUrl} alt={b.name} loading="lazy" /> : b.name}
+                    {/* A logo that fails to load shows the brand name, not a broken-image glyph. */}
+                    {b.logoUrl
+                      ? <img src={b.logoUrl} alt={b.name} loading="lazy"
+                             onError={(e) => { e.currentTarget.replaceWith(document.createTextNode(b.name)); }} />
+                      : b.name}
                   </span>
                 ))}
               </div>
@@ -1670,6 +1679,7 @@ function SoiEcosystem({ lang, go }) {
 
           {/* ── service ── */}
           <article className="eco-t service sx-rv">
+            {val("service_photo") ? <div className="eco-photo" style={{ backgroundImage: `url(${val("service_photo")})` }} /> : null}
             <div className="eco-head"><div className="eco-ic"><Icon name="wrench" size={22} /></div></div>
             <div className="eco-num">{val("service_num")}<span>{val("service_unit")}</span></div>
             <h3>{_lv(lang, "Успешно выполненных сервисных работ", "Muvaffaqiyatli bajarilgan servis ishlari", "Completed service jobs")}</h3>

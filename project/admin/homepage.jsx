@@ -52,6 +52,7 @@ function AdminHomepage() {
     catalog_num: "2 800", catalog_unit: "+",
     training_num: "1000", training_unit: "+",
     service_num: "50", service_unit: "+",
+    training_photo: "", service_photo: "",
     brands_num: "120", brands_unit: "+",
     delivery_num: "14", delivery_unit: "",
   });
@@ -175,6 +176,20 @@ function AdminHomepage() {
                     </Field>
                   </div>
                 ))}
+              </div>
+
+              <hr className="adm-divider" />
+              <div className="adm-page-sub" style={{ marginBottom: 12 }}>
+                Фон плиток «Обучение» и «Сервис». Снимок затемняется, чтобы текст читался.
+                Оставьте пустым — плитка останется без фотографии.
+              </div>
+              <div className="adm-form-row">
+                <Field label="Обучение: фотография">
+                  <ImageUpload value={eco.training_photo || ""} onChange={(v) => setE("training_photo", v)} />
+                </Field>
+                <Field label="Сервис: фотография">
+                  <ImageUpload value={eco.service_photo || ""} onChange={(v) => setE("service_photo", v)} />
+                </Field>
               </div>
 
               <button className="btn btn-primary" style={{ marginTop: 8 }} onClick={() => save(setEco, eco)}>
