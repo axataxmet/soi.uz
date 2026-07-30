@@ -1024,8 +1024,20 @@ function SoiPlatformCSS() {
 
 /* ── tenders: a monitoring service, shown as one ──────────
    Five counters, then three panels: which platforms we watch, what the feed
-   is made of, and the one lot closing next. Every figure here is aggregated
+   is made of. Every figure here is aggregated
    server-side; nothing on this tile is illustrative. */
+/* Restored with the tile rewrite: replacing the old tender CSS block wholesale
+   also took these with it — the LIVE pill, and .eco-brand, which dresses the
+   brand wall on a different tile entirely. */
+.eco-live { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border-radius:999px; font-size:11.5px; font-weight:700;
+  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); color:rgba(255,255,255,.82); white-space:nowrap; }
+.eco-live::before { content:""; width:7px; height:7px; border-radius:50%; background:#3BE38B; box-shadow:0 0 0 0 rgba(59,227,139,.6); animation:ecoPulse 2.4s ease-out infinite; }
+@keyframes ecoPulse { 70% { box-shadow:0 0 0 7px rgba(59,227,139,0); } 100% { box-shadow:0 0 0 0 rgba(59,227,139,0); } }
+.eco-brands { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
+.eco-brand { display:inline-flex; align-items:center; justify-content:center; height:38px; padding:0 14px; border-radius:10px;
+  background:rgba(255,255,255,.92); color:#14243C; font-size:12.5px; font-weight:800; letter-spacing:.01em; }
+.eco-brand img { max-height:20px; max-width:78px; object-fit:contain; }
+
 .eco-t.tender { padding:24px; }
 .tnd-top { display:grid; grid-template-columns:auto 1fr auto; align-items:start; gap:14px; }
 .tnd-titles { min-width:0; }
@@ -1033,12 +1045,12 @@ function SoiPlatformCSS() {
 .eco-t.tender h3 { margin:5px 0 0; font-size:23px; }
 .eco-t.tender > p { margin-top:10px; max-width:62ch; }
 
-.tnd-kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-top:18px; }
+.tnd-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:18px; }
 .tnd-kpi { padding:12px 13px; border-radius:13px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.11); }
 .tnd-kpi-v { font-size:25px; font-weight:800; line-height:1.05; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
 .tnd-kpi-l { margin-top:3px; font-size:11px; line-height:1.32; color:rgba(255,255,255,.62); }
 
-.tnd-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) minmax(0,1fr); gap:12px; margin-top:12px; align-items:stretch; }
+.tnd-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); gap:12px; margin-top:12px; align-items:stretch; }
 .tnd-panel { border-radius:16px; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.11); padding:14px 15px; display:flex; flex-direction:column; }
 .tnd-panel-h { display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:12.5px; font-weight:700; color:rgba(255,255,255,.86); }
 .tnd-panel-h span { font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:rgba(255,255,255,.42); font-variant-numeric:tabular-nums; }
@@ -1075,17 +1087,8 @@ function SoiPlatformCSS() {
 .tnd-cat-v { font-size:18px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
 .tnd-cat-s { font-size:11px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
 
-/* closing lot */
-.tnd-lot-t { margin-top:10px; font-size:13.5px; font-weight:700; line-height:1.35;
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.tnd-lot-c { margin-top:5px; font-size:11.5px; line-height:1.35; color:rgba(255,255,255,.55);
-  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.tnd-lot-s { margin-top:auto; padding-top:12px; font-size:21px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; }
-.tnd-lot-d { margin-top:3px; font-size:11.5px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.58); }
-.tnd-lot-d.urgent { color:#FFB25C; font-weight:700; }
-
 @media (max-width:1080px) {
-  .tnd-kpis { grid-template-columns:repeat(3,1fr); }
+  .tnd-kpis { grid-template-columns:repeat(2,1fr); }
   .tnd-cols { grid-template-columns:1fr; }
 }
 @media (max-width:680px) {
@@ -1328,7 +1331,7 @@ const ECO_DEFAULTS = {
 /* Live figures. One small request per source; every one of them may fail without
    taking the block down — the tiles simply fall back to their editable numbers. */
 function useEcoPulse() {
-  const [pulse, setPulse] = useState({ stats: null, platforms: [], cats: [], closing: null, brands: [], products: null });
+  const [pulse, setPulse] = useState({ stats: null, platforms: [], cats: [], brands: [], products: null });
   useEffect(() => {
     const api = window.api;
     if (!api || !api.listPublic) return;
@@ -1339,10 +1342,6 @@ function useEcoPulse() {
     ok(api.listPublic("etender/stats"), (r) => put({ stats: r }));
     ok(api.listPublic("etender/platforms"), (r) => put({ platforms: Array.isArray(r) ? r : [] }));
     ok(api.listPublic("etender/categories"), (r) => put({ cats: Array.isArray(r) ? r : [] }));
-    /* Only the closing-soonest lot is needed now that the tile shows categories
-       instead of a lot list — the default ordering would hand back the lot with
-       the furthest deadline, which is the opposite of what the panel claims. */
-    ok(api.listPublic("etender/lots", { state: "active", limit: 1, page: 1, sort: "closing" }), (r) => put({ closing: ((r && r.data) || [])[0] || null }));
     ok(api.listPublic("brands", { limit: 6, page: 1 }), (r) => put({ brands: (r && r.data) || (Array.isArray(r) ? r : []) }));
     ok(api.listPublic("products", { limit: 1, page: 1 }), (r) => put({ products: (r && r.total) || 0 }));
     return () => { alive = false; };
@@ -1350,18 +1349,6 @@ function useEcoPulse() {
   return pulse;
 }
 
-/* 14,2 млрд UZS — procurement sums run to eleven digits, so they are only
-   readable rounded to a unit. */
-function ecoSum(value, code, lang) {
-  const v = Number(value);
-  if (!isFinite(v) || v <= 0) return "";
-  const unit = (k) => _lv(lang, { b: "млрд", m: "млн" }[k], { b: "mlrd", m: "mln" }[k], { b: "bn", m: "mn" }[k]);
-  const cut = (n) => n.toFixed(1).replace(/\.0$/, "").replace(".", _lv(lang, ",", ",", "."));
-  const cur = code || "UZS";
-  if (v >= 1e9) return `${cut(v / 1e9)} ${unit("b")} ${cur}`;
-  if (v >= 1e6) return `${cut(v / 1e6)} ${unit("m")} ${cur}`;
-  return `${Math.round(v).toLocaleString("ru-RU")} ${cur}`;
-}
 
 /* Compact money for counters and chips: no currency suffix, because the whole
    feed is in UZS and repeating it five times is noise. */
@@ -1374,27 +1361,7 @@ function ecoShortSum(value, lang) {
   return Math.round(v).toLocaleString("ru-RU");
 }
 
-function ecoDate(d) {
-  if (!d) return "";
-  const t = new Date(d);
-  return isNaN(t) ? "" : t.toLocaleDateString("ru-RU", { day: "2-digit", month: "2-digit", year: "numeric" });
-}
 
-/* A date tells you nothing at a glance; "через 2 дн" does. Inside a week the
-   deadline counts down, and the last three days read as urgent. */
-function ecoDeadline(iso, lang) {
-  if (!iso) return { text: "", urgent: false };
-  const t = new Date(iso);
-  if (isNaN(t)) return { text: "", urgent: false };
-  const days = Math.ceil((t.getTime() - Date.now()) / 86400000);
-  // `countdown` marks a phrase like "через 2 дн" — callers that already print the
-  // date append it only then, instead of showing the same date twice.
-  if (days < 0) return { text: ecoDate(iso), urgent: false, countdown: false };
-  if (days === 0) return { text: _lv(lang, "сегодня", "bugun", "today"), urgent: true, countdown: true };
-  if (days === 1) return { text: _lv(lang, "завтра", "ertaga", "tomorrow"), urgent: true, countdown: true };
-  if (days <= 7) return { text: _lv(lang, `через ${days} дн`, `${days} kundan`, `in ${days} d`), urgent: days <= 3, countdown: true };
-  return { text: ecoDate(iso), urgent: false, countdown: false };
-}
 
 function ecoAgo(iso, lang) {
   if (!iso) return "";
@@ -1515,12 +1482,6 @@ function SoiEcosystem({ lang, go }) {
       sum: rest.reduce((a, c) => a + (c.sum || 0), 0),
     }];
   })();
-  /* The card shows the lot closing soonest — a different lot from the "just
-     published" table, and a reason to click that the table does not already
-     give. Calling it "новое поступление" contradicted the counter beside it,
-     which reads 0 on any day nothing was published. */
-  const closing = pulse.closing;
-
   /* The live counters are only shown once they stop contradicting the headline
      claim — an empty catalog reporting «6» beside «2 800+» reads as a bug. */
   const liveProducts = pulse.products != null && pulse.products >= 100 ? pulse.products : null;
@@ -1618,7 +1579,6 @@ function SoiEcosystem({ lang, go }) {
                 // Counted off the list below, not from stats: the server counts
                 // feeds (Etender publishes two) and the panel counts platforms.
                 { v: srcs.length || "—", l: _lv(lang, "площадок мониторинга", "kuzatilayotgan maydoncha", "platforms watched") },
-                { v: st ? ecoShortSum(st.totalSum, lang) : "—", l: _lv(lang, "объём закупок в ленте", "lentadagi xaridlar hajmi", "volume in the feed") },
               ].map((k, i) => (
                 <div className="tnd-kpi" key={i}>
                   <div className="tnd-kpi-v">{k.v}</div>
@@ -1675,30 +1635,14 @@ function SoiEcosystem({ lang, go }) {
                 </div>
               </div>
 
-              {closing && (
-                <div className="tnd-panel">
-                  <div className="tnd-panel-h">
-                    {_lv(lang, "Ближайший дедлайн", "Eng yaqin muddat", "Closing next")}
-                    <span><Icon name="clock" size={12} /></span>
-                  </div>
-                  <div className="tnd-lot-t" title={closing.name}>{closing.name}</div>
-                  <div className="tnd-lot-c">{closing.sellerName || closing.regionName || ""}</div>
-                  <div className="tnd-lot-s">{ecoSum(closing.cost, closing.currencyCode, lang)}</div>
-                  {(() => {
-                    const dl = ecoDeadline(closing.endDate, lang);
-                    return (
-                      <div className={"tnd-lot-d" + (dl.urgent ? " urgent" : "")}>
-                        {_lv(lang, "до", "gacha", "until")} {ecoDate(closing.endDate)}{dl.countdown ? " · " + dl.text : ""}
-                      </div>
-                    );
-                  })()}
-                  <div className="eco-foot">
-                    <button className="eco-cta solid" onClick={() => go("tenders")}>
-                      {_lv(lang, "Все тендеры", "Barcha tenderlar", "All tenders")}<Icon name="arrowRight" size={15} />
-                    </button>
-                  </div>
-                </div>
-              )}
+            </div>
+
+            {/* The only way out of the tile — it used to live inside the
+                closing-lot card, which is gone. */}
+            <div className="eco-foot" style={{ paddingTop: 14 }}>
+              <button className="eco-cta solid" onClick={() => go("tenders")}>
+                {_lv(lang, "Все тендеры", "Barcha tenderlar", "All tenders")}<Icon name="arrowRight" size={15} />
+              </button>
             </div>
           </article>
 
