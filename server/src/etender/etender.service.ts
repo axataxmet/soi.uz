@@ -284,7 +284,15 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     const where: Prisma.EtenderLotWhereInput = {};
     if (q.source) where.source = q.source;
     if (q.kind) where.kind = q.kind;
-    if (q.medCategory) where.medCategory = q.medCategory;
+    if (q.medCategory) {
+      const wanted = q.medCategory.split(',').map((v) => v.trim()).filter(Boolean);
+      where.medCategory = wanted.length > 1 ? { in: wanted } : wanted[0];
+    }
+    // A platform is several feeds; filter by the sources it publishes through.
+    if (q.platform) {
+      const p = TENDER_PLATFORMS.find((x) => x.id === q.platform);
+      if (p) where.source = { in: p.sources };
+    }
     if (q.state === 'active') where.active = true;
     else if (q.state === 'closed') where.active = false;
     if (q.regionName) where.regionName = { contains: q.regionName, mode: 'insensitive' };

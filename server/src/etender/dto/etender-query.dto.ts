@@ -1,6 +1,30 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString, registerDecorator, ValidationOptions } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
+
+const MED_CATEGORY_IDS = ['equipment', 'furniture', 'instruments', 'consumables', 'drugs', 'other'];
+
+// "other" or "other,drugs" — every element has to be a known category.
+function IsMedCategoryList(options?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'isMedCategoryList',
+      target: object.constructor,
+      propertyName,
+      options,
+      validator: {
+        validate(value: unknown) {
+          if (typeof value !== 'string' || !value.trim()) return false;
+          const parts = value.split(',').map((v) => v.trim()).filter(Boolean);
+          return parts.length > 0 && parts.every((p) => MED_CATEGORY_IDS.includes(p));
+        },
+        defaultMessage() {
+          return `medCategory must be one or more of: ${MED_CATEGORY_IDS.join(', ')}`;
+        },
+      },
+    });
+  };
+}
 
 // Public query for cached tender lots (served from our DB, never upstream).
 export class EtenderLotQueryDto extends PaginationDto {
@@ -14,10 +38,21 @@ export class EtenderLotQueryDto extends PaginationDto {
   @IsIn(['lot', 'news'])
   kind?: 'lot' | 'news';
 
-  @ApiPropertyOptional({ description: 'Мед. категория', enum: ['equipment', 'furniture', 'instruments', 'consumables', 'drugs', 'other'] })
+  /* Accepts one category or a comma-separated set. The showcase shows five
+     categories, not six: "Прочее" there means other + drugs, and asking for both
+     in one request is cheaper than two round trips. */
+  @ApiPropertyOptional({
+    description: 'Мед. категория или несколько через запятую (equipment, furniture, instruments, consumables, drugs, other)',
+    example: 'other,drugs',
+  })
   @IsOptional()
-  @IsIn(['equipment', 'furniture', 'instruments', 'consumables', 'drugs', 'other'])
+  @IsMedCategoryList()
   medCategory?: string;
+
+  @ApiPropertyOptional({ description: 'Площадка мониторинга', enum: ['uzex', 'xt-xarid', 'uzmedimpex', 'farma'] })
+  @IsOptional()
+  @IsIn(['uzex', 'xt-xarid', 'uzmedimpex', 'farma'])
+  platform?: string;
 
   @ApiPropertyOptional({ description: 'Фильтр по региону (по названию, частичное совпадение)' })
   @IsOptional()

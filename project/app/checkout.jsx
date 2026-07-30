@@ -74,12 +74,32 @@ function EtenderLotsBlock({ lang, lv, facet = "source", initialSel = "" }) {
     return () => clearTimeout(id);
   }, [query]);
 
-  // facet registry — platforms (/sources) or medical categories (/categories)
+  /* Facet registry — the four monitored platforms, or the five showcase
+     categories. Both are shown the way the site talks about them, not the way
+     they are stored: "Прочее" here is the other + drugs pair, requested in one
+     call, because the showcase does not sell medicines as a line of its own. */
   useEffect(() => {
     let alive = true;
-    const ep = isCat ? "etender/categories" : "etender/sources";
+    const ep = isCat ? "etender/categories" : "etender/platforms";
     (window.api && window.api.listPublic ? window.api.listPublic(ep) : Promise.resolve([]))
-      .then((res) => { if (alive) setFacets(Array.isArray(res) ? res.map((x) => ({ id: x.source || x.category, label: x.label, count: x.count })) : []); })
+      .then((res) => {
+        if (!alive || !Array.isArray(res)) return;
+        if (!isCat) {
+          setFacets(res.map((p) => ({ id: p.id, label: { ru: p.name, uz: p.name, en: p.name }, count: p.count })));
+          return;
+        }
+        const OWN = ["equipment", "furniture", "instruments", "consumables"];
+        const own = OWN.map((id) => res.find((c) => c.category === id)).filter(Boolean)
+          .map((c) => ({ id: c.category, label: c.label, count: c.count }));
+        const restIds = res.filter((c) => !OWN.includes(c.category)).map((c) => c.category);
+        const restCount = res.filter((c) => !OWN.includes(c.category)).reduce((a, c) => a + (c.count || 0), 0);
+        const other = res.find((c) => c.category === "other");
+        setFacets([...own, {
+          id: restIds.join(","),
+          label: (other && other.label) || { ru: "Прочее", uz: "Boshqa", en: "Other" },
+          count: restCount,
+        }]);
+      })
       .catch(() => {});
     return () => { alive = false; };
   }, []);
@@ -88,7 +108,7 @@ function EtenderLotsBlock({ lang, lv, facet = "source", initialSel = "" }) {
     let alive = true;
     setStatus((s) => (s === "ready" ? "ready" : "loading"));
     const q = { state: "active", limit, page: 1 };
-    if (sel) q[isCat ? "medCategory" : "source"] = sel;
+    if (sel) q[isCat ? "medCategory" : "platform"] = sel;
     if (term) q.search = term;
     (window.api && window.api.listPublic ? window.api.listPublic("etender/lots", q) : Promise.reject(new Error("api")))
       .then((res) => { if (!alive) return; setLots((res && res.data) || []); setTotal((res && res.total) || 0); setStatus("ready"); })

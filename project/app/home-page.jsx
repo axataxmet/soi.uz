@@ -1043,12 +1043,20 @@ function SoiPlatformCSS() {
 .tnd-panel-h { display:flex; align-items:baseline; justify-content:space-between; gap:10px; font-size:12.5px; font-weight:700; color:rgba(255,255,255,.86); }
 .tnd-panel-h span { font-size:10.5px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:rgba(255,255,255,.42); font-variant-numeric:tabular-nums; }
 
-/* platforms */
-.tnd-srcs { display:flex; flex-direction:column; gap:2px; margin-top:10px; }
-.tnd-src { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:9px; padding:6px 0; font-size:12.5px; color:rgba(255,255,255,.86); }
-.tnd-src::before { content:""; width:6px; height:6px; border-radius:50%; background:#3BE38B; }
+/* platforms — each row links out to the source it is quoting */
+.tnd-srcs { display:flex; flex-direction:column; gap:1px; margin-top:8px; }
+.tnd-src { display:grid; grid-template-columns:auto 1fr auto; align-items:baseline; gap:9px; padding:7px 0;
+  border-bottom:1px solid rgba(255,255,255,.06); color:rgba(255,255,255,.9); text-decoration:none; transition:color .18s; }
+.tnd-src:last-of-type { border-bottom:0; }
+.tnd-src:hover { color:#fff; }
+.tnd-src:hover .tnd-src-n { text-decoration:underline; }
+.tnd-src:focus-visible { outline:2px solid #fff; outline-offset:2px; border-radius:6px; }
+.tnd-src::before { content:""; width:6px; height:6px; border-radius:50%; background:#3BE38B; align-self:center; }
 .tnd-src.off::before { background:rgba(255,255,255,.28); }
+.tnd-src-n { font-size:12.5px; font-weight:600; }
+.tnd-src-d { grid-column:2; font-size:10.5px; line-height:1.35; color:rgba(255,255,255,.45); margin-top:2px; }
 .tnd-src i { font-style:normal; font-size:11.5px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
+.tnd-src.off i { color:rgba(255,255,255,.32); }
 .tnd-foot { margin-top:auto; padding-top:12px; font-size:11px; line-height:1.4; color:rgba(255,255,255,.45); }
 
 /* categories */
@@ -1320,7 +1328,7 @@ const ECO_DEFAULTS = {
 /* Live figures. One small request per source; every one of them may fail without
    taking the block down — the tiles simply fall back to their editable numbers. */
 function useEcoPulse() {
-  const [pulse, setPulse] = useState({ stats: null, sources: [], cats: [], closing: null, brands: [], products: null });
+  const [pulse, setPulse] = useState({ stats: null, platforms: [], cats: [], closing: null, brands: [], products: null });
   useEffect(() => {
     const api = window.api;
     if (!api || !api.listPublic) return;
@@ -1329,7 +1337,7 @@ function useEcoPulse() {
     const ok = (p, fn) => p.then(fn).catch(() => {});
 
     ok(api.listPublic("etender/stats"), (r) => put({ stats: r }));
-    ok(api.listPublic("etender/sources"), (r) => put({ sources: Array.isArray(r) ? r : [] }));
+    ok(api.listPublic("etender/platforms"), (r) => put({ platforms: Array.isArray(r) ? r : [] }));
     ok(api.listPublic("etender/categories"), (r) => put({ cats: Array.isArray(r) ? r : [] }));
     /* Only the closing-soonest lot is needed now that the tile shows categories
        instead of a lot list — the default ordering would hand back the lot with
@@ -1469,17 +1477,10 @@ function SoiEcosystem({ lang, go }) {
   const cats = (window.DATA && window.DATA.CATEGORIES || []).slice(0, 5);
   const st = pulse.stats;
 
-  /* Several feeds share a platform (Etender runs both tenders and selections),
-     so fold them onto the platform name and sum the lots underneath. */
-  const srcs = Object.values(
-    pulse.sources.filter((s) => s.count > 0).reduce((acc, s) => {
-      const name = ((s.label && (s.label[lang] || s.label.ru)) || s.source).split(" — ")[0].trim();
-      acc[name] = acc[name] || { name, count: 0, ready: false };
-      acc[name].count += s.count;
-      acc[name].ready = acc[name].ready || !!s.ready;
-      return acc;
-    }, {}),
-  ).sort((a, b) => b.count - a.count);
+  /* Platforms arrive already grouped, named and described by the API — the four
+     the client monitors, in their order. A connected platform with no open lots
+     (Farma today) still belongs on the list. */
+  const srcs = pulse.platforms;
 
   /* Five categories, per the agreed shape of the business: what SOI supplies,
      and one bucket for everything it does not. Drugs land in that bucket by
@@ -1501,11 +1502,15 @@ function SoiEcosystem({ lang, go }) {
       sum: (by.get(c.id) || {}).sum || 0,
     }));
     // Everything outside the four — drugs included — collapses into one line.
+    // Its id is the whole set, so opening it lands on the same filter the
+    // tenders page builds for «Прочее» instead of a narrower one.
     const ownIds = new Set(own.map((c) => c.id));
     const rest = pulse.cats.filter((c) => !ownIds.has(c.category));
     const other = TND_CATS[4];
     return [...own, {
-      ...other, label: _lv(lang, other.ru, other.uz, other.en),
+      ...other,
+      id: rest.map((c) => c.category).join(",") || other.id,
+      label: _lv(lang, other.ru, other.uz, other.en),
       count: rest.reduce((a, c) => a + (c.count || 0), 0),
       sum: rest.reduce((a, c) => a + (c.sum || 0), 0),
     }];
@@ -1630,9 +1635,18 @@ function SoiEcosystem({ lang, go }) {
                 </div>
                 <div className="tnd-srcs">
                   {srcs.map((s) => (
-                    <span className={"tnd-src" + (s.ready ? "" : " off")} key={s.name}>
-                      {s.name}<i>{s.count}</i>
-                    </span>
+                    <a
+                      className={"tnd-src" + (s.count ? "" : " off")}
+                      key={s.id}
+                      href={s.site}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={s.site}
+                    >
+                      <span className="tnd-src-n">{s.name}</span>
+                      <i>{s.count || "—"}</i>
+                      <span className="tnd-src-d">{s.description && (s.description[lang] || s.description.ru)}</span>
+                    </a>
                   ))}
                 </div>
                 <div className="tnd-foot">
