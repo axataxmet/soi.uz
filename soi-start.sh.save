@@ -1,0 +1,120 @@
+#!/bin/bash
+
+PROJECT="/Users/adam/soi.uz"
+
+echo "🚀 Starting SOI.UZ..."
+
+# PostgreSQL
+echo "📦 Starting PostgreSQL..."
+brew services start postgresql@17 >/dev/null 2>&1
+
+# MinIO
+echo "🗄 Starting MinIO..."
+
+if ! pgrep -x "minio" > /dev/null
+then
+    nohup minio server /Users/adam/minio-data --console-address :9001 \
+    > /Users/adam/minio.log 2>&1 &
+else
+    echo "MinIO already running"
+fi
+
+
+# Backend
+echo "⚙️ Starting API..."
+
+cd $PROJECT/server
+
+if ! lsof -i :4000 >/dev/null
+then
+    nohup npm run start:dev \
+    > /Users/adam/soi-api.log 2>&1 &
+else
+    echo "API already running"
+fi
+
+
+# Frontend
+echo "🌐 Starting Frontend..."
+
+cd $PROJECT/project
+
+if ! lsof -i :3456 >/dev/null
+then
+    nohup node dev-server.js \
+    > /Users/adam/soi-front.log 2>&1 &
+else
+    echo "Frontend already running"
+fi
+
+
+echo ""
+echo "✅ SOI.UZ started"
+echo ""
+echo "Frontend:"
+echo "http://localhost:3456"
+echo ""
+echo "API:"
+echo "http://localhost:4000/api"
+echo ""
+echo "Swagger:"
+echo "http://localhost:4000/api/docs"Last login: Tue Jul 28 22:16:59 on ttys000
+adam@MacBook-Air-Adam ~ % nano ~/soi-start.sh
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  UW PICO 5.09                                 File: /Users/adam/soi-start.sh                                 Modified  
+
+#!/bin/zsh
+
+echo "🚀 Запуск SOI.UZ..."
+
+brew services start postgresql@17
+
+cd /Users/adam/soi.uz/server
+npm run start:dev > /tmp/soi-backend.log 2>&1 &
+
+cd /Users/adam/soi.uz/project
+node dev-server.js > /tmp/soi-frontend.log 2>&1 &
+
+sleep 5
+
+open http://127.0.0.1:3456
+
+echo "✅ SOI.UZ запущен"
+echo "Frontend: http://127.0.0.1:3456"
+echo "Backend: http://localhost:4000/api"
+
+
+
+
+
+
+
+^G Get Help         ^O WriteOut         ^R Read File        ^Y Prev Pg          ^K Cut Text         ^C Cur Pos          
+^X Exit             ^J Justify          ^W Where is         ^V Next Pg          ^U UnCut Text       ^T To Spell        
