@@ -267,7 +267,7 @@ function App() {
       setHashSafe(cat ? "/catalog/" + catSlugOf(cat) : "/catalog");
     } else
     setHashSafe(corpHash(view));
-    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   /* unified header: jump straight into a catalog sub-view (cart / wishlist / compare / search) */
@@ -276,7 +276,7 @@ function App() {
     setRoute({ view: "catalog" });
     setCatNav({ sub: sub || "home", param: param || "", q: q || "", from: from || null });
     setHashSafe(q ? "/catalog" : sub && sub !== "home" && sub !== "listing" ? "/catalog/" + sub + (param ? "/" + param : "") : "/catalog");
-    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   /* Пришли по старой ссылке с якорем — молча переписываем адрес в новую форму.
@@ -298,12 +298,12 @@ function App() {
     const onHash = () => {
       const r = parseUrl();
       // unified news: catalog/news deep-link always shows the single corp news page (form 1)
-      if (_isCatNews(r)) { setRoute({ view: "news", from: "catalog" }); setHashSafe(corpHash("news")); window.scrollTo({ top: 0 }); return; }
+      if (_isCatNews(r)) { setRoute({ view: "news", from: "catalog" }); setHashSafe(corpHash("news")); window.scrollTo({ top: 0, behavior: "instant" }); return; }
       setRoute({ view: r.view });
       if (r.view === "catalog") {
         setCatNav(r.cat || { sub: "home", param: "" });
       }
-      window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+      window.scrollTo({ top: 0, behavior: "instant" });
     };
     window.addEventListener("popstate", onHash);
     return () => window.removeEventListener("popstate", onHash);
@@ -314,11 +314,11 @@ function App() {
   useEffect(() => {
     const onMsg = (e) => {
       const d = e.data || {};
-      if (d.type === "soi-cohome") {setRoute({ view: "home" });setHashSafe("/");window.scrollTo({ top: 0 });return;}
+      if (d.type === "soi-cohome") {setRoute({ view: "home" });setHashSafe("/");window.scrollTo({ top: 0, behavior: "instant" });return;}
       if (d.type === "soi-conav" && d.view) {
         setRoute({ view: d.view, from: d.from || null });
         setHashSafe(corpHash(d.view));
-        window.scrollTo({ top: 0 });
+        window.scrollTo({ top: 0, behavior: "instant" });
         return;
       }
       if (d.type !== "soi-route") return;

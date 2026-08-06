@@ -143,7 +143,7 @@ function ProductPage({ t, lang, store, go, params }) {
   const [thumb, setThumb] = useState(0);
   const [variantIdx, setVariantIdx] = useState(0);
 
-  useEffect(() => { setQty(1); setThumb(0); setTab("specs"); setVariantIdx(0); window.scrollTo(0, 0); rvPush(params.id); }, [params.id]);
+  useEffect(() => { setQty(1); setThumb(0); setTab("specs"); setVariantIdx(0); window.scrollTo({ top: 0, behavior: "instant" }); rvPush(params.id); }, [params.id]);
 
   const effectivePrice = (p.variants && p.variants.length > 0) ? p.variants[variantIdx].price : p.price;
   const effectiveOld   = (p.variants && p.variants.length > 0) ? null : p.old;

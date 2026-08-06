@@ -269,7 +269,7 @@ function App(props) {
         return;
       }
       setRoute(Object.assign(embedRouteFrom(props.navSub, props.navParam, props.navQ), { from: props.navFrom || null }));
-      window.scrollTo({ top: 0, behavior: "auto" });
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
   }, [props.navSub, props.navParam, props.navQ, props.navFrom]);
   const [query, setQuery] = useState("");
@@ -292,14 +292,14 @@ function App(props) {
     // corporate news page (form 1), not the catalog's own listing.
     if (view === "news" && EMBED_ON) {
       try { (window.parent || window).postMessage({ type: "soi-conav", view: "news", from: "catalog" }, "*"); } catch (e) {}
-      window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+      window.scrollTo({ top: 0, behavior: "instant" });
       return;
     }
     setRoute({ view, params });
     if (EMBED_ON) {
       try { (window.parent || window).postMessage({ type: "soi-route", view, params }, "*"); } catch (e) {}
     }
-    window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+    window.scrollTo({ top: 0, behavior: "instant" });
   };
 
   /* ---- embed: host shell asks us to navigate (deep-link / back-forward) ---- */
@@ -316,7 +316,7 @@ function App(props) {
       const r = embedRouteFrom(d.sub, d.param);
       setOpenMega(false);
       setRoute(r);
-      window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
+      window.scrollTo({ top: 0, behavior: "instant" });
     };
     window.addEventListener("message", onNav);
     return () => window.removeEventListener("message", onNav);
