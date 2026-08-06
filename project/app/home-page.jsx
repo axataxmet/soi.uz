@@ -1788,7 +1788,7 @@ function SoiEcosystem({ lang, go }) {
               "Klinika xodimlarini yetkazib berilgan uskunalar bilan ishlashga o'rgatamiz — joyida va onlayn.",
               "We train clinic staff to operate the delivered equipment — on-site and online.")}</p>
             <div className="eco-foot">
-              <button className="eco-cta" onClick={() => go("services")}>
+              <button className="eco-cta" onClick={() => go("staffTraining")}>
                 {_lv(lang, "Обучение персонала", "Xodimlarni o'qitish", "Staff training")}<Icon name="arrowRight" size={15} />
               </button>
             </div>
@@ -1926,7 +1926,7 @@ function SoiEcosystem({ lang, go }) {
             <h3>{_lv(lang, "Успешно выполненных сервисных работ", "Muvaffaqiyatli bajarilgan servis ishlari", "Completed service jobs")}</h3>
             <p>{_lv(lang, "Пусконаладка, плановое обслуживание и ремонт оборудования по всей стране.", "Ishga tushirish, rejali xizmat va ta'mirlash butun mamlakat bo'ylab.", "Commissioning, maintenance and repair across the country.")}</p>
             <div className="eco-foot">
-              <button className="eco-cta" onClick={() => go("services")}>
+              <button className="eco-cta" onClick={() => go("serviceSupport")}>
                 {_lv(lang, "Сервис и поддержка", "Servis va qo'llab-quvvatlash", "Service & support")}<Icon name="arrowRight" size={15} />
               </button>
             </div>
@@ -2095,7 +2095,7 @@ function SoiExpertise({ lang, go }) {
         <div className="sxp-head sx-rv">
           <div>
             <p className="sxp-kicker">{_lv(lang, "Экспертиза", "Ekspertiza", "Expertise")}</p>
-            <h2 className="sxp-h2">{_lv(lang, "Компетенции, которые закрывают весь цикл работы с медицинским изделием", "Tibbiy buyum bilan ishlashning toʻliq siklini qamrab oluvchi kompetensiyalar", "Capabilities covering the full lifecycle of a medical device")}</h2>
+            <h2 className="sxp-h2 sx-h2-link" onClick={() => go("directions")}>{_lv(lang, "Компетенции, которые закрывают весь цикл работы с медицинским изделием", "Tibbiy buyum bilan ishlashning toʻliq siklini qamrab oluvchi kompetensiyalar", "Capabilities covering the full lifecycle of a medical device")}</h2>
           </div>
           <p className="sxp-sub">{_lv(lang,
             "Закрываем регуляторные, закупочные, технические и сервисные задачи в едином контуре ответственности.",
@@ -2183,6 +2183,10 @@ function SoiCatalogCards({ lang, go }) {
 .sxc-h2 { margin:0; font-size:clamp(30px,4.2vw,48px); font-weight:800; line-height:1.02;
   letter-spacing:-.035em; color:var(--sx-ink); }
 [data-theme="dark"] .sxc-h2 { color:var(--sx-ink); }
+/* Заголовки секций, ведущие на свою страницу. Подчёркивание только по наведению —
+   постоянное сделало бы крупный заголовок похожим на строку меню. */
+.sx-h2-link { cursor:pointer; transition:color .15s ease; }
+.sx-h2-link:hover { color:var(--blue-600); text-decoration:underline; text-underline-offset:.12em; }
 .sxc-sub { margin:0 0 24px; font-size:var(--fs-4); line-height:1.65; color:var(--sx-mute); }
 [data-theme="dark"] .sxc-sub { color:var(--sx-mute); }
 
@@ -2229,7 +2233,7 @@ function SoiCatalogCards({ lang, go }) {
         <div className="sxc-head sx-rv">
           <div>
             <p className="sxc-kicker">{_lv(lang, "Электронный каталог", "Elektron katalog", "Digital catalog")}</p>
-            <h2 className="sxc-h2">{_lv(lang, "Оборудование для современной медицины", "Zamonaviy tibbiyot uchun uskunalar", "Equipment for modern medicine")}</h2>
+            <h2 className="sxc-h2 sx-h2-link" onClick={() => go("catalog")}>{_lv(lang, "Оборудование для современной медицины", "Zamonaviy tibbiyot uchun uskunalar", "Equipment for modern medicine")}</h2>
           </div>
           <div>
             <p className="sxc-sub">{_lv(lang,
@@ -2437,7 +2441,7 @@ function SoiBrands({ lang, go }) {
   return (
     <section className="sx-mq-sec">
       <div className="sx-mq-head">
-        <h2 className="sx-h2 sx-brands-title sx-rv" onClick={() => go("partners")} style={{ cursor: "pointer", margin: 0 }}>
+        <h2 className="sx-h2 sx-brands-title sx-rv sx-h2-link" onClick={() => go("partners")} style={{ margin: 0 }}>
           {_lv(lang, "Партнёры", "Hamkorlar", "Partners")}
         </h2>
       </div>
@@ -2542,7 +2546,7 @@ function SoiCases({ lang, go }) {
         <div className="sxc-head sx-rv">
           <div>
             <p className="sxc-kicker">{_lv(lang, "Реализованные проекты", "Amalga oshirilgan loyihalar", "Delivered projects")}</p>
-            <h2 className="sxc-h2">{_lv(lang, "Как мы оснащаем медицину Узбекистана", "O'zbekiston tibbiyotini qanday jihozlaymiz", "How we equip Uzbekistan's healthcare")}</h2>
+            <h2 className="sxc-h2 sx-h2-link" onClick={() => go("projects")}>{_lv(lang, "Как мы оснащаем медицину Узбекистана", "O'zbekiston tibbiyotini qanday jihozlaymiz", "How we equip Uzbekistan's healthcare")}</h2>
           </div>
           <div>
             <p className="sxc-sub">{_lv(lang,
@@ -2675,7 +2679,7 @@ function SoiReviews({ lang, go }) {
         <div className="sxc-head sx-rev-head sx-rv">
           <div className="sx-rev-head-left">
             <p className="sxc-kicker">{lv("Отзывы","Sharhlar","Reviews")}</p>
-            <h2 className="sxc-h2" onClick={() => go("reviews")} style={{cursor:"pointer"}}>
+            <h2 className="sxc-h2 sx-h2-link" onClick={() => go("reviews")}>
               {lv("Благодарственные письма клиник и партнёров","Klinikalar va hamkorlarning minnatdorchilik xatlari","Letters of appreciation from clinics and partners")}
             </h2>
           </div>
@@ -2776,7 +2780,7 @@ function SoiNews({ lang, go }) {
         <div className="sxc-head sx-rv">
           <div>
             <p className="sxc-kicker">{_lv(lang, "Новости", "Yangiliklar", "News")}</p>
-            <h2 className="sxc-h2">{_lv(lang, "Что нового в индустрии", "Sohada nima yangilik", "What's new in the industry")}</h2>
+            <h2 className="sxc-h2 sx-h2-link" onClick={() => go("news")}>{_lv(lang, "Что нового в индустрии", "Sohada nima yangilik", "What's new in the industry")}</h2>
           </div>
           <div>
             <p className="sxc-sub">{_lv(lang,
