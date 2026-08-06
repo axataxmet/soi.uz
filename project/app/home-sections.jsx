@@ -65,9 +65,7 @@ function CoHomePage({ t, lang, go }) {
       <SoiCases lang={lang} go={go} />
       <SoiReviews lang={lang} go={go} />
       <SoiBrands lang={lang} go={go} />
-      <SoiCatalogPortal lang={lang} go={go} />
       <SoiNews lang={lang} go={go} />
-      <SoiFinalCTA lang={lang} go={go} />
     </div>
   );
 }

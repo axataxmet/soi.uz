@@ -420,7 +420,15 @@ function App(props) {
       <main className="app-main">{loading ? <PageSkeleton view={v} /> : <div key={routeKey} className="page-fade">{page}</div>}</main>
       <Footer t={t} lang={lang} go={go} setLang={setLang} />
       <CompareBar t={t} lang={lang} store={store} go={go} />
-      {quote && <QuoteModal t={t} lang={lang} product={quote.product} onClose={() => setQuote(null)} />}
+      {/* Модалка КП уходит порталом в body. Она живёт в каталожной оболочке, а
+          та на корпоративных страницах скрыта (display:none) — модалка
+          монтировалась, но оставалась невидимой, и кнопки «Получить
+          консультацию» / «Получить КП» на главной, сервисе, обучении и
+          регистрации выглядели неработающими. */}
+      {quote && ReactDOM.createPortal(
+        <QuoteModal t={t} lang={lang} product={quote.product} onClose={() => setQuote(null)} />,
+        document.body
+      )}
       <QuickViewPortal t={t} lang={lang} store={store} go={go} />
       {toast && (
         <div className="toast">

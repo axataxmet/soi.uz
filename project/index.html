@@ -1135,7 +1135,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none}
 input,textarea,select{font-family:inherit}
 a{color:inherit;text-decoration:none}
 img{display:block;max-width:100%}
-.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 32px}
 .app{min-height:100vh;display:flex;flex-direction:column}
 .app-main{flex:1}
 ::selection{background:var(--blue-500);color:#fff}
@@ -1838,6 +1838,41 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .z-corp .foot-soc{background:rgba(255,255,255,.08);color:#A9BCD8}
 .z-corp .foot-soc:hover{background:var(--cta);color:var(--cta-ink)}
 .z-corp .foot-pay span{border-color:rgba(255,255,255,.16)}
+
+/* Весь текст футера — белый. Приглушённые оттенки (--slate-*, полупрозрачный
+   белый в дисклеймере и строке реквизитов) на тёмном фоне читались как
+   выцветшие; решение заказчика — максимально белый текст.
+   Ссылкам и подзаголовкам оставлена лаймовая подсветка на наведении, иначе
+   ховер перестаёт быть заметен. */
+.z-corp .foot,
+.z-corp .foot .fabout,
+.z-corp .foot ul a,
+.z-corp .foot .foot-contact li,
+.z-corp .foot .fc-grp,
+.z-corp .foot .fc-grp a,
+.z-corp .foot .fc-h,
+.z-corp .foot h5,
+.z-corp .foot-disclaimer,
+.z-corp .foot-bot,
+.z-corp .foot-bot span,
+.z-corp .foot-pay span,
+.z-corp .foot-soc{color:#fff}
+
+/* Ниже футера оставалась светлая полоса: на коротких страницах тёмная плашка
+   не доходила до низа окна, а при «резиновой» прокрутке за ней показывался
+   белый фон документа. Оболочка растянута на высоту окна и прижимает футер к
+   низу, а корневому элементу задан цвет футера — тогда и область
+   переприкрутки остаётся тёмной. */
+html{background:var(--navy-900)}
+body{background:var(--surface)}
+.z-corp{min-height:100dvh;display:flex;flex-direction:column}
+.z-corp > main{flex:1 0 auto}
+.z-corp .foot{flex-shrink:0}
+.z-corp .foot-bot span{font-size:var(--fs-2)}
+.z-corp .foot ul a:hover,
+.z-corp .foot .fc-grp a:hover,
+.z-corp .foot .fc-map{color:var(--cta)}
+
 
 @media(max-width:1180px){.foot .fcols{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:760px){.foot .fcols{grid-template-columns:1fr 1fr;gap:28px 24px}}
@@ -3449,13 +3484,16 @@ html{scroll-padding-top:72px}
   background:transparent!important;border:0!important;box-shadow:var(--sh-sm);
   padding:12px 14px 0;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 /* внутренняя стеклянная панель */
+/* Плавающая шапка шла по 1200 при контенте в 1280 и заметно не совпадала с
+   ним по краям. Ширина взята из общего токена; внутренний отступ выровнен с
+   отступом контента, поэтому логотип встаёт над текстовой колонкой. */
 .z-corp .co-nav .co-nav-wrap{
-  max-width:1200px;margin:0 auto;border-radius:var(--r-lg);
+  max-width:var(--maxw);margin:0 auto;border-radius:var(--r-lg);
   background:rgba(7,26,51,.72);
   border:1px solid rgba(255,255,255,.10);
   box-shadow:var(--sh-lg);
   backdrop-filter:saturate(150%) blur(18px);-webkit-backdrop-filter:saturate(150%) blur(18px);
-  height:60px!important;padding:0 16px;gap:16px}
+  height:60px!important;padding:0 32px;gap:16px}
 .z-corp .co-nav.scrolled .co-nav-wrap{height:56px!important}
 /* логотип — белый на тёмном */
 .z-corp .co-nav .co-brand-mark{filter:brightness(0) invert(1)}
@@ -3808,55 +3846,55 @@ html{scroll-padding-top:72px}
 
 <script src="core/data.js?v=1782416018"></script>
 <script src="core/catalog-data.js?v=1782600023"></script>
-<script src="app/data.js?v=1785784518"></script>
+<script src="app/data.js?v=1785995308"></script>
 
 <!-- ===== catalog (app) data + components — loaded once, no iframe ===== -->
-<script src="app/cms-store.js?v=1785784518"></script>
-<script src="app/store-overlay.js?v=1785784518"></script>
+<script src="app/cms-store.js?v=1785995308"></script>
+<script src="app/store-overlay.js?v=1785995308"></script>
 <script src="lib/xlsx.js?v=1782416018"></script>
 <!-- CMS store loads AFTER window.DATA exists so admin edits sync to the live site -->
 <script src="admin/i18n.js?v=1782600006"></script>
 <!-- API client + remote CMS overlay: routes select collections (reviews) to the REST backend -->
-<script src="app/api-client.js?v=1785784518"></script>
-<script src="app/cms-remote.js?v=1785784518"></script>
+<script src="app/api-client.js?v=1785995308"></script>
+<script src="app/cms-remote.js?v=1785995308"></script>
 <!-- A3 catalog feed: populates window.DATA.{CATEGORIES,BRANDS,PRODUCTS} from the REST API -->
-<script src="app/catalog-remote.js?v=1785784518"></script>
+<script src="app/catalog-remote.js?v=1785995308"></script>
 <script src="admin/ui.jsx?v=1782416018"></script>
-<script type="text/babel" src="app/ui-atoms.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/header.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/hero-wave.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/home-page.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/catalog.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/product-detail.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/cart.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/brand-profile.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/company-info.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/floating-widgets.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/account.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/footer.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/app-entry.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/compare.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/filters.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/catalog-tree.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/map.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/quiz.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/reviews.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/auth.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/wishlist.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/order-track.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/error-boundary.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/app-root.jsx?v=1785784518"></script>
+<script type="text/babel" src="app/ui-atoms.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/header.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/hero-wave.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/home-page.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/catalog.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/product-detail.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/cart.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/brand-profile.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/company-info.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/floating-widgets.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/account.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/footer.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/app-entry.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/compare.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/filters.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/catalog-tree.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/map.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/quiz.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/reviews.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/auth.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/wishlist.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/order-track.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/error-boundary.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/app-root.jsx?v=1785995308"></script>
 
-<script type="text/babel" src="app/tweaks-panel.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/certificates.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/home-sections.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/inner-pages.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/testimonials.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/search.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/staff-training.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/service-support.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/checkout.jsx?v=1785784518"></script>
-<script type="text/babel" src="app/news.jsx?v=1785784518"></script>
+<script type="text/babel" src="app/tweaks-panel.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/certificates.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/home-sections.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/inner-pages.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/testimonials.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/search.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/staff-training.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/service-support.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/checkout.jsx?v=1785995308"></script>
+<script type="text/babel" src="app/news.jsx?v=1785995308"></script>
 
 
 

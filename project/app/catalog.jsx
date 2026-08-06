@@ -737,7 +737,7 @@ function CatalogLandingPage({ t, lang, store, go }) {
       {/* Hero */}
       <div className="clp-hero clp-wrap">
         <div className="clp-eyebrow"><Icon name="grid" size={13} />{lv("Электронный каталог", "Elektron katalog", "Electronic catalog")}</div>
-        <h1 className="clp-h1">{lv(<>2 800+ единиц&nbsp;<span>медицинского оборудования</span></>, <>2 800+ birlik <span>tibbiy uskunalar</span></>, <>2,800+ units of&nbsp;<span>medical equipment</span></>)}</h1>
+        <h1 className="clp-h1">{(() => { const N = (window.siteFigures ? window.siteFigures().catalog : "2 800") + "+"; return lv(<>{N} единиц&nbsp;<span>медицинского оборудования</span></>, <>{N} birlik <span>tibbiy uskunalar</span></>, <>{N} units of&nbsp;<span>medical equipment</span></>); })()}</h1>
         <p className="clp-sub">{lv("Медтехника, мебель, инструменты и расходные материалы. Официальные поставки от 120+ мировых производителей.", "Tibbiy texnika, mebel, asboblar. 120+ jahon ishlab chiqaruvchilaridan rasmiy yetkazib berish.", "Equipment, furniture, instruments and consumables. Official supply from 120+ global manufacturers.")}</p>
         <form className="clp-search" onSubmit={doSearch}>
           <input value={q} onChange={e => setQ(e.target.value)} placeholder={lv("Поиск по каталогу — аппараты, бренды, модели…", "Katalogdan qidiring…", "Search catalog — devices, brands, models…")} autoFocus />
@@ -774,11 +774,13 @@ function CatalogLandingPage({ t, lang, store, go }) {
       {/* Stats */}
       <div className="clp-wrap">
         <div className="clp-stats">
-          {[
-            { n: "2 800+", l: lv("позиций оборудования", "uskuna pozitsiyasi", "equipment items") },
-            { n: "120+",   l: lv("мировых брендов",       "jahon brendlari",    "global brands")   },
-            { n: "14",     l: lv("регионов доставки",     "yetkazish hududi",   "delivery regions")},
-          ].map((s,i) => (
+          {/* Цифры — из общего источника (siteFigures в home-page.jsx), а не
+              вписаны здесь: раньше витрина и главная расходились. */}
+          {(() => { const F = window.siteFigures ? window.siteFigures() : { catalog: "2 800", brands: "120", regions: "14" }; return [
+            { n: F.catalog + "+", l: lv("позиций оборудования", "uskuna pozitsiyasi", "equipment items") },
+            { n: F.brands + "+",  l: lv("мировых брендов",       "jahon brendlari",    "global brands")   },
+            { n: F.regions,       l: lv("регионов доставки",     "yetkazish hududi",   "delivery regions")},
+          ]; })().map((s,i) => (
             <div key={i} className="clp-stat">
               <div className="clp-stat-n">{s.n}</div>
               <div className="clp-stat-l">{s.l}</div>

@@ -33,6 +33,31 @@ const HERO_DEFAULTS = {
   trust3: { ru: "14 регионов Узбекистана", uz: "O'zbekistonning 14 hududi", en: "14 regions" },
 };
 
+/* ── Единый источник цифр сайта ───────────────────────────────────────────
+   Одни и те же шесть чисел раньше лежали в четырёх местах: плитки
+   «Экосистемы», блок «Инфраструктура», витрина каталога и страница «О
+   компании». Они разъезжались при любой правке — например, лет на рынке
+   считалось от года основания в localStorage только на одной странице.
+   Теперь значение одно, и его переопределяет настройка site_figures из
+   админки. Годы на рынке считаются от года основания, а не хранятся числом,
+   иначе их пришлось бы править каждый январь. */
+const SITE_FIGURES_DEFAULTS = {
+  founded: 2021,          // лет на рынке считается отсюда
+  catalog: "2 800",       // позиций в каталоге
+  brands: "120",          // мировых брендов
+  trained: "1000",        // обученных специалистов
+  service: "50",          // успешно выполненных сервисных работ
+  regions: "14",          // регионов доставки
+};
+function siteFigures() {
+  const cms = (window.CMS && window.CMS.getSetting) ? window.CMS.getSetting("site_figures", null) : null;
+  const f = Object.assign({}, SITE_FIGURES_DEFAULTS, cms || {});
+  f.years = String(Math.max(1, new Date().getFullYear() - parseInt(f.founded, 10)));
+  return f;
+}
+window.siteFigures = siteFigures;
+window.SITE_FIGURES_DEFAULTS = SITE_FIGURES_DEFAULTS;
+
 const IMPACT_DEFAULTS = {
   eyebrow: { ru: "Масштаб платформы", uz: "Platforma miqyosi", en: "Platform scale" },
   title: {
@@ -40,10 +65,10 @@ const IMPACT_DEFAULTS = {
     uz: "Klinikalar va davlat muassasalari ishonadigan infratuzilma",
     en: "Infrastructure trusted by clinics and public institutions",
   },
-  stat1_val: "2 800", stat1_unit: "+", stat1_label: { ru: "позиций в каталоге", uz: "katalog pozitsiyasi", en: "items in catalog" },
-  stat2_val: "120",   stat2_unit: "+", stat2_label: { ru: "мировых брендов", uz: "jahon brendi", en: "global brands" },
-  stat3_val: "14",    stat3_unit: "",  stat3_label: { ru: "регионов доставки", uz: "yetkazish hududi", en: "delivery regions" },
-  stat4_val: "5",     stat4_unit: "+", stat4_label: { ru: "лет на рынке Узбекистана", uz: "O'zbekiston bozorida yil", en: "years in Uzbekistan" },
+  stat1_val: SITE_FIGURES_DEFAULTS.catalog, stat1_unit: "+", stat1_label: { ru: "позиций в каталоге", uz: "katalog pozitsiyasi", en: "items in catalog" },
+  stat2_val: SITE_FIGURES_DEFAULTS.brands,  stat2_unit: "+", stat2_label: { ru: "мировых брендов", uz: "jahon brendi", en: "global brands" },
+  stat3_val: SITE_FIGURES_DEFAULTS.regions, stat3_unit: "",  stat3_label: { ru: "регионов доставки", uz: "yetkazish hududi", en: "delivery regions" },
+  stat4_val: String(new Date().getFullYear() - SITE_FIGURES_DEFAULTS.founded), stat4_unit: "+", stat4_label: { ru: "лет на рынке Узбекистана", uz: "O'zbekiston bozorida yil", en: "years in Uzbekistan" },
 };
 
 const CTA_DEFAULTS = {
@@ -210,9 +235,9 @@ const HERO_SLIDES = [
     theme: "dark",
     video: "assets/hero-equip.mp4",
     bg: "linear-gradient(120deg, #050a14 0%, var(--navy-800) 55%, var(--blue-600) 100%)",
-    badge: { ru: "Комплексные поставки", uz: "Kompleks yetkazib berish", en: "Turnkey supply" },
-    title: { ru: "Комплексное оснащение медицинских учреждений", uz: "Tibbiyot muassasalarini kompleks jihozlash", en: "Comprehensive equipping of medical institutions" },
-    subtitle: { ru: "Медицинское оборудование, мебель и инструменты от ведущих производителей — с доставкой, монтажом и обучением персонала.", uz: "Yetakchi ishlab chiqaruvchilardan tibbiy uskunalar, mebel va asboblar — yetkazib berish, o'rnatish va o'qitish bilan.", en: "Medical equipment, furniture and instruments from leading manufacturers — with delivery, installation and staff training." },
+    badge: { ru: "ИНДУСТРИЯ ЗДОРОВЬЯ", uz: "SOGʻLIQ INDUSTRIYASI", en: "HEALTH INDUSTRY" },
+    title: { ru: "Медицинские изделия и оснащение", uz: "Tibbiy buyumlar va jihozlash", en: "Medical devices and equipping" },
+    subtitle: { ru: "Широкий ассортимент медицинских изделий от ведущих производителей. Помогаем выбрать, зарегистрировать, закупить, поставить, внедрить и обеспечить сервисное сопровождение.", uz: "Yetakchi ishlab chiqaruvchilardan tibbiy buyumlarning keng assortimenti. Tanlash, roʻyxatdan oʻtkazish, sotib olish, yetkazib berish, joriy etish va servis qoʻllab-quvvatlashda yordam beramiz.", en: "A wide range of medical devices from leading manufacturers. We help you select, register, procure, deliver, deploy and maintain them." },
     ctas: [
       { label: { ru: "Перейти в каталог", uz: "Katalogga o'tish", en: "Browse catalog" }, action: "catalog", style: "primary" },
       { label: { ru: "Связаться с нами", uz: "Bog'lanish", en: "Contact us" }, action: "contacts", style: "ghost" },
@@ -314,7 +339,7 @@ function Hero({ t, lang, go }) {
 }
 
 /* text column, left-aligned like NVIDIA */
-.soi-chero-wrap { position:relative; z-index:1; min-height:100dvh; max-width:1200px; margin:0 auto;
+.soi-chero-wrap { position:relative; z-index:1; min-height:100dvh; max-width:var(--maxw); margin:0 auto;
   padding:0 24px; display:flex; align-items:center; }
 .soi-chero-col { max-width:640px; padding:112px 0 96px; }
 .soi-chero-slide.t-dark  .soi-chero-col { color:#fff; }
@@ -352,7 +377,7 @@ function Hero({ t, lang, go }) {
 
 /* segmented progress bars with timer fill */
 .soi-chero-bars { position:absolute; bottom:32px; left:50%; transform:translateX(-50%); z-index:20;
-  display:flex; gap:12px; width:100%; max-width:1200px; padding:0 24px; }
+  display:flex; gap:12px; width:100%; max-width:var(--maxw); padding:0 32px; }
 .soi-chero-bar { position:relative; height:16px; width:96px; max-width:20%; padding:0;
   background:none; border:none; cursor:pointer; }
 .soi-chero-bar-track { position:absolute; left:0; top:50%; transform:translateY(-50%);
@@ -757,7 +782,7 @@ function Footer({ t, lang, go, setLang }) {
             : "Технические характеристики, изображения и копии документов — регистрационных удостоверений, сертификатов и деклараций о соответствии, свидетельств об утверждении типа средств измерений — размещены ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» справочно: они не являются публичной офертой и основанием для претензий. Производитель вправе изменить комплектацию и характеристики без уведомления. Перед применением изучите инструкцию (паспорт изделия) или обратитесь к специалисту. Сайт использует файлы cookie: они помогают узнавать вас, оценивать пользовательский опыт и улучшать сайт. Состав обрабатываемых данных и условия — в политике конфиденциальности."}
         </div>
         <div className="foot-bot">
-          <span style={{fontSize:12,color:"var(--slate-400)"}}>
+          <span>
             {lang === "uz" ? `«SOG’LIQ INDUSTRIYASI» MChJ • 100069, Toshkent • STIR: 312513138 • ${SITE_MAIL}` : lang === "en" ? `LLC «HEALTH INDUSTRY» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Tashkent • TIN: 312513138 • ${SITE_MAIL}` : `ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Ташкент • ИНН: 312513138 • ${SITE_MAIL}`}
           </span>
           <div className="foot-socials">
@@ -927,7 +952,7 @@ function SoiPlatformCSS() {
 
 .sx { background:var(--sx-bg); color:var(--sx-ink); }
 .sx *, .sx *::before, .sx *::after { box-sizing:border-box; }
-.sx-wrap { max-width:1200px; margin:0 auto; padding:0 24px; }
+.sx-wrap { max-width:var(--maxw); margin:0 auto; padding:0 32px; }
 .sx-section { padding:clamp(64px,8vw,108px) 0; position:relative; }
 /* Светлые секции выключены: фон страниц — только белый. Правило оставлено
    пустым, чтобы разметка с классом soft не требовала правки. */
@@ -1258,14 +1283,18 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    and six names crawl. */
 .sx-mq-sec {background:var(--sx-card);
   padding:clamp(34px,4.5vw,54px) 0}
-.sx-mq-head { max-width:1200px; margin:0 auto clamp(22px,2.6vw,32px); padding:0 24px; }
+.sx-mq-head { max-width:var(--maxw); margin:0 auto clamp(22px,2.6vw,32px); padding:0 32px; }
 /* Two belts running against each other. Opposite directions are what keep the
    pair from reading as one tall band sliding past, and each row carries its own
    half of the list — the same names twice over would just look like a mistake. */
 .sx-mq-vp { position:relative; display:flex; flex-direction:column; gap:clamp(14px,1.8vw,22px); }
 .sx-mq-row { overflow:hidden; }
-.sx-mq-track { display:flex; width:max-content; align-items:center; gap:clamp(38px,5vw,72px); padding-right:clamp(38px,5vw,72px);
+.sx-mq-track { --mq-gap:clamp(38px,5vw,72px);
+  display:flex; width:max-content; align-items:center;
   animation:sxMarquee var(--mq-dur,42s) linear infinite; will-change:transform; }
+/* Проход несёт и внутренние зазоры, и замыкающий — тогда ширина дорожки ровно
+   вдвое больше прохода, и −50 % попадают точно в стык. */
+.sx-mq-pass { display:flex; align-items:center; gap:var(--mq-gap); padding-right:var(--mq-gap); flex:0 0 auto; }
 @keyframes sxMarquee { from { transform:translate3d(0,0,0); } to { transform:translate3d(-50%,0,0); } }
 /* The right-bound row plays the same keyframes backwards, so the seam maths
    stay in one place instead of being written twice with opposite signs. */
@@ -1470,13 +1499,13 @@ function _lv(lang, ru, uz, en) { return lang === "uz" ? uz : lang === "en" ? en 
    A metric left blank in the admin renders nothing rather than a zero. */
 
 const ECO_DEFAULTS = {
-  catalog_num: "2 800", catalog_unit: "+",
-  training_num: "1000", training_unit: "+",
-  service_num: "50", service_unit: "+",
+  catalog_num: SITE_FIGURES_DEFAULTS.catalog, catalog_unit: "+",
+  training_num: SITE_FIGURES_DEFAULTS.trained, training_unit: "+",
+  service_num: SITE_FIGURES_DEFAULTS.service, service_unit: "+",
   training_photo: "", service_photo: "",
-  brands_num: "120", brands_unit: "+",
+  brands_num: SITE_FIGURES_DEFAULTS.brands, brands_unit: "+",
   // The delivery tile carries the map alone — no metrics, no CTA.
-  delivery_num: "14", delivery_unit: "",
+  delivery_num: SITE_FIGURES_DEFAULTS.regions, delivery_unit: "",
 };
 
 /* Live figures. One small request per source; every one of them may fail without
@@ -1943,7 +1972,8 @@ const EXPERTISE_ITEMS = [
     },
   },
   {
-    nav: "services",
+    /* Раньше обе карточки, обучение и сервис, вели на общий раздел услуг. */
+    nav: "staffTraining",
     t: { ru: "Обучение персонала", uz: "Xodimlarni o'qitish", en: "Staff training" },
     d: { ru: "Обучаем персонал работе с оборудованием — очно, на вашей площадке или онлайн.", uz: "Xodimlarni uskunalar bilan ishlashga o'qitamiz — joyingizda yoki onlayn.", en: "We train your staff to operate the equipment — on-site at your facility or online." },
     proof: { ru: "Индивидуальная программа под ваше оборудование", uz: "Sizning uskunangizga moslashtirilgan dastur", en: "A program tailored to your equipment" },
@@ -1954,7 +1984,7 @@ const EXPERTISE_ITEMS = [
     },
   },
   {
-    nav: "services",
+    nav: "serviceSupport",
     t: { ru: "Сервисное обслуживание", uz: "Servis xizmati", en: "Maintenance service" },
     d: { ru: "Пусконаладка, гарантийный и постгарантийный сервис с выездом в регионы.", uz: "Ishga tushirish, kafolatli va kafolatdan keyingi servis, viloyatlarga chiqish bilan.", en: "Commissioning, warranty and post-warranty service with visits across the regions." },
     proof: { ru: "Гарантийная и постгарантийная поддержка", uz: "Kafolatli va kafolatdan keyingi qo'llab-quvvatlash", en: "Warranty and post-warranty support" },
@@ -1979,7 +2009,7 @@ function SoiExpertise({ lang, go }) {
    lime card carrying the featured service. */
 .sxp { position:relative; overflow:hidden; background:var(--sx-bg); padding:clamp(64px,8vw,112px) 0; }
 .sxp-glow { display:none; }
-.sxp-inner { position:relative; max-width:1200px; margin:0 auto; padding:0 24px; }
+.sxp-inner { position:relative; max-width:var(--maxw); margin:0 auto; padding:0 32px; }
 
 .sxp-head { display:grid; gap:32px; margin-bottom:clamp(40px,5vw,64px); }
 @media(min-width:1024px){ .sxp-head { grid-template-columns:1.15fr .85fr; align-items:end; gap:64px; } }
@@ -2065,7 +2095,7 @@ function SoiExpertise({ lang, go }) {
         <div className="sxp-head sx-rv">
           <div>
             <p className="sxp-kicker">{_lv(lang, "Экспертиза", "Ekspertiza", "Expertise")}</p>
-            <h2 className="sxp-h2">{_lv(lang, "Наши услуги", "Bizning xizmatlar", "Our services")}</h2>
+            <h2 className="sxp-h2">{_lv(lang, "Компетенции, которые закрывают весь цикл работы с медицинским изделием", "Tibbiy buyum bilan ishlashning toʻliq siklini qamrab oluvchi kompetensiyalar", "Capabilities covering the full lifecycle of a medical device")}</h2>
           </div>
           <p className="sxp-sub">{_lv(lang,
             "Закрываем регуляторные, закупочные, технические и сервисные задачи в едином контуре ответственности.",
@@ -2138,10 +2168,16 @@ function SoiCatalogCards({ lang, go }) {
     s.textContent = `
 .sxc { background:var(--sx-bg); padding:clamp(64px,8vw,112px) 0; }
 [data-theme="dark"] .sxc { background:var(--sx-bg-soft); }
-.sxc-inner { max-width:1200px; margin:0 auto; padding:0 24px; }
+.sxc-inner { max-width:var(--maxw); margin:0 auto; padding:0 32px; }
 
 .sxc-head { display:grid; gap:32px; margin-bottom:clamp(40px,5vw,64px); }
-@media(min-width:1024px){ .sxc-head { grid-template-columns:1.3fr .7fr; align-items:end; gap:64px; } }
+/* Колонки шапки выровнены по верху, а правая опущена на высоту надзаголовка —
+   так описание встаёт вровень с первой строкой заголовка, а не с надзаголовком
+   и не с нижним краем блока. */
+@media(min-width:1024px){
+  .sxc-head { grid-template-columns:1.3fr .7fr; align-items:start; gap:64px; }
+  .sxc-head > *:last-child { padding-top:calc(var(--fs-2) * 1.5 + 16px); }
+}
 .sxc-kicker { margin:0 0 16px; font-size:var(--fs-2); font-weight:700; text-transform:uppercase;
   letter-spacing:.16em; color:var(--sx-mute); }
 .sxc-h2 { margin:0; font-size:clamp(30px,4.2vw,48px); font-weight:800; line-height:1.02;
@@ -2388,8 +2424,12 @@ function SoiBrands({ lang, go }) {
         className={"sx-mq-track" + (row ? " rev" : "")}
         style={{ "--mq-dur": Math.max(22, list.length * 5.5) + "s" }}
       >
-        {list.map((b) => item(b, row, false))}
-        <span aria-hidden="true" style={{ display: "contents" }}>{list.map((b) => item(b, row, true))}</span>
+        {/* Два прохода — два самостоятельных блока одинаковой ширины. Раньше
+            клон разворачивался в ту же флекс-строку через display:contents, и
+            ширина дорожки выходила «2×проход минус один зазор»: сдвиг на −50 %
+            не совпадал с длиной прохода, и на стыке лента дёргалась. */}
+        <div className="sx-mq-pass">{list.map((b) => item(b, row, false))}</div>
+        <div className="sx-mq-pass" aria-hidden="true">{list.map((b) => item(b, row, true))}</div>
       </div>
     </div>
   );
@@ -2399,7 +2439,6 @@ function SoiBrands({ lang, go }) {
       <div className="sx-mq-head">
         <h2 className="sx-h2 sx-brands-title sx-rv" onClick={() => go("partners")} style={{ cursor: "pointer", margin: 0 }}>
           {_lv(lang, "Партнёры", "Hamkorlar", "Partners")}
-          <Icon name="chevronRight" size={22} />
         </h2>
       </div>
       <div className="sx-mq-vp">
@@ -2638,7 +2677,6 @@ function SoiReviews({ lang, go }) {
             <p className="sxc-kicker">{lv("Отзывы","Sharhlar","Reviews")}</p>
             <h2 className="sxc-h2" onClick={() => go("reviews")} style={{cursor:"pointer"}}>
               {lv("Благодарственные письма клиник и партнёров","Klinikalar va hamkorlarning minnatdorchilik xatlari","Letters of appreciation from clinics and partners")}
-              <Icon name="chevronRight" size={22}/>
             </h2>
           </div>
           <div>
@@ -2717,6 +2755,7 @@ function SoiReviews({ lang, go }) {
 function SoiNews({ lang, go }) {
   const tx = (o) => (o && (o[lang] || o.ru)) || "";
   const cov = (c) => !c ? null : (typeof c === "string" ? c : (c.data || c.src || null));
+  const [viewer, setViewer] = React.useState(null);
   // Реактивная подписка: cms-remote грузит news из API асинхронно и делает CMS.emit("news").
   const [cmsNews, setCmsNews] = React.useState(() => window.CMS ? window.CMS.list("news") : []);
   React.useEffect(() => {
@@ -2729,19 +2768,38 @@ function SoiNews({ lang, go }) {
   if (!news.length) return null;
   const fmt = (d) => { if (!d) return ""; const x = new Date(d); return isNaN(x) ? d : x.toLocaleDateString(lang === "ru" ? "ru-RU" : lang === "uz" ? "uz-UZ" : "en-US", { day: "2-digit", month: "long", year: "numeric" }); };
   return (
-    <section className="sx-section soft">
-      <div className="sx-wrap">
-        <div className="sx-head sx-rv" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
+    /* Блок в оформлении каталожного: двухколоночная шапка и та же сетка
+       карточек, что у «Реализованных проектов». Карточка открывает окно
+       просмотра — раньше любой клик уводил на общий список новостей. */
+    <section className="sxc">
+      <div className="sxc-inner">
+        <div className="sxc-head sx-rv">
           <div>
-            <span className="sx-eyebrow">{_lv(lang, "Новости и аналитика", "Yangiliklar", "News & insights")}</span>
-            <h2 className="sx-h2">{_lv(lang, "Что нового в индустрии", "Sohada nima yangilik", "What's new in the industry")}</h2>
+            <p className="sxc-kicker">{_lv(lang, "Новости", "Yangiliklar", "News")}</p>
+            <h2 className="sxc-h2">{_lv(lang, "Что нового в индустрии", "Sohada nima yangilik", "What's new in the industry")}</h2>
           </div>
-          <span className="sx-link" onClick={() => go("news")}>{_lv(lang, "Все новости", "Barcha yangiliklar", "All news")}<Icon name="arrowRight" size={16} /></span>
+          <div>
+            <p className="sxc-sub">{_lv(lang,
+              "Поставки и проекты компании, изменения в регулировании медицинских изделий и новинки оборудования.",
+              "Kompaniyaning yetkazib berishlari va loyihalari, tibbiy buyumlarni tartibga solishdagi o'zgarishlar va yangi uskunalar.",
+              "Company deliveries and projects, changes in medical device regulation and new equipment.")}</p>
+          </div>
         </div>
-        <div className="sx-news">
+        <div className="sxc-grid">
           {news.map((n, i) => (
-            <div className="sx-ncard sx-rv" key={n.id || i} style={{ "--i": i }} onClick={() => go("news")}>
-              <div className="sx-ncard-cover">{cov(n.cover) ? <img src={cov(n.cover)} alt={tx(n.title)} loading="lazy" /> : <Icon name="doc" size={28} />}</div>
+            <div
+              key={n.id || i}
+              className="sxc-card sx-ncard sx-rv"
+              style={{ "--i": i }}
+              role="button"
+              tabIndex={0}
+              onClick={() => setViewer(n)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setViewer(n); } }}
+              aria-label={_lv(lang, "Открыть новость", "Yangilikni ochish", "Open news item") + ": " + tx(n.title)}
+            >
+              <div className="sxc-media sx-ncard-cover">
+                {cov(n.cover) ? <img src={cov(n.cover)} alt={tx(n.title)} loading="lazy" /> : <Icon name="doc" size={28} />}
+              </div>
               <div className="sx-ncard-body">
                 <div className="sx-ncard-date">{fmt(n.date)}</div>
                 <h3>{tx(n.title)}</h3>
@@ -2750,7 +2808,41 @@ function SoiNews({ lang, go }) {
           ))}
         </div>
       </div>
+      {viewer && <NewsModal n={viewer} lang={lang} tx={tx} cov={cov} fmt={fmt} onClose={() => setViewer(null)} />}
     </section>
+  );
+}
+
+/* Окно просмотра новости. Оформление и поведение — те же, что у окна кейса
+   (sx-cmod-*): затемнение, закрытие по Esc и по клику мимо, блокировка
+   прокрутки страницы. */
+function NewsModal({ n, lang, tx, cov, fmt, onClose }) {
+  ensureCaseModalCss();
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, []);
+  const cover = cov(n.cover);
+  const body = tx(n.body) || tx(n.text) || tx(n.desc) || tx(n.excerpt) || "";
+  return (
+    <div className="sx-cmod-ov" onClick={onClose} role="dialog" aria-modal="true" aria-label={tx(n.title)}>
+      <button className="sx-cmod-x" onClick={onClose} aria-label={_lv(lang, "Закрыть", "Yopish", "Close")}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <div className="sx-cmod" onClick={(e) => e.stopPropagation()}>
+        <div className="sx-cmod-cover">
+          {cover ? <img src={cover} alt={tx(n.title)} /> : <Icon name="doc" size={40} />}
+        </div>
+        <div className="sx-cmod-body">
+          {n.date && <span className="sx-cmod-tag">{fmt(n.date)}</span>}
+          <h2>{tx(n.title)}</h2>
+          {body && <p style={{ whiteSpace: "pre-line" }}>{body}</p>}
+        </div>
+      </div>
+    </div>
   );
 }
 
