@@ -3299,9 +3299,9 @@ body:has(.cmpbar.show) .fab-wrap{bottom:96px}
 .z-corp .co-nav .co-nav-links>a.nav-primary{background:var(--bg-2);border-color:var(--line-soft);color:var(--blue-700);font-weight:800;box-shadow:var(--sh-lg)}
 .z-corp .co-nav .co-nav-links>a.nav-primary:hover{background:var(--blue-600);border-color:var(--blue-600);color:#fff;box-shadow:var(--sh-lg)}
 .z-corp .co-nav .nav-dd-chevron,
-.z-corp .co-nav .lang-dd-chevron{font-size:calc(var(--fs-1) * 1.15);line-height:1;opacity:.55;transition:transform .16s ease,opacity .16s ease}
+.z-corp .co-nav .lang-dd-chevron{font-size:14px;line-height:1;opacity:1;transition:transform .16s ease,opacity .16s ease}
 .z-corp .co-nav .nav-dd-btn.on .nav-dd-chevron,
-.z-corp .co-nav .lang-dd-btn[aria-expanded="true"] .lang-dd-chevron{transform:rotate(180deg);opacity:.8}
+.z-corp .co-nav .lang-dd-btn[aria-expanded="true"] .lang-dd-chevron{transform:rotate(180deg);opacity:1}
 .z-corp .co-nav .nav-dd-menu,
 .z-corp .co-nav .lang-dd-menu{position:absolute;top:calc(100% + 10px);z-index:940;background:var(--surface,#fff);border:1px solid rgba(15,23,42,.10);border-radius:var(--r);box-shadow:var(--sh-xl);padding:7px;animation:navDdFade .15s ease;overflow:hidden}
 .z-corp .co-nav .nav-dd-menu{left:0;min-width:272px}
@@ -3516,8 +3516,10 @@ html{scroll-padding-top:72px}
   background:var(--nv-lime)!important;color:#03120e!important;border:0!important;font-weight:800;
   box-shadow:var(--sh-lg)}
 .z-corp .co-nav .co-nav-links>a.nav-primary:hover{background:var(--nv-lime-hi)!important;color:#03120e!important}
+/* Стрелка того же тона, что и подпись рядом: свой цвет её глушил до ~.25 альфы
+   против .85 у текста, и она читалась как отключённая. */
 .z-corp .co-nav .nav-dd-chevron,
-.z-corp .co-nav .lang-dd-chevron{color:rgba(255,255,255,.45)}
+.z-corp .co-nav .lang-dd-chevron{color:inherit}
 .z-corp .co-nav .nav-dd-btn.on .nav-dd-chevron,
 .z-corp .co-nav .lang-dd-btn[aria-expanded="true"] .lang-dd-chevron{color:var(--nv-lime-hi)}
 /* выпадающие меню — тёмное стекло, зелёная левая рамка при hover */
