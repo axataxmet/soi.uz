@@ -99,6 +99,7 @@ function CatalogPage({ t, lang, store, go, params }) {
   const [view, setView] = useState(params.view === "grid" ? "grid" : "list");
   const [sort, setSort] = useState("stock");
   const [catSort, setCatSort] = useState("stock"); // блок товаров на корне категории
+  const [catView, setCatView] = useState("grid");  // вид этого же блока: плитки, как было исторически
   const PAGE = 12;
   const [visible, setVisible] = useState(PAGE);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -203,6 +204,25 @@ function CatalogPage({ t, lang, store, go, params }) {
   const atCategoryRoot = params.cat != null && params.sub == null && !params.q && !params.badge && !params.dir;
   const browseSubs = !browseGroups && atCategoryRoot && (!catsReady || (cat && (cat.subs || []).length > 0));
   const goSub = (idx) => go("catalog", { cat: catId, sub: idx });
+
+  /* Переключатель вида отображения. Разметка одна на оба места, иначе кнопки
+     разъедутся, а значение и умолчание у мест разные:
+       • страница товарной группы — список, выбор уходит в адрес (?view=grid),
+         чтобы ссылка открывалась тем же видом;
+       • витрины категории и подраздела — плитки, как было до появления
+         переключателя; адрес вида здесь не несёт, выбор живёт в состоянии. */
+  const ViewSwitch = ({ value, onChange }) => (
+    <div className="view-sw" role="group" aria-label={lvf("Вид", "Ko'rinish", "View")}>
+      <button className={value === "grid" ? "on" : ""} title={lvf("Плиткой", "Plitka", "Grid")}
+        aria-pressed={value === "grid"} onClick={() => onChange("grid")}>
+        <Icon name="grid" size={16} />
+      </button>
+      <button className={value === "list" ? "on" : ""} title={lvf("Списком", "Roʻyxat", "List")}
+        aria-pressed={value === "list"} onClick={() => onChange("list")}>
+        <Icon name="list" size={16} />
+      </button>
+    </div>
+  );
 
   /* Карточки разделов: показываем только непустые. Товар может лежать в разделе
      как основном либо быть добавлен в него дополнительно (extraCats) — считаем
@@ -472,22 +492,7 @@ function CatalogPage({ t, lang, store, go, params }) {
                 : <>{t.found}: <b>{list.length}</b> {t.items_count}</>}</div>}
             </div>
             {!browseTiles && <div className={"cat-bar-controls" + (group ? " plain" : "")}>
-              {/* Переключатель вида — только на странице группы; фильтров там
-                  нет, поэтому он стоит в одной полосе с сортировкой. */}
-              {group && (
-                <div className="view-sw" role="group" aria-label={lvf("Вид","Ko'rinish","View")}>
-                  <button className={view === "grid" ? "on" : ""} title={lvf("Плиткой","Plitka","Grid")}
-                    aria-pressed={view === "grid"}
-                    onClick={() => go("catalog", Object.assign({}, params, { view: "grid" }))}>
-                    <Icon name="grid" size={16} />
-                  </button>
-                  <button className={view === "list" ? "on" : ""} title={lvf("Списком","Roʻyxat","List")}
-                    aria-pressed={view === "list"}
-                    onClick={() => go("catalog", Object.assign({}, params, { view: "list" }))}>
-                    <Icon name="list" size={16} />
-                  </button>
-                </div>
-              )}
+              {group && <ViewSwitch value={view} onChange={(v) => go("catalog", Object.assign({}, params, { view: v }))} />}
               {!group && <button className="flt-trigger" onClick={() => setFiltersOpen(true)}>
                 <Icon name="filter" size={17} />
                 {t.cat_filters}
@@ -575,7 +580,7 @@ function CatalogPage({ t, lang, store, go, params }) {
                 <section className="cat-prod">
                   {/* Заголовок «Товары категории / подкатегории» убран: над списком
                       уже стоит название раздела, и подпись его повторяла.
-                      В шапке остаётся только сортировка. */}
+                      Слева сортировка, справа — переключатель вида. */}
                   <div className="cat-prod-head">
                     <div className="sort-sel">
                       <label htmlFor="cat-sort">{lvf("Сортировать", "Saralash", "Sort by")}:</label>
@@ -583,13 +588,23 @@ function CatalogPage({ t, lang, store, go, params }) {
                         {sortOptions(lvf).map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
                       </select>
                     </div>
+                    <ViewSwitch value={catView} onChange={setCatView} />
                   </div>
-                  <div className="cat-prod-grid">
-                    {catProducts.map((p) => (
-                      <ProductTile key={p.id} product={p} t={t} lang={lang} store={store}
-                        onOpen={(pr) => go("product", { id: pr.id })} />
-                    ))}
-                  </div>
+                  {catView === "list" ? (
+                    <div className="cat-rows">
+                      {catProducts.map((p) => (
+                        <ProductRow key={p.id} product={p} t={t} lang={lang} store={store}
+                          onOpen={(pr) => go("product", { id: pr.id })} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="cat-prod-grid">
+                      {catProducts.map((p) => (
+                        <ProductTile key={p.id} product={p} t={t} lang={lang} store={store}
+                          onOpen={(pr) => go("product", { id: pr.id })} />
+                      ))}
+                    </div>
+                  )}
                 </section>
               )}
             </>
