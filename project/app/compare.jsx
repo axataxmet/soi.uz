@@ -146,7 +146,7 @@ function MobileBottomNav({ t, lang, store, go }) {
       </button>
       <button className="mbn-item" onClick={() => go("catalog",{})}>
         <Icon name="grid" size={22}/>
-        <span>{t.catalog}</span>
+        <span>{t.foot_catalog}</span>
       </button>
       <button className="mbn-item fab" onClick={() => window.__openQuote&&window.__openQuote()}>
         <Icon name="phone" size={24} sw={2}/>
