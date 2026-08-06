@@ -3415,16 +3415,20 @@ body:has(.cmpbar.show) .fab-wrap{bottom:96px}
   .z-corp .co-nav .co-cat-search{order:2;justify-self:start}
   .z-corp .co-nav .co-mobile-actions{order:3;justify-self:end;margin-left:0;display:flex;align-items:center;gap:6px}
   .z-corp .co-nav .nav-utils{display:none}
-  .z-corp .co-nav>.co-actions{display:none!important}
-  .z-corp .co-nav>.burger{display:none!important}
   .z-corp .co-nav .co-actions{order:4;margin-left:auto}
   .z-corp .co-nav .burger{order:5}
   .z-corp .co-nav .lang-dd-btn{min-width:38px;height:38px;padding:0 7px;gap:0;font-size:var(--fs-3)}
   .z-corp .co-nav .lang-dd-btn svg,.z-corp .co-nav .lang-dd-chevron{display:none}
   .z-corp .co-nav .theme-btn{display:none}
-  .z-corp .co-nav .co-actions{position:static;right:auto;top:auto;display:none!important;gap:0;transform:none;z-index:955}
+  /* На каталоге кнопки корзины/меню уже даёт .co-mobile-actions — обычные
+     .co-actions и .burger там дублируют их и скрываются. На остальных
+     страницах .co-mobile-actions не рендерится вовсе, поэтому burger и
+     корзина — единственный способ открыть меню и остаются видимыми. */
+  .z-corp .co-nav-wrap:has(.co-mobile-actions) .co-actions{position:static;right:auto;top:auto;display:none!important;gap:0;transform:none;z-index:955}
   .z-corp .co-nav .co-act.co-act-cart{display:flex!important}
-  .z-corp .co-nav .burger{position:static;right:auto;top:auto;display:none!important;transform:none;z-index:955}
+  .z-corp .co-nav-wrap:has(.co-mobile-actions) .burger{position:static;right:auto;top:auto;display:none!important;transform:none;z-index:955}
+  .z-corp .co-nav .co-actions{position:static;right:auto;top:auto;gap:0;transform:none;z-index:955}
+  .z-corp .co-nav .burger{position:static;right:auto;top:auto;transform:none;z-index:955}
   .z-corp .co-nav .co-act{width:36px;height:38px}
   .z-corp .burger{width:38px;height:38px;border-radius:var(--r-sm)}
   .z-corp .co-cat-search-trigger{width:40px;height:40px}
