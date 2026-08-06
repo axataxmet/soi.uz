@@ -7,7 +7,10 @@ node_modules/
 .env.*.local
 
 # ── build output ──
+# project/dist/app/*.js IS committed — GitHub Pages serves static files with
+# no CI build step, so the precompiled JSX has to live in the repo itself.
 dist/
+!project/dist/
 build/
 *.tsbuildinfo
 

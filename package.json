@@ -2,14 +2,22 @@
   "name": "soi-uz",
   "version": "0.1.0",
   "private": true,
-  "description": "ИНДУСТРИЯ ЗДОРОВЬЯ — сайт и админ-панель. Тесты для фронтенда; сборки нет, JSX компилируется в браузере.",
+  "description": "ИНДУСТРИЯ ЗДОРОВЬЯ — сайт и админ-панель. Сайт (project/app/*.jsx) собирается заранее через esbuild (npm run build:app) в project/dist/; админка по-прежнему компилирует JSX в браузере через CDN Babel.",
   "scripts": {
     "dev": "node project/dev-server.js",
+    "build:app": "node scripts/build.js",
     "test": "jest",
     "test:watch": "jest --watch"
   },
   "devDependencies": {
+    "@babel/core": "^8.0.1",
+    "@babel/preset-env": "^8.0.2",
+    "@babel/preset-react": "^8.0.1",
+    "esbuild": "^0.28.1",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true
   }
 }

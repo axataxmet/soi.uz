@@ -3849,7 +3849,10 @@ html{scroll-padding-top:72px}
 <!-- production builds react@18.3.1 / react-dom@18.3.1 (не заменять на .development.js — это +1 МБ на главной) -->
 <script src="lib/react.js?v=1783400000" integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z" crossorigin="anonymous"></script>
 <script src="lib/react-dom.js?v=1783400000" integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1" crossorigin="anonymous"></script>
-<script src="lib/babel.js?v=1782416018" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<!-- app/*.jsx ниже — не сырой JSX: это скомпилированные dist/app/*.js
+     (npm run build:app, scripts/build.js). babel.js (3 МБ) больше не нужен —
+     компоненты по-прежнему объявляются как глобальные функции без
+     import/export, поэтому транспиляция per-file, а не бандл. -->
 
 <script src="core/data.js?v=1782416018"></script>
 <script src="core/catalog-data.js?v=1782600023"></script>
@@ -3867,41 +3870,41 @@ html{scroll-padding-top:72px}
 <!-- A3 catalog feed: populates window.DATA.{CATEGORIES,BRANDS,PRODUCTS} from the REST API -->
 <script src="app/catalog-remote.js?v=1785999916"></script>
 <script src="admin/ui.jsx?v=1782416018"></script>
-<script type="text/babel" src="app/ui-atoms.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/header.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/hero-wave.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/home-page.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/catalog.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/product-detail.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/cart.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/brand-profile.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/company-info.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/floating-widgets.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/account.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/footer.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/app-entry.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/compare.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/filters.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/catalog-tree.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/map.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/quiz.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/reviews.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/auth.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/wishlist.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/order-track.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/error-boundary.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/app-root.jsx?v=1785999916"></script>
+<script src="dist/app/ui-atoms.js?v=99999999"></script>
+<script src="dist/app/header.js?v=99999999"></script>
+<script src="dist/app/hero-wave.js?v=99999999"></script>
+<script src="dist/app/home-page.js?v=99999999"></script>
+<script src="dist/app/catalog.js?v=99999999"></script>
+<script src="dist/app/product-detail.js?v=99999999"></script>
+<script src="dist/app/cart.js?v=99999999"></script>
+<script src="dist/app/brand-profile.js?v=99999999"></script>
+<script src="dist/app/company-info.js?v=99999999"></script>
+<script src="dist/app/floating-widgets.js?v=99999999"></script>
+<script src="dist/app/account.js?v=99999999"></script>
+<script src="dist/app/footer.js?v=99999999"></script>
+<script src="dist/app/app-entry.js?v=99999999"></script>
+<script src="dist/app/compare.js?v=99999999"></script>
+<script src="dist/app/filters.js?v=99999999"></script>
+<script src="dist/app/catalog-tree.js?v=99999999"></script>
+<script src="dist/app/map.js?v=99999999"></script>
+<script src="dist/app/quiz.js?v=99999999"></script>
+<script src="dist/app/reviews.js?v=99999999"></script>
+<script src="dist/app/auth.js?v=99999999"></script>
+<script src="dist/app/wishlist.js?v=99999999"></script>
+<script src="dist/app/order-track.js?v=99999999"></script>
+<script src="dist/app/error-boundary.js?v=99999999"></script>
+<script src="dist/app/app-root.js?v=99999999"></script>
 
-<script type="text/babel" src="app/tweaks-panel.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/certificates.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/home-sections.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/inner-pages.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/testimonials.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/search.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/staff-training.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/service-support.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/checkout.jsx?v=1785999916"></script>
-<script type="text/babel" src="app/news.jsx?v=1785999916"></script>
+<script src="dist/app/tweaks-panel.js?v=99999999"></script>
+<script src="dist/app/certificates.js?v=99999999"></script>
+<script src="dist/app/home-sections.js?v=99999999"></script>
+<script src="dist/app/inner-pages.js?v=99999999"></script>
+<script src="dist/app/testimonials.js?v=99999999"></script>
+<script src="dist/app/search.js?v=99999999"></script>
+<script src="dist/app/staff-training.js?v=99999999"></script>
+<script src="dist/app/service-support.js?v=99999999"></script>
+<script src="dist/app/checkout.js?v=99999999"></script>
+<script src="dist/app/news.js?v=99999999"></script>
 
 
 
