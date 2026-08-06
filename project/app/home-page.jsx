@@ -2183,10 +2183,10 @@ function SoiCatalogCards({ lang, go }) {
 .sxc-h2 { margin:0; font-size:clamp(30px,4.2vw,48px); font-weight:800; line-height:1.02;
   letter-spacing:-.035em; color:var(--sx-ink); }
 [data-theme="dark"] .sxc-h2 { color:var(--sx-ink); }
-/* Заголовки секций, ведущие на свою страницу. Подчёркивание только по наведению —
-   постоянное сделало бы крупный заголовок похожим на строку меню. */
+/* Заголовки секций, ведущие на свою страницу. Подсветка по наведению без
+   подчёркивания — на крупном кегле оно смотрелось грубо. */
 .sx-h2-link { cursor:pointer; transition:color .15s ease; }
-.sx-h2-link:hover { color:var(--blue-600); text-decoration:underline; text-underline-offset:.12em; }
+.sx-h2-link:hover { color:var(--blue-600); }
 .sxc-sub { margin:0 0 24px; font-size:var(--fs-4); line-height:1.65; color:var(--sx-mute); }
 [data-theme="dark"] .sxc-sub { color:var(--sx-mute); }
 
