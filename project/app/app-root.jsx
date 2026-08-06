@@ -69,8 +69,8 @@ function __setCrumbsLD(items) {
 }
 window.__setCrumbsLD = __setCrumbsLD;
 
-/* SEO: одна canonical-ссылка. /catalog/brands — единственная страница брендов/
-   производителей/партнёров, поэтому /partners (редирект) не размывает выдачу. */
+/* SEO: одна canonical-ссылка. Каталожная витрина брендов удалена — единственная
+   страница брендов и производителей теперь корпоративная, #/partners. */
 function __setCanonical(url) {
   var el = document.querySelector('link[rel="canonical"]');
   if (!url) { if (el) el.remove(); return; }
@@ -83,34 +83,54 @@ function Breadcrumbs({ t, lang, go, route, embed, active }) {
   const v = route.view, p = route.params || {};
   const lvl = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const T = (o) => !o ? "" : (lang === "uz" ? (o.uz || o.ru) : lang === "en" ? (o.en || o.ru) : o.ru);
-  const base = location.origin + location.pathname;
+  // Адреса разделов — обычные пути, поэтому от текущей страницы берём только origin.
+  const base = location.origin;
   // Каталог живёт в одном документе с корп-шеллом (news.jsx слушает message на window),
   // поэтому шлём и при window.parent === window — старый guard времён iframe глушил клик.
   const goHome = () => { try { (window.parent || window).postMessage({ type: "soi-cohome" }, "*"); } catch (e) {} };
   const crumbs = [
-    { label: lvl("Главная", "Bosh sahifa", "Home"), onClick: goHome, url: base + "#/" },
+    { label: lvl("Главная", "Bosh sahifa", "Home"), onClick: goHome, url: base + "/" },
   ];
-  if (v === "brands") {
-    // Каталожная витрина брендов (корп-версия живёт на #/partners со своими крошками)
-    crumbs.push({ label: lvl("Каталог", "Katalog", "Catalog"), onClick: () => go("catalog", {}), url: base + "#/catalog" });
-    crumbs.push({ label: lvl("Бренды и заводы-производители", "Brendlar va ishlab chiqaruvchi zavodlar", "Brands and manufacturers") });
-  } else if (v === "home") {
+  if (v === "home") {
     crumbs.push({ label: lvl("Каталог", "Katalog", "Catalog") });
   } else {
-    crumbs.push({ label: lvl("Каталог", "Katalog", "Catalog"), onClick: () => go("catalog", {}), url: base + "#/catalog" });
+    crumbs.push({ label: lvl("Каталог", "Katalog", "Catalog"), onClick: () => go("catalog", {}), url: base + "/catalog" });
     if (v === "product") {
       const prod = (window.DATA?.PRODUCTS || []).find((x) => x.id === p.id);
       const cat = prod && (window.DATA?.CATEGORIES || []).find((c) => c.id === prod.cat);
       const sub = (cat && prod.sub != null && cat.subs) ? cat.subs[prod.sub] : null;
-      if (cat) crumbs.push({ label: T(cat), onClick: () => go("catalog", { cat: cat.id }), url: base + "#/catalog/listing/" + cat.id });
-      if (sub) crumbs.push({ label: T(sub), onClick: () => go("catalog", { cat: cat.id, sub: prod.sub }), url: base + "#/catalog/listing/" + cat.id + "?sub=" + prod.sub });
-      crumbs.push({ label: prod ? T(prod).split(",")[0] : (t.product || "Товар") });
+      /* Цепочка обрывается на товарной группе — пятом уровне — и названия
+         товара не содержит: решение заказчика. Заголовок карточки и так стоит
+         первым на странице, а крошки остаются путём по дереву разделов. */
+      const grp = (sub && prod.group) ? (sub.groups || []).find((g) => g._id === prod.group) : null;
+      const catUrl = cat ? base + "/catalog/" + (cat.slug || cat.id) : "";
+      const subUrl = (cat && sub) ? catUrl + "/" + (sub.slug || sub._id) : "";
+      if (cat) crumbs.push({ label: T(cat), onClick: () => go("catalog", { cat: cat.id }), url: catUrl });
+      if (sub) crumbs.push({ label: T(sub), onClick: () => go("catalog", { cat: cat.id, sub: prod.sub }), url: subUrl });
+      if (grp) crumbs.push({ label: T(grp), onClick: () => go("catalog", { cat: cat.id, sub: prod.sub, group: grp.slug || grp._id }), url: subUrl + "/" + (grp.slug || grp._id) });
     } else if (v === "catalog") {
-      const cat = (window.DATA?.CATEGORIES || []).find((c) => c.id === p.cat);
-      const sub = (cat && p.sub != null && cat.subs) ? cat.subs[p.sub] : null;
+      const cat = (window.DATA?.CATEGORIES || []).find((c) => c.id === p.cat || c.slug === p.cat);
+      /* Внутри подраздел — индекс в cat.subs, а из адреса (/catalog/equipment/obstetrics)
+         он приходит слагом. Без приведения cat.subs[slug] давал undefined и крошка
+         подраздела молча пропадала. Резолвим на каждый рендер, как CatalogPage. */
+      const subIdx = (() => {
+        if (p.sub == null || !cat) return null;
+        if (typeof p.sub === "number") return p.sub;
+        const i = (cat.subs || []).findIndex((s) => s.slug === p.sub || s._id === p.sub);
+        return i >= 0 ? i : null;
+      })();
+      const sub = cat && subIdx != null ? cat.subs[subIdx] : null;
       if (cat && sub) {
-        crumbs.push({ label: T(cat), onClick: () => go("catalog", { cat: cat.id }), url: base + "#/catalog/listing/" + cat.id });
-        crumbs.push({ label: T(sub), url: base + "#/catalog/listing/" + cat.id + "?sub=" + p.sub });
+        const catUrl = base + "/catalog/" + (cat.slug || cat.id);
+        const subUrl = catUrl + "/" + (sub.slug || sub._id);
+        crumbs.push({ label: T(cat), onClick: () => go("catalog", { cat: cat.id }), url: catUrl });
+        const grp = p.group ? (sub.groups || []).find((g) => g._id === p.group || g.slug === p.group) : null;
+        if (grp) {
+          crumbs.push({ label: T(sub), onClick: () => go("catalog", { cat: cat.id, sub: subIdx }), url: subUrl });
+          crumbs.push({ label: T(grp), url: subUrl + "/" + (grp.slug || grp._id) });
+        } else {
+          crumbs.push({ label: T(sub), url: subUrl });
+        }
       } else if (cat) {
         crumbs.push({ label: T(cat) });
       } else if (p.dir) {
@@ -127,9 +147,9 @@ function Breadcrumbs({ t, lang, go, route, embed, active }) {
       const M = {
         cart: lvl("Корзина / Запрос КП","Savat / KP","Cart / RFQ"), wishlist: lvl("Избранное","Saralangan","Wishlist"),
         compare: lvl("Сравнение","Taqqoslash","Compare"), brand: lvl("Бренд","Brend","Brand"),
-        brands: lvl("Бренды","Brendlar","Brands"), account: lvl("Личный кабинет","Kabinet","Account"),
-        calc: lvl("Калькулятор","Kalkulyator","Calculator"), price: lvl("Прайс-лист","Narxlar","Price list"),
-        news: lvl("Новости","Yangiliklar","News"), kits: lvl("Комплекты","Toʻplamlar","Kits"),
+        account: lvl("Личный кабинет","Kabinet","Account"),
+        price: lvl("Прайс-лист","Narxlar","Price list"),
+        news: lvl("Новости","Yangiliklar","News"),
         tracking: lvl("Отслеживание","Kuzatish","Tracking"), info: lvl("О компании","Kompaniya","About"),
         tenders: lvl("Тендеры","Tenderlar","Tenders"), faq: "FAQ", sitemap: lvl("Карта сайта","Sayt xaritasi","Sitemap"),
       };
@@ -142,14 +162,18 @@ function Breadcrumbs({ t, lang, go, route, embed, active }) {
   React.useEffect(() => {
     if (!embed || active === false) return;
     __setCrumbsLD(crumbs.map((c) => ({ label: c.label, url: c.url })));
-    __setCanonical(v === "brands" ? base + "#/catalog/brands" : null);
+    __setCanonical(null);
   }, [ldKey, embed, active]);
   if (!embed) return null;
   return (
     <nav className="crumbs" aria-label="breadcrumb">
       <div className="wrap">
         {crumbs.map((c, i) => {
-          const last = i === crumbs.length - 1;
+          /* На карточке товара цепочка обрывается на разделе, а не на текущей
+             странице, поэтому последнее звено там остаётся обычной ссылкой:
+             помечать его aria-current="page" было бы неправдой, а лишать
+             ссылки — отнимать единственный путь наверх. */
+          const last = i === crumbs.length - 1 && v !== "product";
           return (
             <React.Fragment key={i}>
               {i > 0 && <span className="crumb-sep">/</span>}
@@ -168,7 +192,25 @@ function embedRouteFrom(sub, param, q) {
   if (q) return { view: "catalog", params: { q } };
   if (!sub || sub === "home") return { view: "catalog", params: {} };
   if (sub === "product") return { view: "product", params: { id: param } };
-  if (sub === "listing") return { view: "catalog", params: param ? { cat: param } : {} };
+  if (sub === "listing") {
+    if (!param) return { view: "catalog", params: {} };
+    // The shell packs an optional subcategory as "catSlug/subSlug" into one
+    // string (catNav only carries one param field) — unpack it. The subcategory
+    // stays a raw slug here rather than being resolved to an array index: this
+    // runs synchronously at page load, before window.DATA.CATEGORIES has had a
+    // chance to arrive from the API, so any lookup here would silently drop it.
+    // CatalogPage re-resolves the slug to an index on every render instead,
+    // which self-heals once the category data actually shows up.
+    /* Вид списка едет в том же одном строковом поле, что и путь по дереву —
+       строкой запроса на его конце: catNav несёт ровно один param. */
+    const [pathPart, qs] = param.split("?");
+    const [catPart, subPart, groupPart] = pathPart.split("/");
+    const params = { cat: catPart };
+    if (subPart) params.sub = subPart;
+    if (groupPart) params.group = groupPart;
+    if (qs && /(^|&)view=grid(&|$)/.test(qs)) params.view = "grid";
+    return { view: "catalog", params };
+  }
   if (sub === "brand") return { view: "brand", params: { id: param } };
   if (sub === "info") return { view: "info", params: { p: param } };
   return { view: sub, params: {} };
@@ -299,7 +341,7 @@ function App(props) {
       const prod = (window.DATA?.PRODUCTS || []).find((x) => x.id === p.id);
       label = prod ? (lang === "uz" ? prod.uz : lang === "en" ? (prod.en || prod.ru) : prod.ru) : (t.product || "Товар");
     } else if (v === "catalog") {
-      const cat = (window.DATA?.CATEGORIES || []).find((c) => c.id === p.cat);
+      const cat = (window.DATA?.CATEGORIES || []).find((c) => c.id === p.cat || c.slug === p.cat);
       label = cat ? (lang === "uz" ? cat.uz : lang === "en" ? cat.en : cat.ru) : (t.catalog || "Каталог");
     } else {
       const lvl = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
@@ -308,12 +350,9 @@ function App(props) {
         wishlist: lvl("Избранное","Saralangan","Wishlist"),
         compare: lvl("Сравнение","Taqqoslash","Compare"),
         brand: lvl("Бренд","Brend","Brand"),
-        brands: lvl("Бренды и заводы","Brendlar va zavodlar","Brands & manufacturers"),
         account: lvl("Личный кабинет","Shaxsiy kabinet","Account"),
-        calc: lvl("Калькулятор оснащения","Jihozlash kalkulyatori","Equipment calculator"),
         price: lvl("Прайс-лист","Narxlar roʻyxati","Price list"),
         news: lvl("Новости и статьи","Yangiliklar va maqolalar","News & articles"),
-        kits: lvl("Готовые комплекты","Tayyor toʻplamlar","Ready kits"),
         tracking: lvl("Отслеживание заказа","Buyurtmani kuzatish","Order tracking"),
         info: lvl("О компании","Kompaniya haqida","About"),
         tenders: lvl("Тендеры и госзакупки","Tenderlar","Tenders"),
@@ -350,31 +389,46 @@ function App(props) {
   else if (v === "wishlist") page = <SimpleListPage t={t} lang={lang} store={store} go={go} ids={store.wishlist} title={t.wishlist} emptyTitle={lang === "uz" ? "Saralangan boʻsh" : lang === "en" ? "Your wishlist is empty" : "В избранном пусто"} emptyIcon="heart" />;
   else if (v === "compare") page = <ComparePage t={t} lang={lang} store={store} go={go} />;
   else if (v === "brand")   page = <BrandPage t={t} lang={lang} store={store} go={go} params={p} />;
-  else if (v === "brands")  page = <BrandsListPage t={t} lang={lang} store={store} go={go} />;
+  /* Страницы «Комплекты», «Калькулятор» и список брендов удалены: в меню каталога
+     их нет, разделы каталога ограничены пятью категориями и прайс-листом. */
   else if (v === "account") page = <AccountPage t={t} lang={lang} store={store} go={go} />;
-  else if (v === "calc")     page = <CalcPage t={t} lang={lang} go={go} />;
   else if (v === "price")    page = <PricePage t={t} lang={lang} store={store} go={go} />;
   else if (v === "news")     page = <CatalogNewsRedirect embed={EMBED_ON} />;
-  else if (v === "kits")     page = <KitsPage t={t} lang={lang} go={go} />;
   else if (v === "tracking") page = <TrackingPage t={t} lang={lang} go={go} />;
   else if (v === "info")    page = <InfoPage t={t} lang={lang} go={go} params={p} />;
   else if (v === "tenders") page = <TendersPage t={t} lang={lang} go={go} />;
   else if (v === "faq")     page = <FaqPage t={t} lang={lang} go={go} />;
   else if (v === "sitemap") page = <SitemapPage t={t} lang={lang} go={go} />;
+  /* Неизвестный раздел — открываем корень каталога. Иначе старая ссылка или
+     закладка на удалённые «Комплекты», «Калькулятор» и витрину брендов давала
+     пустой белый экран. */
+  else page = <CatalogLandingPage t={t} lang={lang} store={store} go={go} />;
 
   return (
     <div className="app">
       <UtilityBar t={t} lang={lang} setLang={setLang} go={go} theme={theme} toggleTheme={toggleTheme} />
       <Header t={t} lang={lang} store={store} go={go} query={query} setQuery={setQuery} onHamburger={()=>setDrawerOpen(true)} />
       <MobileDrawer t={t} lang={lang} go={go} store={store} open={drawerOpen} onClose={()=>setDrawerOpen(false)} />
-      <Nav t={t} lang={lang} go={go} openMega={openMega} setOpenMega={setOpenMega} route={route} />
+      {/* Вторая строка каталога («По направлениям медицины · Оборудование · Мебель ·
+          Инструменты · Расходные материалы · Прайс-лист · Ещё») убрана по решению
+          заказчика: она повторяла разделы, которые и так есть в шапке и плитками на
+          самой странице, и занимала полосу под шапкой на каждом экране. Вход в
+          мега-меню остался в липкой панели — кнопка «Каталог». */}
       <Breadcrumbs t={t} lang={lang} go={go} route={route} embed={EMBED_ON} active={props.active} />
       <StickyBar t={t} lang={lang} setLang={setLang} store={store} go={go} query={query} setQuery={setQuery} theme={theme} toggleTheme={toggleTheme} openMega={openMega} setOpenMega={setOpenMega} route={route} />
       {openMega && <MegaMenu t={t} lang={lang} go={go} onClose={() => setOpenMega(false)} />}
       <main className="app-main">{loading ? <PageSkeleton view={v} /> : <div key={routeKey} className="page-fade">{page}</div>}</main>
       <Footer t={t} lang={lang} go={go} setLang={setLang} />
       <CompareBar t={t} lang={lang} store={store} go={go} />
-      {quote && <QuoteModal t={t} lang={lang} product={quote.product} onClose={() => setQuote(null)} />}
+      {/* Модалка КП уходит порталом в body. Она живёт в каталожной оболочке, а
+          та на корпоративных страницах скрыта (display:none) — модалка
+          монтировалась, но оставалась невидимой, и кнопки «Получить
+          консультацию» / «Получить КП» на главной, сервисе, обучении и
+          регистрации выглядели неработающими. */}
+      {quote && ReactDOM.createPortal(
+        <QuoteModal t={t} lang={lang} product={quote.product} onClose={() => setQuote(null)} />,
+        document.body
+      )}
       <QuickViewPortal t={t} lang={lang} store={store} go={go} />
       {toast && (
         <div className="toast">

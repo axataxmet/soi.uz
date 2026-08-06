@@ -92,7 +92,7 @@ function QuickViewModal({ product, t, lang, store, go, onClose }) {
             <div className="qv-meta">
               {brand && (
                 <span className="qv-brand">
-                  <Icon name="award" size={14} style={{ color:"var(--cyan-600)" }} />
+                  <Icon name="award" size={14} style={{ color:"var(--blue-600)" }} />
                   {brand.name}
                   {brand.country_ru &&
                     <span className="qv-country">

@@ -53,7 +53,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     this.enabledSources = raw.length ? new Set(raw) : null;
     this.pageSize = Number(config.get('ETENDER_SYNC_PAGE_SIZE')) || 50;
     this.maxPages = Number(config.get('ETENDER_SYNC_MAX_PAGES')) || 40;
-    this.cron = config.get<string>('ETENDER_SYNC_CRON') || '0 20 * * *'; // daily 20:00
+    this.cron = config.get<string>('ETENDER_SYNC_CRON') || '0 8,20 * * *'; // twice a day: 08:00 and 20:00
     this.tz = config.get<string>('ETENDER_SYNC_TZ') || 'Asia/Tashkent';
     this.enabled = String(config.get('ETENDER_SYNC_ENABLED') ?? 'true') !== 'false';
     this.listCacheTtlMs = Number(config.get('ETENDER_LIST_CACHE_TTL_MS')) || 300_000; // 5 min
@@ -71,7 +71,7 @@ export class EtenderService implements OnModuleInit, OnModuleDestroy {
     const job = CronJob.from({ cronTime: this.cron, timeZone: this.tz, onTick: () => void this.syncAll('cron'), start: true });
     this.scheduler.addCronJob(CRON_NAME, job as any);
     const active = [...UZEX_SOURCES, ...XARID_SOURCES, ...XT_SOURCES, ...GOVUZ_SOURCES, ...FARMA_SOURCES].filter((s) => this.isOn(s.source)).map((s) => s.source);
-    this.log.log(`tender daily sync scheduled: cron "${this.cron}" (${this.tz}) — sources: ${active.join(', ')}`);
+    this.log.log(`tender sync scheduled: cron "${this.cron}" (${this.tz}) — sources: ${active.join(', ')}`);
 
     this.booting = setTimeout(() => {
       void (async () => {

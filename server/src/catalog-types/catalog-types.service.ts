@@ -6,10 +6,6 @@ import { CreateTypeSubcategoryDto, UpdateTypeSubcategoryDto } from './dto/type-s
 import { CreateProductGroupDto, UpdateProductGroupDto } from './dto/product-group.dto';
 import { EffectiveAttrField, mergeAttrSchemas, validateAttrs } from './attr-schema';
 
-// Порог, при котором товарная группа становится видимой на витрине (см. решение по A3:
-// «каталог открывается по мере наполнения»).
-const VISIBILITY_THRESHOLD = 3;
-
 const asJson = (v: unknown): Prisma.InputJsonValue | undefined =>
   v === undefined ? undefined : (v as Prisma.InputJsonValue);
 
@@ -17,16 +13,21 @@ const asJson = (v: unknown): Prisma.InputJsonValue | undefined =>
 export class CatalogTypesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // ── публичное дерево: активные категории → подкатегории с ≥1 видимой группой → видимые группы ──
+  /* ── публичное дерево ──────────────────────────────────────────────────────
+     Отдаётся всё, что помечено активным, включая пустые ветки. Раньше здесь был
+     порог «группа появляется с третьего товара»: он задумывался как защита от
+     полупустой витрины, но на практике прятал работу контент-менеджера — товар
+     заводился, привязывался к группе и не появлялся на сайте без всякого
+     объяснения. Витриной теперь управляет флаг active, который виден и
+     переключается в админке; пустые разделы показывают «товары скоро появятся». */
   findTreePublic() {
     return this.prisma.typeCategory.findMany({
-      where: { active: true, subcategories: { some: { groups: { some: { visible: true } } } } },
+      where: { active: true },
       orderBy: { order: 'asc' },
       include: {
         subcategories: {
-          where: { groups: { some: { visible: true } } },
           orderBy: { order: 'asc' },
-          include: { groups: { where: { visible: true }, orderBy: { order: 'asc' } } },
+          include: { groups: { where: { active: true }, orderBy: { order: 'asc' } } },
         },
       },
     });
@@ -184,14 +185,16 @@ export class CatalogTypesService {
     return validateAttrs(schema, attrs);
   }
 
-  // Пересчитывает product_count/visible для группы. Вызывается ProductsService при любом
+  // Пересчитывает product_count для группы. Вызывается ProductsService при любом
   // изменении привязок товар↔группа (нет БД-триггера — Postgres GENERATED-колонки не читают
-  // другие таблицы).
+  // другие таблицы). Колонка visible больше не решает, показывать ли группу на витрине
+  // (этим управляет active), и держится равной «в группе есть товары» — её читает
+  // админка, чтобы отличить наполненную группу от пустой.
   async recomputeVisibility(groupId: string) {
     const count = await this.prisma.productGroupItem.count({ where: { groupId } });
     await this.prisma.productGroup.update({
       where: { id: groupId },
-      data: { productCount: count, visible: count >= VISIBILITY_THRESHOLD },
+      data: { productCount: count, visible: count > 0 },
     });
   }
 

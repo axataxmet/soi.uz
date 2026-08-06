@@ -33,6 +33,31 @@ const HERO_DEFAULTS = {
   trust3: { ru: "14 регионов Узбекистана", uz: "O'zbekistonning 14 hududi", en: "14 regions" },
 };
 
+/* ── Единый источник цифр сайта ───────────────────────────────────────────
+   Одни и те же шесть чисел раньше лежали в четырёх местах: плитки
+   «Экосистемы», блок «Инфраструктура», витрина каталога и страница «О
+   компании». Они разъезжались при любой правке — например, лет на рынке
+   считалось от года основания в localStorage только на одной странице.
+   Теперь значение одно, и его переопределяет настройка site_figures из
+   админки. Годы на рынке считаются от года основания, а не хранятся числом,
+   иначе их пришлось бы править каждый январь. */
+const SITE_FIGURES_DEFAULTS = {
+  founded: 2021,          // лет на рынке считается отсюда
+  catalog: "2 800",       // позиций в каталоге
+  brands: "120",          // мировых брендов
+  trained: "1000",        // обученных специалистов
+  service: "50",          // успешно выполненных сервисных работ
+  regions: "14",          // регионов доставки
+};
+function siteFigures() {
+  const cms = (window.CMS && window.CMS.getSetting) ? window.CMS.getSetting("site_figures", null) : null;
+  const f = Object.assign({}, SITE_FIGURES_DEFAULTS, cms || {});
+  f.years = String(Math.max(1, new Date().getFullYear() - parseInt(f.founded, 10)));
+  return f;
+}
+window.siteFigures = siteFigures;
+window.SITE_FIGURES_DEFAULTS = SITE_FIGURES_DEFAULTS;
+
 const IMPACT_DEFAULTS = {
   eyebrow: { ru: "Масштаб платформы", uz: "Platforma miqyosi", en: "Platform scale" },
   title: {
@@ -40,10 +65,10 @@ const IMPACT_DEFAULTS = {
     uz: "Klinikalar va davlat muassasalari ishonadigan infratuzilma",
     en: "Infrastructure trusted by clinics and public institutions",
   },
-  stat1_val: "2 800", stat1_unit: "+", stat1_label: { ru: "позиций в каталоге", uz: "katalog pozitsiyasi", en: "items in catalog" },
-  stat2_val: "120",   stat2_unit: "+", stat2_label: { ru: "мировых брендов", uz: "jahon brendi", en: "global brands" },
-  stat3_val: "14",    stat3_unit: "",  stat3_label: { ru: "регионов доставки", uz: "yetkazish hududi", en: "delivery regions" },
-  stat4_val: "5",     stat4_unit: "+", stat4_label: { ru: "лет на рынке Узбекистана", uz: "O'zbekiston bozorida yil", en: "years in Uzbekistan" },
+  stat1_val: SITE_FIGURES_DEFAULTS.catalog, stat1_unit: "+", stat1_label: { ru: "позиций в каталоге", uz: "katalog pozitsiyasi", en: "items in catalog" },
+  stat2_val: SITE_FIGURES_DEFAULTS.brands,  stat2_unit: "+", stat2_label: { ru: "мировых брендов", uz: "jahon brendi", en: "global brands" },
+  stat3_val: SITE_FIGURES_DEFAULTS.regions, stat3_unit: "",  stat3_label: { ru: "регионов доставки", uz: "yetkazish hududi", en: "delivery regions" },
+  stat4_val: String(new Date().getFullYear() - SITE_FIGURES_DEFAULTS.founded), stat4_unit: "+", stat4_label: { ru: "лет на рынке Узбекистана", uz: "O'zbekiston bozorida yil", en: "years in Uzbekistan" },
 };
 
 const CTA_DEFAULTS = {
@@ -62,7 +87,7 @@ const SITE_CONTACTS_DEFAULTS = {
   phone: "+998 (77) 225-00-01",
   phone2: "+998 (77) 224-00-01",
   email: "info@soi.uz",
-  address: "100069, Ташкент, Узбекистан, ул. МКАД, д.16",
+  address: "100069, Ташкент, Узбекистан, ул. МКАД, д. 16",
   mapUrl: "https://maps.google.com/?q=100069,+Ташкент,+ул.+МКАД,+16",
   telegram: "https://t.me/soi",
   instagram: "https://instagram.com/soi",
@@ -163,9 +188,9 @@ function HeroVideoSlot({ t, lang }) {
           {/* animated stat cards */}
           <div className="hvs-stats">
             {[
-              {n:"2 800+", l:"наименований", ic:"grid", c:"#1a5fd0"},
-              {n:"120+",   l:"брендов",       ic:"award", c:"#15a06a"},
-              {n:"14",    l:"регионов",      ic:"pin",   c:"#e0492f"},
+              {n:"2 800+", l:"наименований", ic:"grid", c:"var(--blue-600)"},
+              {n:"120+",   l:"брендов",       ic:"award", c:"var(--accent)"},
+              {n:"14",    l:"регионов",      ic:"pin",   c:"var(--danger)"},
               {n:(new Date().getFullYear() - parseInt(localStorage.getItem("soi_founded_year")||"2021",10))+"+",    l:"лет на рынке",  ic:"star",  c:"#7c5cbf"},
             ].map((s,i) => (
               <div key={i} className="hvs-stat-card" style={{animationDelay: i*0.1+"s"}}>
@@ -209,10 +234,10 @@ const HERO_SLIDES = [
     id: "slide-equip",
     theme: "dark",
     video: "assets/hero-equip.mp4",
-    bg: "linear-gradient(120deg, #060a08 0%, #0e2c20 55%, #116a4b 100%)",
-    badge: { ru: "Комплексные поставки", uz: "Kompleks yetkazib berish", en: "Turnkey supply" },
-    title: { ru: "Комплексное оснащение медицинских учреждений", uz: "Tibbiyot muassasalarini kompleks jihozlash", en: "Comprehensive equipping of medical institutions" },
-    subtitle: { ru: "Медицинское оборудование, мебель и инструменты от ведущих производителей — с доставкой, монтажом и обучением персонала.", uz: "Yetakchi ishlab chiqaruvchilardan tibbiy uskunalar, mebel va asboblar — yetkazib berish, o'rnatish va o'qitish bilan.", en: "Medical equipment, furniture and instruments from leading manufacturers — with delivery, installation and staff training." },
+    bg: "linear-gradient(120deg, #050a14 0%, var(--navy-800) 55%, var(--blue-600) 100%)",
+    badge: { ru: "ИНДУСТРИЯ ЗДОРОВЬЯ", uz: "SOGʻLIQ INDUSTRIYASI", en: "HEALTH INDUSTRY" },
+    title: { ru: "Медицинские изделия и оснащение", uz: "Tibbiy buyumlar va jihozlash", en: "Medical devices and equipping" },
+    subtitle: { ru: "Широкий ассортимент медицинских изделий от ведущих производителей. Помогаем выбрать, зарегистрировать, закупить, поставить, внедрить и обеспечить сервисное сопровождение.", uz: "Yetakchi ishlab chiqaruvchilardan tibbiy buyumlarning keng assortimenti. Tanlash, roʻyxatdan oʻtkazish, sotib olish, yetkazib berish, joriy etish va servis qoʻllab-quvvatlashda yordam beramiz.", en: "A wide range of medical devices from leading manufacturers. We help you select, register, procure, deliver, deploy and maintain them." },
     ctas: [
       { label: { ru: "Перейти в каталог", uz: "Katalogga o'tish", en: "Browse catalog" }, action: "catalog", style: "primary" },
       { label: { ru: "Связаться с нами", uz: "Bog'lanish", en: "Contact us" }, action: "contacts", style: "ghost" },
@@ -221,7 +246,7 @@ const HERO_SLIDES = [
   {
     id: "slide-registration",
     theme: "light",
-    bg: "linear-gradient(135deg, #f5f9f7 0%, #d6f5e3 55%, #b0eacc 100%)",
+    bg: "linear-gradient(135deg, #FFFFFF 0%, var(--blue-50) 55%, var(--line-soft) 100%)",
     badge: { ru: "Услуга", uz: "Xizmat", en: "Service" },
     title: { ru: "Регистрация медицинских изделий в Узбекистане", uz: "O'zbekistonda tibbiy buyumlarni ro'yxatdan o'tkazish", en: "Medical device registration in Uzbekistan" },
     subtitle: { ru: "Полное сопровождение: досье, экспертиза, взаимодействие с регулятором — под ключ.", uz: "To'liq hamrohlik: hujjatlar, ekspertiza, regulyator bilan ishlash — kalit topshirish sharti bilan.", en: "Full support: dossier, expertise, regulator liaison — turnkey." },
@@ -232,7 +257,7 @@ const HERO_SLIDES = [
   {
     id: "slide-service",
     theme: "dark",
-    bg: "linear-gradient(120deg, #04100b 0%, #10543d 70%, #22a472 100%)",
+    bg: "linear-gradient(120deg, #040c18 0%, var(--blue-700) 70%, var(--blue-500) 100%)",
     badge: { ru: "Сервис", uz: "Servis", en: "Service" },
     title: { ru: "Сервис и обучение персонала", uz: "Servis va xodimlarni o'qitish", en: "Maintenance and staff training" },
     subtitle: { ru: "Пусконаладка, гарантийное и постгарантийное обслуживание, обучение работе с оборудованием.", uz: "Ishga tushirish, kafolatli va kafolatdan keyingi xizmat, uskunalar bilan ishlashga o'qitish.", en: "Commissioning, warranty and post-warranty service, equipment operation training." },
@@ -314,13 +339,13 @@ function Hero({ t, lang, go }) {
 }
 
 /* text column, left-aligned like NVIDIA */
-.soi-chero-wrap { position:relative; z-index:1; min-height:100dvh; max-width:1200px; margin:0 auto;
+.soi-chero-wrap { position:relative; z-index:1; min-height:100dvh; max-width:var(--maxw); margin:0 auto;
   padding:0 24px; display:flex; align-items:center; }
 .soi-chero-col { max-width:640px; padding:112px 0 96px; }
 .soi-chero-slide.t-dark  .soi-chero-col { color:#fff; }
-.soi-chero-slide.t-light .soi-chero-col { color:#0b2d25; }
+.soi-chero-slide.t-light .soi-chero-col { color:var(--blue-600); }
 
-.soi-chero-badge { font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin:0 0 12px; }
+.soi-chero-badge { font-size:var(--fs-4); font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin:0 0 12px; }
 .soi-chero-slide.t-dark  .soi-chero-badge { color:#d0fa4d; }
 .soi-chero-slide.t-light .soi-chero-badge { color:#6f9600; }
 
@@ -332,18 +357,18 @@ function Hero({ t, lang, go }) {
 /* pill CTAs — lime primary with dark label, as on the source */
 .soi-chero-cta { display:flex; flex-wrap:wrap; gap:12px; margin-top:32px; }
 .soi-chero-btn { display:inline-flex; align-items:center; justify-content:center; gap:9px;
-  padding:14px 26px; border-radius:999px; font-family:inherit; font-size:15.5px; font-weight:700;
+  padding:14px 26px; border-radius:var(--r-pill); font-family:inherit; font-size:var(--fs-5); font-weight:700;
   cursor:pointer; border:1px solid transparent; transition:background .2s, color .2s, border-color .2s, transform .18s; }
 .soi-chero-btn:hover { transform:translateY(-2px); }
-.soi-chero-btn.primary { background:#b8f500; color:#0b2d25; }
-.soi-chero-btn.primary:hover { background:#c5ff19; }
+.soi-chero-btn.primary { background:var(--cta); color:var(--blue-600); }
+.soi-chero-btn.primary:hover { background:var(--cta-hover); }
 .soi-chero-btn .arr { display:inline-flex; transition:transform .2s; }
 .soi-chero-btn.primary:hover .arr { transform:translateX(4px); }
 .soi-chero-slide.t-dark  .soi-chero-btn.ghost { background:transparent; color:#fff; border-color:rgba(255,255,255,.6); }
-.soi-chero-slide.t-dark  .soi-chero-btn.ghost:hover { border-color:#c5ff19; color:#c5ff19; }
-.soi-chero-slide.t-light .soi-chero-btn.ghost { background:transparent; color:#111827; border-color:rgba(17,24,39,.4); }
-.soi-chero-slide.t-light .soi-chero-btn.ghost:hover { border-color:#6f9600; color:#6f9600; }
-.soi-chero-btn:focus-visible { outline:2px solid #c5ff19; outline-offset:3px; }
+.soi-chero-slide.t-dark  .soi-chero-btn.ghost:hover { border-color:var(--cta-hover); color:var(--cta-hover); }
+.soi-chero-slide.t-light .soi-chero-btn.ghost { background:transparent; color:var(--navy-900); border-color:rgba(17,24,39,.4); }
+.soi-chero-slide.t-light .soi-chero-btn.ghost:hover { border-color:var(--blue-600); color:var(--blue-600); }
+.soi-chero-btn:focus-visible { outline:2px solid var(--cta-hover); outline-offset:3px; }
 
 /* staggered reveal, replayed per slide */
 .soi-chero-anim { opacity:0; transform:translateY(16px);
@@ -352,16 +377,16 @@ function Hero({ t, lang, go }) {
 
 /* segmented progress bars with timer fill */
 .soi-chero-bars { position:absolute; bottom:32px; left:50%; transform:translateX(-50%); z-index:20;
-  display:flex; gap:12px; width:100%; max-width:1200px; padding:0 24px; }
+  display:flex; gap:12px; width:100%; max-width:var(--maxw); padding:0 32px; }
 .soi-chero-bar { position:relative; height:16px; width:96px; max-width:20%; padding:0;
   background:none; border:none; cursor:pointer; }
 .soi-chero-bar-track { position:absolute; left:0; top:50%; transform:translateY(-50%);
-  height:3px; width:100%; border-radius:999px; overflow:hidden; transition:background .2s; }
+  height:3px; width:100%; border-radius:var(--r-pill); overflow:hidden; transition:background .2s; }
 .soi-chero-stage.t-dark  .soi-chero-bar-track { background:rgba(255,255,255,.25); }
 .soi-chero-stage.t-light .soi-chero-bar-track { background:rgba(17,24,39,.2); }
 .soi-chero-bar:hover .soi-chero-bar-track { background:rgba(197,255,25,.6); }
-.soi-chero-bar:focus-visible .soi-chero-bar-track { outline:2px solid #c5ff19; outline-offset:2px; }
-.soi-chero-bar-fill { position:absolute; inset:0 auto 0 0; display:block; background:#b8f500;
+.soi-chero-bar:focus-visible .soi-chero-bar-track { outline:2px solid var(--cta-hover); outline-offset:2px; }
+.soi-chero-bar-fill { position:absolute; inset:0 auto 0 0; display:block; background:var(--cta);
   animation:soiCheroBar linear forwards; }
 @keyframes soiCheroBar { from{width:0;} to{width:100%;} }
 
@@ -490,19 +515,19 @@ function Hero({ t, lang, go }) {
 function HeroSignals({ lang, go }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const sigs = [
-    { ic: "grid",  cls: "s1", bg: "#e7f1ff", c: "#1757c8",
+    { ic: "grid",  cls: "s1", bg: "var(--blue-50)", c: "var(--blue-600)",
       t: lv("2 800+ позиций", "2 800+ pozitsiya", "2,800+ items"),
       d: lv("в наличии и под заказ", "mavjud va buyurtmaga", "in stock & to order"),
       act: () => go("catalog", {}) },
-    { ic: "check", cls: "s2", bg: "#e6f8f0", c: "#1b9e58",
+    { ic: "check", cls: "s2", bg: "var(--line-2)", c: "var(--accent)",
       t: lv("120+ брендов", "120+ brend", "120+ brands"),
       d: lv("официальные поставки", "rasmiy yetkazib berish", "official supply"),
       act: () => go("brands", {}) },
-    { ic: "truck", cls: "s3", bg: "#eafaff", c: "#0d96be",
+    { ic: "truck", cls: "s3", bg: "var(--bg-2)", c: "var(--blue-600)",
       t: lv("Доставка в 14 регионов", "14 hududga yetkazish", "Delivery to 14 regions"),
       d: lv("монтаж и пусконаладка", "montaj va ishga tushirish", "installation & setup"),
       act: () => go("info", { p: "shipping" }) },
-    { ic: "doc",   cls: "s4", bg: "#f0eefe", c: "#6454d4",
+    { ic: "doc",   cls: "s4", bg: "var(--blue-50)", c: "var(--accent)",
       t: lv("Тендеры и госзакупки", "Tender va davlat xaridlari", "Tenders & procurement"),
       d: lv("полный пакет документов", "to'liq hujjatlar to'plami", "full document package"),
       act: () => go("info", { p: "gov" }) },
@@ -679,18 +704,17 @@ function CtaBand({ t }) {
 
 }
 
+/* Единственный рабочий адрес почты компании. В настройках сайта
+   (site_contacts.email) до сих пор лежит info@soi.uz — старый адрес, из-за
+   которого в футере соседствовали две разные почты. */
+const SITE_MAIL = "info@sogliqindustriyasi.uz";
+
 function Footer({ t, lang, go, setLang }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const contacts = useSiteContacts();
-  const [subscribed, setSubscribed] = useState(false);
   const coNav = (view) => {
     if (window.parent && window.parent !== window) window.parent.postMessage({ type: "soi-conav", view }, "*");
     else location.href = "soi.uz.html#/" + (view === "home" ? "" : view);
-  };
-  const onSubscribe = (e) => {
-    e.preventDefault();
-    setSubscribed(true);
-    e.target.reset();
   };
   return (
     <footer className="foot">
@@ -702,72 +726,64 @@ function Footer({ t, lang, go, setLang }) {
               <span className="f-wordmark">{lv("ИНДУСТРИЯ ЗДОРОВЬЯ", "SOG'LIQ INDUSTRIYASI", "HEALTH INDUSTRY")}</span>
             </div>
             <p className="fabout">{t.foot_about}</p>
-            <a className="cb-phone" href={telHref(contacts.phone)} style={{ fontWeight: 800, fontSize: 20 }}>{contacts.phone}</a>
           </div>
-          <div>
-            <h5>{lv("Компания", "Kompaniya", "Company")}</h5>
-            <ul>
-              <li><a onClick={() => coNav("about")}>{lv("О компании", "Kompaniya haqida", "About")}</a></li>
-              <li><a onClick={() => coNav("services")}>{lv("Услуги", "Xizmatlar", "Services")}</a></li>
-              <li><a onClick={() => coNav("projects")}>{lv("Проекты", "Loyihalar", "Projects")}</a></li>
-              <li><a onClick={() => coNav("partners")}>{lv("Бренды / партнёры", "Brendlar / hamkorlar", "Brands / partners")}</a></li>
-              <li><a onClick={() => go("catalog", {})}>{lv("Электронный каталог", "Elektron katalog", "Online catalog")}</a></li>
-            </ul>
-          </div>
-          <div>
-            <h5>{lv("Документы и право", "Hujjatlar va huquq", "Documents & legal")}</h5>
-            <ul>
-              <li><a onClick={() => coNav("licenses")}>{lv("Лицензии и сертификаты", "Litsenziya va sertifikatlar", "Licenses & certificates")}</a></li>
-              <li><a href={window.__asset("assets/company-card.pdf")} target="_blank" rel="noopener">{lv("Карточка компании", "Kompaniya kartasi", "Company card")}</a></li>
-              <li><a href={window.__asset("assets/registration.pdf")} target="_blank" rel="noopener">{lv("Свидетельство о регистрации", "Ro'yxatdan o'tish guvohnomasi", "Registration certificate")}</a></li>
-              <li><a href={window.__asset("assets/egrul.pdf")} target="_blank" rel="noopener">{lv("Сведения о юридическом лице", "Yuridik shaxs ma'lumotlari", "Legal entity information")}</a></li>
-            </ul>
-          </div>
+          {/* Колонки собираются из той же структуры, что и меню в шапке
+              (corpNavItems в certificates.jsx): два футера и меню держали три
+              независимых списка ссылок и расходились. Битые ссылки на PDF
+              (assets/company-card.pdf и соседние — файлов в проекте нет)
+              убраны вместе со своей колонкой. */}
+          {corpNavItems(lang).filter((it) => it.children).map((col) => (
+            <div key={col.id}>
+              <h5>{col.label}</h5>
+              <ul>
+                {col.children.map((ch, i) => (
+                  <li key={i}>
+                    <a onClick={() => {
+                      if (ch.catSub) return go("catalog", {});
+                      if (ch.catKey) {
+                        const cats = (window.DATA && window.DATA.CATEGORIES) || [];
+                        const found = cats.find((c) => c.id === ch.catKey || c.slug === ch.catKey);
+                        return go("catalog", found ? { cat: found.id } : {});
+                      }
+                      return coNav(ch.view);
+                    }}>{ch.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
           <div>
             <h5>{t.foot_contacts}</h5>
             <ul className="foot-contact">
-              <li>{contacts.address}</li>
-              <li><a className="fc-map" href={contacts.mapUrl} target="_blank" rel="noopener">
-                <Icon name="pin" size={14} />
-                {lv("Показать на карте", "Xaritada ko'rsatish", "Show on map")}
-              </a></li>
-              <li><a href={telHref(contacts.phone)}>{lv("Приёмная", "Qabulxona", "Reception")}: {contacts.phone}</a></li>
-              <li><a href={telHref(contacts.phone2)}>{lv("Отдел продаж", "Sotuv bo'limi", "Sales")}: {contacts.phone2}</a></li>
-              <li><a href={"mailto:" + contacts.email}>{contacts.email}</a></li>
+              {/* Состав колонки повторяет страницу «Контакты» и берёт те же ключи
+                  словаря (t.c_*), чтобы адрес и часы работы не разъезжались.
+                  Телефон сервиса на странице вписан в разметку, а не в настройки
+                  сайта, — здесь он задан так же. */}
+              {/* Офис и склад стоят по одному адресу, часы работы вынесены на
+                  страницу «Контакты» — в футере остаётся один адрес. */}
+              <li className="fc-grp">{t.c_office_addr || contacts.address}</li>
+              {/* Первые два номера берутся из настроек сайта и правятся в админке;
+                  третий там не хранится и задан здесь — так же, как на странице
+                  «Контакты». */}
+              <li className="fc-grp">
+                <a href={telHref(contacts.phone)}>{lv("Приёмная","Qabulxona","Reception")}: {contacts.phone}</a><br />
+                <a href={telHref(contacts.phone2)}>{lv("Отдел продаж","Sotuv bo'limi","Sales")}: {contacts.phone2}</a><br />
+                <a href={telHref("+998772230001")}>{lv("Сервисный отдел","Servis bo'limi","Service department")}: +998 (77) 223-00-01</a>
+              </li>
+              <li className="fc-grp">E-mail: <a href={"mailto:" + SITE_MAIL}>{SITE_MAIL}</a></li>
             </ul>
-          </div>
-          <div className="foot-news-col">
-            <h5>{lv("Рассылка", "Yangiliklar", "Newsletter")}</h5>
-            <p>{lv("Новости, акции и поступления оборудования — не чаще раза в неделю.", "Yangiliklar, aksiyalar va yangi uskunalar — haftada bir martadan ko'p emas.", "Product updates and offers — no more than once a week.")}</p>
-            <form className="foot-news" onSubmit={onSubscribe}>
-              <input type="email" required placeholder={lv("Ваш email", "Emailingiz", "Your email")} aria-label={lv("Email для рассылки", "Yangiliklar uchun email", "Newsletter email")} />
-              <button type="submit" aria-label={lv("Подписаться", "Obuna bo'lish", "Subscribe")}>
-                <Icon name="arrowRight" size={16} />
-              </button>
-            </form>
-            {subscribed && (
-              <div className="foot-news-ok">
-                <Icon name="check" size={14} sw={2.6} />
-                {lv("Спасибо! Вы подписаны.", "Rahmat! Siz obuna bo'ldingiz.", "Thanks! You're subscribed.")}
-              </div>
-            )}
-            <div className="foot-lang" role="group" aria-label={lv("Язык сайта", "Sayt tili", "Site language")}>
-              <button type="button" className={lang === "ru" ? "on" : ""} onClick={() => setLang && setLang("ru")}>RU</button>
-              <button type="button" className={lang === "uz" ? "on" : ""} onClick={() => setLang && setLang("uz")}>UZ</button>
-              <button type="button" className={lang === "en" ? "on" : ""} onClick={() => setLang && setLang("en")}>EN</button>
-            </div>
           </div>
         </div>
         <div className="foot-disclaimer">
-          {lang === "uz"
-            ? "Saytdagi hujjatlar tasvirlari va texnik xususiyatlar ma'lumot uchun berilgan va majburiyat hisoblanmaydi. Uskunadan foydalanishdan oldin foydalanish yo'riqnomasi bilan tanishing yoki mutaxassis bilan maslahatlashing."
-            : lang === "en"
-            ? "Document images and technical specifications on the site are for reference only and do not constitute an obligation. Before using the equipment, read the instructions for use or consult a specialist."
-            : "Информация, изображения документов и технические характеристики на сайте носят справочный характер и не являются публичной офертой. Перед применением оборудования ознакомьтесь с инструкцией по эксплуатации или проконсультируйтесь со специалистом."}
+          {/* Тот же дисклеймер, что в корпоративном футере (certificates.jsx):
+              тексты обязаны совпадать дословно. */}
+          {lang === "uz" ? "Texnik xususiyatlar, tasvirlar va hujjatlar nusxalari — ro‘yxatdan o‘tkazish guvohnomalari, muvofiqlik sertifikatlari va deklaratsiyalari, o‘lchash vositalari turini tasdiqlash guvohnomalari — «SOG’LIQ INDUSTRIYASI» MChJ tomonidan ma’lumot uchun joylashtirilgan: ular ommaviy oferta va da’vo asosi emas. Ishlab chiqaruvchi butlanish va xususiyatlarni ogohlantirishsiz o‘zgartirishi mumkin. Qo‘llashdan oldin yo‘riqnoma (buyum pasporti) bilan tanishing yoki mutaxassisga murojaat qiling. Sayt cookie fayllaridan foydalanadi: ular sizni tanish, foydalanuvchi tajribasini baholash va saytni yaxshilash uchun kerak. Qayta ishlanadigan ma’lumotlar tarkibi va shartlari — maxfiylik siyosatida."
+            : lang === "en" ? "Technical specifications, images and copies of documents — registration certificates, certificates and declarations of conformity, measuring instrument type approvals — are published by SOG’LIQ INDUSTRIYASI LLC for reference: they are not a public offer or grounds for claims. The manufacturer may change configuration and specifications without notice. Before use, read the instructions (device passport) or consult a specialist. The site uses cookies: they help recognise you, assess your experience and improve the site. What data we process and on what terms is set out in the privacy policy."
+            : "Технические характеристики, изображения и копии документов — регистрационных удостоверений, сертификатов и деклараций о соответствии, свидетельств об утверждении типа средств измерений — размещены ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» справочно: они не являются публичной офертой и основанием для претензий. Производитель вправе изменить комплектацию и характеристики без уведомления. Перед применением изучите инструкцию (паспорт изделия) или обратитесь к специалисту. Сайт использует файлы cookie: они помогают узнавать вас, оценивать пользовательский опыт и улучшать сайт. Состав обрабатываемых данных и условия — в политике конфиденциальности."}
         </div>
         <div className="foot-bot">
-          <span style={{fontSize:12,color:"#8095ab"}}>
-            {lang === "uz" ? `«SOG’LIQ INDUSTRIYASI» MChJ • 100069, Toshkent • STIR: 312513138 • ${contacts.phone} • ${contacts.email}` : lang === "en" ? `LLC «HEALTH INDUSTRY» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Tashkent • TIN: 312513138 • ${contacts.phone} • ${contacts.email}` : `ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Ташкент • ИНН: 312513138 • ${contacts.phone} • ${contacts.email}`}
+          <span>
+            {lang === "uz" ? `«SOG’LIQ INDUSTRIYASI» MChJ • 100069, Toshkent • STIR: 312513138 • ${SITE_MAIL}` : lang === "en" ? `LLC «HEALTH INDUSTRY» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Tashkent • TIN: 312513138 • ${SITE_MAIL}` : `ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Ташкент • ИНН: 312513138 • ${SITE_MAIL}`}
           </span>
           <div className="foot-socials">
             <a href={contacts.telegram} target="_blank" rel="noopener" title="Telegram" className="foot-soc">
@@ -780,7 +796,7 @@ function Footer({ t, lang, go, setLang }) {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
             </a>
             <a href={contacts.youtube} target="_blank" rel="noopener" title="YouTube" className="foot-soc">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
             </a>
           </div>
 
@@ -910,24 +926,37 @@ function SoiPlatformCSS() {
     const s = document.createElement("style");
     s.id = id;
     s.textContent = `
-/* ── tokens ─────────────────────────────────────────── */
-.sx { --sx-ink:#0B1B33; --sx-ink-soft:#37475E; --sx-mute:#475569;
-  --sx-line:#D6DEEA; --sx-line-2:#E2E8F1; --sx-card:#FFFFFF; --sx-bg:#FFFFFF; --sx-bg-soft:#F4F7FB;
-  --sx-blue:#0E4AC6; --sx-blue-2:#1d7ed8; --sx-cyan:#14B8E0; --sx-violet:#6454D4; --sx-green:#15A06A; --sx-amber:#E0492F;
-  --sx-shadow:0 1px 2px rgba(11,27,51,.05), 0 8px 24px rgba(11,27,51,.09);
-  --sx-shadow-lg:0 4px 12px rgba(11,27,51,.08), 0 24px 56px rgba(11,27,51,.16);
-  --sx-r:18px; --sx-r-sm:12px;
+/* ── tokens ─────────────────────────────────────────────────────────────
+   Фирменный стиль: белое поле, синий var(--blue-600) вместо чёрного на тексте и
+   структуре, и один сигнальный цвет — лайм, только на главных действиях.
+   Подпись на лайме синяя: белая на нём даёт контраст 1.3:1.
+   Имена --sx-blue и прочие остаются псевдонимами, чтобы шестнадцать мест
+   вызова не пришлось править по одному. Стена плиток «Экосистемы» пока
+   держит собственные оттенки (--eco-h/--eco-a) — её пересборка отдельной
+   задачей. */
+.sx { --sx-ink:var(--ink); --sx-ink-soft:var(--ink-2); --sx-mute:var(--slate-500);
+  --sx-line:var(--line); --sx-line-2:var(--line-2); --sx-card:#FFFFFF; --sx-bg:#FFFFFF; --sx-bg-soft:var(--bg-2);
+  --sx-accent:var(--blue-600); --sx-lime:var(--cta); --sx-lime-ink:var(--blue-600);
+  /* aliases — old names, new restraint */
+  --sx-blue:var(--blue-600); --sx-blue-2:var(--blue-700); --sx-cyan:var(--blue-600); --sx-violet:var(--blue-600); --sx-green:var(--blue-600); --sx-amber:#b87213;
+  --sx-shadow:0 1px 2px rgba(14,74,198,.05);
+  --sx-shadow-lg:0 1px 2px rgba(14,74,198,.06), 0 12px 32px rgba(14,74,198,.08);
+  --sx-r:16px; --sx-r-sm:10px;
   font-family:'Manrope',system-ui,-apple-system,sans-serif; }
-[data-theme="dark"] .sx { --sx-ink:#EAF1FB; --sx-ink-soft:#B6C4D6; --sx-mute:#8294AB;
-  --sx-line:#1E2D42; --sx-line-2:#16243A; --sx-card:#0F1D2F; --sx-bg:#0A1320; --sx-bg-soft:#0C1726;
-  --sx-shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35);
-  --sx-shadow-lg:0 4px 12px rgba(0,0,0,.4), 0 24px 56px rgba(0,0,0,.55); }
+[data-theme="dark"] .sx { --sx-ink:#E8EFFB; --sx-ink-soft:#B9C9E4; --sx-mute:#8FA2BE;
+  --sx-line:var(--navy-800); --sx-line-2:var(--navy-850); --sx-card:var(--navy-900); --sx-bg:var(--navy-900); --sx-bg-soft:var(--navy-900);
+  --sx-accent:#7FA8F0; --sx-lime:var(--cta); --sx-lime-ink:var(--navy-800);
+  --sx-blue:#7FA8F0; --sx-blue-2:#A8C4F6; --sx-cyan:#7FA8F0;
+  --sx-shadow:0 1px 2px rgba(0,0,0,.4);
+  --sx-shadow-lg:0 1px 2px rgba(0,0,0,.4), 0 16px 40px rgba(0,0,0,.5); }
 
 .sx { background:var(--sx-bg); color:var(--sx-ink); }
 .sx *, .sx *::before, .sx *::after { box-sizing:border-box; }
-.sx-wrap { max-width:1200px; margin:0 auto; padding:0 24px; }
+.sx-wrap { max-width:var(--maxw); margin:0 auto; padding:0 32px; }
 .sx-section { padding:clamp(64px,8vw,108px) 0; position:relative; }
-.sx-section.soft { background:var(--sx-bg-soft); }
+/* Светлые секции выключены: фон страниц — только белый. Правило оставлено
+   пустым, чтобы разметка с классом soft не требовала правки. */
+.sx-section.soft { background:var(--sx-bg); }
 
 /* reveal */
 .sx-rv { opacity:0; transform:translateY(26px); transition:opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1); transition-delay:calc(var(--i,0) * 70ms); }
@@ -935,35 +964,43 @@ function SoiPlatformCSS() {
 @media (prefers-reduced-motion: reduce){ .sx-rv{ transition:none; opacity:1; transform:none; } }
 
 /* heads */
-.sx-eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--sx-blue); }
-.sx-eyebrow::before { content:""; width:22px; height:2px; border-radius:2px; background:linear-gradient(90deg,var(--sx-blue),var(--sx-cyan)); }
-.sx-h2 { font-size:clamp(28px,3.8vw,46px); font-weight:800; line-height:1.08; letter-spacing:-.028em; color:var(--sx-ink); margin:16px 0 0; }
-.sx-sub { font-size:clamp(15.5px,1.5vw,18px); line-height:1.62; color:var(--sx-mute); margin-top:16px; max-width:620px; }
-.sx-head { margin-bottom:48px; }
+/* The eyebrow was a coloured label with a gradient dash. Quietened to a small
+   grey caption — the heading under it is doing the work now. */
+/* Надзаголовок секции. Один вид на все секции главной: два правила были
+   побайтово одинаковыми и жили в разных концах файла. */
+.sx-eyebrow,
+.sx-eyebrow::before { content:""; width:16px; height:1px; border-radius:0; background:var(--sx-line); }
+.sx-h2 { font-size:clamp(32px,4.4vw,54px); font-weight:800; line-height:1.04; letter-spacing:-.035em; color:var(--sx-ink); margin:14px 0 0; text-wrap:balance; }
+.sx-sub { font-size:clamp(16px,1.5vw,18px); line-height:1.6; color:var(--sx-mute); margin-top:14px; max-width:600px; }
+.sx-head { margin-bottom:44px; }
 .sx-head.center { text-align:center; }
 .sx-head.center .sx-sub { margin-left:auto; margin-right:auto; }
 .sx-head.center .sx-eyebrow::before { display:none; }
 
 /* link */
-.sx-link { display:inline-flex; align-items:center; gap:6px; font-size:15px; font-weight:700; color:var(--sx-blue); cursor:pointer; transition:gap .2s, color .2s; }
+.sx-link { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-4); font-weight:700; color:var(--sx-blue); cursor:pointer; transition:gap .2s, color .2s; }
 .sx-link:hover { gap:11px; color:var(--sx-blue-2); }
 
 /* ── ecosystem bento ────────────────────────────────────
    Deep-ground tiles reading as one island on the light page. Each tile carries a
    hue of its own (--eco-h/--eco-a); everything inside is built from white alphas
    over that ground, so a tile stays coherent whatever its colour. */
-.eco-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:16px;
+/* The section's own air is cut back too — with the standard 108px band the two
+   rows still overflow a 900px screen by the height of a tile's heading. */
+.eco-section { padding-top:64px; padding-bottom:64px; }
+/* Two rows, not three: the block has to fit one screen. Twelve columns because
+   the second row carries four tiles — six could not divide into four. */
+.eco-grid { display:grid; grid-template-columns:repeat(12,1fr); gap:14px;
   grid-template-areas:
-    "catalog  catalog  catalog  training training training"
-    "tender   tender   tender   tender   tender   tender"
-    "brands   brands   service  service  delivery delivery"; }
+    "catalog  catalog  catalog  catalog  tender tender tender tender tender  tender   tender   tender"
+    "training training training brands   brands brands service service service delivery delivery delivery"; }
 /* One recipe for every tile: the section's own hue in --eco-h, its accent in
    --eco-a, and identical depth on top — same radius, same diagonal, same inner
    glow, same shadow. The hues are the brand values; the gradient darkens them
    so a tile reads as a deep field rather than a flat swatch of colour. */
 .eco-t { --eco-h:#0B4EDB; --eco-a:#5C9DFF;
   position:relative; grid-area:var(--eco-area); isolation:isolate; display:flex; flex-direction:column;
-  padding:26px; border-radius:22px; overflow:hidden; color:#fff;
+  padding:20px; border-radius:var(--r-lg); overflow:hidden; color:#fff;
   background:
     radial-gradient(115% 115% at 100% 0%, color-mix(in srgb, var(--eco-a) 22%, transparent), transparent 60%),
     linear-gradient(150deg,
@@ -974,6 +1011,36 @@ function SoiPlatformCSS() {
     0 1px 0 0 rgba(255,255,255,.10) inset,
     0 0 0 1px color-mix(in srgb, var(--eco-a) 14%, transparent) inset,
     0 20px 44px -24px color-mix(in srgb, var(--eco-h) 70%, #000); }
+/* The ground is not static: two soft blobs of the tile's own accent drift across
+   it, and a wide highlight sweeps over now and then. Both layers sit behind the
+   content (z-index:-1, under .eco-photo) and animate transform only, so a wall
+   of six tiles costs the compositor and not the main thread. The sweeps are
+   deliberately out of phase — tiles flashing in unison read as a glitch. */
+@keyframes ecoDrift {
+  0%   { transform:translate3d(-7%,-5%,0) scale(1.12); }
+  50%  { transform:translate3d(7%,5%,0) scale(1.28); }
+  100% { transform:translate3d(-7%,-5%,0) scale(1.12); }
+}
+@keyframes ecoSheen {
+  0%, 62% { transform:translateX(-130%) skewX(-12deg); }
+  100%    { transform:translateX(320%) skewX(-12deg); }
+}
+.eco-t::before, .eco-t::after { content:""; position:absolute; z-index:-1; pointer-events:none; }
+.eco-t::before { inset:-30%;
+  background:
+    radial-gradient(38% 44% at 24% 28%, color-mix(in srgb, var(--eco-a) 30%, transparent), transparent 68%),
+    radial-gradient(34% 40% at 76% 74%, color-mix(in srgb, var(--eco-a) 20%, transparent), transparent 70%);
+  animation:ecoDrift 19s ease-in-out infinite; will-change:transform; }
+.eco-t::after { top:-40%; bottom:-40%; left:0; width:34%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.13), transparent);
+  animation:ecoSheen 9s ease-in-out infinite; will-change:transform; }
+.eco-t.catalog::before { animation-duration:21s; }
+.eco-t.training::before, .eco-t.training::after { animation-delay:-3.5s; }
+.eco-t.tender::before, .eco-t.tender::after { animation-delay:-6s; }
+.eco-t.brands::before, .eco-t.brands::after { animation-delay:-1.8s; }
+.eco-t.service::before, .eco-t.service::after { animation-delay:-8s; }
+.eco-t.delivery::before, .eco-t.delivery::after { animation-delay:-4.6s; }
+
 .eco-t.catalog { --eco-area:catalog; --eco-h:#0B4EDB; --eco-a:#5C9DFF; }
 .eco-t.training { --eco-area:training; --eco-h:#008C5E; --eco-a:#37D89B; }
 .eco-t.tender { --eco-area:tender; --eco-h:#4C2D91; --eco-a:#A98BFF; }
@@ -985,14 +1052,16 @@ function SoiPlatformCSS() {
    These belong to no single tile: .eco-live is the tenders badge, .eco-brand
    dresses the brand wall. Twice now they were deleted by a wholesale rewrite of
    the tenders CSS because they happened to sit inside it. */
-.eco-live { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border-radius:999px; font-size:11.5px; font-weight:700;
+.eco-live { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border-radius:var(--r-pill); font-size:var(--fs-1); font-weight:700;
   background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); color:rgba(255,255,255,.82); white-space:nowrap; }
-.eco-live::before { content:""; width:7px; height:7px; border-radius:50%; background:#3BE38B; box-shadow:0 0 0 0 rgba(59,227,139,.6); animation:ecoPulse 2.4s ease-out infinite; }
-@keyframes ecoPulse { 70% { box-shadow:0 0 0 7px rgba(59,227,139,0); } 100% { box-shadow:0 0 0 0 rgba(59,227,139,0); } }
-.eco-brands { display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; }
-.eco-brand { display:inline-flex; align-items:center; justify-content:center; height:38px; padding:0 14px; border-radius:10px;
-  background:rgba(255,255,255,.92); color:#14243C; font-size:12.5px; font-weight:800; letter-spacing:.01em; }
-.eco-brand img { max-height:20px; max-width:78px; object-fit:contain; }
+.eco-live::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--blue-400); box-shadow:var(--sh-sm); animation:ecoPulse 2.4s ease-out infinite; }
+@keyframes ecoPulse { 70% { box-shadow:0 0 0 7px rgba(77,142,238,0); } 100% { box-shadow:0 0 0 0 rgba(77,142,238,0); } }
+/* One line, clipped: the wall is a proof of breadth, not a list. Wrapping it
+   cost the block three rows of height it does not have. */
+.eco-brands { display:flex; flex-wrap:nowrap; gap:7px; margin-top:12px; overflow:hidden; mask-image:linear-gradient(90deg,#000 78%,transparent); }
+.eco-brand { display:inline-flex; align-items:center; justify-content:center; height:30px; padding:0 11px; border-radius:var(--r-sm); flex:0 0 auto;
+  background:rgba(255,255,255,.92); color:var(--navy-850); font-size:var(--fs-1); font-weight:800; letter-spacing:.01em; white-space:nowrap; }
+.eco-brand img { max-height:17px; max-width:66px; object-fit:contain; }
 
 /* Optional photo behind a tile: the scrim keeps text legible whatever the shot,
    and the tile looks deliberate when no photo is set at all. */
@@ -1004,111 +1073,130 @@ function SoiPlatformCSS() {
 /* Content starts at the top in every tile, so icon, figure and heading line up
    across a row; the slack falls to the bottom, where the CTA holds the baseline. */
 .eco-head { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
-.eco-ic { width:44px; height:44px; border-radius:13px; display:flex; align-items:center; justify-content:center; flex:0 0 auto;
+.eco-ic { width:38px; height:38px; border-radius:var(--r); display:flex; align-items:center; justify-content:center; flex:0 0 auto;
   background:color-mix(in srgb, var(--eco-a) 22%, transparent); color:var(--eco-a); border:1px solid color-mix(in srgb, var(--eco-a) 26%, transparent); }
-.eco-badge { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border-radius:11px; font-size:12px; font-weight:700;
+.eco-badge { display:inline-flex; align-items:center; gap:7px; padding:7px 11px; border-radius:var(--r); font-size:var(--fs-2); font-weight:700;
   background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.14); color:rgba(255,255,255,.86); }
-.eco-badge b { font-size:15px; font-weight:800; font-variant-numeric:tabular-nums; color:#fff; }
+.eco-badge b { font-size:var(--fs-4); font-weight:800; font-variant-numeric:tabular-nums; color:#fff; }
 
 /* numbers + copy */
-.eco-num { margin-top:20px; font-size:clamp(38px,4.4vw,54px); font-weight:800; line-height:.95; letter-spacing:-.035em;
+.eco-num { margin-top:12px; font-size:clamp(32px,3.1vw,40px); font-weight:800; line-height:.95; letter-spacing:-.035em;
   font-variant-numeric:tabular-nums; color:#fff; }
 .eco-num span { color:var(--eco-a); }
-.eco-t h3 { margin:12px 0 0; font-size:19px; font-weight:800; letter-spacing:-.012em; line-height:1.25; color:#fff; text-wrap:balance; }
-.eco-t.catalog h3 { font-size:23px; }
-.eco-t p { margin:9px 0 0; font-size:14px; line-height:1.55; color:rgba(255,255,255,.72); max-width:44ch; }
+.eco-t h3 { margin:8px 0 0; font-size:var(--fs-5); font-weight:800; letter-spacing:-.012em; line-height:1.25; color:#fff; text-wrap:balance; }
+.eco-t.catalog h3 { font-size:var(--fs-6); }
+.eco-t p { margin:7px 0 0; font-size:var(--fs-3); line-height:1.5; color:rgba(255,255,255,.72); max-width:44ch; }
 
 /* metric strip — hidden entirely when the editor leaves it blank */
 .eco-metrics { display:flex; flex-wrap:wrap; gap:9px; margin-top:20px; }
-.eco-m { flex:1 1 96px; min-width:96px; padding:11px 13px; border-radius:13px;
+.eco-m { flex:1 1 96px; min-width:96px; padding:11px 13px; border-radius:var(--r);
   background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.11); }
-.eco-m-v { font-size:20px; font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:#fff; }
+.eco-m-v { font-size:var(--fs-6); font-weight:800; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:#fff; }
 /* "закрываются" is wider than a third of a phone screen — let it break rather
    than spill out of its card. */
-.eco-m-l { margin-top:3px; font-size:11.5px; line-height:1.35; color:rgba(255,255,255,.62); overflow-wrap:anywhere; }
+.eco-m-l { margin-top:3px; font-size:var(--fs-1); line-height:1.35; color:rgba(255,255,255,.62); overflow-wrap:anywhere; }
 
 /* actions */
-.eco-foot { margin-top:auto; padding-top:20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.eco-cta { display:inline-flex; align-items:center; gap:9px; padding:11px 17px; border-radius:12px; border:1px solid rgba(255,255,255,.16);
-  background:rgba(255,255,255,.10); color:#fff; font-size:13.5px; font-weight:700; cursor:pointer; text-align:left;
+.eco-foot { margin-top:auto; padding-top:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.eco-cta { display:inline-flex; align-items:center; gap:9px; padding:9px 14px; border-radius:var(--r); border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.10); color:#fff; font-size:var(--fs-3); font-weight:700; cursor:pointer; text-align:left;
   transition:background .2s, border-color .2s, gap .2s; }
 .eco-cta:hover { background:rgba(255,255,255,.17); border-color:rgba(255,255,255,.3); gap:13px; }
 .eco-cta.solid { background:var(--eco-a); border-color:transparent; color:#08182F; }
 .eco-cta.solid:hover { background:color-mix(in srgb, var(--eco-a) 84%, #fff); }
-.eco-t :is(a,button):focus-visible { outline:2px solid #fff; outline-offset:3px; border-radius:12px; }
+.eco-t :is(a,button):focus-visible { outline:2px solid #fff; outline-offset:3px; border-radius:var(--r); }
 
-/* catalog tile: search + category chips carrying real counts */
-.eco-search { display:flex; align-items:center; gap:10px; margin-top:22px; padding:12px 14px; border-radius:13px;
-  background:rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.14); color:rgba(255,255,255,.55); font-size:13.5px; cursor:pointer; width:100%;
-  text-align:left; font-family:inherit; }
-.eco-search svg { flex:0 0 auto; }
-.eco-search:hover { background:rgba(255,255,255,.14); }
-.eco-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
-.eco-chip { display:inline-flex; align-items:center; gap:8px; padding:9px 12px; border-radius:11px; cursor:pointer;
-  background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.12); color:rgba(255,255,255,.9); font-size:12.5px; font-weight:600;
-  transition:background .2s, border-color .2s; }
-.eco-chip:hover { background:rgba(255,255,255,.15); border-color:color-mix(in srgb, var(--eco-a) 55%, transparent); }
-.eco-chip i { font-style:normal; font-size:11px; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
+/* The catalog tile had a search field and category chips; both were dropped when
+   the block was cut to one screen, and the tile now leads straight to the CTA. */
 
 /* ── tenders: one monitoring panel, not cards inside cards ────────────────
    Four counters, then two lists separated by a hairline. Everything sits on the
    tile's own ground — the only boxes are the KPI cells, because a figure needs
    an edge to read as a figure. */
-.eco-t.tender { padding:24px; }
+.eco-t.tender { padding:20px; }
 .tnd-top { display:grid; grid-template-columns:auto 1fr auto; align-items:start; gap:14px; }
 .tnd-titles { min-width:0; }
-.tnd-eyebrow { display:block; font-size:10.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--eco-a); }
-.eco-t.tender h3 { margin:5px 0 0; font-size:23px; }
-.eco-t.tender > p { margin-top:10px; max-width:62ch; }
+/* Promoted from caption to headline. Set in caps at heading size, it needs the
+   opposite treatment to a small eyebrow: tracking pulled back in (wide letter
+   spacing at 21px reads as a logotype, not a title) and a tighter line height,
+   because a fifty-character line will take two rows on any tile width. */
+.eco-t.tender h3.tnd-eyebrow { display:block; margin:0; font-size:var(--fs-7); font-weight:800;
+  letter-spacing:.015em; line-height:1.18; text-transform:uppercase; color:#fff; text-wrap:balance; }
+.eco-t.tender > p { margin-top:8px; max-width:62ch; }
 
-.tnd-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:18px; }
-.tnd-kpi { padding:12px 13px; border-radius:13px; background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.11);
-  transition:background .18s ease, border-color .18s ease; }
-.tnd-kpi:hover { background:rgba(255,255,255,.11); border-color:color-mix(in srgb, var(--eco-a) 40%, transparent); }
-.tnd-kpi-v { font-size:25px; font-weight:800; line-height:1.05; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
-.tnd-kpi-l { margin-top:3px; font-size:11px; line-height:1.32; color:rgba(255,255,255,.62); }
+/* The counters lost their boxes: four cells with borders inside a bordered tile
+   inside a bordered grid was three frames deep and read as clutter. What ranks
+   them now is size — the lead figure is nearly twice the others — and a hairline
+   between columns, which is what a dashboard uses. */
+.tnd-kpis {display:grid; grid-template-columns:1.25fr 1fr 1fr 1fr; gap:0; margin-top:16px}
+.tnd-kpi { padding:13px 16px; position:relative; }
+.tnd-kpi + .tnd-kpi { box-shadow:inset 1px 0 0 0 rgba(255,255,255,.10); }
+.tnd-kpi:first-child { padding-left:0; }
+.tnd-kpi-v { font-size:var(--fs-8); font-weight:800; line-height:1; letter-spacing:-.035em; font-variant-numeric:tabular-nums; color:#fff; }
+.tnd-kpi.lead .tnd-kpi-v { font-size:var(--fs-9); color:#fff; }
+.tnd-kpi.lead .tnd-kpi-l { color:rgba(255,255,255,.8); font-weight:600; }
+.tnd-kpi-l { margin-top:5px; font-size:var(--fs-4); line-height:1.25; color:rgba(255,255,255,.58); }
 
 /* two sections, side by side, parted by a rule rather than by borders */
-.tnd-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:0 28px; margin-top:20px; align-items:start; }
+.tnd-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:0 24px; margin-top:14px; align-items:start; }
 .tnd-sec { min-width:0; }
 .tnd-sec + .tnd-sec { padding-left:28px; margin-left:-28px; border-left:1px solid rgba(255,255,255,.10); }
-.tnd-sec-h { display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding-bottom:8px;
-  border-bottom:1px solid rgba(255,255,255,.10);
-  font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.5); }
+.tnd-sec-h {display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding-bottom:8px;
+  font-size:var(--fs-1); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.5)}
 .tnd-sec-h b { font-weight:700; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
 
 /* rows — platforms and categories share one shape */
 .tnd-row { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px;
-  width:100%; padding:9px 8px; margin:0 -8px; border:0; background:transparent; color:inherit; font:inherit; text-align:left;
-  border-radius:9px; text-decoration:none; transition:background .18s ease, color .18s ease; }
+  width:100%; padding:6px 8px; margin:0 -8px; border:0; background:transparent; color:inherit; font:inherit; text-align:left;
+  border-radius:var(--r-sm); text-decoration:none; transition:background .18s ease, color .18s ease, transform .18s ease; }
+/* Categories carry a money column between the name and the count. */
+.tnd-row.cat { grid-template-columns:3px 1fr auto auto; gap:0 9px; }
 a.tnd-row, button.tnd-row { cursor:pointer; }
-.tnd-row + .tnd-row { box-shadow:0 -1px 0 0 rgba(255,255,255,.06); }
-.tnd-row:hover { background:rgba(255,255,255,.09); }
+.tnd-row + .tnd-row { box-shadow:var(--sh-sm); }
+/* Nudged, not scaled: scaling a row inside a dense list shoves its neighbours
+   around, and transform keeps the work off the layout thread either way. */
+.tnd-row:hover { background:rgba(255,255,255,.09); transform:translateX(3px); }
 .tnd-row:focus-visible { outline:2px solid #fff; outline-offset:-2px; }
-.tnd-row-n { font-size:13px; font-weight:600; color:rgba(255,255,255,.9); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.tnd-row-v { font-size:13px; font-weight:700; font-variant-numeric:tabular-nums; color:#fff; }
-.tnd-row.zero .tnd-row-n, .tnd-row.zero .tnd-row-v { color:rgba(255,255,255,.45); }
-.tnd-dot { width:7px; height:7px; border-radius:50%; background:#3BE38B; }
+.tnd-row-n { font-size:var(--fs-3); font-weight:600; color:rgba(255,255,255,.9); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.tnd-row-v { font-size:var(--fs-3); font-weight:700; font-variant-numeric:tabular-nums; color:#fff; min-width:18px; text-align:right; }
+.tnd-row-sum { font-size:var(--fs-2); font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); white-space:nowrap; }
+.tnd-row.zero .tnd-row-n, .tnd-row.zero .tnd-row-v, .tnd-row.zero .tnd-row-sum { color:rgba(255,255,255,.45); }
+.tnd-dot { width:7px; height:7px; border-radius:50%; background:var(--blue-400); }
 .tnd-dot.off { background:rgba(255,255,255,.28); }
-.tnd-row .tnd-ic { width:16px; height:16px; display:flex; align-items:center; justify-content:center; color:var(--eco-a); }
-.tnd-row.zero .tnd-ic { color:rgba(255,255,255,.35); }
-.tnd-note { margin-top:12px; font-size:11px; line-height:1.4; color:rgba(255,255,255,.42); }
+/* The accent bar: one hue, five weights of it, so the list is ranked without
+   turning five rows into five different colours. */
+.tnd-bar { width:3px; height:16px; border-radius:2px; background:var(--eco-a); opacity:var(--bar,1);
+  transform-origin:center; transition:transform .18s ease; }
+.tnd-row.cat:hover .tnd-bar { transform:scaleY(1.35); }
+.tnd-row.cat.zero .tnd-bar { background:rgba(255,255,255,.25); }
 
 @media (max-width:1080px) {
-  .tnd-kpis { grid-template-columns:repeat(2,1fr); }
-  /* Stacked, the divider moves from the side to the top and the sections need
-     a gap — otherwise the note under the platforms butts into the next heading. */
+  /* Two-up, the vertical hairlines have to be redrawn as a cross: the third
+     cell now starts a new line and needs a rule above it, not beside it. */
+  .tnd-kpis { grid-template-columns:1fr 1fr; }
+  .tnd-kpi:nth-child(odd) { padding-left:0; }
+  .tnd-kpi:nth-child(even) { box-shadow:inset 1px 0 0 0 rgba(255,255,255,.10); }
+  .tnd-kpi:nth-child(n+3) { box-shadow:inset 0 1px 0 0 rgba(255,255,255,.10); }
+  .tnd-kpi:nth-child(4) { box-shadow:inset 1px 0 0 0 rgba(255,255,255,.10), inset 0 1px 0 0 rgba(255,255,255,.10); }
   .tnd-cols { grid-template-columns:1fr; gap:22px 0; }
   .tnd-sec + .tnd-sec { padding-left:0; margin-left:0; border-left:0; }
 }
 @media (max-width:680px) {
   .tnd-top { grid-template-columns:auto 1fr; }
   .tnd-top .eco-live { grid-column:1 / -1; justify-self:start; }
-  .tnd-kpis { grid-template-columns:repeat(2,1fr); gap:8px; }
-  .tnd-kpi-v { font-size:21px; }
+  /* Fifty characters of caps need a step down before they take four lines. */
+  .eco-t.tender h3.tnd-eyebrow { font-size:var(--fs-5); }
+  .tnd-kpi.lead .tnd-kpi-v { font-size:var(--fs-8); }
+  .tnd-kpi-v { font-size:var(--fs-7); }
+  /* The money column is the first thing to go when the row runs out of width —
+     the count and the name are what the reader is scanning for. */
+  .tnd-row.cat { grid-template-columns:3px 1fr auto; }
+  .tnd-row-sum { display:none; }
 }
 
-.eco-map { padding-top:18px; width:100%; height:auto; display:block; overflow:visible; }
+/* The map no longer claims a block of its own height: it sits behind the copy,
+   bled to the tile's bottom-right corner, and the text keeps the foreground. */
+.eco-map { position:absolute; right:-8%; bottom:-6%; width:78%; height:auto; display:block; overflow:visible; z-index:-1; opacity:.55; }
 .eco-map-land { fill:color-mix(in srgb, var(--eco-a) 13%, transparent); stroke:color-mix(in srgb, var(--eco-a) 72%, transparent);
   stroke-width:1.3; stroke-linejoin:round; }
 /* Two strokes per route: a faint permanent corridor, and a short dash running
@@ -1128,6 +1216,9 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
   .eco-map-flow { animation:none; stroke-dasharray:none; stroke-dashoffset:0; stroke-width:.9; opacity:.5; }
   .eco-map-dot { animation:none; opacity:.85; }
   .eco-map-ping { display:none; }
+  /* The drifting ground keeps its still frame; the sweep goes away entirely. */
+  .eco-t::before { animation:none; transform:none; }
+  .eco-t::after { display:none; }
 }
 
 @media (max-width:1080px) {
@@ -1138,139 +1229,217 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 @media (max-width:680px) {
   .eco-grid { grid-template-columns:1fr;
     grid-template-areas:"catalog" "training" "tender" "brands" "service" "delivery"; gap:14px; }
-  .eco-t, .eco-t.tender { padding:22px; border-radius:18px; }
+  .eco-t, .eco-t.tender { padding:22px; border-radius:var(--r-lg); }
   .eco-m { flex:1 1 100%; }
   /* KPIs stay three-up on a phone — stacking them would undo the height the
      block just gained — so they shed padding and a couple of type steps. */
   .eco-kpis { gap:8px; }
   .eco-kpis .eco-m { padding:10px; }
-  .eco-kpis .eco-m-v { font-size:23px; }
-  .eco-kpis .eco-m-l { font-size:10.5px; }
+  .eco-kpis .eco-m-v { font-size:var(--fs-7); }
+  .eco-kpis .eco-m-l { font-size:var(--fs-1); }
 }
 
 /* ── directions ─────────────────────────────────────── */
 .sx-dir-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; }
 .sx-dir { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:26px 24px; cursor:pointer; transition:transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s, border-color .3s; }
-.sx-dir:hover { transform:translateY(-4px); box-shadow:var(--sx-shadow-lg); }
-.sx-dir-ic { width:50px; height:50px; border-radius:14px; display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
-.sx-dir h3 { font-size:17px; font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.25; }
+.sx-dir:hover { transform:translateY(-4px); box-shadow:var(--sh-sm); }
+.sx-dir-ic { width:50px; height:50px; border-radius:var(--r); display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
+.sx-dir h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.25; }
 .sx-dir-links { margin-top:14px; display:flex; flex-direction:column; gap:2px; }
-.sx-dir-links a { font-size:13.5px; color:var(--sx-mute); padding:5px 0; transition:color .18s, padding-left .18s; }
+.sx-dir-links a { font-size:var(--fs-3); color:var(--sx-mute); padding:5px 0; transition:color .18s, padding-left .18s; }
 .sx-dir-links a:hover { color:var(--sx-blue); padding-left:5px; }
 
 /* ── impact band (dark interlude) ───────────────────── */
-.sx-impact { position:relative; background:#050D1C; border-radius:28px; padding:clamp(40px,5vw,68px); overflow:hidden; }
+/* Three navy slabs — impact, catalog portal, closing CTA — were the page's
+   other dark moments. They are now paper: a hairline card on the canvas, with
+   the aurora and the blueprint grid switched off. Contrast comes from the
+   ecosystem tiles and the hero photograph, and from nothing else. */
+.sx-impact { position:relative; background:var(--sx-card); border:1px solid var(--sx-line); border-radius:var(--r-xl); padding:clamp(40px,5vw,68px); overflow:hidden; }
 .sx-impact-aurora { position:absolute; inset:0; background:
   radial-gradient(ellipse 60% 80% at 15% 30%, rgba(14,74,198,.35),transparent 70%),
   radial-gradient(ellipse 50% 70% at 85% 70%, rgba(20,184,224,.25),transparent 65%),
   radial-gradient(ellipse 40% 60% at 60% 10%, rgba(100,84,212,.2),transparent 60%); }
 .sx-impact-grid-ov { position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px); background-size:44px 44px; -webkit-mask-image:radial-gradient(ellipse 90% 90% at 50% 0%,#000 30%,transparent 80%); mask-image:radial-gradient(ellipse 90% 90% at 50% 0%,#000 30%,transparent 80%); }
 .sx-impact-inner { position:relative; z-index:1; }
-.sx-impact .sx-eyebrow { color:#8fc7ff; }
-.sx-impact .sx-eyebrow::before { background:linear-gradient(90deg,#4d9fff,#14C8F5); }
-.sx-impact h2 { font-size:clamp(26px,3.4vw,40px); font-weight:800; letter-spacing:-.028em; color:#fff; margin:16px 0 0; max-width:680px; line-height:1.1; }
-.sx-impact-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:48px; }
-.sx-metric-n { font-size:clamp(34px,4vw,52px); font-weight:800; letter-spacing:-.03em; line-height:1; color:#fff; }
-.sx-metric-n .u { background:linear-gradient(120deg,#4d9fff,#14C8F5); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-.sx-metric-l { font-size:14px; color:rgba(255,255,255,.55); margin-top:10px; line-height:1.4; }
-.sx-metric { padding-left:20px; border-left:2px solid rgba(255,255,255,.12); }
+.sx-impact-aurora, .sx-impact-grid-ov { display:none; }
+.sx-impact .sx-eyebrow { color:var(--sx-mute); }
+.sx-impact .sx-eyebrow::before { background:var(--sx-line); }
+.sx-impact h2 { font-size:clamp(28px,3.6vw,44px); font-weight:800; letter-spacing:-.032em; color:var(--sx-ink); margin:14px 0 0; max-width:680px; line-height:1.08; }
+.sx-impact-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:44px; }
+.sx-metric-n { font-size:clamp(34px,4vw,52px); font-weight:800; letter-spacing:-.03em; line-height:1; color:var(--sx-ink); }
+.sx-metric-n .u { color:var(--sx-accent); }
+.sx-metric-l { font-size:var(--fs-4); color:var(--sx-mute); margin-top:10px; line-height:1.4; }
+.sx-metric { padding-left:20px; border-left:1px solid var(--sx-line); }
 
 /* ── brands pill list (2 rows, clipped) ───────────────── */
 .sx-brands-title { display:inline-flex; align-items:center; gap:8px; }
-.sx-brands-pills { display:flex; flex-wrap:wrap; gap:10px; max-height:96px; overflow:hidden; }
-.sx-bpill { display:inline-flex; align-items:center; padding:11px 18px; border-radius:10px; background:var(--sx-bg-soft); color:var(--sx-ink-soft); font-size:14px; font-weight:600; white-space:nowrap; cursor:pointer; transition:background .18s, color .18s; }
-.sx-bpill:hover { background:var(--sx-blue); color:#fff; }
+
+/* ── partners marquee ────────────────────────────────────────────────────
+   A wall of names read as a dump of text; it now drifts. The track holds the
+   list twice and slides exactly one copy to the left, so the seam lands where
+   the first copy ends and the loop is invisible. Duration is set per render
+   from the number of names (--mq-dur), which keeps the speed constant however
+   many partners the admin adds — a fixed duration would make forty names race
+   and six names crawl. */
+.sx-mq-sec {background:var(--sx-card);
+  padding:clamp(34px,4.5vw,54px) 0}
+.sx-mq-head { max-width:var(--maxw); margin:0 auto clamp(22px,2.6vw,32px); padding:0 32px; }
+/* Two belts running against each other. Opposite directions are what keep the
+   pair from reading as one tall band sliding past, and each row carries its own
+   half of the list — the same names twice over would just look like a mistake. */
+.sx-mq-vp { position:relative; display:flex; flex-direction:column; gap:clamp(14px,1.8vw,22px); }
+.sx-mq-row { overflow:hidden; }
+.sx-mq-track { --mq-gap:clamp(38px,5vw,72px);
+  display:flex; width:max-content; align-items:center;
+  animation:sxMarquee var(--mq-dur,42s) linear infinite; will-change:transform; }
+/* Проход несёт и внутренние зазоры, и замыкающий — тогда ширина дорожки ровно
+   вдвое больше прохода, и −50 % попадают точно в стык. */
+.sx-mq-pass { display:flex; align-items:center; gap:var(--mq-gap); padding-right:var(--mq-gap); flex:0 0 auto; }
+@keyframes sxMarquee { from { transform:translate3d(0,0,0); } to { transform:translate3d(-50%,0,0); } }
+/* The right-bound row plays the same keyframes backwards, so the seam maths
+   stay in one place instead of being written twice with opposite signs. */
+.sx-mq-track.rev { animation-direction:reverse; }
+/* Hovering stops the belt you are aiming at — and only that one. Freezing both
+   rows under a single cursor looks like the page hung. */
+.sx-mq-row:hover .sx-mq-track, .sx-mq-row:focus-within .sx-mq-track { animation-play-state:paused; }
+
+/* Monochrome by default, ink on hover — the row stays quiet until you aim at it. */
+.sx-mq-item { flex:0 0 auto; display:inline-flex; align-items:center; gap:10px; border:0; background:none; padding:0; cursor:pointer;
+  font-family:inherit; font-size:clamp(17px,1.9vw,22px); font-weight:700; letter-spacing:-.015em; white-space:nowrap;
+  color:var(--sx-mute); transition:color .25s ease, opacity .25s ease, filter .25s ease; }
+.sx-mq-item:hover, .sx-mq-item:focus-visible { color:var(--sx-ink); }
+.sx-mq-item:focus-visible { outline:2px solid var(--sx-ink); outline-offset:6px; border-radius:var(--r-sm); }
+.sx-mq-item img { height:30px; max-width:120px; object-fit:contain; filter:grayscale(1); opacity:.5; transition:inherit; }
+.sx-mq-item:hover img, .sx-mq-item:focus-visible img { filter:grayscale(0); opacity:1; }
+.sx-mq-flag { font-size:var(--fs-4); filter:grayscale(1); opacity:.55; transition:inherit; }
+.sx-mq-item:hover .sx-mq-flag { filter:grayscale(0); opacity:1; }
+
+/* The fade at both edges: an overlay, never a hit target, so the names it
+   covers stay clickable. Painted with the section's own surface colour rather
+   than a literal white, or the dark theme would get two white smears. */
+.sx-mq-fade { position:absolute; inset:0; pointer-events:none; z-index:1;
+  background:linear-gradient(90deg, var(--sx-card) 0%, transparent 12%, transparent 88%, var(--sx-card) 100%); }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Standing still, each row becomes an ordinary horizontal scroller. */
+  .sx-mq-track { animation:none; }
+  .sx-mq-row { overflow-x:auto; scrollbar-width:none; }
+  .sx-mq-row::-webkit-scrollbar { display:none; }
+}
 
 /* ── proof / cases ──────────────────────────────────── */
 .sx-cases { display:flex; flex-wrap:wrap; justify-content:center; gap:20px; }
 .sx-case { flex:1 1 300px; max-width:calc(33.333% - 14px); min-width:280px; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; transition:transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s; display:flex; flex-direction:column; }
-.sx-case:hover { transform:translateY(-5px); box-shadow:var(--sx-shadow-lg); }
+.sx-case:hover { transform:translateY(-5px); box-shadow:var(--sh-sm); }
 .sx-case-cover { aspect-ratio:16/10; background:linear-gradient(135deg,var(--sx-bg-soft),var(--sx-line-2)); display:flex; align-items:center; justify-content:center; color:var(--sx-mute); overflow:hidden; }
 .sx-case-cover img { width:100%; height:100%; object-fit:cover; }
 .sx-case-body { padding:20px 22px; flex:1; display:flex; flex-direction:column; }
-.sx-case-tag { display:inline-flex; align-self:flex-start; font-size:11.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--sx-blue); background:color-mix(in srgb,var(--sx-blue) 9%,transparent); padding:5px 11px; border-radius:7px; margin-bottom:11px; }
-.sx-case h3 { font-size:17px; font-weight:800; color:var(--sx-ink); line-height:1.25; letter-spacing:-.01em; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.sx-case p { font-size:14px; color:var(--sx-mute); line-height:1.55; margin:8px 0 0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-.sx-case-meta { display:flex; gap:18px; margin-top:auto; padding-top:14px; border-top:1px solid var(--sx-line-2); font-size:13px; color:var(--sx-mute); }
+.sx-case-tag { display:inline-flex; align-self:flex-start; font-size:var(--fs-1); font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--sx-blue); background:color-mix(in srgb,var(--sx-blue) 9%,transparent); padding:5px 11px; border-radius:var(--r-sm); margin-bottom:11px; }
+.sx-case h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); line-height:1.25; letter-spacing:-.01em; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.sx-case p { font-size:var(--fs-4); color:var(--sx-mute); line-height:1.55; margin:8px 0 0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.sx-case-meta {display:flex; gap:18px; margin-top:auto; padding-top:14px; font-size:var(--fs-3); color:var(--sx-mute)}
 .sx-case-meta b { color:var(--sx-ink); }
 
 /* ── news ───────────────────────────────────────────── */
 .sx-news { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
 .sx-ncard { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; transition:transform .3s, box-shadow .3s; }
-.sx-ncard:hover { transform:translateY(-4px); box-shadow:var(--sx-shadow); }
+.sx-ncard:hover { transform:translateY(-4px); box-shadow:var(--sh-sm); }
 .sx-ncard-cover { aspect-ratio:16/9; background:linear-gradient(135deg,var(--sx-bg-soft),var(--sx-line-2)); display:flex; align-items:center; justify-content:center; color:var(--sx-mute); overflow:hidden; }
 .sx-ncard-cover img { width:100%; height:100%; object-fit:cover; }
 .sx-ncard-body { padding:20px; }
-.sx-ncard-date { font-size:12.5px; color:var(--sx-mute); font-weight:600; }
-.sx-ncard h3 { font-size:16px; font-weight:700; color:var(--sx-ink); line-height:1.35; margin-top:8px; }
+.sx-ncard-date { font-size:var(--fs-2); color:var(--sx-mute); font-weight:600; }
+.sx-ncard h3 { font-size:var(--fs-5); font-weight:700; color:var(--sx-ink); line-height:1.35; margin-top:8px; }
 
 /* ── catalog portal ──────────────────────────────────── */
-.sx-cp { position:relative; background:#050D1C; border-radius:28px; padding:clamp(36px,5vw,64px); overflow:hidden; }
+.sx-cp { position:relative; background:var(--sx-card); border:1px solid var(--sx-line); border-radius:var(--r-xl); padding:clamp(36px,5vw,64px); overflow:hidden; }
 .sx-cp-aurora { position:absolute; inset:0; background:
   radial-gradient(ellipse 65% 90% at 5% 50%, rgba(14,74,198,.42), transparent 68%),
   radial-gradient(ellipse 55% 70% at 95% 25%, rgba(20,184,224,.28), transparent 63%),
   radial-gradient(ellipse 45% 65% at 55% 85%, rgba(100,84,212,.22), transparent 58%); pointer-events:none; }
 .sx-cp-ov { position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px); background-size:44px 44px; -webkit-mask-image:radial-gradient(ellipse 90% 90% at 50% 0%,#000 30%,transparent 80%); mask-image:radial-gradient(ellipse 90% 90% at 50% 0%,#000 30%,transparent 80%); pointer-events:none; }
 .sx-cp-inner { position:relative; z-index:1; display:grid; grid-template-columns:1.1fr 1fr; gap:clamp(28px,4vw,56px); align-items:center; }
-.sx-cp-eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#8fc7ff; }
-.sx-cp-eyebrow::before { content:""; width:20px; height:2px; border-radius:2px; background:linear-gradient(90deg,#4d9fff,#14C8F5); }
-.sx-cp-h2 { font-size:clamp(24px,3.2vw,40px); font-weight:800; letter-spacing:-.028em; color:#fff; margin:14px 0 0; line-height:1.1; }
-.sx-cp-sub { font-size:clamp(14px,1.3vw,16px); color:rgba(255,255,255,.55); margin:14px 0 30px; line-height:1.65; }
-.sx-cp-btn { display:inline-flex; align-items:center; gap:10px; height:54px; padding:0 30px; border-radius:14px; background:linear-gradient(135deg,#1d7ed8,#0E4AC6); color:#fff; font-size:15.5px; font-weight:700; border:none; cursor:pointer; transition:transform .18s,filter .18s,box-shadow .25s; box-shadow:0 8px 28px rgba(14,74,198,.45); font-family:inherit; }
-.sx-cp-btn:hover { transform:translateY(-2px); filter:brightness(1.1); box-shadow:0 12px 36px rgba(14,74,198,.55); }
-.sx-cp-tiles { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.sx-cp-tile { display:flex; align-items:center; gap:13px; padding:16px 18px; border-radius:14px; background:rgba(255,255,255,.055); border:1px solid rgba(255,255,255,.09); cursor:pointer; text-align:left; transition:background .2s,border-color .2s,transform .22s cubic-bezier(.16,1,.3,1); }
-.sx-cp-tile:hover { background:rgba(255,255,255,.1); border-color:color-mix(in srgb,var(--ta,#1d7ed8) 55%,rgba(255,255,255,.09)); transform:translateY(-3px); }
-.sx-cp-tile-ic { width:40px; height:40px; border-radius:11px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--ta,#1d7ed8) 20%,transparent); color:color-mix(in srgb,var(--ta,#1d7ed8) 85%,#fff); flex-shrink:0; }
-.sx-cp-tile-t { flex:1; font-size:13.5px; font-weight:700; color:rgba(255,255,255,.88); line-height:1.3; }
-.sx-cp-tile-arr { color:rgba(255,255,255,.35); transition:transform .2s,color .2s; flex-shrink:0; }
-.sx-cp-tile:hover .sx-cp-tile-arr { transform:translate(3px,-2px); color:rgba(255,255,255,.7); }
+.sx-cp-aurora, .sx-cp-ov { display:none; }
+.sx-cp-eyebrow::before { content:""; width:16px; height:1px; background:var(--sx-line); }
+.sx-cp-h2 { font-size:clamp(26px,3.4vw,42px); font-weight:800; letter-spacing:-.032em; color:var(--sx-ink); margin:14px 0 0; line-height:1.08; }
+.sx-cp-sub { font-size:clamp(14px,1.3vw,16px); color:var(--sx-mute); margin:14px 0 28px; line-height:1.65; }
+.sx-cp-btn { display:inline-flex; align-items:center; gap:10px; height:48px; padding:0 26px; border-radius:var(--r-pill); background:var(--sx-lime); color:var(--sx-lime-ink); font-size:var(--fs-4); font-weight:700; border:none; cursor:pointer; transition:background .2s, gap .2s; font-family:inherit; }
+.sx-cp-btn:hover { background:color-mix(in srgb, var(--sx-lime) 82%, #fff); gap:14px; }
+.sx-cp-tiles { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.sx-cp-tile { display:flex; align-items:center; gap:13px; padding:15px 17px; border-radius:var(--r); background:var(--sx-bg-soft); border:1px solid var(--sx-line); cursor:pointer; text-align:left; transition:background .2s,border-color .2s; }
+.sx-cp-tile:hover { background:var(--sx-card); border-color:var(--sx-ink-soft); }
+.sx-cp-tile-ic { width:36px; height:36px; border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; background:var(--sx-card); border:1px solid var(--sx-line); color:var(--sx-accent); flex-shrink:0; }
+.sx-cp-tile-t { flex:1; font-size:var(--fs-3); font-weight:700; color:var(--sx-ink); line-height:1.3; }
+.sx-cp-tile-arr { color:var(--sx-mute); transition:transform .2s,color .2s; flex-shrink:0; }
+.sx-cp-tile:hover .sx-cp-tile-arr { transform:translate(3px,-2px); color:var(--sx-ink); }
 @media(max-width:820px){ .sx-cp-inner{ grid-template-columns:1fr; } }
 @media(max-width:480px){ .sx-cp-tiles{ grid-template-columns:1fr; } }
 
 /* ── final CTA ──────────────────────────────────────── */
-.sx-cta { position:relative; background:#050D1C; border-radius:28px; padding:clamp(48px,6vw,80px); overflow:hidden; text-align:center; }
+.sx-cta { position:relative; background:var(--sx-bg); border:1px solid var(--sx-line); border-radius:var(--r-xl); padding:clamp(48px,6vw,80px); overflow:hidden; text-align:center; }
 .sx-cta-aurora { position:absolute; inset:0; background:
   radial-gradient(ellipse 70% 90% at 30% 20%, rgba(14,74,198,.4),transparent 70%),
   radial-gradient(ellipse 60% 80% at 80% 90%, rgba(20,184,224,.28),transparent 65%); }
 .sx-cta-inner { position:relative; z-index:1; }
-.sx-cta h2 { font-size:clamp(30px,4vw,52px); font-weight:800; letter-spacing:-.03em; color:#fff; line-height:1.08; max-width:740px; margin:0 auto; }
-.sx-cta p { font-size:17px; color:rgba(255,255,255,.6); margin:18px auto 0; max-width:520px; line-height:1.6; }
+.sx-cta-aurora { display:none; }
+.sx-cta h2 { font-size:clamp(32px,4.4vw,56px); font-weight:800; letter-spacing:-.035em; color:var(--sx-ink); line-height:1.04; max-width:740px; margin:0 auto; }
+.sx-cta p { font-size:var(--fs-5); color:var(--sx-mute); margin:18px auto 0; max-width:520px; line-height:1.6; }
 .sx-cta-actions { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; margin-top:36px; }
-.sx-btn { display:inline-flex; align-items:center; gap:9px; height:52px; padding:0 28px; border-radius:13px; font-size:15.5px; font-weight:700; cursor:pointer; border:none; font-family:inherit; transition:transform .15s, filter .15s, box-shadow .2s, background .2s; }
-.sx-btn-primary { background:linear-gradient(135deg,#1d7ed8,#0E4AC6); color:#fff; box-shadow:0 8px 24px rgba(14,74,198,.4); }
-.sx-btn-primary:hover { transform:translateY(-2px); filter:brightness(1.08); }
-.sx-btn-ghost { background:rgba(255,255,255,.08); color:#fff; border:1.5px solid rgba(255,255,255,.2); }
-.sx-btn-ghost:hover { background:rgba(255,255,255,.14); transform:translateY(-2px); }
+/* One button shape for the whole page — the pill the header and hero already
+   use. Before this, a section could put a lime pill next to a blue rectangle
+   offering the same thing, which is what made the page read as assembled from
+   parts. Primary carries the lime; everything else is a hairline. */
+.sx-btn { display:inline-flex; align-items:center; gap:9px; height:48px; padding:0 26px; border-radius:var(--r-pill); font-size:var(--fs-4); font-weight:700; cursor:pointer; border:1px solid transparent; font-family:inherit; letter-spacing:-.005em; transition:background .2s, border-color .2s, color .2s, gap .2s; }
+.sx-btn-primary { background:var(--sx-lime); color:var(--sx-lime-ink); }
+.sx-btn-primary:hover { background:color-mix(in srgb, var(--sx-lime) 82%, #fff); gap:13px; }
+.sx-btn-ghost { background:transparent; color:var(--sx-ink); border-color:var(--sx-line); }
+.sx-btn-ghost:hover { background:var(--sx-bg-soft); border-color:var(--sx-ink-soft); gap:13px; }
+/* On the dark panels that survive (the hero photo, the tiles) the ghost has to
+   invert or it disappears into the ground. */
+.sx-on-dark .sx-btn-ghost, .sx-btn-ghost.on-dark { color:#fff; border-color:rgba(255,255,255,.28); }
+.sx-on-dark .sx-btn-ghost:hover, .sx-btn-ghost.on-dark:hover { background:rgba(255,255,255,.12); border-color:rgba(255,255,255,.5); }
 
 /* ── reviews ─────────────────────────────────────────── */
 .sx-rev-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:40px; }
 .sx-rev-head-left h2 { display:flex; align-items:center; gap:8px; cursor:pointer; }
 .sx-rev-head-left h2:hover { color:var(--sx-blue); }
-.sx-rev-tabs { display:flex; gap:0; align-items:center; border-bottom:2px solid var(--sx-line); flex-shrink:0; }
-.sx-rev-tab { padding:10px 20px; font-size:14.5px; font-weight:600; color:var(--sx-mute); background:transparent; border:none; cursor:pointer; font-family:inherit; position:relative; transition:color .18s; white-space:nowrap; }
+.sx-rev-tabs {display:flex; gap:0; align-items:center; flex-shrink:0}
+.sx-rev-tab { padding:10px 20px; font-size:var(--fs-4); font-weight:600; color:var(--sx-mute); background:transparent; border:none; cursor:pointer; font-family:inherit; position:relative; transition:color .18s; white-space:nowrap; }
 .sx-rev-tab::after { content:""; position:absolute; bottom:-2px; left:0; right:0; height:2px; background:var(--sx-blue); transform:scaleX(0); transition:transform .22s cubic-bezier(.16,1,.3,1); border-radius:2px 2px 0 0; }
 .sx-rev-tab.on { color:var(--sx-ink); }
 .sx-rev-tab.on::after { transform:scaleX(1); }
 .sx-rev-tab:focus-visible { outline:2px solid var(--sx-blue); outline-offset:2px; border-radius:4px 4px 0 0; }
-.sx-rev-outer { display:flex; align-items:center; gap:14px; }
-.sx-rev-arr { flex-shrink:0; width:44px; height:44px; border-radius:50%; border:1.5px solid var(--sx-line); background:var(--sx-card); color:var(--sx-ink); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .18s,border-color .18s,opacity .18s; }
+/* Карусель выровнена по остальным блокам: раньше стрелки стояли в потоке и
+   вдавливали ленту карточек на 58 px внутрь, из-за чего письма не совпадали
+   по левому краю ни с заголовком блока, ни с карточками соседних секций.
+   Теперь стрелки вынесены из потока и висят над краями ленты. */
+.sx-rev-outer { position:relative; display:block; }
+.sx-rev-arr { position:absolute; top:50%; transform:translateY(-50%); z-index:2;
+  flex-shrink:0; width:44px; height:44px; border-radius:50%; border:1.5px solid var(--sx-line); background:var(--sx-card); color:var(--sx-ink); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .18s,border-color .18s,opacity .18s; }
 .sx-rev-arr:hover:not(:disabled) { background:var(--sx-bg-soft); border-color:var(--sx-blue); color:var(--sx-blue); }
 .sx-rev-arr:disabled { opacity:.3; cursor:default; }
 .sx-rev-arr:focus-visible { outline:2px solid var(--sx-blue); outline-offset:2px; }
-.sx-rev-overflow { flex:1; overflow:hidden; }
+.sx-rev-overflow { overflow:hidden; }
+.sx-rev-outer > .sx-rev-arr:first-of-type { left:-22px; }
+.sx-rev-outer > .sx-rev-arr:last-of-type { right:-22px; }
+.sx-rev-arr { box-shadow:var(--sh-sm); }
+@media(max-width:900px){
+  /* На узких экранах вынос за край упирается в поля страницы — возвращаем
+     стрелки внутрь ленты. */
+  .sx-rev-outer > .sx-rev-arr:first-of-type { left:4px; }
+  .sx-rev-outer > .sx-rev-arr:last-of-type { right:4px; }
+}
 .sx-rev-track { display:flex; gap:20px; transition:transform .45s cubic-bezier(.16,1,.3,1); }
 .sx-rev-card { flex:0 0 calc(50% - 10px); display:flex; gap:22px; align-items:flex-start; background:var(--sx-card); border:1px solid var(--sx-line); border-radius:var(--sx-r); padding:24px 26px; }
-.sx-rev-doc { flex-shrink:0; width:134px; aspect-ratio:210/297; border-radius:6px; overflow:hidden; box-shadow:0 4px 18px rgba(0,0,0,.12); background:#fff; cursor:pointer; transition:transform .2s,box-shadow .2s; }
-.sx-rev-doc:hover { transform:translateY(-2px); box-shadow:0 10px 28px rgba(0,0,0,.18); }
+.sx-rev-doc { flex-shrink:0; width:134px; aspect-ratio:210/297; border-radius:var(--r-sm); overflow:hidden; box-shadow:var(--sh-lg); background:#fff; cursor:pointer; transition:transform .2s,box-shadow .2s; }
+.sx-rev-doc:hover { transform:translateY(-2px); box-shadow:var(--sh-sm); }
 .sx-rev-doc:focus-visible { outline:2px solid var(--sx-blue); outline-offset:2px; }
 .sx-rev-doc > img, .sx-rev-doc > svg { width:100%; height:100%; display:block; }
 .sx-rev-doc > img { object-fit:cover; object-position:top; }
 .sx-rev-body { flex:1; min-width:0; display:flex; flex-direction:column; }
 .sx-rev-badges { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:12px; }
-.sx-rev-badge { display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; color:var(--sx-blue); border:1.5px solid color-mix(in srgb,var(--sx-blue) 28%,transparent); border-radius:7px; padding:4px 10px; line-height:1.3; }
-.sx-rev-org { font-size:16px; font-weight:800; color:var(--sx-ink); line-height:1.25; letter-spacing:-.015em; margin:0 0 10px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-.sx-rev-quote { font-size:14px; line-height:1.65; color:var(--sx-mute); flex:1; margin:0; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; }
+.sx-rev-badge { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-2); font-weight:600; color:var(--sx-blue); border:1.5px solid color-mix(in srgb,var(--sx-blue) 28%,transparent); border-radius:var(--r-sm); padding:4px 10px; line-height:1.3; }
+.sx-rev-org { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); line-height:1.25; letter-spacing:-.015em; margin:0 0 10px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+.sx-rev-quote { font-size:var(--fs-4); line-height:1.65; color:var(--sx-mute); flex:1; margin:0; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; }
 @media(max-width:820px){
   .sx-rev-card { flex:0 0 calc(100% - 10px); }
   .sx-rev-doc { width:88px; }
@@ -1286,15 +1455,15 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 
 /* ── focus & accessibility (WCAG 2.4.7) ─────────────── */
 .sx-cp-btn:focus-visible,
-.sx-btn:focus-visible { outline:3px solid #1d7ed8; outline-offset:3px; }
+.sx-btn:focus-visible { outline:3px solid var(--sx-ink); outline-offset:3px; }
 .sx-cp-tile:focus-visible,
 .sx-dir:focus-visible,
-.sx-bpill:focus-visible,
 .sx-case:focus-visible,
-.sx-ncard:focus-visible { outline:2px solid var(--sx-blue,#1d7ed8); outline-offset:2px; border-radius:inherit; }
-.soi-search-input:focus-visible { outline:2px solid var(--sx-blue,#1d7ed8); outline-offset:0; }
+.sx-ncard:focus-visible { outline:2px solid var(--sx-blue); outline-offset:2px; border-radius:inherit; }
+.soi-search-input:focus-visible { outline:2px solid var(--sx-blue); outline-offset:0; }
 @media (prefers-reduced-motion: reduce) {
-  .sx-cp-btn, .sx-cp-tile, .eco-t, .eco-cta, .eco-chip, .sx-dir, .sx-bpill, .sx-case, .sx-ncard,
+  .sx-cp-btn, .sx-cp-tile, .eco-t, .eco-cta, .sx-dir, .sx-case, .sx-ncard,
+  .sx-mq-item,
   .sx-btn { transition:none !important; transform:none !important; }
   .eco-live::before { animation:none !important; }
 }
@@ -1311,7 +1480,7 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
   .sx-bento { grid-template-columns:1fr; grid-template-areas:"catalog" "reg" "tender" "service" "brands" "equip"; }
   .sx-dir-grid { grid-template-columns:1fr; }
   .sx-impact-grid { grid-template-columns:1fr 1fr; }
-  .sx-impact, .sx-cta { border-radius:20px; }
+  .sx-impact, .sx-cta { border-radius:var(--r-lg); }
 }
     `;
     document.head.appendChild(s);
@@ -1330,13 +1499,13 @@ function _lv(lang, ru, uz, en) { return lang === "uz" ? uz : lang === "en" ? en 
    A metric left blank in the admin renders nothing rather than a zero. */
 
 const ECO_DEFAULTS = {
-  catalog_num: "2 800", catalog_unit: "+",
-  training_num: "1000", training_unit: "+",
-  service_num: "50", service_unit: "+",
+  catalog_num: SITE_FIGURES_DEFAULTS.catalog, catalog_unit: "+",
+  training_num: SITE_FIGURES_DEFAULTS.trained, training_unit: "+",
+  service_num: SITE_FIGURES_DEFAULTS.service, service_unit: "+",
   training_photo: "", service_photo: "",
-  brands_num: "120", brands_unit: "+",
+  brands_num: SITE_FIGURES_DEFAULTS.brands, brands_unit: "+",
   // The delivery tile carries the map alone — no metrics, no CTA.
-  delivery_num: "14", delivery_unit: "",
+  delivery_num: SITE_FIGURES_DEFAULTS.regions, delivery_unit: "",
 };
 
 /* Live figures. One small request per source; every one of them may fail without
@@ -1384,6 +1553,86 @@ function ecoAgo(iso, lang) {
   if (h < 24) return _lv(lang, `${h} ч назад`, `${h} soat oldin`, `${h} h ago`);
   const d = Math.floor(h / 24);
   return _lv(lang, `${d} дн назад`, `${d} kun oldin`, `${d} d ago`);
+}
+
+/* A figure that counts up the first time it is scrolled into view.
+   The value is editor-owned text — "2 800", "120", "—" — so only its digits are
+   animated and the editor's own separators are rebuilt around them. A value that
+   holds no digit at all (the "—" a missing counter renders) is printed as it is,
+   and so is everything when the visitor asks for reduced motion. */
+function EcoCount({ value }) {
+  const ref = useRef(null);
+  /* What the tile last showed. A live counter refreshes while the visitor is
+     looking at it, and a value that walks 54 → 55 must not fall back to zero
+     and climb again — it counts on from where it stood. */
+  const shownRef = useRef(0);
+  const raw = value == null ? "" : String(value);
+  const [out, setOut] = useState(raw);
+
+  /* Layout effect, not a plain one: a counter waiting below the fold must be
+     primed to its starting figure before the browser paints, otherwise it shows
+     the final number first and visibly snaps back when it scrolls into view. */
+  React.useLayoutEffect(() => {
+    const el = ref.current;
+    const digits = raw.replace(/\D/g, "");
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!el || !digits || reduce) { setOut(raw); return; }
+
+    const target = parseInt(digits, 10);
+    const from = shownRef.current;
+    // Grouped in the source ("2 800") — keep it grouped while counting.
+    const grouped = /\d[\s ]\d/.test(raw);
+    const fmt = (n) => (grouped ? n.toLocaleString("ru-RU") : String(n));
+    // Whatever wraps the digits — a "№", a "+" typed into the number itself.
+    const [, head = "", tail = ""] = raw.match(/^(\D*)[\d\s ]*(\D*)$/) || [];
+
+    let frame = 0;
+    let done = false;
+    const run = () => {
+      const t0 = performance.now();
+      const step = (now) => {
+        const p = Math.min(1, (now - t0) / 1100);
+        const eased = 1 - Math.pow(1 - p, 3);
+        const n = Math.round(from + (target - from) * eased);
+        shownRef.current = n;
+        setOut(head + fmt(n) + tail);
+        if (p < 1) frame = requestAnimationFrame(step);
+      };
+      frame = requestAnimationFrame(step);
+    };
+
+    setOut(head + fmt(from) + tail);
+    const io = new IntersectionObserver((entries) => {
+      if (!done && entries.some((e) => e.isIntersecting)) { done = true; io.disconnect(); run(); }
+    }, { threshold: .35 });
+    io.observe(el);
+    return () => { io.disconnect(); cancelAnimationFrame(frame); };
+  }, [raw]);
+
+  return <span ref={ref}>{out}</span>;
+}
+
+/* «29.07.2026 · 20:02» — the real moment of the last sync, always in Tashkent
+   time whatever the visitor's clock says, because that is the schedule the
+   client's crawler runs on and the one the claim «daily» refers to. */
+function tndStamp(iso) {
+  const d = new Date(iso);
+  if (!iso || isNaN(d)) return "";
+  const p = new Intl.DateTimeFormat("ru-RU", {
+    timeZone: "Asia/Tashkent", day: "2-digit", month: "2-digit", year: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: false,
+  }).formatToParts(d).reduce((a, x) => (a[x.type] = x.value, a), {});
+  return `${p.day}.${p.month}.${p.year} · ${p.hour}:${p.minute}`;
+}
+
+/* Lot money runs to eleven digits: printed in full it would be unreadable and
+   would not fit the row, so it is cut to billions/millions with one decimal. */
+function tndMoney(sum, lang) {
+  const n = Number(sum) || 0;
+  if (n < 1e6) return "";
+  const cur = _lv(lang, "сум", "so'm", "UZS");
+  if (n >= 1e9) return `${(n / 1e9).toLocaleString("ru-RU", { maximumFractionDigits: 1 })} ${_lv(lang, "млрд", "mlrd", "bn")} ${cur}`;
+  return `${Math.round(n / 1e6).toLocaleString("ru-RU")} ${_lv(lang, "млн", "mln", "m")} ${cur}`;
 }
 
 function EcoMetrics({ items, className }) {
@@ -1452,7 +1701,6 @@ function SoiEcosystem({ lang, go }) {
      falls back to the default, so a fresh install still shows a full block. */
   const val = (f) => (eco && Object.prototype.hasOwnProperty.call(eco, f) ? eco[f] : ECO_DEFAULTS[f]);
 
-  const cats = (window.DATA && window.DATA.CATEGORIES || []).slice(0, 5);
   const st = pulse.stats;
 
   /* Platforms arrive already grouped, named and described by the API — the four
@@ -1501,7 +1749,7 @@ function SoiEcosystem({ lang, go }) {
 
 
   return (
-    <section className="sx-section">
+    <section className="sx-section eco-section">
       <div className="sx-wrap">
         <div className="eco-grid">
 
@@ -1516,25 +1764,12 @@ function SoiEcosystem({ lang, go }) {
                 </div>
               )}
             </div>
-            <div className="eco-num">{val("catalog_num")}<span>{val("catalog_unit")}</span></div>
+            <div className="eco-num"><EcoCount value={val("catalog_num")} /><span>{val("catalog_unit")}</span></div>
             <h3>{_lv(lang, "Электронный каталог оборудования", "Elektron uskunalar katalogi", "Electronic equipment catalog")}</h3>
             <p>{_lv(lang,
               "Медтехника, мебель, инструменты и расходные материалы от ведущих мировых производителей.",
               "Tibbiy texnika, mebel, asboblar va sarf materiallari — yetakchi jahon ishlab chiqaruvchilaridan.",
               "Equipment, furniture, instruments and consumables from leading global manufacturers.")}</p>
-            <button className="eco-search" onClick={() => go("catalog")}>
-              <Icon name="search" size={16} />
-              {_lv(lang, "Поиск оборудования, бренда, категории…", "Uskuna, brend, kategoriya qidirish…", "Search equipment, brand, category…")}
-            </button>
-            <div className="eco-chips">
-              {cats.map((c) => (
-                <button className="eco-chip" key={c.id} onClick={() => go("catalog", { cat: c.id })}>
-                  <Icon name={c.icon} size={14} />
-                  {_lv(lang, c.ru, c.uz || c.ru, c.en || c.ru)}
-                  {c.count ? <i>{c.count}</i> : null}
-                </button>
-              ))}
-            </div>
             <div className="eco-foot">
               <button className="eco-cta solid" onClick={() => go("catalog")}>
                 {_lv(lang, "Перейти в каталог", "Katalogga o'tish", "Open the catalog")}<Icon name="arrowRight" size={15} />
@@ -1546,7 +1781,7 @@ function SoiEcosystem({ lang, go }) {
           <article className="eco-t training sx-rv">
             {val("training_photo") ? <div className="eco-photo" style={{ backgroundImage: `url(${val("training_photo")})` }} /> : null}
             <div className="eco-head"><div className="eco-ic"><Icon name="user" size={22} /></div></div>
-            <div className="eco-num">{val("training_num")}<span>{val("training_unit")}</span></div>
+            <div className="eco-num"><EcoCount value={val("training_num")} /><span>{val("training_unit")}</span></div>
             <h3>{_lv(lang, "Обученных специалистов", "O'qitilgan mutaxassislar", "Trained specialists")}</h3>
             <p>{_lv(lang,
               "Обучаем персонал клиник работе с поставленным оборудованием — очно и онлайн.",
@@ -1564,36 +1799,39 @@ function SoiEcosystem({ lang, go }) {
             <div className="tnd-top">
               <div className="eco-ic"><Icon name="pulse" size={22} /></div>
               <div className="tnd-titles">
-                <span className="tnd-eyebrow">
-                  {_lv(lang, "Мониторинг государственных закупок", "Davlat xaridlari monitoringi", "Public procurement monitoring")}
-                </span>
-                <h3>{_lv(lang, "Тендеры и государственные закупки", "Tender va davlat xaridlari", "Tenders & public procurement")}</h3>
+                {/* The eyebrow is the heading now — the tile used to carry both a
+                    caption and a title that said the same thing twice. */}
+                <h3 className="tnd-eyebrow">
+                  {_lv(lang,
+                    "Мониторинг государственных и корпоративных закупок",
+                    "Davlat va korporativ xaridlar monitoringi",
+                    "Public & corporate procurement monitoring")}
+                </h3>
               </div>
               {st && st.lastSyncAt && (
-                <div className="eco-live">
-                  LIVE · {_lv(lang, "обновлено", "yangilandi", "updated")} {ecoAgo(st.lastSyncAt, lang)}
+                /* The exact stamp of the last sync, in Tashkent time, instead of
+                   a vague «updated 2 days ago»: a panel that claims daily
+                   monitoring has to be checkable. */
+                <div className="eco-live" title={_lv(lang, "Время последней синхронизации", "Oxirgi sinxronizatsiya vaqti", "Last sync time")}>
+                  {_lv(lang, "Обновлено", "Yangilandi", "Updated")} {tndStamp(st.lastSyncAt)}
                 </div>
               )}
             </div>
 
-            <p>{_lv(lang,
-              "Ежедневно собираем лоты с государственных площадок, раскладываем их по категориям и готовим предложения под требования закупки.",
-              "Har kuni davlat maydonchalaridan lotlarni yig'amiz, kategoriyalarga ajratamiz va xarid talablariga mos takliflar tayyorlaymiz.",
-              "We collect lots from the state platforms daily, sort them by category and prepare offers that match the procurement.")}</p>
-
-            {/* Five counters, all aggregated server-side. No trend lines: we keep
-                a single snapshot, so a sparkline here would be invented. */}
+            {/* Four figures, ranked rather than boxed: the lead one carries the
+                headline claim and the rest step down in size. They used to sit in
+                bordered cells — a card inside a card inside a card. */}
             <div className="tnd-kpis">
               {[
-                { v: st ? st.active : "—", l: _lv(lang, "активных закупок", "faol xarid", "active lots") },
+                { v: st ? st.active : "—", l: _lv(lang, "активных закупок", "faol xarid", "active lots"), lead: true },
                 { v: st ? st.newWeek : "—", l: _lv(lang, "новых за неделю", "haftada yangi", "new this week") },
                 { v: st ? st.endingWeek : "—", l: _lv(lang, "закрываются за неделю", "hafta ichida yopiladi", "closing this week") },
                 // Counted off the list below, not from stats: the server counts
                 // feeds (Etender publishes two) and the panel counts platforms.
                 { v: srcs.length || "—", l: _lv(lang, "площадок мониторинга", "kuzatilayotgan maydoncha", "platforms watched") },
               ].map((k, i) => (
-                <div className="tnd-kpi" key={i}>
-                  <div className="tnd-kpi-v">{k.v}</div>
+                <div className={"tnd-kpi" + (k.lead ? " lead" : "")} key={i}>
+                  <div className="tnd-kpi-v"><EcoCount value={k.v} /></div>
                   <div className="tnd-kpi-l">{k.l}</div>
                 </div>
               ))}
@@ -1612,16 +1850,15 @@ function SoiEcosystem({ lang, go }) {
                     href={s.site}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title={s.site}
+                    /* What the platform is, on hover — the API already ships the
+                       description in all three languages. */
+                    title={(s.description ? _lv(lang, s.description.ru, s.description.uz, s.description.en) + " · " : "") + s.site}
                   >
                     <span className={"tnd-dot" + (s.count ? "" : " off")} />
                     <span className="tnd-row-n">{s.name}</span>
-                    <span />
+                    <span className="tnd-row-v">{s.count || "—"}</span>
                   </a>
                 ))}
-                <div className="tnd-note">
-                  {_lv(lang, "Данные обновляются ежедневно.", "Ma'lumotlar har kuni yangilanadi.", "Data refreshes daily.")}
-                </div>
               </div>
 
               <div className="tnd-sec">
@@ -1629,22 +1866,26 @@ function SoiEcosystem({ lang, go }) {
                   {_lv(lang, "Категории закупок", "Xarid kategoriyalari", "Procurement categories")}
                   <b>{st ? st.active : ""}</b>
                 </div>
-                {tndCats.map((c) => (
+                {tndCats.map((c, i) => (
                   <button
-                    className={"tnd-row" + (c.count ? "" : " zero")}
+                    className={"tnd-row cat" + (c.count ? "" : " zero")}
                     key={c.id}
+                    /* One accent, five weights of it: five different hues inside a
+                       violet tile is exactly the acid the brief rules out. */
+                    style={{ "--bar": (1 - i * 0.15).toFixed(2) }}
                     onClick={() => go("tenders", { cat: c.id })}
                     title={_lv(lang, "Открыть тендеры: ", "Tenderlarni ochish: ", "Open tenders: ") + c.label}
                   >
-                    <span className="tnd-ic"><Icon name={c.icon} size={15} /></span>
+                    <span className="tnd-bar" />
                     <span className="tnd-row-n">{c.label}</span>
+                    <span className="tnd-row-sum">{tndMoney(c.sum, lang)}</span>
                     <span className="tnd-row-v">{c.count}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="eco-foot" style={{ paddingTop: 14 }}>
+            <div className="eco-foot" style={{ paddingTop: 12 }}>
               <button className="eco-cta solid" onClick={() => go("tenders")}>
                 {_lv(lang, "Все тендеры", "Barcha tenderlar", "All tenders")}<Icon name="arrowRight" size={15} />
               </button>
@@ -1654,7 +1895,7 @@ function SoiEcosystem({ lang, go }) {
           {/* ── brands ── */}
           <article className="eco-t brands sx-rv">
             <div className="eco-head"><div className="eco-ic"><Icon name="award" size={22} /></div></div>
-            <div className="eco-num">{val("brands_num")}<span>{val("brands_unit")}</span></div>
+            <div className="eco-num"><EcoCount value={val("brands_num")} /><span>{val("brands_unit")}</span></div>
             <h3>{_lv(lang, "Мировые бренды", "Jahon brendlari", "Global brands")}</h3>
             <p>{_lv(lang, "Официальные поставки от производителей из 12 стран.", "12 mamlakat ishlab chiqaruvchilaridan rasmiy yetkazib berish.", "Official supply from manufacturers across 12 countries.")}</p>
             {showWall && (
@@ -1681,7 +1922,7 @@ function SoiEcosystem({ lang, go }) {
           <article className="eco-t service sx-rv">
             {val("service_photo") ? <div className="eco-photo" style={{ backgroundImage: `url(${val("service_photo")})` }} /> : null}
             <div className="eco-head"><div className="eco-ic"><Icon name="wrench" size={22} /></div></div>
-            <div className="eco-num">{val("service_num")}<span>{val("service_unit")}</span></div>
+            <div className="eco-num"><EcoCount value={val("service_num")} /><span>{val("service_unit")}</span></div>
             <h3>{_lv(lang, "Успешно выполненных сервисных работ", "Muvaffaqiyatli bajarilgan servis ishlari", "Completed service jobs")}</h3>
             <p>{_lv(lang, "Пусконаладка, плановое обслуживание и ремонт оборудования по всей стране.", "Ishga tushirish, rejali xizmat va ta'mirlash butun mamlakat bo'ylab.", "Commissioning, maintenance and repair across the country.")}</p>
             <div className="eco-foot">
@@ -1694,7 +1935,7 @@ function SoiEcosystem({ lang, go }) {
           {/* ── delivery ── */}
           <article className="eco-t delivery sx-rv">
             <div className="eco-head"><div className="eco-ic"><Icon name="pin" size={22} /></div></div>
-            <div className="eco-num">{val("delivery_num")}<span>{val("delivery_unit")}</span></div>
+            <div className="eco-num"><EcoCount value={val("delivery_num")} /><span>{val("delivery_unit")}</span></div>
             <h3>{_lv(lang, "Доставка по всей стране", "Butun mamlakat bo'ylab yetkazish", "Nationwide delivery")}</h3>
             <p>{_lv(lang, "Поставка, логистика и сопровождение в 14 регионах Узбекистана.", "14 hududda yetkazib berish, logistika va qo'llab-quvvatlash.", "Delivery, logistics and support across 14 regions of Uzbekistan.")}</p>
             <EcoUzMap lang={lang} />
@@ -1706,7 +1947,7 @@ function SoiEcosystem({ lang, go }) {
   );
 }
 
-/* ── «Экспертиза · 360° / Наши услуги» — ported from CLAUDE HP ServicesSection ── */
+/* ── «Экспертиза / Наши услуги» — ported from CLAUDE HP ServicesSection ── */
 const EXPERTISE_ITEMS = [
   {
     nav: "registration",
@@ -1731,7 +1972,8 @@ const EXPERTISE_ITEMS = [
     },
   },
   {
-    nav: "services",
+    /* Раньше обе карточки, обучение и сервис, вели на общий раздел услуг. */
+    nav: "staffTraining",
     t: { ru: "Обучение персонала", uz: "Xodimlarni o'qitish", en: "Staff training" },
     d: { ru: "Обучаем персонал работе с оборудованием — очно, на вашей площадке или онлайн.", uz: "Xodimlarni uskunalar bilan ishlashga o'qitamiz — joyingizda yoki onlayn.", en: "We train your staff to operate the equipment — on-site at your facility or online." },
     proof: { ru: "Индивидуальная программа под ваше оборудование", uz: "Sizning uskunangizga moslashtirilgan dastur", en: "A program tailored to your equipment" },
@@ -1742,7 +1984,7 @@ const EXPERTISE_ITEMS = [
     },
   },
   {
-    nav: "services",
+    nav: "serviceSupport",
     t: { ru: "Сервисное обслуживание", uz: "Servis xizmati", en: "Maintenance service" },
     d: { ru: "Пусконаладка, гарантийный и постгарантийный сервис с выездом в регионы.", uz: "Ishga tushirish, kafolatli va kafolatdan keyingi servis, viloyatlarga chiqish bilan.", en: "Commissioning, warranty and post-warranty service with visits across the regions." },
     proof: { ru: "Гарантийная и постгарантийная поддержка", uz: "Kafolatli va kafolatdan keyingi qo'llab-quvvatlash", en: "Warranty and post-warranty support" },
@@ -1761,52 +2003,55 @@ function SoiExpertise({ lang, go }) {
     const s = document.createElement("style");
     s.id = id;
     s.textContent = `
-.sxp { position:relative; overflow:hidden; background:#0b2d25; padding:clamp(64px,8vw,112px) 0; }
-.sxp-glow { position:absolute; top:-160px; right:-160px; width:520px; height:520px; border-radius:50%;
-  background:rgba(184,245,0,.10); filter:blur(80px); pointer-events:none; }
-.sxp-inner { position:relative; max-width:1200px; margin:0 auto; padding:0 24px; }
+/* Services used to be a dark-green slab with a lime glow — one of four dark
+   panels the light page kept running into. It is now the same accordion of
+   cards on the page's own canvas: white cards, hairline borders, and a single
+   lime card carrying the featured service. */
+.sxp { position:relative; overflow:hidden; background:var(--sx-bg); padding:clamp(64px,8vw,112px) 0; }
+.sxp-glow { display:none; }
+.sxp-inner { position:relative; max-width:var(--maxw); margin:0 auto; padding:0 32px; }
 
 .sxp-head { display:grid; gap:32px; margin-bottom:clamp(40px,5vw,64px); }
 @media(min-width:1024px){ .sxp-head { grid-template-columns:1.15fr .85fr; align-items:end; gap:64px; } }
-.sxp-kicker { margin:0 0 16px; font-size:12px; font-weight:700; text-transform:uppercase;
-  letter-spacing:.16em; color:#c5ff19; }
+.sxp-kicker { margin:0 0 16px; font-size:var(--fs-1); font-weight:700; text-transform:uppercase;
+  letter-spacing:.16em; color:var(--sx-mute); }
 .sxp-h2 { margin:0; font-size:clamp(34px,5vw,60px); font-weight:800; line-height:.95;
-  letter-spacing:-.03em; color:#fff; }
-.sxp-sub { margin:0; max-width:28rem; font-size:15px; line-height:1.65; color:rgba(255,255,255,.55); }
+  letter-spacing:-.035em; color:var(--sx-ink); }
+.sxp-sub { margin:0; max-width:28rem; font-size:var(--fs-4); line-height:1.65; color:var(--sx-mute); }
 
 .sxp-grid { display:grid; gap:14px; }
 @media(min-width:640px){ .sxp-grid { grid-template-columns:1fr 1fr; } }
 @media(min-width:1024px){ .sxp-grid { display:flex; flex-wrap:nowrap; align-items:stretch; } }
 
 .sxp-card { position:relative; display:flex; flex-direction:column; overflow:hidden; text-align:left;
-  min-height:460px; padding:28px; border-radius:24px; cursor:pointer; font-family:inherit;
-  border:1px solid rgba(255,255,255,.1); background:rgba(255,255,255,.04); color:#fff;
+  min-height:460px; padding:28px; border-radius:var(--r-xl); cursor:pointer; font-family:inherit;
+  border:1px solid var(--sx-line); background:var(--sx-card); color:var(--sx-ink);
   transition:flex-grow .5s ease, background .35s, border-color .35s, transform .35s; }
 @media(min-width:1024px){ .sxp-card { flex:1 1 0; } .sxp-card:hover { flex-grow:1.35; } }
-.sxp-card:hover { border-color:rgba(184,245,0,.5); background:rgba(255,255,255,.07); }
-.sxp-card.feat { background:#b8f500; border-color:transparent; color:#0b2d25; }
-.sxp-card.feat:hover { background:#c5ff19; }
-.sxp-card:focus-visible { outline:2px solid #c5ff19; outline-offset:3px; }
+.sxp-card:hover { border-color:var(--sx-ink-soft); background:var(--sx-card); }
+.sxp-card.feat { background:var(--sx-lime); border-color:transparent; color:var(--sx-lime-ink); }
+.sxp-card.feat:hover { background:color-mix(in srgb, var(--sx-lime) 88%, #fff); }
+.sxp-card:focus-visible { outline:2px solid var(--sx-ink); outline-offset:3px; }
 
 .sxp-bignum { position:absolute; right:12px; bottom:-48px; font-size:9rem; font-weight:800; line-height:1;
-  user-select:none; pointer-events:none; color:rgba(255,255,255,.03); }
-.sxp-card.feat .sxp-bignum { color:rgba(11,45,37,.08); }
+  user-select:none; pointer-events:none; color:rgba(16,21,18,.04); }
+.sxp-card.feat .sxp-bignum { color:rgba(22,33,11,.08); }
 
 .sxp-top { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.sxp-no { font-size:12px; font-weight:700; color:#c5ff19; }
-.sxp-card.feat .sxp-no { color:rgba(11,45,37,.6); }
+.sxp-no { font-size:var(--fs-2); font-weight:700; color:var(--sx-mute); }
+.sxp-card.feat .sxp-no { color:rgba(22,33,11,.6); }
 .sxp-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
-  border-radius:50%; border:1px solid rgba(255,255,255,.2); font-size:18px; color:#c5ff19;
+  border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
   transition:transform .3s, background .3s, border-color .3s, color .3s; }
-.sxp-card:hover .sxp-arrow { transform:rotate(45deg); background:#b8f500; border-color:#b8f500; color:#0b2d25; }
-.sxp-card.feat .sxp-arrow { border-color:rgba(11,45,37,.25); color:#0b2d25; }
+.sxp-card:hover .sxp-arrow { transform:rotate(45deg); background:var(--sx-lime); border-color:var(--sx-lime); color:var(--sx-lime-ink); }
+.sxp-card.feat .sxp-arrow { border-color:rgba(22,33,11,.25); color:var(--sx-lime-ink); }
 .sxp-card.feat:hover .sxp-arrow { background:transparent; }
 
-.sxp-t { position:relative; z-index:1; margin:40px 0 0; max-width:16rem; font-size:24px; font-weight:700;
+.sxp-t { position:relative; z-index:1; margin:40px 0 0; max-width:16rem; font-size:var(--fs-7); font-weight:700;
   line-height:1.2; letter-spacing:-.02em; }
-.sxp-d { position:relative; z-index:1; margin:12px 0 0; max-width:20rem; font-size:14px; line-height:1.6;
-  color:rgba(255,255,255,.55); }
-.sxp-card.feat .sxp-d { color:rgba(11,45,37,.7); }
+.sxp-d { position:relative; z-index:1; margin:12px 0 0; max-width:20rem; font-size:var(--fs-4); line-height:1.6;
+  color:var(--sx-mute); }
+.sxp-card.feat .sxp-d { color:rgba(22,33,11,.72); }
 
 /* grid-rows 0fr→1fr: высота подстраивается ровно под контент */
 .sxp-expand { position:relative; z-index:1; display:grid; grid-template-rows:0fr;
@@ -1815,23 +2060,23 @@ function SoiExpertise({ lang, go }) {
 .sxp-expand-outer { overflow:hidden; }
 .sxp-expand-in { padding-top:16px; opacity:0; transition:opacity .3s ease .1s; }
 .sxp-card:hover .sxp-expand-in, .sxp-card:focus-visible .sxp-expand-in { opacity:1; }
-.sxp-comp { margin:0; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.08em;
-  color:rgba(255,255,255,.35); }
-.sxp-card.feat .sxp-comp { color:rgba(11,45,37,.5); }
-.sxp-proof { margin:4px 0 0; font-size:13px; font-weight:500; color:#fff; }
-.sxp-card.feat .sxp-proof { color:#0b2d25; }
+.sxp-comp { margin:0; font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--sx-mute); }
+.sxp-card.feat .sxp-comp { color:rgba(22,33,11,.55); }
+.sxp-proof { margin:4px 0 0; font-size:var(--fs-3); font-weight:500; color:var(--sx-ink); }
+.sxp-card.feat .sxp-proof { color:var(--sx-lime-ink); }
 .sxp-list { list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:6px; }
-.sxp-list li { display:flex; align-items:flex-start; gap:8px; font-size:12px; line-height:1.4;
-  color:rgba(255,255,255,.6); }
-.sxp-card.feat .sxp-list li { color:rgba(11,45,37,.7); }
-.sxp-dot { flex-shrink:0; width:6px; height:6px; margin-top:5px; border-radius:50%; background:#b8f500; }
-.sxp-card.feat .sxp-dot { background:#0b2d25; }
+.sxp-list li { display:flex; align-items:flex-start; gap:8px; font-size:var(--fs-2); line-height:1.4;
+  color:var(--sx-mute); }
+.sxp-card.feat .sxp-list li { color:rgba(22,33,11,.72); }
+.sxp-dot { flex-shrink:0; width:6px; height:6px; margin-top:5px; border-radius:50%; background:var(--sx-accent); }
+.sxp-card.feat .sxp-dot { background:var(--sx-lime-ink); }
 
-.sxp-more { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between;
-  gap:8px; margin-top:auto; padding-top:16px; border-top:1px solid rgba(255,255,255,.1);
-  font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#c5ff19; }
-.sxp-card.feat .sxp-more { border-top-color:rgba(11,45,37,.15); color:#0b2d25; }
-.sxp-more-arr { font-size:16px; transition:transform .3s; }
+.sxp-more {position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between;
+  gap:8px; margin-top:auto; padding-top:16px;
+  font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--sx-ink)}
+.sxp-card.feat .sxp-more {border-top-color:rgba(22,33,11,.18); color:var(--sx-lime-ink)}
+.sxp-more-arr { font-size:var(--fs-5); transition:transform .3s; }
 .sxp-card:hover .sxp-more-arr { transform:translateX(4px); }
 
 @media (prefers-reduced-motion: reduce){
@@ -1849,8 +2094,8 @@ function SoiExpertise({ lang, go }) {
       <div className="sxp-inner">
         <div className="sxp-head sx-rv">
           <div>
-            <p className="sxp-kicker">{_lv(lang, "Экспертиза · 360°", "Ekspertiza · 360°", "Expertise · 360°")}</p>
-            <h2 className="sxp-h2">{_lv(lang, "Наши услуги", "Bizning xizmatlar", "Our services")}</h2>
+            <p className="sxp-kicker">{_lv(lang, "Экспертиза", "Ekspertiza", "Expertise")}</p>
+            <h2 className="sxp-h2">{_lv(lang, "Компетенции, которые закрывают весь цикл работы с медицинским изделием", "Tibbiy buyum bilan ishlashning toʻliq siklini qamrab oluvchi kompetensiyalar", "Capabilities covering the full lifecycle of a medical device")}</h2>
           </div>
           <p className="sxp-sub">{_lv(lang,
             "Закрываем регуляторные, закупочные, технические и сервисные задачи в едином контуре ответственности.",
@@ -1921,52 +2166,52 @@ function SoiCatalogCards({ lang, go }) {
     const s = document.createElement("style");
     s.id = id;
     s.textContent = `
-.sxc { background:#f6f7f2; padding:clamp(64px,8vw,112px) 0; }
+.sxc { background:var(--sx-bg); padding:clamp(64px,8vw,112px) 0; }
 [data-theme="dark"] .sxc { background:var(--sx-bg-soft); }
-.sxc-inner { max-width:1200px; margin:0 auto; padding:0 24px; }
+.sxc-inner { max-width:var(--maxw); margin:0 auto; padding:0 32px; }
 
 .sxc-head { display:grid; gap:32px; margin-bottom:clamp(40px,5vw,64px); }
-@media(min-width:1024px){ .sxc-head { grid-template-columns:1.3fr .7fr; align-items:end; gap:64px; } }
-.sxc-kicker { margin:0 0 16px; font-size:12px; font-weight:700; text-transform:uppercase;
-  letter-spacing:.16em; color:#6f9600; }
+/* Колонки шапки выровнены по верху, а правая опущена на высоту надзаголовка —
+   так описание встаёт вровень с первой строкой заголовка, а не с надзаголовком
+   и не с нижним краем блока. */
+@media(min-width:1024px){
+  .sxc-head { grid-template-columns:1.3fr .7fr; align-items:start; gap:64px; }
+  .sxc-head > *:last-child { padding-top:calc(var(--fs-2) * 1.5 + 16px); }
+}
+.sxc-kicker { margin:0 0 16px; font-size:var(--fs-2); font-weight:700; text-transform:uppercase;
+  letter-spacing:.16em; color:var(--sx-mute); }
 .sxc-h2 { margin:0; font-size:clamp(30px,4.2vw,48px); font-weight:800; line-height:1.02;
-  letter-spacing:-.03em; color:#0b2d25; }
+  letter-spacing:-.035em; color:var(--sx-ink); }
 [data-theme="dark"] .sxc-h2 { color:var(--sx-ink); }
-.sxc-sub { margin:0 0 24px; font-size:15px; line-height:1.65; color:#6b7280; }
+.sxc-sub { margin:0 0 24px; font-size:var(--fs-4); line-height:1.65; color:var(--sx-mute); }
 [data-theme="dark"] .sxc-sub { color:var(--sx-mute); }
-.sxc-cta { display:inline-flex; align-items:center; gap:12px; padding:13px 26px; border-radius:999px;
-  border:none; cursor:pointer; font-family:inherit; font-size:14px; font-weight:700;
-  background:#b8f500; color:#0b2d25; transition:background .2s, transform .18s; }
-.sxc-cta:hover { background:#c5ff19; transform:translateY(-2px); }
-.sxc-cta:focus-visible { outline:2px solid #6f9600; outline-offset:3px; }
 
 .sxc-grid { display:grid; gap:20px; grid-template-columns:1fr; }
 @media(min-width:640px){ .sxc-grid { grid-template-columns:1fr 1fr; } }
 @media(min-width:1024px){ .sxc-grid { grid-template-columns:repeat(4,1fr); } }
 
-.sxc-card { overflow:hidden; border-radius:24px; border:1px solid #e5e7eb; background:#fff;
+.sxc-card { overflow:hidden; border-radius:var(--sx-r); border:1px solid var(--sx-line); background:var(--sx-card);
   cursor:pointer; text-align:left; padding:0; font-family:inherit; display:flex; flex-direction:column;
   transition:box-shadow .3s, border-color .3s; }
 [data-theme="dark"] .sxc-card { background:var(--sx-card); border-color:var(--sx-line); }
-.sxc-card:hover { box-shadow:0 20px 50px rgba(18,53,46,.10); }
-.sxc-card:focus-visible { outline:2px solid #6f9600; outline-offset:3px; }
+.sxc-card:hover { border-color:var(--sx-ink-soft); }
+.sxc-card:focus-visible { outline:2px solid var(--sx-ink); outline-offset:3px; }
 .sxc-media { aspect-ratio:4/3; overflow:hidden; }
 .sxc-media img { display:block; width:100%; height:100%; object-fit:cover;
   transition:transform .5s cubic-bezier(.16,1,.3,1); }
 .sxc-card:hover .sxc-media img { transform:scale(1.06); }
 
 .sxc-foot { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:20px; }
-.sxc-no { font-size:12px; font-weight:700; color:#6f9600; }
-.sxc-t { margin:4px 0 0; font-size:18px; font-weight:700; line-height:1.3; color:#0b2d25; }
+.sxc-no { font-size:var(--fs-2); font-weight:700; color:var(--sx-mute); }
+.sxc-t { margin:4px 0 0; font-size:var(--fs-6); font-weight:700; line-height:1.3; color:var(--sx-ink); }
 [data-theme="dark"] .sxc-t { color:var(--sx-ink); }
 .sxc-arr { display:flex; align-items:center; justify-content:center; flex-shrink:0; width:44px; height:44px;
-  border-radius:50%; border:1px solid rgba(143,194,0,.4); color:#6f9600;
+  border-radius:50%; border:1px solid var(--sx-line); color:var(--sx-ink);
   transition:transform .3s, background .3s, border-color .3s, color .3s; }
-.sxc-card:hover .sxc-arr { transform:rotate(45deg); background:#b8f500; border-color:#b8f500; color:#0b2d25; }
+.sxc-card:hover .sxc-arr { transform:rotate(45deg); background:var(--sx-lime); border-color:var(--sx-lime); color:var(--sx-lime-ink); }
 
 @media (prefers-reduced-motion: reduce){
-  .sxc-card, .sxc-media img, .sxc-arr, .sxc-cta { transition:none; }
-  .sxc-card:hover .sxc-media img { transform:none; }
+  .sxc-card, .sxc-media img, .sxc-arr,   .sxc-card:hover .sxc-media img { transform:none; }
 }
     `;
     document.head.appendChild(s);
@@ -1991,10 +2236,6 @@ function SoiCatalogCards({ lang, go }) {
               "Структурированный каталог решений для диагностики, лечения, реанимации и ежедневной работы медицинских учреждений.",
               "Tibbiyot muassasalarining diagnostika, davolash, reanimatsiya va kundalik ish uchun yechimlar katalogi.",
               "A structured catalog of solutions for diagnostics, treatment, intensive care and the daily work of medical institutions.")}</p>
-            <button className="sxc-cta" onClick={() => go("catalog", {})}>
-              {_lv(lang, "Открыть весь каталог", "Butun katalogni ochish", "Open the full catalog")}
-              <Icon name="arrowRight" size={18} />
-            </button>
           </div>
         </div>
 
@@ -2031,14 +2272,30 @@ function SoiDirections({ lang, go }) {
   const DD = window.DIRECTIONS_DATA;
   if (!DD) return null;
   const { DIRECTION_GROUPS, getDirsForGroup } = DD;
+  /* Блок пересобран на разметке и классах каталожного блока (.sxc-*): у него
+     та же двухколоночная шапка и те же карточки с номером, заголовком и
+     стрелкой. Отличие одно — вместо фотографии в медиа-области глиф
+     направления: снимков под группы у нас нет.
+     Прежние цвета групп (g.color) не используются: это была радуга из шести
+     произвольных оттенков мимо палитры. */
   return (
-    <section className="sx-section soft">
-      <div className="sx-wrap">
-        <div className="sx-head sx-rv">
-          <span className="sx-eyebrow">{_lv(lang, "Навигация по направлениям", "Yo'nalishlar bo'yicha", "By specialty")}</span>
-          <h2 className="sx-h2">{_lv(lang, "Подбор по направлению медицины", "Tibbiyot yo'nalishi bo'yicha tanlov", "Find by medical specialty")}</h2>
-          <p className="sx-sub">{_lv(lang, "Откройте каталог по профилю учреждения, отделению или клинической задаче.", "Muassasa profili yoki klinik vazifa bo'yicha katalogni oching.", "Open the catalog by institution profile, department or clinical task.")}</p>
+    <section className="sxc">
+      <div className="sxc-inner">
+        <div className="sxc-head sx-rv">
+          <div>
+            <p className="sxc-kicker">{_lv(lang, "Навигация по направлениям", "Yo'nalishlar bo'yicha", "By specialty")}</p>
+            <h2 className="sxc-h2">{_lv(lang, "Подбор по направлению медицины", "Tibbiyot yo'nalishi bo'yicha tanlov", "Find by medical specialty")}</h2>
+          </div>
+          <div>
+            <p className="sxc-sub">{_lv(lang,
+              "Откройте каталог по профилю учреждения, отделению или клинической задаче.",
+              "Muassasa profili yoki klinik vazifa bo'yicha katalogni oching.",
+              "Open the catalog by institution profile, department or clinical task.")}</p>
+          </div>
         </div>
+
+        {/* Карточки прежние — глиф, название и список направлений. Шапка блока
+            осталась в оформлении каталожного блока (.sxc-head). */}
         <div className="sx-dir-grid">
           {DIRECTION_GROUPS.map((g, i) => {
             const dirs = getDirsForGroup(g.id).slice(0, 4);
@@ -2117,21 +2374,76 @@ function SoiCountUp({ value }) {
   return <span ref={ref}>{disp}</span>;
 }
 
+/* Shown until the admin has enough real partners: an empty — or nearly empty —
+   belt is worse than a placeholder one. The threshold is four rather than one,
+   because two rows of two laps each repeat the list four times: a single real
+   brand would parade past as the same word four times over, which reads as a
+   bug rather than as a short list. */
+const PARTNERS_MIN = 4;
+const PARTNERS_FALLBACK = [
+  { id: "ph", name: "Philips" }, { id: "am", name: "Армед" },
+  { id: "kpz", name: "Касимовский ПЗ" }, { id: "md", name: "Midmark" },
+  { id: "ns", name: "Нейрософт" }, { id: "dr", name: "Dräger" },
+  { id: "mn", name: "Mindray" }, { id: "el", name: "Елатомский ПЗ" },
+];
+
 function SoiBrands({ lang, go }) {
-  const brands = window.DATA && window.DATA.BRANDS || [];
-  if (!brands.length) return null;
+  const brands = (window.DATA && window.DATA.BRANDS || []).filter((b) => b && b.name);
+  const items = brands.length >= PARTNERS_MIN ? brands : PARTNERS_FALLBACK;
+
+  /* One list, split across the two rows. Odd counts leave the extra name on the
+     top row, and a single partner would leave the bottom one empty — so below
+     two names the list is simply repeated rather than divided. */
+  const half = Math.ceil(items.length / 2);
+  const rows = items.length > 1 ? [items.slice(0, half), items.slice(half)] : [items, items];
+
+  const item = (b, row, dup) => (
+    <button
+      className="sx-mq-item"
+      key={row + (dup ? "b-" : "a-") + b.id}
+      onClick={() => go("partners")}
+      tabIndex={dup ? -1 : 0}
+      title={_lv(lang, "Все партнёры", "Barcha hamkorlar", "All partners")}
+    >
+      {b.logo
+        ? <img src={b.logo} alt={b.name} loading="lazy"
+               onError={(e) => { e.currentTarget.replaceWith(document.createTextNode(b.name)); }} />
+        : b.name}
+      {b.flag ? <span className="sx-mq-flag">{b.flag}</span> : null}
+    </button>
+  );
+
+  /* Two passes of the row's own names. The animation travels -50%, the width of
+     exactly one pass, so when it resets the second pass is standing where the
+     first began and nothing jumps. The clone is hidden from screen readers — it
+     is the same names again, not twice as many partners. */
+  const belt = (list, row) => (
+    <div className="sx-mq-row" key={row}>
+      {/* Slower with more names, so both belts read at one speed whatever the admin adds. */}
+      <div
+        className={"sx-mq-track" + (row ? " rev" : "")}
+        style={{ "--mq-dur": Math.max(22, list.length * 5.5) + "s" }}
+      >
+        {/* Два прохода — два самостоятельных блока одинаковой ширины. Раньше
+            клон разворачивался в ту же флекс-строку через display:contents, и
+            ширина дорожки выходила «2×проход минус один зазор»: сдвиг на −50 %
+            не совпадал с длиной прохода, и на стыке лента дёргалась. */}
+        <div className="sx-mq-pass">{list.map((b) => item(b, row, false))}</div>
+        <div className="sx-mq-pass" aria-hidden="true">{list.map((b) => item(b, row, true))}</div>
+      </div>
+    </div>
+  );
+
   return (
-    <section className="sx-section soft">
-      <div className="sx-wrap">
-        <h2 className="sx-h2 sx-brands-title sx-rv" onClick={() => go("partners")} style={{ cursor: "pointer", marginBottom: 28 }}>
-          {_lv(lang, "Бренды и заводы производители", "Brendlar va ishlab chiqaruvchi zavodlar", "Brands and manufacturing plants")}
-          <Icon name="chevronRight" size={22} />
+    <section className="sx-mq-sec">
+      <div className="sx-mq-head">
+        <h2 className="sx-h2 sx-brands-title sx-rv" onClick={() => go("partners")} style={{ cursor: "pointer", margin: 0 }}>
+          {_lv(lang, "Партнёры", "Hamkorlar", "Partners")}
         </h2>
-        <div className="sx-brands-pills">
-          {brands.map((b) => (
-            <span className="sx-bpill" key={b.id} onClick={() => go("partners")}>{b.name}</span>
-          ))}
-        </div>
+      </div>
+      <div className="sx-mq-vp">
+        <div className="sx-mq-fade" />
+        {rows.map((list, i) => belt(list, i))}
       </div>
     </section>
   );
@@ -2145,16 +2457,16 @@ function ensureCaseModalCss() {
   s.textContent = `
 .sx-cmod-ov { position:fixed; inset:0; background:rgba(8,14,24,.8); z-index:9100; display:flex; align-items:center; justify-content:center; padding:24px; animation:sxCmodFade .18s ease; }
 @keyframes sxCmodFade { from{opacity:0} to{opacity:1} }
-.sx-cmod { background:#fff; border-radius:16px; width:min(680px,94vw); max-height:90vh; overflow:auto; box-shadow:0 30px 90px rgba(0,0,0,.5); animation:sxCmodUp .22s cubic-bezier(.16,1,.3,1); }
+.sx-cmod { background:#fff; border-radius:var(--r-lg); width:min(680px,94vw); max-height:90vh; overflow:auto; box-shadow:var(--sh-xl); animation:sxCmodUp .22s cubic-bezier(.16,1,.3,1); }
 @keyframes sxCmodUp { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:translateY(0)} }
-.sx-cmod-cover { aspect-ratio:16/9; background:linear-gradient(135deg,#eef3fb,#dbe6f5); display:flex; align-items:center; justify-content:center; color:#94a3b8; overflow:hidden; }
+.sx-cmod-cover { aspect-ratio:16/9; background:var(--sx-bg-soft); display:flex; align-items:center; justify-content:center; color:var(--slate-300); overflow:hidden; }
 .sx-cmod-cover img { width:100%; height:100%; object-fit:cover; display:block; }
 .sx-cmod-body { padding:26px 30px 30px; }
-.sx-cmod-tag { display:inline-flex; font-size:11.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#0E4AC6; background:rgba(14,74,198,.09); padding:5px 12px; border-radius:7px; margin-bottom:14px; }
-.sx-cmod-body h2 { font-size:23px; font-weight:800; color:#0B1B33; line-height:1.25; letter-spacing:-.015em; margin:0 0 14px; }
-.sx-cmod-body p { font-size:15px; line-height:1.7; color:#3d4d68; margin:0; white-space:pre-line; }
-.sx-cmod-meta { display:flex; flex-wrap:wrap; gap:22px; margin-top:22px; padding-top:18px; border-top:1px solid #e2e8f1; font-size:13.5px; color:#475569; }
-.sx-cmod-meta b { color:#0B1B33; }
+.sx-cmod-tag { display:inline-flex; font-size:var(--fs-1); font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--sx-accent); background:var(--sx-bg-soft); border:1px solid var(--sx-line); padding:5px 12px; border-radius:var(--r-sm); margin-bottom:14px; }
+.sx-cmod-body h2 { font-size:var(--fs-7); font-weight:800; color:var(--sx-ink); line-height:1.25; letter-spacing:-.015em; margin:0 0 14px; }
+.sx-cmod-body p { font-size:var(--fs-4); line-height:1.7; color:var(--sx-ink-soft); margin:0; white-space:pre-line; }
+.sx-cmod-meta {display:flex; flex-wrap:wrap; gap:22px; margin-top:22px; padding-top:18px; font-size:var(--fs-3); color:var(--sx-mute)}
+.sx-cmod-meta b { color:var(--navy-900); }
 .sx-cmod-x { position:fixed; top:22px; right:26px; width:42px; height:42px; border-radius:50%; border:none; background:rgba(255,255,255,.14); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .18s; z-index:9110; }
 .sx-cmod-x:hover { background:rgba(255,255,255,.28); }
 .sx-cmod-x:focus-visible { outline:2px solid #fff; outline-offset:2px; }
@@ -2163,7 +2475,7 @@ function ensureCaseModalCss() {
 [data-theme="dark"] .sx-cmod-body p { color:#a9b8cc; }
 [data-theme="dark"] .sx-cmod-meta { border-color:#22344e; color:#94a7bf; }
 [data-theme="dark"] .sx-cmod-meta b { color:#eaf1fb; }
-@media(max-width:500px){ .sx-cmod-body { padding:20px; } .sx-cmod-body h2 { font-size:20px; } }
+@media(max-width:500px){ .sx-cmod-body { padding:20px; } .sx-cmod-body h2 { font-size:var(--fs-6); } }
 @media(prefers-reduced-motion:reduce){ .sx-cmod-ov,.sx-cmod { animation:none; } }
   `;
   document.head.appendChild(s);
@@ -2222,23 +2534,31 @@ function SoiCases({ lang, go }) {
   cases = cases.slice(0, 3);
   if (!cases.length) return null;
   return (
-    <section className="sx-section">
-      <div className="sx-wrap">
-        <div className="sx-head sx-rv" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
+    /* Блок приведён к оформлению каталожного: та же обёртка, двухколоночная
+       шапка и та же сетка карточек. Содержимое карточки оставлено прежним —
+       обложка, тег, описание, год и регион: это её смысл, а не оформление. */
+    <section className="sxc">
+      <div className="sxc-inner">
+        <div className="sxc-head sx-rv">
           <div>
-            <span className="sx-eyebrow">{_lv(lang, "Реализованные проекты", "Amalga oshirilgan loyihalar", "Delivered projects")}</span>
-            <h2 className="sx-h2">{_lv(lang, "Как мы оснащаем медицину Узбекистана", "O'zbekiston tibbiyotini qanday jihozlaymiz", "How we equip Uzbekistan's healthcare")}</h2>
+            <p className="sxc-kicker">{_lv(lang, "Реализованные проекты", "Amalga oshirilgan loyihalar", "Delivered projects")}</p>
+            <h2 className="sxc-h2">{_lv(lang, "Как мы оснащаем медицину Узбекистана", "O'zbekiston tibbiyotini qanday jihozlaymiz", "How we equip Uzbekistan's healthcare")}</h2>
           </div>
-          <span className="sx-link" onClick={() => go("cases")}>{_lv(lang, "Все кейсы", "Barcha keyslar", "All cases")}<Icon name="arrowRight" size={16} /></span>
+          <div>
+            <p className="sxc-sub">{_lv(lang,
+              "Оснащение больниц, диагностических центров и частных клиник — от поставки до пусконаладки и обучения персонала.",
+              "Kasalxonalar, diagnostika markazlari va xususiy klinikalarni jihozlash — yetkazib berishdan ishga tushirish va o'qitishgacha.",
+              "Equipping hospitals, diagnostic centres and private clinics — from delivery to commissioning and staff training.")}</p>
+          </div>
         </div>
-        <div className="sx-cases">
+        <div className="sxc-grid sx-cases">
           {cases.map((c, i) => (
-            <div className="sx-case sx-rv" key={c.id || i} style={{ "--i": i }}
+            <div className="sxc-card sx-case sx-rv" key={c.id || i} style={{ "--i": i }}
               role="button" tabIndex={0}
               onClick={() => setViewer(c)}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setViewer(c); } }}
               aria-label={_lv(lang, "Открыть кейс", "Keysni ochish", "Open case") + ": " + tx(c.title)}>
-              <div className="sx-case-cover">{img(c.image) ? <img src={img(c.image)} alt={tx(c.title)} loading="lazy" /> : <Icon name="pin" size={34} />}</div>
+              <div className="sxc-media sx-case-cover">{img(c.image) ? <img src={img(c.image)} alt={tx(c.title)} loading="lazy" /> : <Icon name="pin" size={34} />}</div>
               <div className="sx-case-body">
                 {c.tag && <span className="sx-case-tag">{tx(c.tag)}</span>}
                 <h3>{tx(c.title)}</h3>
@@ -2279,7 +2599,9 @@ function SoiReviews({ lang, go }) {
   const [viewer, setViewer] = React.useState(null);
   const ovRef = React.useRef(null);
   const GAP = 20;
-  const COLORS = ["#E0492F","#1d7ed8","#15A06A","#6454D4","#F59E0B","#8B5CF6"];
+  /* Аватары отзывов различаются светлотой одного синего, а не набором чужих
+     цветов: красный здесь читался как ошибка, фиолетового в палитре нет. */
+  const COLORS = ["var(--accent)","var(--blue-500)","var(--blue-400)","var(--accent-2)","var(--blue-700)","var(--blue-600)"];
   const tx = (o) => !o ? "" : typeof o === "string" ? o : (o[lang] || o.ru || "");
   const rtype = (r) => { const v = r.type || r.group || ""; if (v==="suppliers") return "supplier"; if (v==="buyers") return "buyer"; return v||"buyer"; };
 
@@ -2291,15 +2613,15 @@ function SoiReviews({ lang, go }) {
   }, []);
 
   const BUYERS_STUB = [
-    { id:"namangan", org:lv("Компания «Наманганская областная больница»","«Namangan viloyat kasalxonasi» kompaniyasi","Namangan Regional Hospital"), city:lv("Наманган","Namangan","Namangan"), type:lv("госучреждение","davlat muassasasi","public institution"), cat:lv("Оборудование для отделения диагностики","Diagnostika bo'limi uchun uskunalar","Diagnostic dept. equipment"), text:lv("Выражаем благодарность ИНДУСТРИЯ ЗДОРОВЬЯ за оперативную поставку и качественный монтаж оборудования для отделения диагностики.","Diagnostika bo'limi uchun uskunalarni tezkor yetkazib berish va sifatli o'rnatganlik uchun SOG’LIQ INDUSTRIYASIga minnatdorchilik bildiramiz.","We express gratitude to HEALTH INDUSTRY for prompt delivery and quality installation of diagnostic department equipment."), color:"#E0492F" },
-    { id:"oncology", org:lv("Компания «РСНПМЦ Онкологии»","«RSNPMC Onkologiyasi» kompaniyasi","RSNPMC Oncology Center"), city:lv("Ташкент","Toshkent","Tashkent"), type:lv("госучреждение","davlat muassasasi","public institution"), cat:lv("Лучевая диагностика «под ключ»","«Kalit ostida» nurli diagnostika","Radiology dept. turnkey"), text:lv("Комплексное оснащение отделения лучевой диагностики выполнено под ключ, с обучением персонала и полным пакетом документов.","Nurli diagnostika bo'limini kompleks jihozlash kalit ostida amalga oshirildi, xodimlarni o'qitish va to'liq hujjatlar to'plami bilan.","Complete turnkey outfitting of the radiology department including staff training and full documentation package."), color:"#1d7ed8" },
-    { id:"perinatal", org:lv("Республиканский перинатальный центр","Respublika perinatal markazi","Republican Perinatal Center"), city:lv("Ташкент","Toshkent","Tashkent"), type:lv("госучреждение","davlat muassasasi","public institution"), cat:lv("Акушерство и гинекология","Akusherlik va ginekologiya","Obstetrics & Gynecology"), text:lv("Поставка оборудования для роддома выполнена точно в срок. Всё оборудование прошло метрологическую поверку и введено в эксплуатацию.","Tug'ruqxona uchun uskunalar o'z vaqtida yetkazildi. Barcha uskunalar metrologik tekshiruvdan o'tdi va foydalanishga topshirildi.","Equipment for the maternity unit was delivered on schedule. All equipment passed metrological verification and was commissioned."), color:"#15A06A" },
-    { id:"dental", org:lv("Стоматологическая клиника «DentaLux»","«DentaLux» stomatologiya klinikasi","DentaLux Dental Clinic"), city:lv("Самарканд","Samarqand","Samarkand"), type:lv("частная клиника","xususiy klinika","private clinic"), cat:lv("Стоматологическое оборудование","Stomatologiya uskunalari","Dental equipment"), text:lv("ИНДУСТРИЯ ЗДОРОВЬЯ помогла оснастить клинику «под ключ» в сжатые сроки. Профессиональный подход к каждому этапу — от выбора оборудования до сервиса.","SOG’LIQ INDUSTRIYASI klinikani qisqa muddatda «kalit ostida» jihozlashga yordam berdi. Uskunani tanlashdan xizmat ko'rsatishgacha bo'lgan har bir bosqichda professional yondashuv.","HEALTH INDUSTRY helped outfit the clinic turnkey on a tight schedule. Professional approach at every stage from equipment selection to service."), color:"#6454D4" },
+    { id:"namangan", org:lv("Компания «Наманганская областная больница»","«Namangan viloyat kasalxonasi» kompaniyasi","Namangan Regional Hospital"), city:lv("Наманган","Namangan","Namangan"), type:lv("госучреждение","davlat muassasasi","public institution"), cat:lv("Оборудование для отделения диагностики","Diagnostika bo'limi uchun uskunalar","Diagnostic dept. equipment"), text:lv("Выражаем благодарность ИНДУСТРИЯ ЗДОРОВЬЯ за оперативную поставку и качественный монтаж оборудования для отделения диагностики.","Diagnostika bo'limi uchun uskunalarni tezkor yetkazib berish va sifatli o'rnatganlik uchun SOG’LIQ INDUSTRIYASIga minnatdorchilik bildiramiz.","We express gratitude to HEALTH INDUSTRY for prompt delivery and quality installation of diagnostic department equipment."), color:"var(--blue-500)" },
+    { id:"oncology", org:lv("Компания «РСНПМЦ Онкологии»","«RSNPMC Onkologiyasi» kompaniyasi","RSNPMC Oncology Center"), city:lv("Ташкент","Toshkent","Tashkent"), type:lv("госучреждение","davlat muassasasi","public institution"), cat:lv("Лучевая диагностика «под ключ»","«Kalit ostida» nurli diagnostika","Radiology dept. turnkey"), text:lv("Комплексное оснащение отделения лучевой диагностики выполнено под ключ, с обучением персонала и полным пакетом документов.","Nurli diagnostika bo'limini kompleks jihozlash kalit ostida amalga oshirildi, xodimlarni o'qitish va to'liq hujjatlar to'plami bilan.","Complete turnkey outfitting of the radiology department including staff training and full documentation package."), color:"var(--blue-500)" },
+    { id:"perinatal", org:lv("Республиканский перинатальный центр","Respublika perinatal markazi","Republican Perinatal Center"), city:lv("Ташкент","Toshkent","Tashkent"), type:lv("госучреждение","davlat muassasasi","public institution"), cat:lv("Акушерство и гинекология","Akusherlik va ginekologiya","Obstetrics & Gynecology"), text:lv("Поставка оборудования для роддома выполнена точно в срок. Всё оборудование прошло метрологическую поверку и введено в эксплуатацию.","Tug'ruqxona uchun uskunalar o'z vaqtida yetkazildi. Barcha uskunalar metrologik tekshiruvdan o'tdi va foydalanishga topshirildi.","Equipment for the maternity unit was delivered on schedule. All equipment passed metrological verification and was commissioned."), color:"var(--accent)" },
+    { id:"dental", org:lv("Стоматологическая клиника «DentaLux»","«DentaLux» stomatologiya klinikasi","DentaLux Dental Clinic"), city:lv("Самарканд","Samarqand","Samarkand"), type:lv("частная клиника","xususiy klinika","private clinic"), cat:lv("Стоматологическое оборудование","Stomatologiya uskunalari","Dental equipment"), text:lv("ИНДУСТРИЯ ЗДОРОВЬЯ помогла оснастить клинику «под ключ» в сжатые сроки. Профессиональный подход к каждому этапу — от выбора оборудования до сервиса.","SOG’LIQ INDUSTRIYASI klinikani qisqa muddatda «kalit ostida» jihozlashga yordam berdi. Uskunani tanlashdan xizmat ko'rsatishgacha bo'lgan har bir bosqichda professional yondashuv.","HEALTH INDUSTRY helped outfit the clinic turnkey on a tight schedule. Professional approach at every stage from equipment selection to service."), color:"var(--blue-500)" },
   ];
   const SUPPLIERS_STUB = [
-    { id:"midmark", org:"Midmark Corporation", city:lv("Вершайлз, США","Versayles, AQSh","Versailles, USA"), type:lv("производитель","ishlab chiqaruvchi","manufacturer"), cat:lv("Официальный дистрибьютор в ЦА","Markaziy Osiyo bo'yicha rasmiy distribyutor","Authorized distributor in CA"), text:lv("ИНДУСТРИЯ ЗДОРОВЬЯ является авторизованным дистрибьютором Midmark в Центральной Азии. Высокий стандарт сервиса и компетентность персонала.","SOG’LIQ INDUSTRIYASI — Markaziy Osiyoda Midmarkning vakolatli distribyutori. Xizmat ko'rsatishning yuqori standarti va xodimlarning malakasi.","HEALTH INDUSTRY is the authorized distributor of Midmark in Central Asia. High service standards and staff competence."), color:"#1d7ed8" },
-    { id:"armed", org:"Armed Medical", city:lv("Москва, Россия","Moskva, Rossiya","Moscow, Russia"), type:lv("производитель","ishlab chiqaruvchi","manufacturer"), cat:lv("Партнёрское соглашение","Hamkorlik shartnomasi","Partnership agreement"), text:lv("Надёжный региональный партнёр по дистрибуции. Ответственный подход к продажам и соблюдению условий авторизованного дистрибьютора.","Ishonchli mintaqaviy distribyutor hamkor. Savdoga mas'uliyatli yondashuv va vakolatli distribyutor shartlariga rioya qilish.","A reliable regional distribution partner. Responsible sales approach and compliance with authorized distributor terms."), color:"#E0492F" },
-    { id:"choicemmed", org:"ChoiceMmed Technology", city:lv("Пекин, Китай","Pekin, Xitoy","Beijing, China"), type:lv("производитель","ishlab chiqaruvchi","manufacturer"), cat:lv("Авторизованный дистрибьютор","Vakolatli distribyutor","Authorized distributor"), text:lv("ИНДУСТРИЯ ЗДОРОВЬЯ — один из ключевых партнёров в Узбекистане. Своевременные поставки и профессиональная техническая служба поддержки.","SOG’LIQ INDUSTRIYASI — O'zbekistondagi asosiy hamkorlarimizdan biri. O'z vaqtida yetkazib berish va professional texnik qo'llab-quvvatlash xizmati.","HEALTH INDUSTRY is one of our key partners in Uzbekistan. Timely deliveries and professional technical support service."), color:"#15A06A" },
+    { id:"midmark", org:"Midmark Corporation", city:lv("Вершайлз, США","Versayles, AQSh","Versailles, USA"), type:lv("производитель","ishlab chiqaruvchi","manufacturer"), cat:lv("Официальный дистрибьютор в ЦА","Markaziy Osiyo bo'yicha rasmiy distribyutor","Authorized distributor in CA"), text:lv("ИНДУСТРИЯ ЗДОРОВЬЯ является авторизованным дистрибьютором Midmark в Центральной Азии. Высокий стандарт сервиса и компетентность персонала.","SOG’LIQ INDUSTRIYASI — Markaziy Osiyoda Midmarkning vakolatli distribyutori. Xizmat ko'rsatishning yuqori standarti va xodimlarning malakasi.","HEALTH INDUSTRY is the authorized distributor of Midmark in Central Asia. High service standards and staff competence."), color:"var(--blue-500)" },
+    { id:"armed", org:"Armed Medical", city:lv("Москва, Россия","Moskva, Rossiya","Moscow, Russia"), type:lv("производитель","ishlab chiqaruvchi","manufacturer"), cat:lv("Партнёрское соглашение","Hamkorlik shartnomasi","Partnership agreement"), text:lv("Надёжный региональный партнёр по дистрибуции. Ответственный подход к продажам и соблюдению условий авторизованного дистрибьютора.","Ishonchli mintaqaviy distribyutor hamkor. Savdoga mas'uliyatli yondashuv va vakolatli distribyutor shartlariga rioya qilish.","A reliable regional distribution partner. Responsible sales approach and compliance with authorized distributor terms."), color:"var(--blue-500)" },
+    { id:"choicemmed", org:"ChoiceMmed Technology", city:lv("Пекин, Китай","Pekin, Xitoy","Beijing, China"), type:lv("производитель","ishlab chiqaruvchi","manufacturer"), cat:lv("Авторизованный дистрибьютор","Vakolatli distribyutor","Authorized distributor"), text:lv("ИНДУСТРИЯ ЗДОРОВЬЯ — один из ключевых партнёров в Узбекистане. Своевременные поставки и профессиональная техническая служба поддержки.","SOG’LIQ INDUSTRIYASI — O'zbekistondagi asosiy hamkorlarimizdan biri. O'z vaqtida yetkazib berish va professional texnik qo'llab-quvvatlash xizmati.","HEALTH INDUSTRY is one of our key partners in Uzbekistan. Timely deliveries and professional technical support service."), color:"var(--accent)" },
   ];
 
   /* prefer CMS; fall back to stub if CMS is empty */
@@ -2327,34 +2649,38 @@ function SoiReviews({ lang, go }) {
       <rect width="160" height="212" rx="6" fill="white"/>
       <rect width="160" height="38" rx="6" fill={color}/>
       <rect y="26" width="160" height="12" fill={color}/>
-      <rect x="14" y="52" width="68" height="7" rx="3.5" fill="#E5E7EB"/>
-      <rect x="14" y="65" width="132" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="14" y="75" width="126" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="14" y="85" width="116" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="14" y="100" width="132" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="14" y="110" width="120" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="14" y="120" width="128" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="14" y="130" width="100" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="14" y="148" width="60" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="14" y="158" width="72" height="5" rx="2.5" fill="#F3F4F6"/>
+      <rect x="14" y="52" width="68" height="7" rx="3.5" fill="var(--line-soft)"/>
+      <rect x="14" y="65" width="132" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="14" y="75" width="126" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="14" y="85" width="116" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="14" y="100" width="132" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="14" y="110" width="120" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="14" y="120" width="128" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="14" y="130" width="100" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="14" y="148" width="60" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="14" y="158" width="72" height="5" rx="2.5" fill="var(--bg-2)"/>
       <circle cx="36" cy="188" r="17" stroke={color} strokeWidth="1.5" opacity=".75"/>
       <circle cx="36" cy="188" r="10" fill={color} opacity=".15"/>
-      <rect x="64" y="181" width="54" height="5" rx="2.5" fill="#E5E7EB"/>
-      <rect x="64" y="191" width="42" height="5" rx="2.5" fill="#E5E7EB"/>
+      <rect x="64" y="181" width="54" height="5" rx="2.5" fill="var(--line-soft)"/>
+      <rect x="64" y="191" width="42" height="5" rx="2.5" fill="var(--line-soft)"/>
     </svg>
   );
 
   return (
-    <section className="sx-section soft">
-      <div className="sx-wrap">
-        <div className="sx-rev-head sx-rv">
+    /* Шапка приведена к оформлению каталожного блока: надзаголовок и заголовок
+       слева, описание и переключатель — справа. Карусель и карточки писем
+       оставлены как есть, это механика блока. */
+    <section className="sxc">
+      <div className="sxc-inner">
+        <div className="sxc-head sx-rev-head sx-rv">
           <div className="sx-rev-head-left">
-            <h2 className="sx-h2" onClick={() => go("reviews")}>
-              {lv("Отзывы","Sharhlar","Reviews")}
-              <Icon name="chevronRight" size={22}/>
+            <p className="sxc-kicker">{lv("Отзывы","Sharhlar","Reviews")}</p>
+            <h2 className="sxc-h2" onClick={() => go("reviews")} style={{cursor:"pointer"}}>
+              {lv("Благодарственные письма клиник и партнёров","Klinikalar va hamkorlarning minnatdorchilik xatlari","Letters of appreciation from clinics and partners")}
             </h2>
-            <p className="sx-sub" style={{marginTop:10}}>{lv("Благодарственные письма клиник и партнёров-производителей","Klinikalar va ishlab chiqaruvchi hamkorlarning minnatdorchilik xatlari","Letters of appreciation from clinics and manufacturer partners")}</p>
           </div>
+          <div>
+            <p className="sxc-sub">{lv("Письма от медицинских учреждений Узбекистана и производителей оборудования, с которыми мы работаем.","O'zbekiston tibbiyot muassasalari va biz ishlaydigan uskuna ishlab chiqaruvchilarining xatlari.","Letters from medical institutions in Uzbekistan and the equipment manufacturers we work with.")}</p>
           <div className="sx-rev-tabs">
             <button className={"sx-rev-tab"+(tab==="buyers"?" on":"")} onClick={() => setTab("buyers")}>
               {lv("Покупатели","Xaridorlar","Buyers")}
@@ -2362,6 +2688,7 @@ function SoiReviews({ lang, go }) {
             <button className={"sx-rev-tab"+(tab==="suppliers"?" on":"")} onClick={() => setTab("suppliers")}>
               {lv("Поставщики","Ta'minotchilar","Suppliers")}
             </button>
+          </div>
           </div>
         </div>
 
@@ -2428,6 +2755,7 @@ function SoiReviews({ lang, go }) {
 function SoiNews({ lang, go }) {
   const tx = (o) => (o && (o[lang] || o.ru)) || "";
   const cov = (c) => !c ? null : (typeof c === "string" ? c : (c.data || c.src || null));
+  const [viewer, setViewer] = React.useState(null);
   // Реактивная подписка: cms-remote грузит news из API асинхронно и делает CMS.emit("news").
   const [cmsNews, setCmsNews] = React.useState(() => window.CMS ? window.CMS.list("news") : []);
   React.useEffect(() => {
@@ -2440,19 +2768,38 @@ function SoiNews({ lang, go }) {
   if (!news.length) return null;
   const fmt = (d) => { if (!d) return ""; const x = new Date(d); return isNaN(x) ? d : x.toLocaleDateString(lang === "ru" ? "ru-RU" : lang === "uz" ? "uz-UZ" : "en-US", { day: "2-digit", month: "long", year: "numeric" }); };
   return (
-    <section className="sx-section soft">
-      <div className="sx-wrap">
-        <div className="sx-head sx-rv" style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
+    /* Блок в оформлении каталожного: двухколоночная шапка и та же сетка
+       карточек, что у «Реализованных проектов». Карточка открывает окно
+       просмотра — раньше любой клик уводил на общий список новостей. */
+    <section className="sxc">
+      <div className="sxc-inner">
+        <div className="sxc-head sx-rv">
           <div>
-            <span className="sx-eyebrow">{_lv(lang, "Новости и аналитика", "Yangiliklar", "News & insights")}</span>
-            <h2 className="sx-h2">{_lv(lang, "Что нового в индустрии", "Sohada nima yangilik", "What's new in the industry")}</h2>
+            <p className="sxc-kicker">{_lv(lang, "Новости", "Yangiliklar", "News")}</p>
+            <h2 className="sxc-h2">{_lv(lang, "Что нового в индустрии", "Sohada nima yangilik", "What's new in the industry")}</h2>
           </div>
-          <span className="sx-link" onClick={() => go("news")}>{_lv(lang, "Все новости", "Barcha yangiliklar", "All news")}<Icon name="arrowRight" size={16} /></span>
+          <div>
+            <p className="sxc-sub">{_lv(lang,
+              "Поставки и проекты компании, изменения в регулировании медицинских изделий и новинки оборудования.",
+              "Kompaniyaning yetkazib berishlari va loyihalari, tibbiy buyumlarni tartibga solishdagi o'zgarishlar va yangi uskunalar.",
+              "Company deliveries and projects, changes in medical device regulation and new equipment.")}</p>
+          </div>
         </div>
-        <div className="sx-news">
+        <div className="sxc-grid">
           {news.map((n, i) => (
-            <div className="sx-ncard sx-rv" key={n.id || i} style={{ "--i": i }} onClick={() => go("news")}>
-              <div className="sx-ncard-cover">{cov(n.cover) ? <img src={cov(n.cover)} alt={tx(n.title)} loading="lazy" /> : <Icon name="doc" size={28} />}</div>
+            <div
+              key={n.id || i}
+              className="sxc-card sx-ncard sx-rv"
+              style={{ "--i": i }}
+              role="button"
+              tabIndex={0}
+              onClick={() => setViewer(n)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setViewer(n); } }}
+              aria-label={_lv(lang, "Открыть новость", "Yangilikni ochish", "Open news item") + ": " + tx(n.title)}
+            >
+              <div className="sxc-media sx-ncard-cover">
+                {cov(n.cover) ? <img src={cov(n.cover)} alt={tx(n.title)} loading="lazy" /> : <Icon name="doc" size={28} />}
+              </div>
               <div className="sx-ncard-body">
                 <div className="sx-ncard-date">{fmt(n.date)}</div>
                 <h3>{tx(n.title)}</h3>
@@ -2461,7 +2808,41 @@ function SoiNews({ lang, go }) {
           ))}
         </div>
       </div>
+      {viewer && <NewsModal n={viewer} lang={lang} tx={tx} cov={cov} fmt={fmt} onClose={() => setViewer(null)} />}
     </section>
+  );
+}
+
+/* Окно просмотра новости. Оформление и поведение — те же, что у окна кейса
+   (sx-cmod-*): затемнение, закрытие по Esc и по клику мимо, блокировка
+   прокрутки страницы. */
+function NewsModal({ n, lang, tx, cov, fmt, onClose }) {
+  ensureCaseModalCss();
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
+  }, []);
+  const cover = cov(n.cover);
+  const body = tx(n.body) || tx(n.text) || tx(n.desc) || tx(n.excerpt) || "";
+  return (
+    <div className="sx-cmod-ov" onClick={onClose} role="dialog" aria-modal="true" aria-label={tx(n.title)}>
+      <button className="sx-cmod-x" onClick={onClose} aria-label={_lv(lang, "Закрыть", "Yopish", "Close")}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+      <div className="sx-cmod" onClick={(e) => e.stopPropagation()}>
+        <div className="sx-cmod-cover">
+          {cover ? <img src={cover} alt={tx(n.title)} /> : <Icon name="doc" size={40} />}
+        </div>
+        <div className="sx-cmod-body">
+          {n.date && <span className="sx-cmod-tag">{fmt(n.date)}</span>}
+          <h2>{tx(n.title)}</h2>
+          {body && <p style={{ whiteSpace: "pre-line" }}>{body}</p>}
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -2470,14 +2851,17 @@ function SoiCatalogPortal({ lang, go }) {
   const cats = window.DATA && window.DATA.CATEGORIES || [];
 
   const tiles = [
-    { key: "equip", ru: "Медицинское оборудование", uz: "Tibbiy uskunalar", en: "Medical equipment", ic: "pulse", accent: "#1d7ed8", catKey: "equipment" },
-    { key: "furn",  ru: "Медицинская мебель",        uz: "Tibbiy mebel",   en: "Medical furniture",  ic: "bed",   accent: "#15A06A", catKey: "furniture" },
-    { key: "inst",  ru: "Инструменты",               uz: "Asboblar",       en: "Instruments",        ic: "scalpel", accent: "#E0492F", catKey: "instruments" },
-    { key: "cons",  ru: "Расходные материалы",        uz: "Sarf materiallari", en: "Consumables",    ic: "box",   accent: "#6454D4", catKey: "consumables" },
+    { key: "equip", ru: "Медицинское оборудование", uz: "Tibbiy uskunalar", en: "Medical equipment", ic: "pulse", accent: "var(--blue-500)", catKey: "equipment" },
+    { key: "furn",  ru: "Медицинская мебель",        uz: "Tibbiy mebel",   en: "Medical furniture",  ic: "bed",   accent: "var(--accent)", catKey: "furniture" },
+    { key: "inst",  ru: "Инструменты",               uz: "Asboblar",       en: "Instruments",        ic: "scalpel", accent: "var(--accent)", catKey: "instruments" },
+    { key: "cons",  ru: "Расходные материалы",        uz: "Sarf materiallari", en: "Consumables",    ic: "box",   accent: "var(--accent)", catKey: "consumables" },
   ];
 
   const goTile = (t) => {
-    const found = cats.find(c => c.id === t.catKey || (c.ru && c.ru.toLowerCase().includes(t.ru.toLowerCase().split(" ")[1])));
+    /* Плитки заданы по slug — сверяем и с ним, и с cuid. Подбор по куску
+       названия, который стоял здесь раньше, не срабатывал: «Медицинская мебель»
+       искалась по слову «мебель» в нижнем регистре и мимо шла на общий каталог. */
+    const found = cats.find(c => c.slug === t.catKey || c.id === t.catKey);
     go("catalog", found ? { cat: found.id } : {});
   };
 

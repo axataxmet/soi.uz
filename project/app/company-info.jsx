@@ -1,3 +1,11 @@
+/* Цифры страницы берутся из общего источника (siteFigures в home-page.jsx)
+   и читаются геттером — в момент отрисовки, а не при загрузке файла: настройки
+   из админки приезжают асинхронно, и при чтении на старте здесь навсегда
+   застывали бы значения по умолчанию.
+   Узбекская версия раньше несла свои числа («12» лет вместо расчёта от года
+   основания) и расходилась с русской и английской. */
+function _figs() { return window.siteFigures ? window.siteFigures() : { catalog: "2 800", brands: "120", regions: "14", years: "5" }; }
+
 /* ИНДУСТРИЯ ЗДОРОВЬЯ — Company info pages with real content */
 
 function buildInfoContent(contacts) {
@@ -9,7 +17,7 @@ return {
         { head: "Кто мы", body: "ИНДУСТРИЯ ЗДОРОВЬЯ — специализированная платформа поставки медицинского оборудования и расходных материалов для государственных и частных медицинских учреждений Республики Узбекистан. Работаем с 2014 года. За 12 лет мы стали одним из ведущих B2B-поставщиков медтехники в стране." },
         { head: "Наша миссия", body: "Сделать профессиональное медицинское оборудование мирового уровня доступным для каждой клиники, больницы и медицинского центра в Узбекистане — с прямыми ценами от производителей, сертификацией, монтажом и послепродажным обслуживанием." },
         { head: "Преимущества", list: ["Прямые контракты с 120+ заводами-производителями в 18 странах", "Собственный склад в Ташкенте площадью 3 000 м²", "Инженерный центр: монтаж, пуско-наладка, обучение персонала", "Полный пакет регистрационных удостоверений МЗ РУз", "Доставка во все 14 регионов республики", "Лизинг и рассрочка платежа для бюджетных организаций"] },
-        { head: "Цифры", stats: [{ n:"2 800+", l:"Наименований оборудования"},{n:"120+",l:"Брендов-производителей"},{n:"14",l:"Регионов доставки"},{n:(new Date().getFullYear()-parseInt(localStorage.getItem("soi_founded_year")||"2021",10))+"+" ,l:"Лет на рынке"}] },
+        { head: "Цифры", get stats(){ const F=_figs(); return [{n:F.catalog+"+",l:"Наименований оборудования"},{n:F.brands+"+",l:"Брендов-производителей"},{n:F.regions,l:"Регионов доставки"},{n:F.years+"+",l:"Лет на рынке"}]; } },
       ]
     },
     uz: {
@@ -18,7 +26,7 @@ return {
         { head: "Biz kimizmiz", body: "SOG’LIQ INDUSTRIYASI — O'zbekiston Respublikasining davlat va xususiy tibbiyot muassasalari uchun tibbiy uskunalar va sarf materiallarini yetkazib berish platformasi. 2014 yildan beri faoliyat yuritamiz." },
         { head: "Bizning maqsadimiz", body: "Jahon darajasidagi professional tibbiy uskunalarni O'zbekistondagi har bir klinika, kasalxona va tibbiy markazga ishlab chiqaruvchilardan to'g'ridan-to'g'ri narxlarda, sertifikatlash, montaj va servis bilan birga taqdim etish." },
         { head: "Afzalliklar", list: ["18 mamlakatdagi 120+ ishlab chiqaruvchi zavod bilan to'g'ridan-to'g'ri shartnomalar", "Toshkentda 3 000 m² ombor", "Muhandislik markazi: montaj, ishga tushirish, xodimlarni o'qitish", "OʻzR SSV roʻyxatdan oʻtkazish guvohnomalarining toʻliq to'plami", "Respublikaning barcha 14 hududiga yetkazib berish", "Budjet tashkilotlari uchun lizing va bo'lib to'lash"] },
-        { head: "Raqamlarda", stats: [{ n:"2 800+", l:"Uskuna nomi"},{n:"120+",l:"Hamkor brendlar"},{n:"14",l:"Yetkazish hududi"},{n:"12",l:"Yillik tajriba"}] },
+        { head: "Raqamlarda", get stats(){ const F=_figs(); return [{n:F.catalog+"+",l:"Uskuna nomi"},{n:F.brands+"+",l:"Hamkor brendlar"},{n:F.regions,l:"Yetkazish hududi"},{n:F.years+"+",l:"Yillik tajriba"}]; } },
       ]
     },
     en: {
@@ -27,7 +35,7 @@ return {
         { head: "Who we are", body: "HEALTH INDUSTRY is a specialized B2B platform for medical equipment supply to public and private healthcare institutions across Uzbekistan. Operating since 2014, we have become one of the country's leading medical technology distributors." },
         { head: "Our mission", body: "To make world-class professional medical equipment accessible to every clinic, hospital and medical centre in Uzbekistan — with direct factory prices, certification, installation and after-sales service." },
         { head: "Advantages", list: ["Direct contracts with 120+ manufacturers in 18 countries", "Own 3,000 m² warehouse in Tashkent", "Engineering centre: installation, commissioning, staff training", "Full MoH Uzbekistan registration certificate package", "Delivery to all 14 regions of the republic", "Leasing and instalment options for public institutions"] },
-        { head: "By the numbers", stats: [{ n:"2,800+", l:"Equipment items"},{n:"120+",l:"Partner brands"},{n:"14",l:"Delivery regions"},{n:(new Date().getFullYear()-parseInt(localStorage.getItem("soi_founded_year")||"2021",10))+"+",l:"Years on the market"}] },
+        { head: "By the numbers", get stats(){ const F=_figs(); return [{n:F.catalog+"+",l:"Equipment items"},{n:F.brands+"+",l:"Partner brands"},{n:F.regions,l:"Delivery regions"},{n:F.years+"+",l:"Years on the market"}]; } },
       ]
     }
   },

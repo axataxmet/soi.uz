@@ -38,8 +38,21 @@ async function bootstrap() {
     .split(',')
     .map((o) => o.trim())
     .filter(Boolean);
+  /* Dev servers are started with autoPort, so the frontend's port changes from
+     session to session and pinning it in CORS_ORIGIN breaks the next run. Outside
+     production, trust any localhost port; in production only the configured list
+     gets through. */
+  const isProd = (config.get<string>('NODE_ENV') || 'development') === 'production';
+  const LOCALHOST = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
   app.enableCors({
-    origin: origins.length ? origins : true,
+    origin: origins.length
+      ? (origin, cb) => {
+          if (!origin) return cb(null, true); // curl, same-origin, server-to-server
+          if (origins.includes(origin)) return cb(null, true);
+          if (!isProd && LOCALHOST.test(origin)) return cb(null, true);
+          cb(null, false);
+        }
+      : true,
     credentials: true,
   });
 

@@ -23,7 +23,7 @@ function CrmSettingsPage({ t, lang, go }) {
     setTesting(false);
   }
 
-  const inp = "height:44px;border:1.5px solid var(--line);border-radius:10px;padding:0 14px;font-size:14px;font-family:var(--font);width:100%;box-sizing:border-box;outline:none;background:var(--surface);color:var(--ink)";
+  const inp = "height:44px;border:1.5px solid var(--line);border-radius:var(--r-sm);padding:0 14px;font-size:var(--fs-4);font-family:var(--font);width:100%;box-sizing:border-box;outline:none;background:var(--surface);color:var(--ink)";
 
   return (
     <div className="wrap" style={{ padding: "8px 0 70px", maxWidth: 680, margin: "0 auto" }}>

@@ -95,8 +95,41 @@ function resolveFile(reqUrl) {
   return file;
 }
 
+/* /api and /uploads are forwarded to the Nest backend so the site can be served
+   through a single origin — a tunnel, a phone on the LAN, anything that is not
+   this machine. Without it the browser would be asked to call
+   http://localhost:4000 from an https page: the wrong host for the visitor, and
+   blocked as mixed content besides. Same origin also means no CORS pre-flight
+   to configure, and it lets media URLs be stored relative. */
+const API_TARGET = process.env.API_TARGET || "http://127.0.0.1:4000";
+const PROXIED = ["/api", "/uploads"];
+
+function proxyApi(req, res) {
+  const t = new URL(API_TARGET);
+  const up = http.request(
+    {
+      hostname: t.hostname,
+      port: t.port || 80,
+      path: req.url,
+      method: req.method,
+      // The upstream must see its own host, not the tunnel's.
+      headers: Object.assign({}, req.headers, { host: t.host }),
+    },
+    (r) => { res.writeHead(r.statusCode, r.headers); r.pipe(res); }
+  );
+  up.on("error", (e) => {
+    res.writeHead(502, { "Content-Type": "application/json; charset=utf-8" });
+    res.end(JSON.stringify({ error: "api_unreachable", target: API_TARGET, detail: e.message }));
+  });
+  req.pipe(up);
+}
+
 http
   .createServer((req, res) => {
+    if (PROXIED.some((p) => req.url === p || req.url.startsWith(p + "/"))) {
+      proxyApi(req, res);
+      return;
+    }
     if (req.method !== "GET" && req.method !== "HEAD") {
       res.writeHead(405, { "Content-Type": "text/plain; charset=utf-8" });
       res.end("Method not allowed");

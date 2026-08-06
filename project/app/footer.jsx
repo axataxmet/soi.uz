@@ -36,15 +36,15 @@ function TendersPage({ t, lang, go }) {
         <div className="wrap">
           <div className="tnd-hero-inner">
             <div>
-              <div className="hero-kicker" style={{color:"#bfe3f3",marginBottom:18,background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.2)"}}>
+              <div className="hero-kicker" style={{color:"var(--line)",marginBottom:18,background:"rgba(255,255,255,.1)",border:"1px solid rgba(255,255,255,.2)"}}>
                 <Icon name="award" size={15}/>{lv("Госзакупки медицинского оборудования","Tibbiy uskunalar davlat xaridlari","Medical equipment public procurement")}
               </div>
               <h1 style={{fontSize:46,fontWeight:800,lineHeight:1.06,letterSpacing:"-.02em",color:"#fff",margin:"0 0 18px"}} dangerouslySetInnerHTML={{__html: lv(
-                "Поставки для государственных<br/><span style=\"color:#18b4e0\">медучреждений</span>",
-                "Davlat tibbiyot muassasalariga<br/><span style=\"color:#18b4e0\">yetkazib berish</span>",
-                "Supplies to public<br/><span style=\"color:#18b4e0\">healthcare institutions</span>"
+                "Поставки для государственных<br/><span style=\"color:var(--blue-500)\">медучреждений</span>",
+                "Davlat tibbiyot muassasalariga<br/><span style=\"color:var(--blue-500)\">yetkazib berish</span>",
+                "Supplies to public<br/><span style=\"color:var(--blue-500)\">healthcare institutions</span>"
               )}} />
-              <p style={{fontSize:17,color:"#c2d4ea",maxWidth:520,lineHeight:1.6,marginBottom:28}}>
+              <p style={{fontSize:17,color:"var(--line)",maxWidth:520,lineHeight:1.6,marginBottom:28}}>
                 {lv("Сопровождаем весь цикл тендерных закупок медицинского оборудования через портал tender.soi.uz. Более 60 государственных контрактов за 2025–2026 гг.",
                   "tender.soi.uz portali orqali tibbiy uskunalar tender xaridlarining to'liq tsiklini qo'llaymiz.",
                   "We support the full cycle of medical equipment tender procurement via tender.soi.uz. Over 60 public contracts in 2025–2026.")}
@@ -132,7 +132,7 @@ function TendersPage({ t, lang, go }) {
               ))}
             </div>
 
-            <div style={{background:"linear-gradient(135deg,#eaf3fc,#dbeafb)",border:"1px solid var(--line)",borderRadius:14,padding:20,marginTop:18}}>
+            <div style={{background:"linear-gradient(135deg,var(--blue-50),var(--line-soft))",border:"1px solid var(--line)",borderRadius:14,padding:20,marginTop:18}}>
               <h4 style={{fontWeight:800,marginBottom:8}}>{lv("Нужна помощь с тендером?","Tender bo'yicha yordam kerakmi?","Need tender assistance?")}</h4>
               <p style={{fontSize:13.5,color:"var(--slate-600)",marginBottom:14,lineHeight:1.5}}>
                 {lv("Наш тендерный отдел ответит в течение 2 часов.","Tender bo'limiz 2 soat ichida javob beradi.","Our tender team will respond within 2 hours.")}

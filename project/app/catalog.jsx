@@ -1,5 +1,43 @@
 /* ИНДУСТРИЯ ЗДОРОВЬЯ — catalog / listing page */
 
+/* Иконка раздела подбирается по slug подкатегории. Ключ — slug, а не название:
+   названия переводятся на три языка и правятся контент-менеджером, slug живёт
+   в URL и меняется куда реже. У раздела без своей иконки будет нейтральная
+   сетка — новый раздел появится на витрине сразу, просто без глифа. */
+const SUBCAT_ICON = {
+  diagnostics: "stethoscope",
+  obstetrics: "venus",
+  anesthesiology: "lungs",
+  cosmetology: "face",
+  laboratory: "flask",
+  neonatology: "incubator",
+  sterilization: "shield",
+  traumatology: "spine",
+  "func-diagnostics": "pulse",
+  surgery: "scalpel",
+  "blood-service": "blood",
+  ambulance: "ambulance",
+  "other-equipment": "grid",
+  "furniture-1": "bed",
+  "furniture-2": "cabinet",
+  "instruments-1": "scissors",
+  "instruments-2": "magnifierPlus",
+  "consumables-1": "plaster",
+  "consumables-2": "mask",
+};
+
+/* «1 товар / 2 товара / 5 товаров» — без этого бейдж на карточке читается как
+   машинный вывод. Узбекский и английский множественного числа здесь не требуют. */
+function itemsLabel(n, lang) {
+  if (lang === "uz") return n + " ta mahsulot";
+  if (lang === "en") return n + (n === 1 ? " item" : " items");
+  const d10 = n % 10, d100 = n % 100;
+  const w = d10 === 1 && d100 !== 11 ? "товар"
+    : d10 >= 2 && d10 <= 4 && (d100 < 12 || d100 > 14) ? "товара"
+    : "товаров";
+  return n + " " + w;
+}
+
 function Checkbox({ label, count, on, onClick }) {
   return (
     <div className={"chk " + (on ? "on" : "")} onClick={onClick}>
@@ -8,6 +46,37 @@ function Checkbox({ label, count, on, onClick }) {
       {count != null && <span className="ct">{count}</span>}
     </div>
   );
+}
+
+/* ── Единый формат сортировки ──────────────────────────────────────────────
+   Списков сортировки на странице было два, и они расходились и составом, и
+   формулировками: у основного «Сначала дешёвые / Сначала дорогие», у блока
+   товаров категории — «По возрастанию цены / По убыванию цены». Теперь набор
+   один, пункты и порядок общие, а сравнение живёт в одной функции. */
+function sortOptions(lvf) {
+  return [
+    { v: "stock",      l: lvf("По наличию",            "Mavjudligi boʻyicha",      "By availability") },
+    { v: "price_asc",  l: lvf("По возрастанию цены",   "Narx oʻsishi boʻyicha",    "Price: low to high") },
+    { v: "price_desc", l: lvf("По убыванию цены",      "Narx kamayishi boʻyicha",  "Price: high to low") },
+    { v: "name_asc",   l: lvf("По наименованию А-Я",   "Nomi boʻyicha A-Z",        "Name: A-Z") },
+    { v: "name_desc",  l: lvf("По наименованию Я-А",   "Nomi boʻyicha Z-A",        "Name: Z-A") },
+  ];
+}
+/* Наличие: сначала со склада, затем «под заказ», в конце предзаказ. Внутри
+   ступени — по популярности, иначе товары с одним статусом встают вразнобой.
+   Товары без цены уходят в конец при сортировке по цене, а не считаются
+   нулевыми. */
+const STOCK_RANK = { in: 0, order: 1, preorder: 2 };
+function makeSorter(mode, lang) {
+  const rank = (p) => (STOCK_RANK[p.stock] != null ? STOCK_RANK[p.stock] : 1);
+  const name = (p) => tri(lang, p.ru, p.uz, p.en) || "";
+  return (a, b) => {
+    if (mode === "price_asc")  return (a.price == null ? Infinity : a.price) - (b.price == null ? Infinity : b.price);
+    if (mode === "price_desc") return (b.price == null ? -Infinity : b.price) - (a.price == null ? -Infinity : a.price);
+    if (mode === "name_asc")   return name(a).localeCompare(name(b), "ru");
+    if (mode === "name_desc")  return name(b).localeCompare(name(a), "ru");
+    return rank(a) - rank(b) || b.pop - a.pop;   // stock
+  };
 }
 
 function CatalogPage({ t, lang, store, go, params }) {
@@ -26,7 +95,11 @@ function CatalogPage({ t, lang, store, go, params }) {
   ];
   const [minP, setMinP] = useState("");
   const [maxP, setMaxP] = useState("");
-  const [sort, setSort] = useState("pop");
+  // Уровень 5 (страница товарной группы): переключатель вида списка.
+  const [view, setView] = useState(params.view === "grid" ? "grid" : "list");
+  const [sort, setSort] = useState("stock");
+  const [catSort, setCatSort] = useState("stock"); // блок товаров на корне категории
+  const [catView, setCatView] = useState("grid");  // вид этого же блока: плитки, как было исторически
   const PAGE = 12;
   const [visible, setVisible] = useState(PAGE);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -38,13 +111,36 @@ function CatalogPage({ t, lang, store, go, params }) {
     setStockSel(params.stock ? [params.stock] : []);
     setFeatSel([]);
     setMinP(""); setMaxP("");
-  }, [params.cat, params.sub, params.brand, params.stock, params.badge, params.q, params.dir]);
+  }, [params.cat, params.sub, params.group, params.brand, params.stock, params.badge, params.q, params.dir]);
+  // Вид списка живёт в адресе (?view=list|grid) — ссылка на страницу воспроизводится целиком.
+  useEffect(() => { setView(params.view === "grid" ? "grid" : "list"); }, [params.view]);
 
   // reset visible count when filters/sort/route change
   useEffect(() => { setVisible(PAGE); }, [params.cat, params.sub, params.brand, params.stock, params.badge, params.q, params.dir, sort, brandSel, stockSel, featSel, minP, maxP]);
 
-  const cat = params.cat ? cats.find((c) => c.id === params.cat) : null;
-  const sub = cat && params.sub != null ? cat.subs[params.sub] : null;
+  /* В адресе категория стоит по slug (#/catalog/furniture), а товары и группы
+     ссылаются на её id. Приводим к id один раз — дальше по коду только catId. */
+  const cat = params.cat ? cats.find((c) => c.id === params.cat || c.slug === params.cat) : null;
+  const catId = cat ? cat.id : params.cat;
+  /* Same reasoning for the subcategory: internally it's an array index (a
+     product carries p.sub === that index), but the address bar and a direct
+     page load carry its slug — and can carry it before window.DATA.CATEGORIES
+     has even loaded. Re-resolving here on every render (not once at route-parse
+     time) means the page self-heals the moment the category data arrives,
+     the same way catId already does above. */
+  const subIdx = (() => {
+    if (params.sub == null || !cat) return null;
+    if (typeof params.sub === "number") return params.sub;
+    const idx = (cat.subs || []).findIndex((s) => s.slug === params.sub || s._id === params.sub);
+    return idx >= 0 ? idx : null;
+  })();
+  const sub = cat && subIdx != null ? cat.subs[subIdx] : null;
+  /* Третий уровень дерева — товарная группа внутри подраздела («Кольпоскопы»
+     в «Акушерстве и гинекологии»). В адресе она стоит слагом, внутри кода
+     ходит id; приводим здесь по тем же соображениям, что cat и sub выше. */
+  const subGroups = (sub && sub.groups) || [];
+  const group = params.group ? subGroups.find((g) => g._id === params.group || g.slug === params.group) : null;
+  const groupId = group ? group._id : null;
   let dirObj    = params.dir && window.DIRECTIONS_DATA ? window.DIRECTIONS_DATA.getDirById(params.dir) : null;
   // fallback: resolve direction from the normalized CMS catalog (new model)
   if (!dirObj && params.dir && window.CMS) {
@@ -69,7 +165,7 @@ function CatalogPage({ t, lang, store, go, params }) {
   // sections of the current direction (подразделы/кабинеты)
   const dirSections = (CAT && params.dir) ? CAT.sections.filter((s) => s.dir === params.dir).sort((a, b) => (a.order || 0) - (b.order || 0)) : [];
   // product groups relevant to the current route
-  const subSid = (cat && params.sub != null && cat.subs[params.sub]) ? cat.subs[params.sub]._id : null;
+  const subSid = sub ? sub._id : null;
   const groupList = (() => {
     if (!CAT) return [];
     if (params.section) {
@@ -83,8 +179,8 @@ function CatalogPage({ t, lang, store, go, params }) {
     }
     if (params.cat) {
       return CAT.groups.filter((g) => {
-        const primary = g.cat === params.cat && (!subSid || g.sub === subSid);
-        const secondary = !subSid && (CAT.seccats || []).some((sc) => sc.group === g.id && sc.cat === params.cat);
+        const primary = g.cat === catId && (!subSid || g.sub === subSid);
+        const secondary = !subSid && (CAT.seccats || []).some((sc) => sc.group === g.id && sc.cat === catId);
         return primary || secondary;
       }).sort((a, b) => (a.order || 0) - (b.order || 0));
     }
@@ -93,6 +189,71 @@ function CatalogPage({ t, lang, store, go, params }) {
   // show the group-browse (taxonomy) layer at a category/direction/section root —
   // i.e. before the user drills into a specific subcategory or runs a search
   const browseGroups = groupList.length > 0 && params.sub == null && !params.q && !params.badge;
+  /* At a bare category root — /catalog/equipment — lead with subcategory tiles
+     (photo-less placeholders, per the current design decision) rather than the
+     product grid straight away, the way a category landing page reads on most
+     medical-equipment catalogs. Only subcategories the backend already exposes
+     appear here — empty ones are filtered out before they ever reach the client. */
+  /* Признак «мы на корне категории» берётся из маршрута, а не из загруженного
+     дерева: категории приезжают с бэкенда асинхронно, и при перезагрузке первый
+     кадр рисовался ещё без них — cat был null, browseSubs выключался, и слева
+     на мгновение появлялся сайдбар фильтров, который тут же исчезал.
+     Пока дерево не пришло, считаем страницу витриной разделов; когда придёт —
+     уточняем: если у категории подкатегорий нет, это обычный список товаров. */
+  const catsReady = (cats || []).length > 0;
+  const atCategoryRoot = params.cat != null && params.sub == null && !params.q && !params.badge && !params.dir;
+  const browseSubs = !browseGroups && atCategoryRoot && (!catsReady || (cat && (cat.subs || []).length > 0));
+  const goSub = (idx) => go("catalog", { cat: catId, sub: idx });
+
+  /* Переключатель вида отображения. Разметка одна на оба места, иначе кнопки
+     разъедутся, а значение и умолчание у мест разные:
+       • страница товарной группы — список, выбор уходит в адрес (?view=grid),
+         чтобы ссылка открывалась тем же видом;
+       • витрины категории и подраздела — плитки, как было до появления
+         переключателя; адрес вида здесь не несёт, выбор живёт в состоянии. */
+  const ViewSwitch = ({ value, onChange }) => (
+    <div className="view-sw" role="group" aria-label={lvf("Вид", "Ko'rinish", "View")}>
+      <button className={value === "grid" ? "on" : ""} title={lvf("Плиткой", "Plitka", "Grid")}
+        aria-pressed={value === "grid"} onClick={() => onChange("grid")}>
+        <Icon name="grid" size={16} />
+      </button>
+      <button className={value === "list" ? "on" : ""} title={lvf("Списком", "Roʻyxat", "List")}
+        aria-pressed={value === "list"} onClick={() => onChange("list")}>
+        <Icon name="list" size={16} />
+      </button>
+    </div>
+  );
+
+  /* Карточки разделов: показываем только непустые. Товар может лежать в разделе
+     как основном либо быть добавлен в него дополнительно (extraCats) — считаем
+     оба случая, иначе раздел с «одолженными» товарами выглядел бы пустым. */
+  const subCount = (idx) => ALL.filter((p) =>
+    (p.cat === catId && p.sub === idx) ||
+    (p.extraCats || []).some((ec) => ec.cat === catId && ec.sub === idx)).length;
+  const subCards = ((cat && cat.subs) || [])
+    .map((s, idx) => ({ s, idx, cnt: subCount(idx) }))
+    .filter((x) => x.cnt > 0);
+
+  /* Товарные группы подраздела — тот же ярус витрины, что подкатегории у
+     категории, поэтому и считаются, и рисуются одинаково: непустые, теми же
+     карточками. Счёт берём по загруженным товарам, а не по productCount с
+     сервера, чтобы число на карточке совпадало со списком, который откроется. */
+  const groupCount = (gid) => ALL.filter((p) =>
+    p.group === gid || (p.extraCats || []).some((ec) => ec.group === gid)).length;
+  const groupCards = subGroups
+    .map((g) => ({ g, cnt: groupCount(g._id) }))
+    .filter((x) => x.cnt > 0);
+  // На странице подраздела витрина групп заменяет список товаров — так же,
+  // как витрина подкатегорий на странице категории.
+  const atSubRoot = subIdx != null && !groupId && !params.q && !params.badge && !params.dir;
+  const browseGroupTiles = atSubRoot && groupCards.length > 0;
+  /* Оба яруса витрины делят одну раскладку: во всю ширину, без сайдбара
+     фильтров, без плашки уровня и счётчика позиций — решение заказчика
+     привести уровень подраздела к виду уровня категории. */
+  const browseTiles = browseSubs || browseGroupTiles;
+  // Уровень 5 идёт без сайдбара — как витрины разделов, во всю ширину.
+  const noSidebar = browseTiles || !!group;
+  const goGroupTile = (g) => go("catalog", { cat: catId, sub: subIdx, group: g.slug || g._id });
   // navigate from a group tile to its category + subcategory listing
   const goGroup = (g) => {
     const c = cats.find((x) => x.id === g.cat);
@@ -104,8 +265,8 @@ function CatalogPage({ t, lang, store, go, params }) {
   // base set by route
   let base = ALL.filter((p) => {
     if (params.cat) {
-      const inPrimary = p.cat === params.cat && (params.sub == null || p.sub === params.sub);
-      const inExtra = (p.extraCats || []).some(ec => ec.cat === params.cat && (params.sub == null || ec.sub === params.sub));
+      const inPrimary = p.cat === catId && (subIdx == null || p.sub === subIdx) && (!groupId || p.group === groupId);
+      const inExtra = (p.extraCats || []).some(ec => ec.cat === catId && (subIdx == null || ec.sub === subIdx) && (!groupId || ec.group === groupId));
       if (!inPrimary && !inExtra) return false;
     }
     if (params.dir) {
@@ -123,6 +284,7 @@ function CatalogPage({ t, lang, store, go, params }) {
   // brands available in base for the filter list
   const brandsInBase = brands.filter((b) => base.some((p) => p.brand === b.id));
 
+
   // apply sidebar filters
   let list = base.filter((p) => {
     if (brandSel.length && !brandSel.includes(p.brand)) return false;
@@ -139,15 +301,24 @@ function CatalogPage({ t, lang, store, go, params }) {
   });
 
   // sort
-  list = [...list].sort((a, b) => {
-    if (sort === "price_asc") return a.price - b.price;
-    if (sort === "price_desc") return b.price - a.price;
-    if (sort === "new") return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) || b.pop - a.pop;
-    return b.pop - a.pop;
-  });
+  list = [...list].sort(makeSorter(sort, lang));
 
   const shown = list.slice(0, visible);
   const hasMore = visible < list.length;
+
+  /* Товары категории под карточками разделов. Своя сортировка, не связанная с
+     сайдбарной: на корне категории сайдбар скрыт, а значит и его селект тоже —
+     блоку нужен собственный. Товары без цены («по запросу») уходят в конец при
+     любой ценовой сортировке, иначе они занимали бы первые места как нули. */
+  const CAT_COLS = 5, CAT_ROWS = 10;
+  const catProducts = browseTiles
+    ? [...list].sort(makeSorter(catSort, lang)).slice(0, CAT_COLS * CAT_ROWS)
+    : [];
+
+  // .clp-cat-tile styles for the subcategory tile grid below — a visitor can
+  // land straight on /catalog/equipment without ever hitting the bare landing
+  // page, which is the only other place that injects this stylesheet.
+  useEffect(ensureClpCss, []);
 
   // infinite scroll: load next page when sentinel enters viewport
   useEffect(() => {
@@ -165,6 +336,7 @@ function CatalogPage({ t, lang, store, go, params }) {
 
   const title = sectionObj ? tri(lang, sectionObj.ru, sectionObj.uz, sectionObj.en)
     : dirObj ? tri(lang, dirObj.ru, dirObj.uz, dirObj.en)
+    : group ? (tri(lang, group.ru, group.uz, group.en))
     : sub ? (tri(lang, sub.ru, sub.uz, sub.en))
     : cat ? (tri(lang, cat.ru, cat.uz, cat.en))
     : params.badge === "hit" ? t.sec_featured
@@ -197,9 +369,15 @@ function CatalogPage({ t, lang, store, go, params }) {
         {sectionObj && <><Icon name="chevronRight" size={14} /><span className="cur">{tri(lang, sectionObj.ru, sectionObj.uz, sectionObj.en)}</span></>}
       </div>
 
-      <div className="cat-layout">
-        <div className={"filters-backdrop " + (filtersOpen ? "show" : "")} onClick={() => setFiltersOpen(false)} />
-        <aside className={"filters " + (filtersOpen ? "open" : "")}>
+      {/* На витрине разделов фильтровать и сортировать нечего: на странице не
+          товары, а плитки подкатегорий. Сайдбар и панель сортировки скрыты, а
+          сетка переводится в одну колонку, чтобы не оставлять пустое место. */}
+      {/* Сайдбара нет ни на витринах разделов, ни на странице товарной группы:
+          на уровне 5 фильтры убраны по решению заказчика, там остаются только
+          заголовок, вид и сортировка. */}
+      <div className={"cat-layout" + (noSidebar ? " cat-layout-full" : "")}>
+        {!noSidebar && <div className={"filters-backdrop " + (filtersOpen ? "show" : "")} onClick={() => setFiltersOpen(false)} />}
+        {!noSidebar && <aside className={"filters " + (filtersOpen ? "open" : "")}>
           <div className="flt-head">
             <h3>{t.cat_filters}</h3>
             {hasFilters ? <button className="flt-reset" onClick={resetAll}>{t.cat_reset}</button> : null}
@@ -223,8 +401,8 @@ function CatalogPage({ t, lang, store, go, params }) {
               {cat.subs.map((s, i) => (
                 <Checkbox key={i} label={tri(lang, s.ru, s.uz, s.en)}
                   count={ALL.filter(p=>(p.cat===cat.id&&p.sub===i)||(p.extraCats||[]).some(ec=>ec.cat===cat.id&&ec.sub===i)).length}
-                  on={params.sub === i}
-                  onClick={() => go("catalog", params.sub === i ? { cat: cat.id } : { cat: cat.id, sub: i })} />
+                  on={subIdx === i}
+                  onClick={() => go("catalog", subIdx === i ? { cat: cat.id } : { cat: cat.id, sub: i })} />
               ))}
             </div>
           )}
@@ -282,14 +460,22 @@ function CatalogPage({ t, lang, store, go, params }) {
           <button className="flt-apply" onClick={() => setFiltersOpen(false)}>
             {lang === "uz" ? `${list.length} ta ko'rsatish` : lang === "en" ? `Show ${list.length}` : `Показать ${list.length}`}
           </button>
-        </aside>
+        </aside>}
 
         <main className="cat-main">
           <div className="cat-bar">
             <div>
-              {(() => {
+              {/* Плашка уровня и счётчик — навигационные подсказки для страниц
+                  с товарами. На витрине разделов их не показываем: заголовок и
+                  сами плитки уже говорят, где пользователь и что здесь есть. */}
+              {/* На странице товарной группы шапка — только заголовок: плашка
+                  уровня, ссылка на родителя и счётчик убраны по решению
+                  заказчика. Путь наверх и так стоит в хлебных крошках. */}
+              {!browseTiles && !group && (() => {
                 const lvl = dirObj
                   ? { txt: lvf("Медицинское направление","Tibbiy yoʻnalish","Medical direction"), cls: "dir" }
+                  : group
+                  ? { txt: lvf("Товарная группа","Mahsulot guruhi","Product group"), cls: "sub" }
                   : sub
                   ? { txt: lvf("Подкатегория","Subkategoriya","Subcategory"), cls: "sub" }
                   : cat
@@ -300,30 +486,28 @@ function CatalogPage({ t, lang, store, go, params }) {
                 return lvl ? <div className={"cat-level cat-level-" + lvl.cls}>{lvl.txt}</div> : null;
               })()}
               <h1>{title}</h1>
-              {sub && cat && <div className="cb-parent">{lvf("в категории","toifada","in category")} <a onClick={() => go("catalog", { cat: cat.id })}>{tri(lang, cat.ru, cat.uz, cat.en)}</a></div>}
-              <div className="cb-found">{browseGroups
+              {sub && cat && !group && <div className="cb-parent">{lvf("в категории","toifada","in category")} <a onClick={() => go("catalog", { cat: cat.id })}>{tri(lang, cat.ru, cat.uz, cat.en)}</a></div>}
+              {!browseTiles && !group && <div className="cb-found">{browseGroups
                 ? <>{lvf("Товарных групп","Mahsulot guruhlari","Product groups")}: <b>{groupList.length}</b></>
-                : <>{t.found}: <b>{list.length}</b> {t.items_count}</>}</div>
+                : <>{t.found}: <b>{list.length}</b> {t.items_count}</>}</div>}
             </div>
-            <div className="cat-bar-controls">
-              <button className="flt-trigger" onClick={() => setFiltersOpen(true)}>
+            {!browseTiles && <div className={"cat-bar-controls" + (group ? " plain" : "")}>
+              {group && <ViewSwitch value={view} onChange={(v) => go("catalog", Object.assign({}, params, { view: v }))} />}
+              {!group && <button className="flt-trigger" onClick={() => setFiltersOpen(true)}>
                 <Icon name="filter" size={17} />
                 {t.cat_filters}
                 {hasFilters ? <span className="flt-trigger-dot" /> : null}
-              </button>
+              </button>}
               <div className="sort-sel">
                 <label>{t.cat_sort}:</label>
                 <select value={sort} onChange={(e) => setSort(e.target.value)}>
-                  <option value="pop">{t.sort_pop}</option>
-                  <option value="price_asc">{t.sort_price_asc}</option>
-                <option value="price_desc">{t.sort_price_desc}</option>
-                <option value="new">{t.sort_new}</option>
-              </select>
+                  {sortOptions(lvf).map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
+                </select>
             </div>
-          </div>
+          </div>}
           </div>
 
-          {hasFilters ? (
+          {hasFilters && !browseTiles ? (
             <div className="chips">
               {brandSel.map((id) => (
                 <span key={id} className="chip">{brandName(id)}<button onClick={() => toggle(brandSel, setBrandSel, id)}><Icon name="x" size={13} /></button></span>
@@ -353,7 +537,78 @@ function CatalogPage({ t, lang, store, go, params }) {
             </div>
           ) : null}
 
-          {browseGroups ? (
+          {browseTiles ? (
+            <>
+              {/* Один ярус витрины на два уровня: у категории это подкатегории,
+                  у подкатегории — товарные группы. Разметка и классы общие,
+                  различаются только источник карточек и картинка. Пустые
+                  разделы отфильтрованы выше — решение заказчика. */}
+              {browseSubs && subCards.length > 0 && (
+                <div className="sc-grid">
+                  {subCards.map(({ s, idx, cnt }) => (
+                    <button key={s._id} className="sc-card" onClick={() => goSub(idx)}
+                      title={tri(lang, s.ru, s.uz, s.en)}>
+                      <span className="sc-media"><Icon name={SUBCAT_ICON[s.slug] || "grid"} size={64} sw={1.25} /></span>
+                      <span className="sc-name">{tri(lang, s.ru, s.uz, s.en)}</span>
+                      <span className="sc-cnt">{itemsLabel(cnt, lang)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {browseGroupTiles && (
+                <div className="sc-grid">
+                  {groupCards.map(({ g, cnt }) => (
+                    <button key={g._id} className="sc-card" onClick={() => goGroupTile(g)}
+                      title={tri(lang, g.ru, g.uz, g.en)}>
+                      {/* Своих иллюстраций у групп нет — показываем снимок
+                          первого товара группы, он приезжает из catalog-remote.
+                          Товара без фото хватает, чтобы остаться на глифе. */}
+                      <span className="sc-media">
+                        {g.img
+                          ? <img src={g.img} alt="" loading="lazy" />
+                          : <Icon name="grid" size={64} sw={1.25} />}
+                      </span>
+                      <span className="sc-name">{tri(lang, g.ru, g.uz, g.en)}</span>
+                      <span className="sc-cnt">{itemsLabel(cnt, lang)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {catProducts.length > 0 && (
+                <section className="cat-prod">
+                  {/* Заголовок «Товары категории / подкатегории» убран: над списком
+                      уже стоит название раздела, и подпись его повторяла.
+                      Слева сортировка, справа — переключатель вида. */}
+                  <div className="cat-prod-head">
+                    <div className="sort-sel">
+                      <label htmlFor="cat-sort">{lvf("Сортировать", "Saralash", "Sort by")}:</label>
+                      <select id="cat-sort" value={catSort} onChange={(e) => setCatSort(e.target.value)}>
+                        {sortOptions(lvf).map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
+                      </select>
+                    </div>
+                    <ViewSwitch value={catView} onChange={setCatView} />
+                  </div>
+                  {catView === "list" ? (
+                    <div className="cat-rows">
+                      {catProducts.map((p) => (
+                        <ProductRow key={p.id} product={p} t={t} lang={lang} store={store}
+                          onOpen={(pr) => go("product", { id: pr.id })} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="cat-prod-grid">
+                      {catProducts.map((p) => (
+                        <ProductTile key={p.id} product={p} t={t} lang={lang} store={store}
+                          onOpen={(pr) => go("product", { id: pr.id })} />
+                      ))}
+                    </div>
+                  )}
+                </section>
+              )}
+            </>
+          ) : browseGroups ? (
             <div className="cat-groups">
               {groupList.map((g) => (
                 <button key={g.id} className="cat-group-tile" onClick={() => goGroup(g)}>
@@ -382,11 +637,20 @@ function CatalogPage({ t, lang, store, go, params }) {
             </div>
           ) : (
             <>
-              <div className="cat-grid-p">
-                {shown.map((p) => (
-                  <ProductCard key={p.id} product={p} t={t} lang={lang} store={store} onOpen={(pr) => go("product", { id: pr.id, fromDir: params.dir })} />
-                ))}
-              </div>
+              {view === "grid" && group ? (
+                <div className="cat-prod-grid">
+                  {shown.map((p) => (
+                    <ProductTile key={p.id} product={p} t={t} lang={lang} store={store}
+                      onOpen={(pr) => go("product", { id: pr.id, fromDir: params.dir })} />
+                  ))}
+                </div>
+              ) : (
+                <div className="cat-rows">
+                  {shown.map((p) => (
+                    <ProductRow key={p.id} product={p} t={t} lang={lang} store={store} onOpen={(pr) => go("product", { id: pr.id, fromDir: params.dir })} />
+                  ))}
+                </div>
+              )}
               {hasMore && (
                 <div className="cat-loadmore" ref={sentinelRef}>
                   <div className="cat-progress"><div className="cat-progress-bar" style={{ width: Math.round((visible / list.length) * 100) + "%" }} /></div>
@@ -405,6 +669,60 @@ function CatalogPage({ t, lang, store, go, params }) {
 }
 
 /* ── Catalog Landing Page (shown at #/catalog with no params) ── */
+/* Injected once, id-guarded — called from both CatalogLandingPage (bare /catalog)
+   and CatalogPage (a category or subcategory tile grid), because a visitor can
+   land straight on /catalog/equipment without ever hitting the bare landing
+   page first, and .clp-cat-tile still needs its styles either way. */
+function ensureClpCss() {
+  const id = "soi-clp-css";
+  if (document.getElementById(id)) return;
+  const s = document.createElement("style");
+  s.id = id;
+  s.textContent = `
+.clp-wrap { max-width:1200px; margin:0 auto; padding:0 24px; }
+.clp-hero { padding:clamp(48px,6vw,80px) 0 clamp(36px,4vw,56px); text-align:center; }
+/* Тот же надзаголовок, что на главной: кегль и разрядка приведены к общим,
+   свои остались только цвет и отбивка — это витрина каталога. */
+.clp-eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:var(--fs-1); font-weight:700; letter-spacing:.13em; text-transform:uppercase; color:var(--blue-600); margin-bottom:18px; }
+.clp-h1 { font-size:clamp(28px,4vw,52px); font-weight:800; letter-spacing:-.03em; line-height:1.08; color:var(--c-text,#111); margin:0 0 18px; }
+.clp-h1 span { background:linear-gradient(120deg,var(--blue-500),var(--blue-500)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.clp-sub { font-size:clamp(15px,1.5vw,17px); color:var(--c-muted,var(--slate-400)); margin:0 auto 36px; max-width:580px; line-height:1.65; }
+.clp-search { display:flex; max-width:680px; margin:0 auto; gap:0; border-radius:var(--r-lg); border:2px solid var(--c-border,var(--line-soft)); background:var(--c-surface,#fff); overflow:hidden; transition:border-color .2s,box-shadow .2s; }
+.clp-search:focus-within { border-color:var(--c-primary,var(--blue-600)); box-shadow:var(--sh-sm); }
+.clp-search input { flex:1; padding:16px 20px; font-size:var(--fs-5); border:none; outline:none; background:transparent; color:var(--c-text,#111); font-family:inherit; }
+.clp-search button { padding:14px 28px; background:var(--c-primary,var(--blue-600)); color:#fff; border:none; cursor:pointer; font-size:var(--fs-4); font-weight:700; font-family:inherit; transition:background .18s; border-radius:0 14px 14px 0; }
+.clp-search button:hover { background:color-mix(in srgb,var(--c-primary,var(--blue-600)) 85%,#000); }
+
+.clp-cats { padding:clamp(28px,3.5vw,44px) 0; }
+.clp-cats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.clp-cat-tile { display:flex; flex-direction:column; gap:16px; padding:28px 24px; border-radius:var(--r-lg); border:1.5px solid var(--c-border,var(--line-soft)); background:var(--c-surface,#fff); cursor:pointer; text-align:left; transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s,border-color .25s; position:relative; overflow:hidden; }
+.clp-cat-tile::before { content:""; position:absolute; inset:0; border-radius:inherit; opacity:0; transition:opacity .3s; background:radial-gradient(100% 80% at 0% 0%, color-mix(in srgb,var(--ta,var(--blue-500)) 10%,transparent), transparent 60%); pointer-events:none; }
+.clp-cat-tile:hover { transform:translateY(-5px); box-shadow:var(--sh-lg); border-color:color-mix(in srgb,var(--ta,var(--blue-500)) 45%,var(--c-border,var(--line-soft))); }
+.clp-cat-tile:hover::before { opacity:1; }
+.clp-cat-ic { width:52px; height:52px; border-radius:var(--r); display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--ta,var(--blue-500)) 12%,transparent); color:var(--ta,var(--blue-500)); flex-shrink:0; }
+.clp-cat-name { font-size:var(--fs-5); font-weight:800; color:var(--c-text,#111); letter-spacing:-.01em; line-height:1.25; }
+.clp-cat-cnt { font-size:var(--fs-3); color:var(--c-muted,var(--slate-400)); margin-top:4px; }
+.clp-cat-arr { margin-top:auto; display:flex; align-items:center; gap:6px; font-size:var(--fs-3); font-weight:700; color:var(--ta,var(--blue-500)); transition:gap .2s; }
+.clp-cat-tile:hover .clp-cat-arr { gap:10px; }
+
+/* Полоса статистики: заливка убрана, разделители держатся на рамке. */
+.clp-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-soft); border-radius:var(--r-lg); overflow:hidden; margin:clamp(24px,3vw,40px) 0; }
+.clp-stat { background:var(--c-surface,#fff); padding:28px 24px; text-align:center; }
+.clp-stat-n { font-size:clamp(32px,4vw,46px); font-weight:800; letter-spacing:-.03em; background:linear-gradient(120deg,var(--blue-500),var(--blue-500)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; line-height:1; }
+.clp-stat-l { font-size:var(--fs-4); color:var(--c-muted,var(--slate-400)); margin-top:8px; }
+
+@media(max-width:800px){ .clp-cats-grid{ grid-template-columns:repeat(2,1fr); } .clp-stats{ grid-template-columns:1fr 1fr 1fr; } }
+@media(max-width:540px){ .clp-cats-grid{ grid-template-columns:1fr 1fr; } .clp-cat-tile{ padding:20px 16px; } }
+
+.clp-cat-tile:focus-visible { outline:2px solid var(--ta,var(--blue-500)); outline-offset:2px; }
+.clp-search button:focus-visible { outline:3px solid rgba(255,255,255,.7); outline-offset:-3px; }
+@media(prefers-reduced-motion:reduce){
+  .clp-cat-tile { transition:none !important; transform:none !important; }
+}
+  `;
+  document.head.appendChild(s);
+}
+
 function CatalogLandingPage({ t, lang, store, go }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const ALL = window.DATA && window.DATA.PRODUCTS || [];
@@ -420,72 +738,23 @@ function CatalogLandingPage({ t, lang, store, go }) {
 
   // Main category groups
   const CAT_TILES = [
-    { ic: "pulse",   accent: "#1d7ed8", ru: "Медицинское оборудование", uz: "Tibbiy uskunalar",     en: "Medical equipment",  key: "equipment"    },
-    { ic: "bed",     accent: "#15A06A", ru: "Медицинская мебель",        uz: "Tibbiy mebel",          en: "Medical furniture",  key: "furniture"     },
-    { ic: "scalpel", accent: "#E0492F", ru: "Инструменты",               uz: "Asboblar",              en: "Instruments",        key: "instruments"   },
-    { ic: "box",     accent: "#6454D4", ru: "Расходные материалы",        uz: "Sarf materiallari",     en: "Consumables",        key: "consumables"   },
+    /* Акцент у всех четырёх плиток один — синий. Раньше здесь была радуга из
+       четырёх цветов; после перехода на палитру из трёх цветов «Инструменты»
+       оказались окрашены в цвет ошибки, а «Расходные материалы» — в фиолетовый,
+       которого в палитре нет. Различают разделы иконка и подпись. */
+    { ic: "pulse",   accent: "var(--accent)", ru: "Медицинское оборудование", uz: "Tibbiy uskunalar",     en: "Medical equipment",  key: "equipment"    },
+    { ic: "bed",     accent: "var(--accent)", ru: "Медицинская мебель",        uz: "Tibbiy mebel",          en: "Medical furniture",  key: "furniture"     },
+    { ic: "scalpel", accent: "var(--accent)", ru: "Инструменты",               uz: "Asboblar",              en: "Instruments",        key: "instruments"   },
+    { ic: "box",     accent: "var(--accent)", ru: "Расходные материалы",        uz: "Sarf materiallari",     en: "Consumables",        key: "consumables"   },
   ];
 
   const goCatTile = (tile) => {
-    const found = cats.find(c => c.id === tile.key);
+    // Плитки заданы по slug, категории из API несут и slug, и cuid — сверяем оба.
+    const found = cats.find(c => c.id === tile.key || c.slug === tile.key);
     go("catalog", found ? { cat: found.id } : {});
   };
 
-  const topDirs = DD ? (DD.DIRECTION_GROUPS || []).slice(0, 8) : [];
-
-  useEffect(() => {
-    const id = "soi-clp-css";
-    if (document.getElementById(id)) return;
-    const s = document.createElement("style");
-    s.id = id;
-    s.textContent = `
-.clp-wrap { max-width:1200px; margin:0 auto; padding:0 24px; }
-.clp-hero { padding:clamp(48px,6vw,80px) 0 clamp(36px,4vw,56px); text-align:center; }
-.clp-eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--c-primary,#1a5fd0); margin-bottom:18px; }
-.clp-h1 { font-size:clamp(28px,4vw,52px); font-weight:800; letter-spacing:-.03em; line-height:1.08; color:var(--c-text,#111); margin:0 0 18px; }
-.clp-h1 span { background:linear-gradient(120deg,#1d7ed8,#14B8E0); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-.clp-sub { font-size:clamp(15px,1.5vw,17px); color:var(--c-muted,#6b7280); margin:0 auto 36px; max-width:580px; line-height:1.65; }
-.clp-search { display:flex; max-width:680px; margin:0 auto; gap:0; border-radius:16px; border:2px solid var(--c-border,#e5e7eb); background:var(--c-surface,#fff); overflow:hidden; transition:border-color .2s,box-shadow .2s; }
-.clp-search:focus-within { border-color:var(--c-primary,#1a5fd0); box-shadow:0 0 0 4px color-mix(in srgb,var(--c-primary,#1a5fd0) 12%,transparent); }
-.clp-search input { flex:1; padding:16px 20px; font-size:16px; border:none; outline:none; background:transparent; color:var(--c-text,#111); font-family:inherit; }
-.clp-search button { padding:14px 28px; background:var(--c-primary,#1a5fd0); color:#fff; border:none; cursor:pointer; font-size:15px; font-weight:700; font-family:inherit; transition:background .18s; border-radius:0 14px 14px 0; }
-.clp-search button:hover { background:color-mix(in srgb,var(--c-primary,#1a5fd0) 85%,#000); }
-
-.clp-cats { padding:clamp(28px,3.5vw,44px) 0; }
-.clp-cats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
-.clp-cat-tile { display:flex; flex-direction:column; gap:16px; padding:28px 24px; border-radius:18px; border:1.5px solid var(--c-border,#e5e7eb); background:var(--c-surface,#fff); cursor:pointer; text-align:left; transition:transform .25s cubic-bezier(.16,1,.3,1),box-shadow .25s,border-color .25s; position:relative; overflow:hidden; }
-.clp-cat-tile::before { content:""; position:absolute; inset:0; border-radius:inherit; opacity:0; transition:opacity .3s; background:radial-gradient(100% 80% at 0% 0%, color-mix(in srgb,var(--ta,#1d7ed8) 10%,transparent), transparent 60%); pointer-events:none; }
-.clp-cat-tile:hover { transform:translateY(-5px); box-shadow:0 16px 40px rgba(0,0,0,.1); border-color:color-mix(in srgb,var(--ta,#1d7ed8) 45%,var(--c-border,#e5e7eb)); }
-.clp-cat-tile:hover::before { opacity:1; }
-.clp-cat-ic { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; background:color-mix(in srgb,var(--ta,#1d7ed8) 12%,transparent); color:var(--ta,#1d7ed8); flex-shrink:0; }
-.clp-cat-name { font-size:16px; font-weight:800; color:var(--c-text,#111); letter-spacing:-.01em; line-height:1.25; }
-.clp-cat-cnt { font-size:13px; color:var(--c-muted,#6b7280); margin-top:4px; }
-.clp-cat-arr { margin-top:auto; display:flex; align-items:center; gap:6px; font-size:13.5px; font-weight:700; color:var(--ta,#1d7ed8); transition:gap .2s; }
-.clp-cat-tile:hover .clp-cat-arr { gap:10px; }
-
-.clp-dirs { padding:clamp(24px,3vw,40px) 0; border-top:1px solid var(--c-border,#e5e7eb); }
-.clp-dirs-label { font-size:12.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--c-muted,#6b7280); margin-bottom:16px; }
-.clp-dirs-row { display:flex; flex-wrap:wrap; gap:8px; }
-.clp-dir-chip { display:inline-flex; align-items:center; gap:7px; padding:9px 15px; border-radius:99px; border:1.5px solid var(--c-border,#e5e7eb); background:var(--c-surface,#fff); font-size:13.5px; font-weight:600; color:var(--c-text,#111); cursor:pointer; transition:border-color .18s,background .18s,color .18s; }
-.clp-dir-chip:hover { border-color:var(--c-primary,#1a5fd0); background:color-mix(in srgb,var(--c-primary,#1a5fd0) 8%,transparent); color:var(--c-primary,#1a5fd0); }
-
-.clp-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--c-border,#e5e7eb); border-radius:18px; overflow:hidden; margin:clamp(24px,3vw,40px) 0; }
-.clp-stat { background:var(--c-surface,#fff); padding:28px 24px; text-align:center; }
-.clp-stat-n { font-size:clamp(32px,4vw,46px); font-weight:800; letter-spacing:-.03em; background:linear-gradient(120deg,#1d7ed8,#14B8E0); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; line-height:1; }
-.clp-stat-l { font-size:14px; color:var(--c-muted,#6b7280); margin-top:8px; }
-
-@media(max-width:800px){ .clp-cats-grid{ grid-template-columns:repeat(2,1fr); } .clp-stats{ grid-template-columns:1fr 1fr 1fr; } }
-@media(max-width:540px){ .clp-cats-grid{ grid-template-columns:1fr 1fr; } .clp-cat-tile{ padding:20px 16px; } }
-
-.clp-cat-tile:focus-visible { outline:2px solid var(--ta,#1d7ed8); outline-offset:2px; }
-.clp-search button:focus-visible { outline:3px solid rgba(255,255,255,.7); outline-offset:-3px; }
-.clp-dir-chip:focus-visible { outline:2px solid var(--c-primary,#1a5fd0); outline-offset:2px; }
-@media(prefers-reduced-motion:reduce){
-  .clp-cat-tile, .clp-dir-chip { transition:none !important; transform:none !important; }
-}
-    `;
-    document.head.appendChild(s);
-  }, []);
+  useEffect(ensureClpCss, []);
 
   return (
     <div>
@@ -498,7 +767,7 @@ function CatalogLandingPage({ t, lang, store, go }) {
       {/* Hero */}
       <div className="clp-hero clp-wrap">
         <div className="clp-eyebrow"><Icon name="grid" size={13} />{lv("Электронный каталог", "Elektron katalog", "Electronic catalog")}</div>
-        <h1 className="clp-h1">{lv(<>2 800+ единиц&nbsp;<span>медицинского оборудования</span></>, <>2 800+ birlik <span>tibbiy uskunalar</span></>, <>2,800+ units of&nbsp;<span>medical equipment</span></>)}</h1>
+        <h1 className="clp-h1">{(() => { const N = (window.siteFigures ? window.siteFigures().catalog : "2 800") + "+"; return lv(<>{N} единиц&nbsp;<span>медицинского оборудования</span></>, <>{N} birlik <span>tibbiy uskunalar</span></>, <>{N} units of&nbsp;<span>medical equipment</span></>); })()}</h1>
         <p className="clp-sub">{lv("Медтехника, мебель, инструменты и расходные материалы. Официальные поставки от 120+ мировых производителей.", "Tibbiy texnika, mebel, asboblar. 120+ jahon ishlab chiqaruvchilaridan rasmiy yetkazib berish.", "Equipment, furniture, instruments and consumables. Official supply from 120+ global manufacturers.")}</p>
         <form className="clp-search" onSubmit={doSearch}>
           <input value={q} onChange={e => setQ(e.target.value)} placeholder={lv("Поиск по каталогу — аппараты, бренды, модели…", "Katalogdan qidiring…", "Search catalog — devices, brands, models…")} autoFocus />
@@ -511,7 +780,7 @@ function CatalogLandingPage({ t, lang, store, go }) {
         <div className="clp-wrap">
           <div className="clp-cats-grid">
             {CAT_TILES.map(tile => {
-              const found = cats.find(c => c.id === tile.key);
+              const found = cats.find(c => c.id === tile.key || c.slug === tile.key);
               const cnt = found ? ALL.filter(p => p.cat === found.id).length : 0;
               return (
                 <button key={tile.key} className="clp-cat-tile" style={{ "--ta": tile.accent }} onClick={() => goCatTile(tile)}>
@@ -529,30 +798,19 @@ function CatalogLandingPage({ t, lang, store, go }) {
       </div>
 
       {/* Directions */}
-      {topDirs.length > 0 && (
-        <div className="clp-wrap clp-dirs">
-          <div className="clp-dirs-label">{lv("По направлению медицины", "Tibbiyot yo'nalishi bo'yicha", "By medical specialty")}</div>
-          <div className="clp-dirs-row">
-            {topDirs.map(g => {
-              const dirs = (DD.getDirsForGroup(g.id) || []).slice(0, 1);
-              return dirs.map(d => (
-                <button key={d.id} className="clp-dir-chip" onClick={() => go("catalog", { dir: d.id })}>
-                  <Icon name={g.icon} size={14} style={{ color: g.color }} />{lv(d.ru, d.uz, d.en)}
-                </button>
-              ));
-            })}
-          </div>
-        </div>
-      )}
+      {/* Блок «По направлению медицины» удалён вместе с пунктом меню:
+          каталог остаётся деревом из четырёх категорий. */}
 
       {/* Stats */}
       <div className="clp-wrap">
         <div className="clp-stats">
-          {[
-            { n: "2 800+", l: lv("позиций оборудования", "uskuna pozitsiyasi", "equipment items") },
-            { n: "120+",   l: lv("мировых брендов",       "jahon brendlari",    "global brands")   },
-            { n: "14",     l: lv("регионов доставки",     "yetkazish hududi",   "delivery regions")},
-          ].map((s,i) => (
+          {/* Цифры — из общего источника (siteFigures в home-page.jsx), а не
+              вписаны здесь: раньше витрина и главная расходились. */}
+          {(() => { const F = window.siteFigures ? window.siteFigures() : { catalog: "2 800", brands: "120", regions: "14" }; return [
+            { n: F.catalog + "+", l: lv("позиций оборудования", "uskuna pozitsiyasi", "equipment items") },
+            { n: F.brands + "+",  l: lv("мировых брендов",       "jahon brendlari",    "global brands")   },
+            { n: F.regions,       l: lv("регионов доставки",     "yetkazish hududi",   "delivery regions")},
+          ]; })().map((s,i) => (
             <div key={i} className="clp-stat">
               <div className="clp-stat-n">{s.n}</div>
               <div className="clp-stat-l">{s.l}</div>

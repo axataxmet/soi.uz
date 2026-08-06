@@ -80,7 +80,6 @@ function SitemapPage({ t, lang, go }) {
           <Link onClick={() => go("faq", {})}>{lv("Частые вопросы", "Savol-javob", "FAQ")}</Link>
           <Link onClick={() => go("info", { p: "suppliers" })}>{lv("Поставщикам", "Yetkazib beruvchilarga", "For suppliers")}</Link>
           <Link onClick={() => go("info", { p: "gov" })}>{lv("Для государственных закупок", "Davlat xaridlari uchun", "Government procurement")}</Link>
-          <Link onClick={() => go("calc", {})}>{lv("Калькулятор доставки", "Yetkazib berish kalkulyatori", "Delivery calculator")}</Link>
           <Link onClick={() => go("tracking", {})}>{lv("Отслеживание заказа", "Buyurtmani kuzatish", "Order tracking")}</Link>
           <Link onClick={() => go("price", {})}>{lv("Прайс-лист", "Narxlar ro'yxati", "Price list")}</Link>
         </Section>
@@ -90,8 +89,7 @@ function SitemapPage({ t, lang, go }) {
           <Link onClick={() => go("info", { p: "contacts" })}>{lv("Контакты", "Kontaktlar", "Contacts")}</Link>
           <Link onClick={() => go("news", {})}>{lv("Новости и статьи", "Yangiliklar va maqolalar", "News & articles")}</Link>
           <Link onClick={() => go("tenders", {})}>{lv("Тендеры", "Tenderlar", "Tenders")}</Link>
-          <Link onClick={() => go("kits", {})}>{lv("Готовые комплекты", "Tayyor to'plamlar", "Ready kits")}</Link>
-          <Link onClick={() => go("brands", {})}>{lv("Бренды и производители", "Brendlar va ishlab chiqaruvchilar", "Brands & manufacturers")}</Link>
+          <Link onClick={() => go("partners", {})}>{lv("Бренды и производители", "Brendlar va ishlab chiqaruvchilar", "Brands & manufacturers")}</Link>
         </Section>
 
         <Section title={lv("Документы и право", "Hujjatlar va huquq", "Documents & legal")}>

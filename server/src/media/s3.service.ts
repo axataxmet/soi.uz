@@ -43,10 +43,12 @@ export class S3Service implements OnModuleInit {
     this.publicUrl = (config.get<string>('S3_PUBLIC_URL') || '').replace(/\/$/, '');
     this.endpoint = config.get<string>('S3_ENDPOINT') || undefined;
     this.localUploadDir = config.get<string>('MEDIA_UPLOAD_DIR') || join(process.cwd(), 'uploads');
-    this.localPublicUrl = (config.get<string>('MEDIA_PUBLIC_URL') || 'http://localhost:4000/uploads').replace(
-      /\/$/,
-      '',
-    );
+    /* Относительный по умолчанию. Абсолютный «http://localhost:4000/uploads»
+       записывался прямо в базу и уезжал вместе с ней куда угодно: на проде и
+       через туннель такая ссылка ведёт на машину посетителя, а не на сервер.
+       Файлы раздаёт тот же origin, что и сайт — nginx в проде, dev-server
+       локально, — поэтому базы в ссылке быть не должно. */
+    this.localPublicUrl = (config.get<string>('MEDIA_PUBLIC_URL') || '/uploads').replace(/\/$/, '');
     this.localFallback =
       (config.get<string>('NODE_ENV') || 'development') !== 'production' &&
       config.get<string>('MEDIA_LOCAL_FALLBACK') !== 'false';

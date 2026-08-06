@@ -28,13 +28,11 @@ function _applyPalette(pal) {
   r.setProperty("--blue-700", _shiftHex(primary, -12));
   r.setProperty("--blue-600", primary);
   r.setProperty("--blue-500", _shiftHex(primary, 10));
-  r.setProperty("--cyan-600", _shiftHex(accent, -10));
-  r.setProperty("--cyan-500", accent);
-  r.setProperty("--cyan-400", _shiftHex(accent, 12));
   r.setProperty("--navy-900", dark);
   r.setProperty("--navy-850", _shiftHex(dark, 6));
   r.setProperty("--navy-700", _shiftHex(dark, 18));
-  r.setProperty("--grad-brand", `linear-gradient(120deg,${primary},${accent})`);
+  /* --grad-brand не трогаем: это лайм фирменного стиля, а не производная
+     от выбранного в панели акцента. */
   // neutral page backgrounds — only in light theme; in dark theme let the
   // [data-theme="dark"] CSS control them (inline would override and break it)
   const isDark = document.documentElement.getAttribute("data-theme") === "dark";
@@ -53,14 +51,14 @@ function _applyPalette(pal) {
 
 // 4 curated palettes: [primary, accent, page-bg, dark-bg]
 const PALETTE_OPTS = [
-  ["#1a5fd0","#18b4e0","#f4f7fb","#0c2244"],  // Medical Blue  (default)
-  ["#0b8f7a","#15c9ae","#f0faf8","#092820"],  // Clinical Teal
-  ["#5246d5","#7c70f0","#f4f3ff","#1e1b48"],  // Trust Indigo
-  ["#1a7a40","#22c55e","#f3fdf5","#0a2a18"],  // Wellness Green
+  ["var(--blue-600)","var(--blue-500)","var(--bg-2)","var(--navy-850)"],  // Medical Blue  (default)
+  ["var(--accent)","var(--blue-400)","var(--bg-2)","var(--navy-900)"],  // Clinical Teal
+  ["#5246d5","#7c70f0","var(--bg-2)","var(--navy-850)"],  // Trust Indigo
+  ["var(--accent)","var(--blue-500)","var(--bg-2)","var(--navy-900)"],  // Wellness Green
 ];
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "palette": ["#1a5fd0","#18b4e0","#f4f7fb","#0c2244"],
+  "palette": ["#0E4AC6","#2b72e3","#F4F7FD","#0b1f3a"],
   "cards": "elevated",
   "density": "normal"
 }/*EDITMODE-END*/;

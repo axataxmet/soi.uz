@@ -10,41 +10,41 @@ function useEtenderLotsCss() {
     s.id = ID;
     s.textContent = `
 .etl-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
-.etl-src{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:700;color:var(--blue-700,#1749a6);background:var(--blue-50,#eef4ff);border:1px solid var(--blue-200,#cfe0fb);border-radius:8px;padding:6px 12px}
-.etl-src .dot{width:7px;height:7px;border-radius:50%;background:#15A06A;box-shadow:0 0 0 3px rgba(21,160,106,.18)}
+.etl-src{display:inline-flex;align-items:center;gap:7px;font-size:var(--fs-2);font-weight:700;color:var(--blue-700,var(--ink-soft));background:var(--blue-50,var(--blue-50));border:1px solid var(--blue-200,var(--line-soft));border-radius:var(--r-sm);padding:6px 12px}
+.etl-src .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:var(--sh-sm)}
 .etl-tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-.etl-search{height:42px;min-width:230px;border:1.5px solid var(--line);border-radius:10px;padding:0 14px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--ink);outline:none}
-.etl-search:focus{border-color:var(--blue-400,#4d88e0)}
-.etl-count{font-size:13px;color:var(--slate-500);white-space:nowrap}
+.etl-search{height:42px;min-width:230px;border:1.5px solid var(--line);border-radius:var(--r-sm);padding:0 14px;font-size:var(--fs-4);font-family:inherit;background:var(--bg);color:var(--ink);outline:none}
+.etl-search:focus{border-color:var(--blue-400,var(--blue-400))}
+.etl-count{font-size:var(--fs-3);color:var(--slate-500);white-space:nowrap}
 .etl-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
-.etl-tab{font-size:13px;font-weight:600;color:var(--slate-600);background:var(--bg-2,#f4f7fb);border:1.5px solid var(--line);border-radius:20px;padding:7px 14px;cursor:pointer;font-family:inherit;transition:.14s;display:inline-flex;align-items:center;gap:7px}
-.etl-tab:hover{border-color:var(--blue-300,#9cc0f5)}
+.etl-tab{font-size:var(--fs-3);font-weight:600;color:var(--slate-600);background:var(--bg-2,var(--bg-2));border:1.5px solid var(--line);border-radius:var(--r-lg);padding:7px 14px;cursor:pointer;font-family:inherit;transition:.14s;display:inline-flex;align-items:center;gap:7px}
+.etl-tab:hover{border-color:var(--blue-300,var(--line))}
 .etl-tab.on{background:var(--blue-600);border-color:var(--blue-600);color:#fff}
-.etl-tab .n{font-size:11px;font-weight:700;background:rgba(0,0,0,.08);border-radius:10px;padding:1px 7px}
+.etl-tab .n{font-size:var(--fs-1);font-weight:700;background:rgba(0,0,0,.08);border-radius:var(--r-sm);padding:1px 7px}
 .etl-tab.on .n{background:rgba(255,255,255,.22)}
-.etl-srctag{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--blue-700,#1749a6);background:var(--blue-50,#eef4ff);border-radius:5px;padding:2px 7px;white-space:nowrap}
+.etl-srctag{font-size:var(--fs-1);font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--blue-700,var(--ink-soft));background:var(--blue-50,var(--blue-50));border-radius:var(--r-sm);padding:2px 7px;white-space:nowrap}
 .etl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .etl-card{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r-lg,16px);background:var(--surface,#fff);padding:20px;transition:box-shadow .16s,border-color .16s;position:relative}
-.etl-card:hover{box-shadow:var(--sh-sm,0 6px 20px rgba(16,42,86,.08));border-color:var(--blue-200,#cfe0fb)}
+.etl-card:hover{box-shadow:var(--sh-sm,0 6px 20px rgba(16,42,86,.08));border-color:var(--blue-200,var(--line-soft))}
 .etl-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-.etl-no{font-size:12px;font-weight:700;color:var(--slate-500);font-variant-numeric:tabular-nums}
-.etl-deadline{font-size:11.5px;font-weight:700;border-radius:20px;padding:4px 10px;white-space:nowrap}
-.etl-deadline.ok{color:#15803d;background:#e7f6ec}
+.etl-no{font-size:var(--fs-2);font-weight:700;color:var(--slate-500);font-variant-numeric:tabular-nums}
+.etl-deadline{font-size:var(--fs-1);font-weight:700;border-radius:var(--r-lg);padding:4px 10px;white-space:nowrap}
+.etl-deadline.ok{color:var(--accent);background:var(--line-2)}
 .etl-deadline.soon{color:#b45309;background:#fdf1e0}
-.etl-deadline.urgent{color:#b42318;background:#fdeceb}
-.etl-name{font-size:14.5px;font-weight:700;line-height:1.4;color:var(--ink);margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:60px}
+.etl-deadline.urgent{color:#b42318;background:var(--bg-2)}
+.etl-name{font-size:var(--fs-4);font-weight:700;line-height:1.4;color:var(--ink);margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:60px}
 .etl-meta{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
-.etl-row{display:flex;gap:9px;align-items:flex-start;font-size:12.5px;color:var(--slate-600);line-height:1.4}
+.etl-row{display:flex;gap:9px;align-items:flex-start;font-size:var(--fs-2);color:var(--slate-600);line-height:1.4}
 .etl-row svg{flex-shrink:0;color:var(--slate-400);margin-top:1px}
-.etl-cost{margin-top:auto;padding-top:14px;border-top:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between;gap:10px}
-.etl-cost-v{font-size:18px;font-weight:900;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
-.etl-cost-c{font-size:12px;font-weight:700;color:var(--slate-400)}
-.etl-open{font-size:12.5px;font-weight:700;color:var(--blue-600);white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.etl-cost{margin-top:auto;padding-top:14px;display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.etl-cost-v{font-size:var(--fs-6);font-weight:900;letter-spacing:-.02em;color:var(--ink);font-variant-numeric:tabular-nums}
+.etl-cost-c{font-size:var(--fs-2);font-weight:700;color:var(--slate-400)}
+.etl-open{font-size:var(--fs-2);font-weight:700;color:var(--blue-600);white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
 .etl-open:hover{text-decoration:underline}
 .etl-skel{border:1px solid var(--line);border-radius:var(--r-lg,16px);background:var(--surface,#fff);padding:20px;height:210px}
-.etl-skel .b{background:linear-gradient(90deg,var(--bg-2,#f1f5f9) 25%,var(--line,#e2e8f0) 50%,var(--bg-2,#f1f5f9) 75%);background-size:200% 100%;animation:etlsh 1.3s infinite;border-radius:7px}
+.etl-skel .b{background:linear-gradient(90deg,var(--bg-2,var(--bg-2)) 25%,var(--line,var(--line-soft)) 50%,var(--bg-2,var(--bg-2)) 75%);background-size:200% 100%;animation:etlsh 1.3s infinite;border-radius:var(--r-sm)}
 @keyframes etlsh{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.etl-state{text-align:center;padding:44px 20px;border:1px dashed var(--line);border-radius:var(--r-lg,16px);color:var(--slate-500);font-size:14px}
+.etl-state{text-align:center;padding:44px 20px;border:1px dashed var(--line);border-radius:var(--r-lg,16px);color:var(--slate-500);font-size:var(--fs-4)}
 .etl-more{display:flex;justify-content:center;margin-top:26px}
 @media(max-width:900px){.etl-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.etl-grid{grid-template-columns:1fr}.etl-name{min-height:0}}
@@ -316,7 +316,7 @@ function SubscribeCard({ lv }) {
           style={status === "err" ? { borderColor: "var(--red-400, #f87171)" } : {}}
         />
         {status === "err" &&
-          <span style={{ fontSize: 12.5, color: "var(--red-500, #ef4444)", marginTop: -4 }}>
+          <span style={{ fontSize: 12.5, color: "var(--red-500, var(--danger))", marginTop: -4 }}>
             {lv("Введите корректный email.", "To'g'ri email kiriting.", "Please enter a valid email.")}
           </span>}
         <button type="submit" className="btn btn-pri" style={{ justifyContent: "center" }}>
