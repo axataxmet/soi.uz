@@ -249,8 +249,15 @@ function CatalogPage({ t, lang, store, go, params }) {
     return true;
   });
 
+  /* Порядок наличия: сначала то, что на складе, затем «под заказ», в конце
+     предзаказ. Внутри каждой ступени — по популярности, иначе товары с
+     одинаковым статусом вставали бы в произвольном порядке. */
+  const STOCK_RANK = { in: 0, order: 1, preorder: 2 };
+  const stockRank = (p) => (STOCK_RANK[p.stock] != null ? STOCK_RANK[p.stock] : 1);
+
   // sort
   list = [...list].sort((a, b) => {
+    if (sort === "stock") return stockRank(a) - stockRank(b) || b.pop - a.pop;
     if (sort === "price_asc") return a.price - b.price;
     if (sort === "price_desc") return b.price - a.price;
     if (sort === "new") return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) || b.pop - a.pop;
@@ -475,6 +482,7 @@ function CatalogPage({ t, lang, store, go, params }) {
               <div className="sort-sel">
                 <label>{t.cat_sort}:</label>
                 <select value={sort} onChange={(e) => setSort(e.target.value)}>
+                  <option value="stock">{t.sort_stock}</option>
                   <option value="pop">{t.sort_pop}</option>
                   <option value="price_asc">{t.sort_price_asc}</option>
                 <option value="price_desc">{t.sort_price_desc}</option>
