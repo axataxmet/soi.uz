@@ -93,7 +93,7 @@ function AboutPage({ t, lang, go }) {
           <div className="grid-3">
             {D.VALUES.map((v, i) =>
             <div className="scard reveal" key={i}>
-                <div style={{ fontFamily: "var(--serif)", fontSize: 30, fontWeight: 600, color: "var(--blue-400)" }}>{v.n}</div>
+                <div style={{ fontFamily: "var(--font)", fontSize: 30, fontWeight: 600, color: "var(--blue-400)" }}>{v.n}</div>
                 <h3 style={{ marginTop: 10 }}>{tr(lang, v.t)}</h3>
                 <p>{tr(lang, v.d)}</p>
               </div>
@@ -336,18 +336,18 @@ function DocFallbackSheet() {
   return (
     <svg viewBox="0 0 160 208" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style={{ display: "block" }}>
       <rect width="160" height="208" fill="#fff"/>
-      <rect x="20" y="22" width="120" height="9" rx="2" fill="#1757c8" opacity=".85"/>
-      <rect x="20" y="40" width="88" height="6" rx="2" fill="#E5E7EB"/>
-      <rect x="20" y="60" width="120" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="20" y="72" width="120" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="20" y="84" width="104" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="20" y="104" width="120" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="20" y="116" width="112" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="20" y="128" width="120" height="5" rx="2.5" fill="#F3F4F6"/>
-      <rect x="20" y="140" width="72" height="5" rx="2.5" fill="#F3F4F6"/>
-      <circle cx="40" cy="180" r="15" stroke="#1757c8" strokeWidth="1.5" opacity=".7"/>
-      <rect x="66" y="174" width="54" height="5" rx="2.5" fill="#E5E7EB"/>
-      <rect x="66" y="184" width="40" height="5" rx="2.5" fill="#E5E7EB"/>
+      <rect x="20" y="22" width="120" height="9" rx="2" fill="var(--blue-600)" opacity=".85"/>
+      <rect x="20" y="40" width="88" height="6" rx="2" fill="var(--line-soft)"/>
+      <rect x="20" y="60" width="120" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="20" y="72" width="120" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="20" y="84" width="104" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="20" y="104" width="120" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="20" y="116" width="112" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="20" y="128" width="120" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <rect x="20" y="140" width="72" height="5" rx="2.5" fill="var(--bg-2)"/>
+      <circle cx="40" cy="180" r="15" stroke="var(--blue-600)" strokeWidth="1.5" opacity=".7"/>
+      <rect x="66" y="174" width="54" height="5" rx="2.5" fill="var(--line-soft)"/>
+      <rect x="66" y="184" width="40" height="5" rx="2.5" fill="var(--line-soft)"/>
     </svg>
   );
 }
@@ -449,7 +449,7 @@ function ServicesPage({ t, lang, go }) {
           </div>
 
           {/* RU registration highlight */}
-          <div className="reveal" style={{ marginTop: 40, padding: "34px 36px", background: "linear-gradient(120deg,#eef4ff,#e7f5fb)", borderRadius: "var(--r-lg)", border: "1px solid #d6e6ff" }}>
+          <div className="reveal" style={{ marginTop: 40, padding: "34px 36px", background: "linear-gradient(120deg,var(--blue-50),var(--blue-50))", borderRadius: "var(--r-lg)", border: "1px solid var(--line-soft)" }}>
             <span className="eyebrow">{lv("Регистрация изделий", "Buyumlarni ro'yxatga olish", "Device registration")}</span>
             <h3 style={{ fontSize: 22, fontWeight: 800, margin: "14px 0 10px", letterSpacing: "-.01em" }}>{lv("Получение регистрационного удостоверения (РУ) в Республике Узбекистан", "O'zbekiston Respublikasida ro'yxatga olish guvohnomasini (RU) olish", "Obtaining a registration certificate (RC) in Uzbekistan")}</h3>
             <p style={{ fontSize: 15, color: "var(--slate-600)", lineHeight: 1.65, maxWidth: 820 }}>

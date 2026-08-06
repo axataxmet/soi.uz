@@ -65,18 +65,18 @@ class RootErrorBoundary extends React.Component {
       <div style={{ minHeight: "60vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "48px 20px" }}>
         <div style={{ maxWidth: 560, textAlign: "center", fontFamily: "Manrope, system-ui, sans-serif" }}>
           <div style={{ fontSize: 40, lineHeight: 1, marginBottom: 16 }}>⚠️</div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, margin: "0 0 10px", color: "#0c2244" }}>{t.title}</h1>
-          <p style={{ fontSize: 15, lineHeight: 1.6, color: "#5b6b85", margin: "0 0 24px" }}>{t.body}</p>
+          <h1 style={{ fontSize: 24, fontWeight: 800, margin: "0 0 10px", color: "var(--navy-850)" }}>{t.title}</h1>
+          <p style={{ fontSize: 15, lineHeight: 1.6, color: "var(--slate-400)", margin: "0 0 24px" }}>{t.body}</p>
           <button
             onClick={() => location.reload()}
-            style={{ padding: "12px 24px", fontSize: 15, fontWeight: 700, color: "#fff", background: "#0E4AC6", border: 0, borderRadius: 10, cursor: "pointer" }}
+            style={{ padding: "12px 24px", fontSize: 15, fontWeight: 700, color: "#fff", background: "var(--blue-600)", border: 0, borderRadius: 10, cursor: "pointer" }}
           >
             {t.reload}
           </button>
           {ebShowDetails() && (
             <details style={{ marginTop: 28, textAlign: "left" }}>
-              <summary style={{ cursor: "pointer", fontSize: 13, color: "#5b6b85" }}>{t.details}</summary>
-              <pre style={{ marginTop: 10, padding: 12, overflow: "auto", maxHeight: 260, fontSize: 12, lineHeight: 1.5, background: "#f5f7fa", borderRadius: 8, color: "#33415c" }}>
+              <summary style={{ cursor: "pointer", fontSize: 13, color: "var(--slate-400)" }}>{t.details}</summary>
+              <pre style={{ marginTop: 10, padding: 12, overflow: "auto", maxHeight: 260, fontSize: 12, lineHeight: 1.5, background: "var(--bg-2)", borderRadius: 8, color: "#33415c" }}>
                 {String((err && err.stack) || err)}
               </pre>
             </details>

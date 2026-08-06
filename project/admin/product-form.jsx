@@ -61,9 +61,9 @@ function AdminProductForm({ go, editId }) {
   const isEdit = !!editId;
 
   const blank = {
-    sku: "", gtin: "", status: "DRAFT",
+    sku: "", status: "DRAFT",
     name: { ru: "", uz: "", en: "" }, description: { ru: "", uz: "", en: "" },
-    manufacturerId: "", badge: "", isNew: false, inStock: true, popularity: 60,
+    manufacturerId: "", isNew: false, inStock: true, popularity: 60,
     groupIds: [], specCategoryIds: [], attrs: {},
     price: "", oldPrice: "", wholesalePrice: "", currency: "UZS", priceOnRequest: false, qty: "",
     image: "",
@@ -92,6 +92,24 @@ function AdminProductForm({ go, editId }) {
     window.api.listPublic("spec-categories", { limit: 100 }).then(r => setSpecs((r && r.data) || r || [])).catch(() => {});
   }, []);
 
+  /* Артикул нового товара выдаётся автоматически: следующий свободный номер
+     после максимального числового среди уже заведённых. Буквенные артикулы
+     поставщиков (ECG-12-KM и т.п.) в нумерации не участвуют — они остаются
+     как есть у своих товаров, но новые позиции нумеруются сквозным счётом. */
+  useEffect(() => {
+    if (isEdit) return;
+    window.CatalogAPI.listProducts({})
+      .then(r => {
+        const list = (r && r.data) || r || [];
+        const max = list.reduce((m, p) => {
+          const n = /^\d+$/.test(p.sku || "") ? parseInt(p.sku, 10) : 0;
+          return n > m ? n : m;
+        }, 0);
+        set("sku", String(max + 1).padStart(4, "0"));
+      })
+      .catch(() => set("sku", String(Date.now()).slice(-6)));
+  }, [isEdit]);
+
   // load product for edit
   useEffect(() => {
     if (!isEdit) return;
@@ -101,9 +119,9 @@ function AdminProductForm({ go, editId }) {
       const main = (p.media || []).find(m => m.isMain) || (p.media || [])[0];
       setForm({
         ...blank,
-        sku: p.sku || "", gtin: p.gtin || "", status: p.status || "DRAFT",
+        sku: p.sku || "", status: p.status || "DRAFT",
         name: p.name || blank.name, description: p.description || blank.description,
-        manufacturerId: p.manufacturerId || "", badge: p.badge || "", isNew: !!p.isNew, inStock: p.inStock !== false, popularity: p.popularity || 60,
+        manufacturerId: p.manufacturerId || "", isNew: !!p.isNew, inStock: p.inStock !== false, popularity: p.popularity || 60,
         groupIds: (p.groups || []).map(g => g.groupId), specCategoryIds: (p.specs || []).map(s => s.specId), attrs: p.attrs || {},
         price: price.price != null ? price.price : "", oldPrice: price.oldPrice != null ? price.oldPrice : "",
         wholesalePrice: price.wholesalePrice != null ? price.wholesalePrice : "", currency: price.currency || "UZS",
@@ -135,18 +153,34 @@ function AdminProductForm({ go, editId }) {
 
   const save = async () => {
     if (!form.name.ru.trim()) { toast("Введите название (RU)", "error"); goSection("basic"); return; }
-    if (!form.sku.trim()) { toast("Введите артикул (SKU)", "error"); goSection("basic"); return; }
     setSaving(true);
     try {
       const body = {
-        sku: form.sku.trim(), gtin: form.gtin || undefined,
+        sku: form.sku.trim() || String(Date.now()).slice(-6),
         name: form.name, description: form.description,
         manufacturerId: form.manufacturerId || undefined,
         status: form.status,
-        badge: form.badge || undefined, isNew: form.isNew, inStock: form.inStock, popularity: Number(form.popularity) || 60,
+        isNew: form.isNew, inStock: form.inStock, popularity: Number(form.popularity) || 60,
         attrs: form.attrs, groupIds: form.groupIds, specCategoryIds: form.specCategoryIds,
       };
-      const saved = isEdit ? await window.CatalogAPI.updateProduct(editId, body) : await window.CatalogAPI.createProduct(body);
+      /* Номер выдан на клиенте, поэтому два одновременно открытых бланка могут
+         получить один и тот же — БД такой товар не примет (sku @unique).
+         Ловим этот случай и берём следующий свободный номер, а не показываем
+         оператору невнятную ошибку про constraint. */
+      let saved;
+      if (isEdit) saved = await window.CatalogAPI.updateProduct(editId, body);
+      else {
+        try { saved = await window.CatalogAPI.createProduct(body); }
+        catch (e) {
+          if (!/sku|unique|уник/i.test((e && e.message) || "")) throw e;
+          const r = await window.CatalogAPI.listProducts({});
+          const list = (r && r.data) || r || [];
+          const max = list.reduce((m, p) => { const n = /^\d+$/.test(p.sku || "") ? parseInt(p.sku, 10) : 0; return n > m ? n : m; }, 0);
+          body.sku = String(max + 1).padStart(4, "0");
+          setForm(f => ({ ...f, sku: body.sku }));
+          saved = await window.CatalogAPI.createProduct(body);
+        }
+      }
       const pid = saved.id;
 
       await window.CatalogAPI.setPrice(pid, {
@@ -210,10 +244,11 @@ function AdminProductForm({ go, editId }) {
           <PfAcc id="basic" title="Основная информация" isOpen={!!open.basic} onToggle={toggleSection}>
             <div className="adm-form">
               <div className="adm-form-row">
-                <Field label="Артикул (SKU)" required><input className="adm-input" value={form.sku} onChange={e => set("sku", e.target.value)} placeholder="ECG-12-KM" /></Field>
-                <Field label="Штрихкод (GTIN)"><input className="adm-input" value={form.gtin} onChange={e => set("gtin", e.target.value)} /></Field>
+                <Field label="Артикул (SKU)" hint={isEdit ? "менять не рекомендуется — на него ссылаются счета и заявки" : "назначен автоматически"}>
+                  <input className="adm-input mono" value={form.sku} readOnly />
+                </Field>
+                <Field label="Название (RU)" required><input className="adm-input" value={form.name.ru} onChange={e => setName("ru", e.target.value)} /></Field>
               </div>
-              <Field label="Название (RU)" required><input className="adm-input" value={form.name.ru} onChange={e => setName("ru", e.target.value)} /></Field>
               <div className="adm-form-row">
                 <Field label="Название (UZ)"><input className="adm-input" value={form.name.uz} onChange={e => setName("uz", e.target.value)} /></Field>
                 <Field label="Название (EN)"><input className="adm-input" value={form.name.en} onChange={e => setName("en", e.target.value)} /></Field>
@@ -238,10 +273,9 @@ function AdminProductForm({ go, editId }) {
                   </select>
                 </Field>
               </div>
-              <div className="adm-form-row">
-                <Field label="Бейдж" hint="хит, new…"><input className="adm-input" value={form.badge} onChange={e => set("badge", e.target.value)} /></Field>
-                <Field label="Популярность"><input className="adm-input" type="number" value={form.popularity} onChange={e => set("popularity", e.target.value)} /></Field>
-              </div>
+              <Field label="Популярность" hint="чем больше число, тем выше товар в каталоге; по умолчанию 60">
+                <input className="adm-input" type="number" value={form.popularity} onChange={e => set("popularity", e.target.value)} />
+              </Field>
               <div className="adm-flex" style={{ gap: 24 }}>
                 <PfToggle checked={form.isNew} onChange={v => set("isNew", v)} label="Новинка" />
                 <PfToggle checked={form.inStock} onChange={v => set("inStock", v)} label="В наличии" />

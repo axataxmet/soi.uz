@@ -255,17 +255,17 @@ function ProductPage({ t, lang, store, go, params }) {
           )}
 
           <div className="pdp-quick">
-            <div className="pq"><Icon name="award" size={16} style={{ color: "var(--cyan-600)" }} /><span>{t.spec_brand}: <b>{brand.name}</b></span></div>
-            <div className="pq"><Icon name="pin" size={16} style={{ color: "var(--cyan-600)" }} /><span>{t.spec_country}: <b>{tri(lang, brand.country_ru, brand.country_uz, brand.country_en)}</b></span></div>
-            <div className="pq"><Icon name="grid" size={16} style={{ color: "var(--cyan-600)" }} /><span>{lang==="uz"?"Toifa":lang==="en"?"Category":"Категория"}: <b><a onClick={() => go("catalog", { cat: cat.id })} style={{cursor:"pointer",color:"var(--blue-600)"}}>{tri(lang, cat.ru, cat.uz, cat.en)}</a></b></span></div>
-            <div className="pq"><Icon name="chevronRight" size={16} style={{ color: "var(--cyan-600)" }} /><span>{lang==="uz"?"Subkategoriya":lang==="en"?"Subcategory":"Подкатегория"}: <b><a onClick={() => go("catalog", { cat: cat.id, sub: p.sub })} style={{cursor:"pointer",color:"var(--blue-600)"}}>{tri(lang, sub.ru, sub.uz, sub.en)}</a></b></span></div>
+            <div className="pq"><Icon name="award" size={16} style={{ color: "var(--blue-600)" }} /><span>{t.spec_brand}: <b>{brand.name}</b></span></div>
+            <div className="pq"><Icon name="pin" size={16} style={{ color: "var(--blue-600)" }} /><span>{t.spec_country}: <b>{tri(lang, brand.country_ru, brand.country_uz, brand.country_en)}</b></span></div>
+            <div className="pq"><Icon name="grid" size={16} style={{ color: "var(--blue-600)" }} /><span>{lang==="uz"?"Toifa":lang==="en"?"Category":"Категория"}: <b><a onClick={() => go("catalog", { cat: cat.id })} style={{cursor:"pointer",color:"var(--blue-600)"}}>{tri(lang, cat.ru, cat.uz, cat.en)}</a></b></span></div>
+            <div className="pq"><Icon name="chevronRight" size={16} style={{ color: "var(--blue-600)" }} /><span>{lang==="uz"?"Subkategoriya":lang==="en"?"Subcategory":"Подкатегория"}: <b><a onClick={() => go("catalog", { cat: cat.id, sub: p.sub })} style={{cursor:"pointer",color:"var(--blue-600)"}}>{tri(lang, sub.ru, sub.uz, sub.en)}</a></b></span></div>
             {(() => {
               const DD = window.DIRECTIONS_DATA;
               const dirIds = DD && DD.PRODUCT_DIR_MAP ? (DD.PRODUCT_DIR_MAP[p.id] || []) : [];
               if (!dirIds.length) return null;
               const d0 = DD.getDirById(dirIds[0]);
               if (!d0) return null;
-              return <div className="pq"><Icon name="pulse" size={16} style={{ color: "var(--cyan-600)" }} /><span>{lang==="uz"?"Yoʻnalish":lang==="en"?"Direction":"Направление"}: <b><a onClick={() => go("catalog", { dir: d0.id })} style={{cursor:"pointer",color:"var(--blue-600)"}}>{tri(lang, d0.ru, d0.uz, d0.en)}</a></b></span></div>;
+              return <div className="pq"><Icon name="pulse" size={16} style={{ color: "var(--blue-600)" }} /><span>{lang==="uz"?"Yoʻnalish":lang==="en"?"Direction":"Направление"}: <b><a onClick={() => go("catalog", { dir: d0.id })} style={{cursor:"pointer",color:"var(--blue-600)"}}>{tri(lang, d0.ru, d0.uz, d0.en)}</a></b></span></div>;
             })()}
           </div>
 

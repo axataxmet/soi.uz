@@ -34,8 +34,27 @@
       var catFields = fieldsOf(cat.attrSchema);
       var subs = [];
       (cat.subcategories || []).forEach(function (sub, subIndex) {
-        subs.push(Object.assign({ _id: sub.id }, tx(sub.name)));
         var upper = catFields.concat(fieldsOf(sub.attrSchema));
+        /* Третий уровень дерева (товарная группа: «Кольпоскопы», «Кресла
+           гинекологические») раньше здесь терялся — от группы оставался только
+           её вклад в groupMap, а название и slug выбрасывались, поэтому витрина
+           подраздела не могла показать вложенные разделы. Теперь группы едут
+           вместе с подразделом. Пустые не отфильтровываем: дерево типов — это
+           навигация, а не витрина, и раздел без товаров всё равно должен быть
+           виден (счётчик показывает 0). */
+        var groups = (sub.groups || [])
+          .filter(function (g) { return g.active !== false; })
+          .slice()
+          .sort(function (a, b) { return (a.order || 0) - (b.order || 0); })
+          .map(function (g) {
+            /* Схема характеристик группы = поля категории + подкатегории + свои.
+               Она нужна витрине уровня 5, чтобы построить фасеты («Тип»,
+               «Режимы работы», «Каналов»), поэтому едет на клиент целиком,
+               а не сворачивается в одни только подписи, как раньше. */
+            var fields = upper.concat(fieldsOf(g.attrSchema)).filter(function (f) { return f && f.key; });
+            return Object.assign({ _id: g.id, slug: g.slug, count: g.productCount || 0, fields: fields }, tx(g.name));
+          });
+        subs.push(Object.assign({ _id: sub.id, slug: sub.slug, groups: groups }, tx(sub.name)));
         (sub.groups || []).forEach(function (g) {
           var labels = {};
           upper.concat(fieldsOf(g.attrSchema)).forEach(function (f) {
@@ -43,10 +62,14 @@
             var l = f.label || {};
             labels[f.key] = { ru: l.ru || f.key, uz: l.uz || l.ru || f.key, en: l.en || l.ru || f.key, unit: f.unit || "" };
           });
-          groupMap[g.id] = { catId: cat.id, subIndex: subIndex, labels: labels };
+          groupMap[g.id] = { catId: cat.id, subIndex: subIndex, groupId: g.id, labels: labels };
         });
       });
-      CATEGORIES.push(Object.assign({ id: cat.id, icon: "catalog", subs: subs }, tx(cat.name)));
+      // slug обязателен: по нему меню и плитки находят категорию. Раньше сюда
+      // попадал только cuid, а в разметке ссылки записаны как equipment,
+      // furniture и прочие — сравнение не совпадало никогда, и любой переход
+      // в категорию открывал пустой листинг.
+      CATEGORIES.push(Object.assign({ id: cat.id, slug: cat.slug, icon: "catalog", subs: subs }, tx(cat.name)));
     });
     return { CATEGORIES: CATEGORIES, groupMap: groupMap };
   }
@@ -80,7 +103,7 @@
 
       var extraCats = groups.slice(1).map(function (gi) {
         var m = groupMap[gi.groupId];
-        return m ? { cat: m.catId, sub: m.subIndex } : null;
+        return m ? { cat: m.catId, sub: m.subIndex, group: m.groupId } : null;
       }).filter(Boolean);
 
       return {
@@ -88,6 +111,7 @@
         ru: name.ru, uz: name.uz, en: name.en,
         cat: primary ? primary.catId : null,
         sub: primary ? primary.subIndex : null,
+        group: primary ? primary.groupId : null,
         extraCats: extraCats,
         specIds: (p.specs || []).map(function (s) { return s.specId; }), // направления медицины (A3)
         brand: p.manufacturerId || (p.manufacturer && p.manufacturer.id) || null,
@@ -99,9 +123,27 @@
         isNew: !!p.isNew,
         img: main, images: main ? [main] : [], gallery: main ? [{ src: main, alt: name.ru }] : [],
         specs: specs,
+        attrs: attrs, // сырые значения — по ним фасеты уровня 5 фильтруют товары
         related: p.related || [], accessories: [], consumables: [],
         glyph: "pulse", _remote: true,
       };
+    });
+  }
+
+  /* Витрина товарных групп показывает снимок первого товара группы — своих
+     иллюстраций у групп в базе нет, а 140+ нарисованных глифов заказчик
+     заводить не стал. Считаем после сборки товаров: раньше их просто нет. */
+  function attachGroupImages(CATEGORIES, products) {
+    var byGroup = {};
+    (products || []).forEach(function (p) {
+      if (!p.img) return;
+      var ids = [p.group].concat((p.extraCats || []).map(function (ec) { return ec.group; }));
+      ids.forEach(function (gid) { if (gid && !byGroup[gid]) byGroup[gid] = p.img; });
+    });
+    (CATEGORIES || []).forEach(function (cat) {
+      (cat.subs || []).forEach(function (sub) {
+        (sub.groups || []).forEach(function (g) { g.img = byGroup[g._id] || null; });
+      });
     });
   }
 
@@ -133,6 +175,7 @@
       D.CATEGORIES = built.CATEGORIES;
       D.BRANDS = buildBrands(res[2]);
       D.PRODUCTS = buildProducts(res[1], built.groupMap);
+      attachGroupImages(D.CATEGORIES, D.PRODUCTS);
       window.SOI_CATALOG_SOURCE = "api";
       window.dispatchEvent(new CustomEvent("soi-data-changed", { detail: { source: "api" } }));
       console.log("[catalog-remote] loaded from API:", D.CATEGORIES.length, "categories,",

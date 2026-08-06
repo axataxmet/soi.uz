@@ -44,7 +44,7 @@ export default () => ({
   ETENDER_XT_ENABLED: process.env.ETENDER_XT_ENABLED || 'true',
   ETENDER_XT_API_BASE: process.env.ETENDER_XT_API_BASE || 'https://api.xt-xarid.uz',
   ETENDER_XT_LANG: process.env.ETENDER_XT_LANG || 'ru',
-  ETENDER_SYNC_CRON: process.env.ETENDER_SYNC_CRON || '0 20 * * *', // daily 20:00
+  ETENDER_SYNC_CRON: process.env.ETENDER_SYNC_CRON || '0 8,20 * * *', // twice a day: 08:00 and 20:00
   ETENDER_SYNC_TZ: process.env.ETENDER_SYNC_TZ || 'Asia/Tashkent',
   ETENDER_SYNC_PAGE_SIZE: parseInt(process.env.ETENDER_SYNC_PAGE_SIZE || '50', 10),
   ETENDER_SYNC_MAX_PAGES: parseInt(process.env.ETENDER_SYNC_MAX_PAGES || '40', 10),

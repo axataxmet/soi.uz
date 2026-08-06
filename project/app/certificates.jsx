@@ -105,22 +105,9 @@ function useCatCounts() {
   return c;
 }
 
-function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
-  const scrolled = useScrolled();
-  const deep = useScrolled(170);
-  route = route || { view: "" };
-  goCat = goCat || ((sub, param, q) => go("catalog"));
-  const counts = useCatCounts();
-  const [drawer, setDrawer] = useState(false);
-  const [moreOpen, setMoreOpen] = useState(false);
-  const [q, setQ] = useState("");
-  const [catSearchOpen, setCatSearchOpen] = useState(false);
-  const catSearchInputRef = useRef(null);
-  const isCatalog = route.view === "catalog";
+function corpNavItems(lang) {
   const lvh = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
-  // Новая структура шапки главной: О компании ▾ · Услуги ▾ · Кейсы · Контакты · Каталог.
-  // (Спецификация: главная — режим доверия к компании; каталог — режим поиска.)
-  const corpNav = [
+  return [
   { id: "company", label: lvh("О компании", "Kompaniya haqida", "About"), children: [
     { view: "about",     label: lvh("Об ИНДУСТРИЯ ЗДОРОВЬЯ",  "SOG’LIQ INDUSTRIYASI haqida",   "About HEALTH INDUSTRY") },
     { view: "documents", label: lvh("Документы компании",      "Kompaniya hujjatlari",          "Company documents") },
@@ -138,16 +125,32 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
   // Каталог: подменю повторяет структуру 3000. Категории резолвятся по клику
   // (catKey) — если каталог из API ещё не загружен, открывается общий каталог.
   { id: "catalog", label: lvh("Каталог", "Katalog", "Catalog"), children: [
-    { view: "catalog", label: lvh("Каталог по направлениям медицины", "Tibbiyot yo‘nalishlari bo‘yicha katalog", "Catalog by medical specialty") },
     { view: "catalog", catKey: "equipment",   label: lvh("Медицинское оборудование", "Tibbiy uskunalar",        "Medical equipment") },
     { view: "catalog", catKey: "furniture",   label: lvh("Медицинская мебель",       "Tibbiy mebel",            "Medical furniture") },
     { view: "catalog", catKey: "instruments", label: lvh("Медицинские инструменты",  "Tibbiy asboblar",         "Medical instruments") },
     { view: "catalog", catKey: "consumables", label: lvh("Расходные материалы",      "Sarflanadigan materiallar", "Consumables") },
-    { view: "catalog", label: lvh("Прочие товары",        "Boshqa tovarlar",           "Other products") },
-    { view: "catalog", label: lvh("Каталог / прайс-лист", "Katalog / narxlar ro‘yxati", "Catalog / price list") }] },
+    /* Прайс-лист живёт в каталожной оболочке, поэтому открывается через goCat:
+       корпоративный go() знает только корп-страницы и на «price» дал бы пустой экран. */
+    { catSub: "price", label: lvh("Каталог / прайс-лист", "Katalog / narxlar ro‘yxati", "Catalog / price list") }] },
 
   { view: "contacts", label: lvh("Контакты", "Kontaktlar", "Contacts") }];
+}
 
+function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
+  const scrolled = useScrolled();
+  route = route || { view: "" };
+  goCat = goCat || ((sub, param, q) => go("catalog"));
+  const counts = useCatCounts();
+  const [drawer, setDrawer] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const [catSearchOpen, setCatSearchOpen] = useState(false);
+  const catSearchInputRef = useRef(null);
+  const isCatalog = route.view === "catalog";
+  const lvh = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
+  // Новая структура шапки главной: О компании ▾ · Услуги ▾ · Кейсы · Контакты · Каталог.
+  // (Спецификация: главная — режим доверия к компании; каталог — режим поиска.)
+  const corpNav = corpNavItems(lang);
 
   const [openDd, setOpenDd] = useState(null); // null | "company" | "services" | "catalog"
 
@@ -157,7 +160,9 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
     if (child.params) return child.params;
     if (!child.catKey) return {};
     const cats = (window.DATA && window.DATA.CATEGORIES) || [];
-    const found = cats.find((c) => c.id === child.catKey);
+    // В разметке меню категории записаны по slug, из API приходит ещё и cuid —
+    // принимаем оба, иначе пункт молча открывает общий каталог.
+    const found = cats.find((c) => c.id === child.catKey || c.slug === child.catKey);
     return found ? { cat: found.id } : {};
   };
 
@@ -184,7 +189,7 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
     const onDown = (e) => {
       const t = e.target;
       if (!t || !t.closest) { setOpenDd(null); setLangOpen(null); return; }
-      if (openDd && !t.closest(".nav-dd") && !t.closest(".cs-more")) setOpenDd(null);
+      if (openDd && !t.closest(".nav-dd")) setOpenDd(null);
       if (langOpen && !t.closest(".lang-dd")) setLangOpen(null);
     };
     document.addEventListener("mousedown", onDown);
@@ -269,7 +274,7 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
               <div className="nav-dd-menu">
                 {item.children.map((child, idx) =>
                 <button key={idx}
-                  onClick={() => { go(child.view, navParams(child)); setOpenDd(null); }}
+                  onClick={() => { child.catSub ? goCat(child.catSub) : go(child.view, navParams(child)); setOpenDd(null); }}
                   className="nav-dd-item">
                   {child.label}
                 </button>
@@ -347,52 +352,9 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
           </button>}
         </div>
       </nav>
-      {isCatalog &&
-      <div className={"cat-sticky" + (deep ? " show" : "")}>
-        <div className="wrap">
-          <button className="cs-menu" onClick={() => goCat("home")}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
-            <span>{lvh("По направлениям медицины", "Tibbiyot yo'nalishlari bo'yicha", "By medical direction")}</span>
-          </button>
-          <div className="cs-links">
-            <a onClick={() => goCat("listing", "equipment")}>{lvh("Оборудование", "Uskunalar", "Equipment")}</a>
-            <a onClick={() => goCat("listing", "furniture")}>{lvh("Мебель", "Mebel", "Furniture")}</a>
-            <a onClick={() => goCat("listing", "instruments")}>{lvh("Инструменты", "Asboblar", "Instruments")}</a>
-            <a onClick={() => goCat("listing", "consumables")}>{lvh("Расходные материалы", "Sarf materiallari", "Consumables")}</a>
-            <a onClick={() => goCat("price")}>{lvh("Прайс-лист", "Narxlar", "Price")}</a>
-            <div className="cs-more">
-              <button
-                className={"cs-more-btn" + (openDd === "csMore" ? " open" : "")}
-                onClick={() => setOpenDd((o) => o === "csMore" ? null : "csMore")}
-                aria-expanded={openDd === "csMore"}
-                aria-haspopup="true">
-                {lvh("Ещё", "Yana", "More")}
-                <span className="cs-more-chevron">▾</span>
-              </button>
-              {openDd === "csMore" &&
-              <>
-              <div className="cs-more-menu">
-                {[
-                { view: "kits",     label: lvh("Комплекты",   "Komplektlar",   "Kits") },
-                { view: "brands",   label: lvh("Бренды",      "Brendlar",      "Brands") },
-                { view: "calc",     label: lvh("Калькулятор", "Kalkulyator",   "Calculator") },
-                { view: "catalog", params: { badge: "sale" }, label: lvh("Скидки",      "Chegirmalar",   "Discounts") },
-                { view: "catalog", params: { badge: "promo" }, label: lvh("Акции",       "Aksiyalar",     "Promotions") }].
-                map((it, idx) =>
-                <button key={idx}
-                  onClick={() => { setOpenDd(null); go(it.view, it.params || {}); }}
-                  className="cs-more-item">
-                  {it.label}
-                </button>
-                )}
-              </div>
-              </>
-              }
-            </div>
-          </div>
-        </div>
-      </div>
-      }
+      {/* Подменю каталога («По направлениям медицины», категории, «Прайс-лист»,
+          «Ещё») убрано по решению заказчика: оно дублировало основную навигацию
+          шапки и перекрывало верх страницы при прокрутке. */}
       <div className={"drawer-ov" + (drawer ? " on" : "")} onClick={() => setDrawer(false)}></div>
       <aside className={"drawer" + (drawer ? " on" : "")}>
         <div className="drawer-head">
@@ -411,8 +373,8 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
           : [{ ...item, key: item.view }]
         ).map((it) =>
         it._heading
-          ? <div key={it.key} style={{ padding: "12px 0 4px", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-muted, #64748b)", fontWeight: 600 }}>{it.label}</div>
-          : <a key={it.key} className={route.view === it.view ? "on" : ""} onClick={() => { go(it.view, navParams(it)); setDrawer(false); }} style={it.primary ? { color: "var(--blue-600, #1757c8)", fontWeight: 600 } : undefined}>{it.label}</a>
+          ? <div key={it.key} style={{ padding: "12px 0 4px", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-muted, var(--slate-500))", fontWeight: 600 }}>{it.label}</div>
+          : <a key={it.key} className={route.view === it.view ? "on" : ""} onClick={() => { it.catSub ? goCat(it.catSub) : go(it.view, navParams(it)); setDrawer(false); }} style={it.primary ? { color: "var(--blue-600, var(--blue-600))", fontWeight: 600 } : undefined}>{it.label}</a>
         )}
       </aside>
     </>);
@@ -426,9 +388,9 @@ function CoBreadcrumbs({ lang, go, route }) {
   const v = (route && route.view) || "";
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const base = location.origin + location.pathname;
-  const home = { label: lv("Главная", "Bosh sahifa", "Home"), view: "home", url: base + "#/" };
-  const company = { label: lv("О компании", "Kompaniya haqida", "About company"), view: "about", url: base + "#/about" };
-  const services = { label: lv("Услуги", "Xizmatlar", "Services"), view: "services", url: base + "#/services" };
+  const home = { label: lv("Главная", "Bosh sahifa", "Home"), view: "home", url: base + "/" };
+  const company = { label: lv("О компании", "Kompaniya haqida", "About company"), view: "about", url: base + "/about" };
+  const services = { label: lv("Услуги", "Xizmatlar", "Services"), view: "services", url: base + "/services" };
   const MAP = {
     about:        [home, { label: company.label }],
     documents:    [home, company, { label: lv("Документы", "Hujjatlar", "Documents") }],
@@ -478,15 +440,14 @@ function CoBreadcrumbs({ lang, go, route }) {
   );
 }
 
-function CoFooter({ t, lang, go, setLang }) {
+/* Единственный рабочий адрес почты компании. В настройках сайта
+   (site_contacts.email) до сих пор лежит info@soi.uz — старый адрес, из-за
+   которого в футере соседствовали две разные почты. */
+const SITE_MAIL = "info@sogliqindustriyasi.uz";
+
+function CoFooter({ t, lang, go, goCat, setLang }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const contacts = useSiteContacts();
-  const [subscribed, setSubscribed] = React.useState(false);
-  const onSubscribe = (e) => {
-    e.preventDefault();
-    setSubscribed(true);
-    e.target.reset();
-  };
   return (
     <footer className="foot">
       <div className="wrap">
@@ -497,74 +458,73 @@ function CoFooter({ t, lang, go, setLang }) {
               <span className="f-wordmark">{lv("ИНДУСТРИЯ ЗДОРОВЬЯ", "SOG'LIQ INDUSTRIYASI", "HEALTH INDUSTRY")}</span>
             </div>
             <p className="fabout">{t.f_about}</p>
-            <a className="cb-phone" href={telHref(contacts.phone)} style={{ fontWeight: 800, fontSize: 20 }}>{contacts.phone}</a>
           </div>
-          <div>
-            <h5>{lv("Компания", "Kompaniya", "Company")}</h5>
-            <ul>
-              <li><a onClick={() => go("about")}>{t.nav_about}</a></li>
-              <li><a onClick={() => go("services")}>{t.nav_services}</a></li>
-              <li><a onClick={() => go("cases")}>{t.nav_projects}</a></li>
-              <li><a onClick={() => go("partners")}>{lv("Бренды / партнёры", "Brendlar / hamkorlar", "Brands / partners")}</a></li>
-              <li><a onClick={() => go("catalog")}>{lv("Электронный каталог", "Elektron katalog", "Online catalog")}</a></li>
-            </ul>
-          </div>
-          <div>
-            <h5>{lv("Документы и право", "Hujjatlar va huquq", "Documents & legal")}</h5>
-            <ul>
-              <li><a onClick={() => go("licenses")}>{lv("Лицензии и сертификаты", "Litsenziya va sertifikatlar", "Licenses & certificates")}</a></li>
-              <li><a href="corp/company-card.pdf" target="_blank" rel="noopener">{lv("Карточка компании", "Kompaniya kartasi", "Company card")}</a></li>
-              <li><a href="corp/registration.pdf" target="_blank" rel="noopener">{lv("Свидетельство о регистрации", "Ro'yxatdan o'tish guvohnomasi", "Registration certificate")}</a></li>
-              <li><a href="corp/egrul.pdf" target="_blank" rel="noopener">{lv("Сведения о юридическом лице", "Yuridik shaxs ma'lumotlari", "Legal entity information")}</a></li>
-            </ul>
-          </div>
+          {/* Колонки навигации собираются из той же структуры, что и меню в
+              шапке (corpNavItems): раньше футер держал свой список ссылок и
+              расходился с меню при каждой правке навигации. Пункты, которые
+              умеет открывать только каталожная оболочка (прайс-лист), уходят
+              через goCat — корпоративный go() дал бы на них пустой экран. */}
+          {corpNavItems(lang).filter((it) => it.children).map((col) => (
+            <div key={col.id}>
+              <h5>{col.label}</h5>
+              <ul>
+                {col.children.map((ch, i) => (
+                  <li key={i}>
+                    <a onClick={() => {
+                      if (ch.catSub) return goCat ? goCat(ch.catSub, "", "") : go("catalog");
+                      /* Категории каталога записаны в меню по slug, из API приходит
+                         ещё и cuid — принимаем оба; не нашли, значит дерево ещё не
+                         приехало, открываем общий каталог. */
+                      if (ch.catKey) {
+                        const cats = (window.DATA && window.DATA.CATEGORIES) || [];
+                        const found = cats.find((c) => c.id === ch.catKey || c.slug === ch.catKey);
+                        return go("catalog", found ? { cat: found.id } : {});
+                      }
+                      return go(ch.view);
+                    }}>{ch.label}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
           <div>
             <h5>{t.f_contacts}</h5>
             <ul className="foot-contact">
-              <li>{contacts.address}</li>
-              <li><a className="fc-map" href={contacts.mapUrl} target="_blank" rel="noopener">
-                <Icon name="pin" size={14} />
-                {lv("Показать на карте", "Xaritada ko'rsatish", "Show on map")}
-              </a></li>
-              <li><a href={telHref(contacts.phone)}>{lv("Приёмная", "Qabulxona", "Reception")}: {contacts.phone}</a></li>
-              <li><a href={telHref(contacts.phone2)}>{lv("Отдел продаж", "Sotuv bo'limi", "Sales")}: {contacts.phone2}</a></li>
-              <li><a href={"mailto:" + contacts.email}>{contacts.email}</a></li>
+              {/* Состав колонки повторяет страницу «Контакты» и берёт те же ключи
+                  словаря (t.c_*), чтобы адрес и часы работы не разъезжались.
+                  Телефон сервиса на странице вписан в разметку, а не в настройки
+                  сайта, — здесь он задан так же. */}
+              {/* Офис и склад стоят по одному адресу, часы работы вынесены на
+                  страницу «Контакты» — в футере остаётся один адрес. */}
+              <li className="fc-grp">{t.c_office_addr || contacts.address}</li>
+              {/* Первые два номера берутся из настроек сайта и правятся в админке;
+                  третий там не хранится и задан здесь — так же, как на странице
+                  «Контакты». */}
+              <li className="fc-grp">
+                <a href={telHref(contacts.phone)}>{lv("Приёмная","Qabulxona","Reception")}: {contacts.phone}</a><br />
+                <a href={telHref(contacts.phone2)}>{lv("Отдел продаж","Sotuv bo'limi","Sales")}: {contacts.phone2}</a><br />
+                <a href={telHref("+998772230001")}>{lv("Сервисный отдел","Servis bo'limi","Service department")}: +998 (77) 223-00-01</a>
+              </li>
+              <li className="fc-grp">E-mail: <a href={"mailto:" + SITE_MAIL}>{SITE_MAIL}</a></li>
             </ul>
-          </div>
-          <div className="foot-news-col">
-            <h5>{lv("Рассылка", "Yangiliklar", "Newsletter")}</h5>
-            <p>{lv("Новости, акции и поступления оборудования — не чаще раза в неделю.", "Yangiliklar, aksiyalar va yangi uskunalar — haftada bir martadan ko'p emas.", "Product updates and offers — no more than once a week.")}</p>
-            <form className="foot-news" onSubmit={onSubscribe}>
-              <input type="email" required placeholder={lv("Ваш email", "Emailingiz", "Your email")} aria-label={lv("Email для рассылки", "Yangiliklar uchun email", "Newsletter email")} />
-              <button type="submit" aria-label={lv("Подписаться", "Obuna bo'lish", "Subscribe")}>
-                <Icon name="arrowRight" size={16} />
-              </button>
-            </form>
-            {subscribed && (
-              <div className="foot-news-ok">
-                <Icon name="check" size={14} sw={2.6} />
-                {lv("Спасибо! Вы подписаны.", "Rahmat! Siz obuna bo'ldingiz.", "Thanks! You're subscribed.")}
-              </div>
-            )}
-            <div className="foot-lang" role="group" aria-label={lv("Язык сайта", "Sayt tili", "Site language")}>
-              <button type="button" className={lang === "ru" ? "on" : ""} onClick={() => setLang && setLang("ru")}>RU</button>
-              <button type="button" className={lang === "uz" ? "on" : ""} onClick={() => setLang && setLang("uz")}>UZ</button>
-              <button type="button" className={lang === "en" ? "on" : ""} onClick={() => setLang && setLang("en")}>EN</button>
-            </div>
           </div>
         </div>
         <div className="foot-disclaimer">
-          {lv("Информация, изображения документов и технические характеристики на сайте носят справочный характер и не являются публичной офертой. Перед применением оборудования ознакомьтесь с инструкцией по эксплуатации или проконсультируйтесь со специалистом.",
-          "Saytdagi hujjatlar tasvirlari va texnik xususiyatlar ma'lumot uchun berilgan va majburiyat hisoblanmaydi. Uskunadan foydalanishdan oldin foydalanish yo'riqnomasi bilan tanishing yoki mutaxassis bilan maslahatlashing.",
-          "Document images and technical specifications on the site are for reference only and do not constitute an obligation. Before using the equipment, read the instructions for use or consult a specialist.")}
+          {/* Дисклеймер под требования Республики Узбекистан: документы названы
+              так, как называются в РУз. Ссылка на ПКМ № 738 из этого текста
+              убрана при сокращении — она осталась на странице регистрации МИ,
+              где стоит по делу. Юридическую точность подтверждает юрист. */}
+          {lv("Технические характеристики, изображения и копии документов — регистрационных удостоверений, сертификатов и деклараций о соответствии, свидетельств об утверждении типа средств измерений — размещены ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» справочно: они не являются публичной офертой и основанием для претензий. Производитель вправе изменить комплектацию и характеристики без уведомления. Перед применением изучите инструкцию (паспорт изделия) или обратитесь к специалисту. Сайт использует файлы cookie: они помогают узнавать вас, оценивать пользовательский опыт и улучшать сайт. Состав обрабатываемых данных и условия — в политике конфиденциальности.",
+          "Texnik xususiyatlar, tasvirlar va hujjatlar nusxalari — ro‘yxatdan o‘tkazish guvohnomalari, muvofiqlik sertifikatlari va deklaratsiyalari, o‘lchash vositalari turini tasdiqlash guvohnomalari — «SOG’LIQ INDUSTRIYASI» MChJ tomonidan ma’lumot uchun joylashtirilgan: ular ommaviy oferta va da’vo asosi emas. Ishlab chiqaruvchi butlanish va xususiyatlarni ogohlantirishsiz o‘zgartirishi mumkin. Qo‘llashdan oldin yo‘riqnoma (buyum pasporti) bilan tanishing yoki mutaxassisga murojaat qiling. Sayt cookie fayllaridan foydalanadi: ular sizni tanish, foydalanuvchi tajribasini baholash va saytni yaxshilash uchun kerak. Qayta ishlanadigan ma’lumotlar tarkibi va shartlari — maxfiylik siyosatida.",
+          "Technical specifications, images and copies of documents — registration certificates, certificates and declarations of conformity, measuring instrument type approvals — are published by SOG’LIQ INDUSTRIYASI LLC for reference: they are not a public offer or grounds for claims. The manufacturer may change configuration and specifications without notice. Before use, read the instructions (device passport) or consult a specialist. The site uses cookies: they help recognise you, assess your experience and improve the site. What data we process and on what terms is set out in the privacy policy.")}
         </div>
         <div className="foot-bot">
-          <span style={{ fontSize: 12, color: "#8095ab" }}>{lv(`ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Ташкент • ИНН: 312513138 • ${contacts.phone} • ${contacts.email}`, `«SOG’LIQ INDUSTRIYASI» MChJ • 100069, Toshkent • STIR: 312513138 • ${contacts.phone} • ${contacts.email}`, `LLC «HEALTH INDUSTRY» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Tashkent • TIN: 312513138 • ${contacts.phone} • ${contacts.email}`)}</span>
+          <span style={{ fontSize: 12, color: "var(--slate-400)" }}>{lv(`ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Ташкент • ИНН: 312513138 • ${SITE_MAIL}`, `«SOG’LIQ INDUSTRIYASI» MChJ • 100069, Toshkent • STIR: 312513138 • ${SITE_MAIL}`, `LLC «HEALTH INDUSTRY» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Tashkent • TIN: 312513138 • ${SITE_MAIL}`)}</span>
           <div className="foot-socials">
             <a href={contacts.telegram} target="_blank" rel="noopener" title="Telegram" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.07 9.74c-.15.68-.56.85-1.13.53l-3.13-2.3-1.51 1.45c-.17.17-.31.31-.63.31l.22-3.18 5.79-5.23c.25-.22-.06-.35-.39-.12L6.07 13.88l-3.07-.96c-.67-.21-.68-.67.14-.99l11.97-4.62c.55-.2 1.04.13.83.88z" /></svg></a>
             <a href={contacts.instagram} target="_blank" rel="noopener" title="Instagram" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg></a>
             <a href={contacts.facebook} target="_blank" rel="noopener" title="Facebook" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" /></svg></a>
-            <a href={contacts.youtube} target="_blank" rel="noopener" title="YouTube" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8z" /></svg></a>
+            <a href={contacts.youtube} target="_blank" rel="noopener" title="YouTube" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.75 8.55 16.2 12l-6.45 3.45V8.55z" /></svg></a>
           </div>
         </div>
       </div>

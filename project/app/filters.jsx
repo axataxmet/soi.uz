@@ -29,7 +29,7 @@ function PricePage({ t, lang, go }) {
 
   const downloadPDF = () => {
     const rows = prods.map((p,i)=>`<tr><td>${i+1}</td><td class="mono">${p.sku}</td><td>${pname(p)}</td><td>${bname(p.brand)}</td><td>${cname(p.cat)}</td><td>${STOCK[p.stock]||p.stock}</td><td class="mono r">${p.price.toLocaleString("ru-RU")} сум</td></tr>`).join("");
-    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ИНДУСТРИЯ ЗДОРОВЬЯ — Прайс-лист</title><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}h1{font-size:18px;margin-bottom:4px}p{color:#666;font-size:11px;margin-bottom:12px}table{width:100%;border-collapse:collapse}th{background:#0c2244;color:#fff;padding:6px 8px;text-align:left;font-size:10px}td{padding:5px 8px;border-bottom:1px solid #eee}.mono{font-family:monospace}.r{text-align:right}tr:nth-child(even) td{background:#f8f9fc}@media print{@page{size:A4 landscape;margin:10mm}}</style></head><body><h1>ИНДУСТРИЯ ЗДОРОВЬЯ — Прайс-лист</h1><p>Дата: ${new Date().toLocaleDateString("ru-RU")} · Позиций: ${prods.length}</p><table><thead><tr><th>№</th><th>Арт.</th><th>Наименование</th><th>Бренд</th><th>Категория</th><th>Наличие</th><th>Цена</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+    const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>ИНДУСТРИЯ ЗДОРОВЬЯ — Прайс-лист</title><style>body{font-family:Arial,sans-serif;font-size:var(--fs-1);margin:20px}h1{font-size:var(--fs-6);margin-bottom:4px}p{color:#666;font-size:var(--fs-1);margin-bottom:12px}table{width:100%;border-collapse:collapse}th{background:var(--navy-850);color:#fff;padding:6px 8px;text-align:left;font-size:var(--fs-1)}td{padding:5px 8px}.mono{font-family:monospace}.r{text-align:right}tr:nth-child(even) td{background:var(--bg-2)}@media print{@page{size:A4 landscape;margin:10mm}}</style></head><body><h1>ИНДУСТРИЯ ЗДОРОВЬЯ — Прайс-лист</h1><p>Дата: ${new Date().toLocaleDateString("ru-RU")} · Позиций: ${prods.length}</p><table><thead><tr><th>№</th><th>Арт.</th><th>Наименование</th><th>Бренд</th><th>Категория</th><th>Наличие</th><th>Цена</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
     const w = window.open("","_blank","width=900,height=700");
     if(w){w.document.write(html);w.document.close();setTimeout(()=>w.print(),400);}
     setDlMsg(lv("Открыт для печати","Chop etish uchun ochildi","Opened for print"));
@@ -44,7 +44,7 @@ function PricePage({ t, lang, go }) {
         <span className="cur">{lv("Прайс-лист","Narxlar ro'yxati","Price list")}</span>
       </div>
 
-      <div style={{width:72,height:72,borderRadius:20,background:"linear-gradient(135deg,#1a5fd0,#18b4e0)",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",boxShadow:"0 8px 24px rgba(26,95,208,.25)"}}>
+      <div style={{width:72,height:72,borderRadius:20,background:"linear-gradient(135deg,var(--blue-600),var(--blue-500))",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",boxShadow:"0 8px 24px rgba(26,95,208,.25)"}}>
         <Icon name="doc" size={34} style={{color:"#fff"}} sw={1.5}/>
       </div>
 
@@ -70,7 +70,7 @@ function PricePage({ t, lang, go }) {
       </div>
 
       {dlMsg && (
-        <div style={{marginTop:20,display:"inline-flex",alignItems:"center",gap:8,background:"#e7f6ef",color:"var(--success)",borderRadius:10,padding:"10px 18px",fontWeight:700,fontSize:14,animation:"fade .2s"}}>
+        <div style={{marginTop:20,display:"inline-flex",alignItems:"center",gap:8,background:"var(--line-2)",color:"var(--success)",borderRadius:10,padding:"10px 18px",fontWeight:700,fontSize:14,animation:"fade .2s"}}>
           <Icon name="check" size={16} sw={2.5}/>{dlMsg}
         </div>
       )}
@@ -92,7 +92,7 @@ function PricePage({ t, lang, go }) {
               onClick={()=>{
                 const catProds = prods.filter(p=>p.cat===c.cat);
                 const rows = catProds.map((p,j)=>`<tr><td>${j+1}</td><td>${pname(p)}</td><td>${bname(p.brand)}</td><td>${STOCK[p.stock]||p.stock}</td><td class="r mono">${p.price.toLocaleString("ru-RU")} сум</td></tr>`).join("");
-                const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${lv(c.title_ru,c.title_uz,c.title_en)} — ИНДУСТРИЯ ЗДОРОВЬЯ</title><style>body{font-family:Arial,sans-serif;font-size:11px;margin:20px}h1{font-size:20px;font-weight:900;color:#0c2244;margin-bottom:4px}.sub{color:#666;font-size:11px;margin-bottom:16px}table{width:100%;border-collapse:collapse}th{background:#0c2244;color:#fff;padding:7px 10px;text-align:left;font-size:10px;letter-spacing:.04em}td{padding:6px 10px;border-bottom:1px solid #eee}.mono{font-family:monospace}.r{text-align:right}tr:nth-child(even) td{background:#f8f9fc}.foot{margin-top:20px;font-size:10px;color:#999;text-align:center}@media print{@page{size:A4;margin:12mm}}</style></head><body><h1>${lv(c.title_ru,c.title_uz,c.title_en)}</h1><div class="sub">ИНДУСТРИЯ ЗДОРОВЬЯ · ${new Date().toLocaleDateString("ru-RU")} · ${catProds.length} наименований</div><table><thead><tr><th>№</th><th>Наименование</th><th>Производитель</th><th>Наличие</th><th>Цена</th></tr></thead><tbody>${rows}</tbody></table><div class="foot">ИНДУСТРИЯ ЗДОРОВЬЯ · +998 (77) 225-00-01 · info@sogliqindustriyasi.uz · uzmedex.uz</div></body></html>`;
+                const html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${lv(c.title_ru,c.title_uz,c.title_en)} — ИНДУСТРИЯ ЗДОРОВЬЯ</title><style>body{font-family:Arial,sans-serif;font-size:var(--fs-1);margin:20px}h1{font-size:var(--fs-6);font-weight:900;color:var(--navy-850);margin-bottom:4px}.sub{color:#666;font-size:var(--fs-1);margin-bottom:16px}table{width:100%;border-collapse:collapse}th{background:var(--navy-850);color:#fff;padding:7px 10px;text-align:left;font-size:var(--fs-1);letter-spacing:.04em}td{padding:6px 10px}.mono{font-family:monospace}.r{text-align:right}tr:nth-child(even) td{background:var(--bg-2)}.foot{margin-top:20px;font-size:var(--fs-1);color:#999;text-align:center}@media print{@page{size:A4;margin:12mm}}</style></head><body><h1>${lv(c.title_ru,c.title_uz,c.title_en)}</h1><div class="sub">ИНДУСТРИЯ ЗДОРОВЬЯ · ${new Date().toLocaleDateString("ru-RU")} · ${catProds.length} наименований</div><table><thead><tr><th>№</th><th>Наименование</th><th>Производитель</th><th>Наличие</th><th>Цена</th></tr></thead><tbody>${rows}</tbody></table><div class="foot">ИНДУСТРИЯ ЗДОРОВЬЯ · +998 (77) 225-00-01 · info@sogliqindustriyasi.uz · uzmedex.uz</div></body></html>`;
                 const w=window.open("","_blank","width=800,height=700");
                 if(w){w.document.write(html);w.document.close();setTimeout(()=>w.print(),400);}
               }}

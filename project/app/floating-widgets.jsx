@@ -60,8 +60,8 @@ function FloatingWidgets({ lang, go }) {
   const handleOpen = () => { setOpen(!open); setPulse(false); };
 
   const CHANNELS = [
-    { icon:"tg", label:"Telegram",    color:"#2AABEE", bg:"#e8f6fd", href:"https://t.me/UzMedEx_bot" },
-    { icon:"wa", label:"WhatsApp",    color:"#25D366", bg:"#e8faf0", href:"https://wa.me/998773870001?text=Здравствуйте!%20Пишу%20с%20ИНДУСТРИЯ%20ЗДОРОВЬЯ." },
+    { icon:"tg", label:"Telegram",    color:"var(--blue-500)", bg:"var(--blue-50)", href:"https://t.me/UzMedEx_bot" },
+    { icon:"wa", label:"WhatsApp",    color:"#25D366", bg:"var(--bg-2)", href:"https://wa.me/998773870001?text=Здравствуйте!%20Пишу%20с%20ИНДУСТРИЯ%20ЗДОРОВЬЯ." },
     { icon:"phone", label:lv("Перезвоните мне","Qayta qo\u02bbng\u02bbiring","Call me back"), color:"var(--blue-600)", bg:"var(--bg-2)", cb:true },
   ];
 

@@ -1,7 +1,12 @@
 /* ИНДУСТРИЯ ЗДОРОВЬЯ — REST API client (window.api)
    Plain ES (no build). Handles JWT (access + refresh rotation), JSON, errors, media upload. */
 (function () {
-  var BASE = (window.SOI_API_BASE || "http://localhost:4000/api").replace(/\/$/, "");
+  /* Opened on this machine, the API is where it has always been. Opened from
+     anywhere else — a tunnel, a phone on the LAN — «localhost» would mean the
+     visitor's own computer, so the client falls back to the origin it was
+     served from and lets the dev server proxy /api onward. */
+  var LOCAL = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
+  var BASE = (window.SOI_API_BASE || (LOCAL ? "http://localhost:4000/api" : "/api")).replace(/\/$/, "");
   var TOKEN_KEY = "soi_token", REFRESH_KEY = "soi_refresh";
 
   function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ""; } catch (e) { return ""; } }

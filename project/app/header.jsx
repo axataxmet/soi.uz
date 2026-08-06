@@ -252,87 +252,11 @@ function useNavVis() {
   return (id) => !vis || vis[id] !== false;
 }
 
-function NavMore({ lang, go, route, show }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-  const badge = route && route.view === "catalog" ? route.params.badge : null;
-  const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
-  useEffect(() => {
-    if (!open) return;
-    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
-    document.addEventListener("mousedown", h);
-    return () => document.removeEventListener("mousedown", h);
-  }, [open]);
-  // Спецификация A3: Ещё ▾ = Комплекты · Бренды · Калькулятор · Скидки · Акции
-  const items = [
-    { label: lv("Комплекты",   "Komplektlar",   "Kits"),        act: () => go("kits", {}),                     active: route && route.view === "kits" },
-    { label: lv("Бренды",      "Brendlar",      "Brands"),      act: () => go("brands", {}),                   active: route && route.view === "brands" },
-    { label: lv("Калькулятор", "Kalkulyator",   "Calculator"),  act: () => go("calc", {}),                     active: route && route.view === "calc" },
-    { label: lv("Скидки",      "Chegirmalar",   "Discounts"),   act: () => go("catalog", { badge: "sale" }),   active: badge === "sale" },
-    { label: lv("Акции",       "Aksiyalar",     "Promotions"),  act: () => go("catalog", { badge: "promo" }),  active: badge === "promo" }];
-  if (!items.length) return null;
-  return (
-    <div className="nav-more-wrap" ref={ref}>
-      <button className={"nav-more-btn" + (open ? " open" : "")} onClick={() => setOpen(!open)} aria-expanded={open} aria-haspopup="true">
-        {lv("Ещё","Ko'proq","More")} <Icon name="chevronDown" size={14} />
-      </button>
-      {open && (
-        <div className="nav-more-dd" role="menu">
-          {items.map((item, i) => (
-            <button key={i} className={"nav-more-item" + (item.active ? " on" : "")} role="menuitem"
-              onClick={() => { item.act(); setOpen(false); }}>
-              {item.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
+/* NavMore удалён вместе со второй строкой каталога: пункты «Комплекты»,
+   «Бренды», «Калькулятор», «Скидки», «Акции» больше не существуют. */
 
-function Nav({ t, lang, go, openMega, setOpenMega, route }) {
-  const show = useNavVis();
-  const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
-  // Каталожная строка 2 (спецификация A3):
-  // [☰ По направлениям медицины] · Оборудование · Мебель · Инструменты · Расходные материалы · Прайс-лист · Ещё ▾
-  const TYPES = [
-    { view: "catalog", params: { type: "equipment"   }, label: lv("Оборудование",         "Uskunalar",           "Equipment") },
-    { view: "catalog", params: { type: "furniture"   }, label: lv("Мебель",               "Mebel",               "Furniture") },
-    { view: "catalog", params: { type: "instruments" }, label: lv("Инструменты",          "Asboblar",            "Instruments") },
-    { view: "catalog", params: { type: "consumables" }, label: lv("Расходные материалы",  "Sarf materiallari",   "Consumables") }];
-
-  return (
-    <nav className="nav" role="navigation" aria-label={lv("Каталог","Katalog","Catalog")}>
-      <div className="wrap" data-comment-anchor="1bf3cea58b-div-184-7">
-        <button className={"cat-btn" + (openMega ? " open" : "")}
-          onClick={() => setOpenMega(!openMega)}
-          onMouseEnter={() => { if (!window.matchMedia("(hover:none)").matches) setOpenMega(true); }}
-          aria-expanded={openMega} aria-haspopup="true">
-          <Icon name={openMega ? "x" : "menu"} size={18} />
-          <span>{lv("По направлениям медицины","Tibbiyot yo'nalishlari bo'yicha","By medical direction")}</span>
-        </button>
-        <div className="nav-links">
-          {TYPES.map((it, i) => (
-            <a key={i}
-               className={route && route.view === "catalog" && route.params && route.params.type === it.params.type ? "on" : ""}
-               onClick={() => go(it.view, it.params)} tabIndex={0}
-               onKeyDown={(e) => e.key === "Enter" && go(it.view, it.params)}>
-              {it.label}
-            </a>
-          ))}
-          {show("price") !== false && (
-            <a className={route && route.view === "price" ? "on" : ""}
-               onClick={() => go("price", {})} tabIndex={0}
-               onKeyDown={e => e.key==="Enter" && go("price",{})}>
-              {lv("Прайс-лист","Narxlar","Price list")}
-            </a>
-          )}
-          <NavMore lang={lang} go={go} route={route} show={show} />
-        </div>
-      </div>
-    </nav>
-  );
-}
+/* Nav удалён вместе со второй строкой каталога: пункты «Комплекты»,
+   «Бренды», «Калькулятор», «Скидки», «Акции» больше не существуют. */
 
 function useMegaAnchor(open) {
   const [topY, setTopY] = useState(140);
@@ -497,4 +421,4 @@ function StickyBar({ t, lang, setLang, store, go, query, setQuery, theme, toggle
   );
 }
 
-Object.assign(window, { UtilityBar, Header, Nav, MegaMenu, StickyBar });
+Object.assign(window, { UtilityBar, Header, MegaMenu, StickyBar });

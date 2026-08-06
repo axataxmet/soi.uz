@@ -49,7 +49,7 @@ function NotifyAvailable({ t, lang, product }) {
         </form>
       }
       {sent &&
-      <div style={{ display: "flex", alignItems: "center", gap: 9, background: "#e7f6ef", color: "var(--success)", borderRadius: 9, padding: "10px 14px", fontSize: 13.5, fontWeight: 700 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 9, background: "var(--line-2)", color: "var(--success)", borderRadius: 9, padding: "10px 14px", fontSize: 13.5, fontWeight: 700 }}>
           <Icon name="check" size={16} sw={2.5} />{lv("Вы подписаны — уведомим по e-mail", "Obuna bo\u02bbldingiz — e-mail orqali xabar beramiz", "Subscribed — we'll notify by email")}
         </div>
       }
@@ -82,7 +82,7 @@ function StarRow({ rating, size = 16 }) {
   return (
     <div style={{ display: "flex", gap: 2 }}>
       {[1, 2, 3, 4, 5].map((i) =>
-      <Icon key={i} name="star" size={size} sw={1.5} style={{ color: i <= rating ? "#f5a623" : "#e0e5ee", fill: i <= rating ? "#f5a623" : "none" }} />
+      <Icon key={i} name="star" size={size} sw={1.5} style={{ color: i <= rating ? "#f5a623" : "var(--line-soft)", fill: i <= rating ? "#f5a623" : "none" }} />
       )}
     </div>);
 
@@ -123,25 +123,25 @@ function ReviewsSection({ t, lang, productId }) {
    TURNKEY KITS PAGE
    ============================================================ */
 const KITS = [
-{ id: "k1", icon: "scalpel", color: "#1a5fd0",
+{ id: "k1", icon: "scalpel", color: "var(--blue-600)",
   title_ru: "Операционный блок", title_en: "Operating suite",
   desc_ru: "Полное оснащение операционной: стол, наркозный аппарат, монитор, ИВЛ, светильники, электрохирургия, стерилизатор.",
   desc_en: "Full OR equipping: table, anesthesia machine, monitor, ventilator, lights, electrosurgery, sterilizer.",
   items_ru: ["Операционный стол Armed ST-III", "Наркозный аппарат Comen AX-600", "Монитор пациента Comen C60", "Аппарат ИВЛ Dräger Savina 300", "Светильник Midmark LED-720", "Электрохирургия BMT ESU-300", "Автоклав Tuttnauer 3870EA"],
   sum: 712000000, time_ru: "14–21 рабочих день", time_en: "14–21 working days" },
-{ id: "k2", icon: "pulse", color: "#18b4e0",
+{ id: "k2", icon: "pulse", color: "var(--blue-500)",
   title_ru: "Отделение функциональной диагностики", title_en: "Functional diagnostics unit",
   desc_ru: "Кабинет УЗИ, ЭКГ, мониторинг. Всё оборудование с регистрационными удостоверениями.",
   desc_en: "Ultrasound, ECG and monitoring room. All equipment with registration certificates.",
   items_ru: ["УЗИ-сканер Edan Acclarix AX8", "ЭКГ-аппарат Edan SE-1201", "Монитор Comen C60 × 3", "Тонометры Armed × 5", "Пульсоксиметры ChoiceMMed × 5"],
   sum: 284000000, time_ru: "7–10 рабочих дней", time_en: "7–10 working days" },
-{ id: "k3", icon: "shield-cross", color: "#15a06a",
+{ id: "k3", icon: "shield-cross", color: "var(--accent)",
   title_ru: "Стерилизационное отделение (ЦСО)", title_en: "Central sterile services dept.",
   desc_ru: "Полный цикл стерилизации: паровые автоклавы, сухожар, ультразвуковые мойки, УФ-облучатели.",
   desc_en: "Full sterilization cycle: steam autoclaves, dry heat, ultrasonic cleaners, UV lamps.",
   items_ru: ["Автоклав Tuttnauer 3870EA", "Стерилизатор BMT Sterivap 23 л", "УЗ-мойка BMT UC-10 × 2", "Шкаф сухожаровой Armed ГП-80", "Рециркулятор Armed CH-215 × 2", "Облучатель Armed ОБН-150 × 3"],
   sum: 168000000, time_ru: "5–7 рабочих дней", time_en: "5–7 working days" },
-{ id: "k4", icon: "cross-pulse", color: "#e0492f",
+{ id: "k4", icon: "cross-pulse", color: "var(--danger)",
   title_ru: "Машина скорой помощи", title_en: "Emergency ambulance kit",
   desc_ru: "Полная комплектация реанимобиля: ИВЛ транспортный, дефибриллятор, монитор, укладки, кислородный модуль.",
   desc_en: "Full paramedic vehicle kit: transport ventilator, defibrillator, monitor, medical bags, oxygen module.",
@@ -149,75 +149,7 @@ const KITS = [
   sum: 299000000, time_ru: "7–14 рабочих дней", time_en: "7–14 working days" }];
 
 
-function KitsPage({ t, lang, go }) {
-  const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
-  const [sel, setSel] = useStateX(null);
-
-  return (
-    <div className="wrap" style={{ padding: "8px 0 64px" }}>
-      <div className="crumb">
-        <a onClick={() => go("home")}>{t.breadcrumb_home}</a>
-        <Icon name="chevronRight" size={14} />
-        <span className="cur">{lv("Комплекты под ключ", "Kompleks jihozlash", "Turnkey kits")}</span>
-      </div>
-      <div className="sec-head" style={{ marginBottom: 32 }}>
-        <div>
-          <h1 style={{ fontSize: 32, fontWeight: 800, letterSpacing: "-.02em" }}>{lv("Комплексное оснащение", "Kompleks jihozlash", "Turnkey equipping")}</h1>
-          <div className="sub" style={{ marginTop: 6 }}>{lv("Готовые комплекты оборудования для отделений и кабинетов", "Bo\u02bblimlar va kabinetlar uchun tayyor uskunalar to\u02bbplamlari", "Ready equipment packages for departments and offices")}</div>
-        </div>
-      </div>
-
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(460px,1fr))", gap: 22 }}>
-        {KITS.map((k) =>
-        <div key={k.id} className="kit-card" onClick={() => setSel(k === sel ? null : k)}>
-            <div className="kc-head" style={{ borderLeft: `4px solid ${k.color}` }}>
-              <div className="kc-ic" style={{ background: k.color + "18", color: k.color }}><Icon name={k.icon} size={26} /></div>
-              <div>
-                <h3 className="kc-title">{lang === "en" ? k.title_en : k.title_ru}</h3>
-                <p className="kc-desc">{lang === "en" ? k.desc_en : k.desc_ru}</p>
-              </div>
-            </div>
-            <div className="kc-meta">
-              <div className="kc-sum">
-                <div className="kcs-from">{t.from}</div>
-                <div className="kcs-val">{fmtPrice(k.sum)}</div>
-                <div className="kcs-cur">{t.currency}</div>
-              </div>
-              <div className="kc-time"><Icon name="truck" size={15} style={{ color: "var(--slate-400)" }} />{lang === "en" ? k.time_en : k.time_ru}</div>
-            </div>
-            {sel?.id === k.id &&
-          <div className="kc-items">
-                {k.items_ru.map((item, i) =>
-            <div key={i} style={{ display: "flex", gap: 9, padding: "7px 0", borderBottom: "1px solid var(--line)", fontSize: 14 }}>
-                    <Icon name="check" size={15} sw={2.5} style={{ color: "var(--success)", flexShrink: 0, marginTop: 2 }} />
-                    <span>{item}</span>
-                  </div>
-            )}
-                <button className="btn btn-primary" style={{ width: "100%", justifyContent: "center", marginTop: 16 }} onClick={(e) => {e.stopPropagation();window.__openQuote && window.__openQuote();}}>
-                  <Icon name="doc" size={17} />{lv("Запросить КП на комплект", "Komplekt uchun KP so\u02bbra", "Get a quote for this kit")}
-                </button>
-              </div>
-          }
-          </div>
-        )}
-      </div>
-
-      <div className="ctaband" style={{ marginTop: 48 }}>
-        <div className="cb-grid" />
-        <div className="cb-l" style={{ position: "relative" }}>
-          <h2>{lv("Нужен индивидуальный проект?", "Individual loyiha kerakmi?", "Need a custom project?")}</h2>
-          <p>{lv("Разработаем спецификацию и КП под любой бюджет и техническое задание.", "Har qanday byudjet va texnik topshiriq uchun spetsifikatsiya va KP ishlab chiqamiz.", "We'll develop a specification and quote for any budget and technical requirement.")}</p>
-        </div>
-        <div className="cb-r" style={{ position: "relative" }}>
-          <button className="btn btn-cyan btn-lg" onClick={() => window.__openQuote && window.__openQuote()}>
-            {t.cta_btn}<Icon name="arrowRight" size={18} />
-          </button>
-        </div>
-      </div>
-    </div>);
-
-}
-
+/* KitsPage удалён: страницы нет в меню каталога. */
 /* ============================================================
    ORDER TRACKING WIDGET
    ============================================================ */
@@ -272,7 +204,7 @@ function TrackingPage({ t, lang, go }) {
       <div style={{ fontSize: 13, color: "var(--slate-400)", marginTop: -20, marginBottom: 28 }}>{lv("Пример: ORD-2026-037 (попробуйте этот номер)", "Misol: ORD-2026-037", "Example: ORD-2026-037 (try this number)")}</div>
 
       {notFound &&
-      <div style={{ background: "#fdecea", border: "1px solid #fca5a5", borderRadius: 12, padding: "16px 20px", color: "#b91c1c", fontWeight: 700 }}>
+      <div style={{ background: "var(--bg-2)", border: "1px solid #fca5a5", borderRadius: 12, padding: "16px 20px", color: "#b91c1c", fontWeight: 700 }}>
           <Icon name="x" size={18} style={{ verticalAlign: "middle", marginRight: 8 }} />{lv("Заявка не найдена. Проверьте номер.", "Ariza topilmadi. Raqamni tekshiring.", "Request not found. Please check the number.")}
         </div>
       }
@@ -327,6 +259,5 @@ function TrackingPage({ t, lang, go }) {
 Object.assign(window, {
   RecentlyViewed, rvPush, NotifyAvailable,
   ReviewsSection, StarRow,
-  KitsPage,
   TrackingPage
 });

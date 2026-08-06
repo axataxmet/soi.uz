@@ -28,8 +28,13 @@ const CORP_VIEW_TO_SLUG = {
 const CAT_SLUG_TO_ID = { equipment: "equipment", "medical-furniture": "furniture", instruments: "instruments", consumables: "consumables", diagnostics: "diagnostics", surgery: "surgery", sterilization: "sterilization", physio: "physio", emergency: "emergency" };
 const CAT_ID_TO_SLUG = { furniture: "medical-furniture" };
 const CAT_SUBS = ["home", "product", "listing", "brand", "info", "cart", "wishlist", "compare", "calc", "price", "news", "kits", "tracking", "account", "faq", "sitemap", "brands"];
-function parseHash() {
-  const seg = (location.hash || "").replace(/^#\/?/, "").split("/").filter(Boolean);
+/* ── маршрутизация по пути, а не по якорю ───────────────────────────────────
+   Раздел живёт на обычном адресе — /contacts, /catalog/equipment. Фрагмент
+   после # на сервер не уходил вовсе, поэтому поисковик, логи и превью ссылок
+   в мессенджерах видели только главную. Со стороны сервера нужна одна вещь:
+   отдавать index.html на любой путь без расширения (dev-server и nginx это
+   делают), остальное разбирает parseUrl. */
+function parseSegments(seg) {
   if (!seg.length) return { view: "home", cat: null };
   // product at root → catalog product
   if (seg[0] === "product") return { view: "catalog", cat: { sub: "product", param: seg[1] || "" } };
@@ -37,21 +42,105 @@ function parseHash() {
     const s1 = seg[1];
     if (!s1) return { view: "catalog", cat: { sub: "home", param: "" } };
     if (CAT_SUBS.indexOf(s1) >= 0) return { view: "catalog", cat: { sub: s1, param: seg[2] || "" } };
-    // treat as category slug → listing
-    return { view: "catalog", cat: { sub: "listing", param: CAT_SLUG_TO_ID[s1] || s1 } };
+    // category slug → listing; the optional third and fourth segments are the
+    // subcategory and the product group (/catalog/equipment/obstetrics/obstetrics-kolposkopy)
+    // — packed into param as "cat/sub/group" because catNav only carries one
+    // string, and split again in embedRouteFrom.
+    const catPart = CAT_SLUG_TO_ID[s1] || s1;
+    const tail = seg.slice(2, 4).filter(Boolean);
+    let q = "";
+    try { if (new URLSearchParams(location.search).get("view") === "grid") q = "?view=grid"; } catch (e) {}
+    return { view: "catalog", cat: { sub: "listing", param: [catPart].concat(tail).join("/") + q } };
   }
   const view = CORP_SLUG_TO_VIEW[seg[0]];
   return { view: view || "home", cat: null };
 }
-function corpHash(view) {return view === "home" ? "#/" : "#/" + (CORP_VIEW_TO_SLUG[view] || view);}
+function segmentsOfPath() {
+  return (location.pathname || "/")
+    .split("/")
+    .filter(Boolean)
+    .filter((s) => s !== "index.html" && s !== "soi.uz.html");
+}
+/* Старые ссылки вида #/catalog/equipment продолжают открываться: если путь
+   пустой, а якорь похож на маршрут — читаем его. App при старте перепишет
+   адрес в новую форму через replaceState, не создавая лишней записи истории. */
+function legacyHashSegments() {
+  const h = (location.hash || "").replace(/^#\/?/, "");
+  return h ? h.split("/").filter(Boolean) : [];
+}
+function parseUrl() {
+  const seg = segmentsOfPath();
+  return parseSegments(seg.length ? seg : legacyHashSegments());
+}
+/* Категория в адресе — человекочитаемый slug, а не cuid из базы: ссылка вида
+   #/catalog/furniture переживает пересоздание базы, читается в выдаче и не
+   пугает при копировании. Внутри кода по-прежнему ходит id. */
+function catSlugOf(id) {
+  const c = ((window.DATA && window.DATA.CATEGORIES) || []).find((x) => x.id === id || x.slug === id);
+  return (c && (c.slug || c.id)) || id;
+}
+/* Subcategory is a per-category array index (products carry p.sub === that
+   index, not an id) — resolved back to its own slug for the address bar. */
+function subSlugOf(catId, subIdx) {
+  const c = ((window.DATA && window.DATA.CATEGORIES) || []).find((x) => x.id === catId || x.slug === catId);
+  const s = c && c.subs && c.subs[subIdx];
+  return (s && (s.slug || s._id)) || subIdx;
+}
+/* Третий уровень — товарная группа. В адресе, как категория и подраздел, стоит
+   slug; внутри маршрута может лежать и id (когда переход пришёл из кода), и slug
+   (когда страницу открыли по ссылке) — принимаем оба. */
+function groupSlugOf(catId, subIdx, group) {
+  const c = ((window.DATA && window.DATA.CATEGORIES) || []).find((x) => x.id === catId || x.slug === catId);
+  const s = c && c.subs && c.subs[subIdx];
+  const g = s && (s.groups || []).find((x) => x._id === group || x.slug === group);
+  return (g && (g.slug || g._id)) || group;
+}
+function catPathTail(params) {
+  if (params.sub == null) return "";
+  const subPart = "/" + subSlugOf(params.cat, params.sub);
+  return params.group ? subPart + "/" + groupSlugOf(params.cat, params.sub, params.group) : subPart;
+}
+/* Вид списка — единственный параметр состояния, который стоит в адресе строкой
+   запроса, а не сегментом пути: он не про то, где мы в дереве, а про то, как
+   показан один и тот же раздел, и ссылка «списком» должна открываться списком. */
+function catQuery(params) {
+  return params.group && params.view === "grid" ? "?view=grid" : "";
+}
+function corpHash(view) {return view === "home" ? "/" : "/" + (CORP_VIEW_TO_SLUG[view] || view);}
 function catHashFromRoute(view, params) {
   params = params || {};
-  if (!view || view === "home") return "#/catalog";
-  if (view === "product") return "#/catalog/product/" + (params.id || "");
-  if (view === "catalog") return params.cat ? "#/catalog/" + (CAT_ID_TO_SLUG[params.cat] || params.cat) : "#/catalog";
-  if (view === "brand") return "#/catalog/brand/" + (params.id || "");
-  if (view === "info") return "#/catalog/info/" + (params.p || "");
-  return "#/catalog/" + view;
+  if (!view || view === "home") return "/catalog";
+  if (view === "product") return "/catalog/product/" + (params.id || "");
+  if (view === "catalog") {
+    if (!params.cat) return "/catalog";
+    const catPart = catSlugOf(params.cat);
+    return "/catalog/" + catPart + catPathTail(params) + catQuery(params);
+  }
+  if (view === "brand") return "/catalog/brand/" + (params.id || "");
+  if (view === "info") return "/catalog/info/" + (params.p || "");
+  return "/catalog/" + view;
+}
+/* The inverse of embedRouteFrom (app-root.jsx): turns the catalog's own route
+   announcement (a "soi-route" message, fired by its internal go()) back into
+   the {sub, param} shape catNav carries. Without this, a click inside the
+   catalog moved the address bar but left catNav — and the navSub/navParam
+   props the catalog itself reads on the next external navigation — pointing
+   at the old route. That mismatch was invisible until history.back() landed on
+   a URL whose param happened to be byte-identical to the stale one; React saw
+   no prop change, ran no effect, and the page silently kept showing the
+   subcategory it had already left. */
+function catNavFromRoute(view, params) {
+  params = params || {};
+  if (!view || view === "home") return { sub: "home", param: "" };
+  if (view === "product") return { sub: "product", param: params.id || "" };
+  if (view === "catalog") {
+    if (!params.cat) return { sub: "home", param: "" };
+    const catPart = catSlugOf(params.cat);
+    return { sub: "listing", param: catPart + catPathTail(params) + catQuery(params) };
+  }
+  if (view === "brand") return { sub: "brand", param: params.id || "" };
+  if (view === "info") return { sub: "info", param: params.p || "" };
+  return { sub: view, param: "" };
 }
 
 function CatalogFrame({ lang, theme, frameRef, initial, active }) {
@@ -83,7 +172,7 @@ function CatalogFrame({ lang, theme, frameRef, initial, active }) {
   }
   return (
     <div className="cat-frame-wrap" style={{
-      height: active ? h : 0, width: "100%", background: "var(--bg, #f7fafd)",
+      height: active ? h : 0, width: "100%", background: "var(--bg, var(--bg-2))",
       overflow: "hidden", visibility: active ? "visible" : "hidden",
       position: active ? "static" : "absolute", left: active ? "auto" : "-9999px"
     }} aria-hidden={!active}>
@@ -112,7 +201,7 @@ function useSiteSeo() {
 }
 
 function App() {
-  const _initHashRaw = parseHash();
+  const _initHashRaw = parseUrl();
   // unified news: catalog deep-link to news resolves to the single corp news page (form 1)
   const _isCatNews = (h) => h.view === "catalog" && h.cat && h.cat.sub === "news";
   const _initHash = _isCatNews(_initHashRaw) ? { view: "news" } : _initHashRaw;
@@ -126,8 +215,16 @@ function App() {
   const [catNav, setCatNav] = useState(_initHash.cat || { sub: "home", param: "", q: "", from: null });
   // catalog frame mounts once, then stays alive (no re-start on every open)
   const [catReady, setCatReady] = React.useState(_initHash.view === "catalog");
-  const skipHash = React.useRef(false);
-  const setHashSafe = (hh) => {if (location.hash !== hh) {skipHash.current = true;location.hash = hh;}};
+  /* Адрес пишем через History API. Unlike location.hash="…", pushState never
+     fires popstate on its own — only a real back/forward does — so, unlike the
+     old hash-based router, there is no echo to guard against here. A guard flag
+     was carried over from that router in an earlier pass; it looked harmless
+     but pushState never clears it, so it silently swallowed the next real
+     back/forward press. Removed rather than reintroduced. */
+  const setHashSafe = (url) => {
+    if (location.pathname + location.search === url) return;
+    history.pushState({ soi: true }, "", url);
+  };
 
   useEffect(() => {
     const r = document.documentElement;
@@ -156,11 +253,19 @@ function App() {
   // `opts` carries a preselection into the target page — today only the tender
   // category, so the homepage tiles can open the feed already filtered.
   const go = (view, opts) => {
-    // "brands" — прямой запрос каталожной витрины; "partners" — корп-страница
-    // «Бренды и заводы-производители» (единые данные /api/brands, admin/brands).
-    if (view === "brands") { goCat("brands", "", "", "company"); return; }
+    // Каталожная витрина брендов удалена — в меню каталога её нет. Прежние
+    // ссылки «Бренды» ведут на корпоративную страницу «Партнёры»: данные те же
+    // (/api/brands, admin/brands), просто одна страница вместо двух.
+    if (view === "brands") view = "partners";
     setRoute({ view, ...(opts && opts.cat ? { cat: opts.cat } : {}) });
-    if (view === "catalog") {setCatNav({ sub: "home", param: "", q: "", from: null });setHashSafe("#/catalog");} else
+    if (view === "catalog") {
+      /* Категорию нужно донести до каталожной оболочки: раньше здесь всегда
+         стоял sub «home», и любая ссылка на раздел — плитки на главной, пункты
+         меню — открывала корень каталога, потеряв выбранную категорию. */
+      const cat = opts && opts.cat;
+      setCatNav({ sub: cat ? "listing" : "home", param: cat || "", q: "", from: null });
+      setHashSafe(cat ? "/catalog/" + catSlugOf(cat) : "/catalog");
+    } else
     setHashSafe(corpHash(view));
     window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
   };
@@ -170,15 +275,28 @@ function App() {
     setCatReady(true);
     setRoute({ view: "catalog" });
     setCatNav({ sub: sub || "home", param: param || "", q: q || "", from: from || null });
-    setHashSafe(q ? "#/catalog" : sub && sub !== "home" && sub !== "listing" ? "#/catalog/" + sub + (param ? "/" + param : "") : "#/catalog");
+    setHashSafe(q ? "/catalog" : sub && sub !== "home" && sub !== "listing" ? "/catalog/" + sub + (param ? "/" + param : "") : "/catalog");
     window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
   };
 
-  /* ---- deep-link: react to hash changes (back/forward, manual) ---- */
+  /* Пришли по старой ссылке с якорем — молча переписываем адрес в новую форму.
+     replaceState, а не pushState: иначе кнопка «назад» возвращала бы на тот же
+     экран со старым адресом. */
+  useEffect(() => {
+    const legacy = legacyHashSegments();
+    if (!legacy.length || segmentsOfPath().length) return;
+    const r = parseSegments(legacy);
+    const url = r.view === "catalog" ? catHashFromRoute(
+      r.cat && r.cat.sub === "listing" ? "catalog" : (r.cat && r.cat.sub) || "home",
+      r.cat && r.cat.sub === "listing" ? { cat: r.cat.param } : { id: (r.cat || {}).param, p: (r.cat || {}).param }
+    ) : corpHash(r.view);
+    history.replaceState({ soi: true }, "", url);
+  }, []);
+
+  /* ---- deep-link: react to history changes (back/forward, manual) ---- */
   useEffect(() => {
     const onHash = () => {
-      if (skipHash.current) {skipHash.current = false;return;}
-      const r = parseHash();
+      const r = parseUrl();
       // unified news: catalog/news deep-link always shows the single corp news page (form 1)
       if (_isCatNews(r)) { setRoute({ view: "news", from: "catalog" }); setHashSafe(corpHash("news")); window.scrollTo({ top: 0 }); return; }
       setRoute({ view: r.view });
@@ -187,8 +305,8 @@ function App() {
       }
       window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
     };
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
+    window.addEventListener("popstate", onHash);
+    return () => window.removeEventListener("popstate", onHash);
   }, []);
 
 
@@ -196,7 +314,7 @@ function App() {
   useEffect(() => {
     const onMsg = (e) => {
       const d = e.data || {};
-      if (d.type === "soi-cohome") {setRoute({ view: "home" });setHashSafe("#/");window.scrollTo({ top: 0 });return;}
+      if (d.type === "soi-cohome") {setRoute({ view: "home" });setHashSafe("/");window.scrollTo({ top: 0 });return;}
       if (d.type === "soi-conav" && d.view) {
         setRoute({ view: d.view, from: d.from || null });
         setHashSafe(corpHash(d.view));
@@ -206,6 +324,8 @@ function App() {
       if (d.type !== "soi-route") return;
       const newHash = catHashFromRoute(d.view, d.params);
       setHashSafe(newHash);
+      // Keep catNav in step with the catalog's own route — see catNavFromRoute.
+      setCatNav(Object.assign({ q: "", from: null }, catNavFromRoute(d.view, d.params)));
     };
     window.addEventListener("message", onMsg);
     return () => window.removeEventListener("message", onMsg);
@@ -284,7 +404,7 @@ function App() {
       <React.Fragment>
           <CoBreadcrumbs lang={lang} go={go} route={route} />
           <main key={v + lang}>{page}</main>
-          <CoFooter t={t} lang={lang} go={go} setLang={setLang} />
+          <CoFooter t={t} lang={lang} go={go} goCat={goCat} setLang={setLang} />
         </React.Fragment>
       }
       {!isCatalog &&
@@ -313,9 +433,9 @@ function App() {
         <TweakSection label={lang === "uz" ? "Urg'u rangi" : lang === "en" ? "Accent tone" : "Акцент"} />
         <TweakColor
           label={lang === "uz" ? "Brend rangi" : lang === "en" ? "Brand" : "Бренд"}
-          value={tw.accent === "cyan" ? "#0d96be" : tw.accent === "lavender" ? "#5b4ee0" : "#1757c8"}
-          options={["#1757c8", "#0d96be", "#5b4ee0"]}
-          onChange={(v) => setTweak("accent", v === "#0d96be" ? "cyan" : v === "#5b4ee0" ? "lavender" : "blue")} />
+          value={tw.accent === "cyan" ? "var(--blue-600)" : tw.accent === "lavender" ? "var(--blue-600)" : "var(--blue-600)"}
+          options={["var(--blue-600)", "var(--blue-600)", "var(--blue-600)"]}
+          onChange={(v) => setTweak("accent", v === "var(--blue-600)" ? "cyan" : v === "var(--blue-600)" ? "lavender" : "blue")} />
       </TweaksPanel>
       }
     </div>);
