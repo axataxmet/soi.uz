@@ -486,7 +486,6 @@ function CatalogPage({ t, lang, store, go, params }) {
                 return lvl ? <div className={"cat-level cat-level-" + lvl.cls}>{lvl.txt}</div> : null;
               })()}
               <h1>{title}</h1>
-              {sub && cat && !group && <div className="cb-parent">{lvf("в категории","toifada","in category")} <a onClick={() => go("catalog", { cat: cat.id })}>{tri(lang, cat.ru, cat.uz, cat.en)}</a></div>}
               {!browseTiles && !group && <div className="cb-found">{browseGroups
                 ? <>{lvf("Товарных групп","Mahsulot guruhlari","Product groups")}: <b>{groupList.length}</b></>
                 : <>{t.found}: <b>{list.length}</b> {t.items_count}</>}</div>}
