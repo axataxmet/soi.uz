@@ -2095,7 +2095,7 @@ function SoiExpertise({ lang, go }) {
         <div className="sxp-head sx-rv">
           <div>
             <p className="sxp-kicker">{_lv(lang, "Экспертиза", "Ekspertiza", "Expertise")}</p>
-            <h2 className="sxp-h2 sx-h2-link" onClick={() => go("directions")}>{_lv(lang, "Компетенции, которые закрывают весь цикл работы с медицинским изделием", "Tibbiy buyum bilan ishlashning toʻliq siklini qamrab oluvchi kompetensiyalar", "Capabilities covering the full lifecycle of a medical device")}</h2>
+            <h2 className="sxp-h2">{_lv(lang, "Компетенции полного цикла работы", "Toʻliq siklli kompetensiyalar", "Full-lifecycle capabilities")}</h2>
           </div>
           <p className="sxp-sub">{_lv(lang,
             "Закрываем регуляторные, закупочные, технические и сервисные задачи в едином контуре ответственности.",
@@ -2221,9 +2221,11 @@ function SoiCatalogCards({ lang, go }) {
     document.head.appendChild(s);
   }, []);
 
-  // та же логика сопоставления категорий, что и в SoiCatalogPortal — чтобы оба блока вели одинаково
+  // та же логика сопоставления категорий, что и в SoiCatalogPortal — чтобы оба блока вели одинаково.
+  // Сверять только по id нельзя: у категорий из CMS id — это cuid, а "equipment"
+  // и прочие ключи карточек лежат в slug, поэтому карточки уводили в корень каталога.
   const goCard = (card) => {
-    const found = cats.find((c) => c.id === card.catKey);
+    const found = cats.find((c) => c.slug === card.catKey || c.id === card.catKey);
     go("catalog", found ? { cat: found.id } : {});
   };
 
