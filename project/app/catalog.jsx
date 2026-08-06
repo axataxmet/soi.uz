@@ -48,6 +48,37 @@ function Checkbox({ label, count, on, onClick }) {
   );
 }
 
+/* ── Единый формат сортировки ──────────────────────────────────────────────
+   Списков сортировки на странице было два, и они расходились и составом, и
+   формулировками: у основного «Сначала дешёвые / Сначала дорогие», у блока
+   товаров категории — «По возрастанию цены / По убыванию цены». Теперь набор
+   один, пункты и порядок общие, а сравнение живёт в одной функции. */
+function sortOptions(lvf) {
+  return [
+    { v: "stock",      l: lvf("По наличию",            "Mavjudligi boʻyicha",      "By availability") },
+    { v: "price_asc",  l: lvf("По возрастанию цены",   "Narx oʻsishi boʻyicha",    "Price: low to high") },
+    { v: "price_desc", l: lvf("По убыванию цены",      "Narx kamayishi boʻyicha",  "Price: high to low") },
+    { v: "name_asc",   l: lvf("По наименованию А-Я",   "Nomi boʻyicha A-Z",        "Name: A-Z") },
+    { v: "name_desc",  l: lvf("По наименованию Я-А",   "Nomi boʻyicha Z-A",        "Name: Z-A") },
+  ];
+}
+/* Наличие: сначала со склада, затем «под заказ», в конце предзаказ. Внутри
+   ступени — по популярности, иначе товары с одним статусом встают вразнобой.
+   Товары без цены уходят в конец при сортировке по цене, а не считаются
+   нулевыми. */
+const STOCK_RANK = { in: 0, order: 1, preorder: 2 };
+function makeSorter(mode, lang) {
+  const rank = (p) => (STOCK_RANK[p.stock] != null ? STOCK_RANK[p.stock] : 1);
+  const name = (p) => tri(lang, p.ru, p.uz, p.en) || "";
+  return (a, b) => {
+    if (mode === "price_asc")  return (a.price == null ? Infinity : a.price) - (b.price == null ? Infinity : b.price);
+    if (mode === "price_desc") return (b.price == null ? -Infinity : b.price) - (a.price == null ? -Infinity : a.price);
+    if (mode === "name_asc")   return name(a).localeCompare(name(b), "ru");
+    if (mode === "name_desc")  return name(b).localeCompare(name(a), "ru");
+    return rank(a) - rank(b) || b.pop - a.pop;   // stock
+  };
+}
+
 function CatalogPage({ t, lang, store, go, params }) {
   const ALL = window.DATA.PRODUCTS;
   const cats = window.DATA.CATEGORIES;
@@ -66,8 +97,8 @@ function CatalogPage({ t, lang, store, go, params }) {
   const [maxP, setMaxP] = useState("");
   // Уровень 5 (страница товарной группы): переключатель вида списка.
   const [view, setView] = useState(params.view === "grid" ? "grid" : "list");
-  const [sort, setSort] = useState("pop");
-  const [catSort, setCatSort] = useState("price_asc"); // блок товаров на корне категории
+  const [sort, setSort] = useState("stock");
+  const [catSort, setCatSort] = useState("stock"); // блок товаров на корне категории
   const PAGE = 12;
   const [visible, setVisible] = useState(PAGE);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -249,20 +280,8 @@ function CatalogPage({ t, lang, store, go, params }) {
     return true;
   });
 
-  /* Порядок наличия: сначала то, что на складе, затем «под заказ», в конце
-     предзаказ. Внутри каждой ступени — по популярности, иначе товары с
-     одинаковым статусом вставали бы в произвольном порядке. */
-  const STOCK_RANK = { in: 0, order: 1, preorder: 2 };
-  const stockRank = (p) => (STOCK_RANK[p.stock] != null ? STOCK_RANK[p.stock] : 1);
-
   // sort
-  list = [...list].sort((a, b) => {
-    if (sort === "stock") return stockRank(a) - stockRank(b) || b.pop - a.pop;
-    if (sort === "price_asc") return a.price - b.price;
-    if (sort === "price_desc") return b.price - a.price;
-    if (sort === "new") return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0) || b.pop - a.pop;
-    return b.pop - a.pop;
-  });
+  list = [...list].sort(makeSorter(sort, lang));
 
   const shown = list.slice(0, visible);
   const hasMore = visible < list.length;
@@ -273,12 +292,7 @@ function CatalogPage({ t, lang, store, go, params }) {
      любой ценовой сортировке, иначе они занимали бы первые места как нули. */
   const CAT_COLS = 5, CAT_ROWS = 10;
   const catProducts = browseTiles
-    ? [...list].sort((a, b) => {
-        if (catSort === "price_asc") return (a.price == null ? Infinity : a.price) - (b.price == null ? Infinity : b.price);
-        if (catSort === "price_desc") return (b.price == null ? -Infinity : b.price) - (a.price == null ? -Infinity : a.price);
-        const an = tri(lang, a.ru, a.uz, a.en), bn = tri(lang, b.ru, b.uz, b.en);
-        return catSort === "name_desc" ? bn.localeCompare(an, "ru") : an.localeCompare(bn, "ru");
-      }).slice(0, CAT_COLS * CAT_ROWS)
+    ? [...list].sort(makeSorter(catSort, lang)).slice(0, CAT_COLS * CAT_ROWS)
     : [];
 
   // .clp-cat-tile styles for the subcategory tile grid below — a visitor can
@@ -482,12 +496,8 @@ function CatalogPage({ t, lang, store, go, params }) {
               <div className="sort-sel">
                 <label>{t.cat_sort}:</label>
                 <select value={sort} onChange={(e) => setSort(e.target.value)}>
-                  <option value="stock">{t.sort_stock}</option>
-                  <option value="pop">{t.sort_pop}</option>
-                  <option value="price_asc">{t.sort_price_asc}</option>
-                <option value="price_desc">{t.sort_price_desc}</option>
-                <option value="new">{t.sort_new}</option>
-              </select>
+                  {sortOptions(lvf).map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
+                </select>
             </div>
           </div>}
           </div>
@@ -563,17 +573,14 @@ function CatalogPage({ t, lang, store, go, params }) {
 
               {catProducts.length > 0 && (
                 <section className="cat-prod">
+                  {/* Заголовок «Товары категории / подкатегории» убран: над списком
+                      уже стоит название раздела, и подпись его повторяла.
+                      В шапке остаётся только сортировка. */}
                   <div className="cat-prod-head">
-                    <h2 className="cat-prod-title">{browseGroupTiles
-                      ? lvf("Товары подкатегории", "Subkategoriya mahsulotlari", "Products in this subcategory")
-                      : lvf("Товары категории", "Toifa mahsulotlari", "Products in this category")}</h2>
                     <div className="sort-sel">
                       <label htmlFor="cat-sort">{lvf("Сортировать", "Saralash", "Sort by")}:</label>
                       <select id="cat-sort" value={catSort} onChange={(e) => setCatSort(e.target.value)}>
-                        <option value="price_asc">{lvf("По возрастанию цены", "Narx oʻsishi boʻyicha", "Price: low to high")}</option>
-                        <option value="price_desc">{lvf("По убыванию цены", "Narx kamayishi boʻyicha", "Price: high to low")}</option>
-                        <option value="name_asc">{lvf("По наименованию А-Я", "Nomi boʻyicha A-Z", "Name: A-Z")}</option>
-                        <option value="name_desc">{lvf("По наименованию Я-А", "Nomi boʻyicha Z-A", "Name: Z-A")}</option>
+                        {sortOptions(lvf).map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
                       </select>
                     </div>
                   </div>
