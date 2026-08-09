@@ -15,6 +15,14 @@
 // var for old targets, so this uses @babel/core directly — the same
 // transform babel.js was doing in-browser, just run once here instead of
 // on every visit.
+//
+// The target is modern evergreen browsers, NOT `ie 11`: with `ie 11` every one
+// of the 35 files carried its own copy of the Babel helpers (_regenerator,
+// _toConsumableArray, _typeof, …), which cost ~500 KB across the bundle set.
+// `transform-block-scoping` is forced back on regardless of target, because
+// the cross-file global leak described above depends on it — dropping it
+// leaves `const`/`let` at the top level of each script and the site breaks
+// with "already declared". Everything else can stay native.
 const fs = require("fs");
 const path = require("path");
 const babel = require("@babel/core");
@@ -31,7 +39,13 @@ for (const file of files) {
   const srcPath = path.join(srcDir, file);
   const { code } = babel.transformFileSync(srcPath, {
     presets: [
-      ["@babel/preset-env", { targets: "ie 11" }],
+      [
+        "@babel/preset-env",
+        {
+          targets: { chrome: "100", safari: "15", firefox: "100", edge: "100" },
+          include: ["transform-block-scoping"],
+        },
+      ],
       ["@babel/preset-react", { runtime: "classic" }],
     ],
     envName: "production",

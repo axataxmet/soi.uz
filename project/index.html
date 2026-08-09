@@ -83,278 +83,58 @@
 
 
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-<style>/* cyrillic-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/81bf8a26-09d3-4d98-a4cb-1e8b38559022.woff2") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/3b00a1fe-4b9f-4682-ae3f-e26509f8a2c8.woff2") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/ff14def7-950e-44f9-8130-b8c5b516294b.woff2") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/9cbd9905-e84a-4596-866f-3ae4bdd239b5.woff2") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/5f3cd7ba-4e32-4441-9bf8-5bf30a3aebc5.woff2") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/c32355b2-8d74-4222-9d86-fdb16e48a5ce.woff2") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
+<!-- preconnect к fonts.googleapis.com/gstatic.com убран: шрифт лежит локально
+     в assets/, внешних обращений за ним нет. Оставленный preconnect открывал
+     бы соединение к Google на каждой загрузке страницы впустую. -->
+<style>/* Montserrat — фирменный шрифт сайта (решение заказчика 07.08.2026,
+   стек взят с референса medcomp.ru: Montserrat, Helvetica, Arial).
+   Заменил Manrope: тот занимал 60 объявлений @font-face и 28 файлов.
+
+   Здесь variable-версия: один файл на subset покрывает весь диапазон
+   насыщенности 400-900, а сайт использует 400/500/600/700/800/900 —
+   статическими начертаниями это стоило бы два десятка запросов.
+   Итого 4 файла, 146 КБ.
+
+   Subset'ы: кириллица нужна русской и части узбекской локали, latin-ext —
+   узбекской латинице с диакритикой (oʻ, gʻ, ʼ). Греческий и вьетнамский,
+   которые тянулись с Manrope, выброшены — на сайте их нет. */
 /* cyrillic-ext */
 @font-face {
-  font-family: 'Manrope';
+  font-family: 'Montserrat';
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400 900;
   font-display: swap;
-  src: url("assets/81bf8a26-09d3-4d98-a4cb-1e8b38559022.woff2") format('woff2');
+  src: url("assets/montserrat-cyrillic-ext.woff2") format('woff2');
   unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
 }
 /* cyrillic */
 @font-face {
-  font-family: 'Manrope';
+  font-family: 'Montserrat';
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400 900;
   font-display: swap;
-  src: url("assets/3b00a1fe-4b9f-4682-ae3f-e26509f8a2c8.woff2") format('woff2');
+  src: url("assets/montserrat-cyrillic.woff2") format('woff2');
   unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("assets/ff14def7-950e-44f9-8130-b8c5b516294b.woff2") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("assets/9cbd9905-e84a-4596-866f-3ae4bdd239b5.woff2") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
 }
 /* latin-ext */
 @font-face {
-  font-family: 'Manrope';
+  font-family: 'Montserrat';
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400 900;
   font-display: swap;
-  src: url("assets/5f3cd7ba-4e32-4441-9bf8-5bf30a3aebc5.woff2") format('woff2');
+  src: url("assets/montserrat-latin-ext.woff2") format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 /* latin */
 @font-face {
-  font-family: 'Manrope';
+  font-family: 'Montserrat';
   font-style: normal;
-  font-weight: 500;
+  font-weight: 400 900;
   font-display: swap;
-  src: url("assets/c32355b2-8d74-4222-9d86-fdb16e48a5ce.woff2") format('woff2');
+  src: url("assets/montserrat-latin.woff2") format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-/* cyrillic-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/81bf8a26-09d3-4d98-a4cb-1e8b38559022.woff2") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/3b00a1fe-4b9f-4682-ae3f-e26509f8a2c8.woff2") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/ff14def7-950e-44f9-8130-b8c5b516294b.woff2") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/9cbd9905-e84a-4596-866f-3ae4bdd239b5.woff2") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/5f3cd7ba-4e32-4441-9bf8-5bf30a3aebc5.woff2") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/c32355b2-8d74-4222-9d86-fdb16e48a5ce.woff2") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/81bf8a26-09d3-4d98-a4cb-1e8b38559022.woff2") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/3b00a1fe-4b9f-4682-ae3f-e26509f8a2c8.woff2") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/ff14def7-950e-44f9-8130-b8c5b516294b.woff2") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/9cbd9905-e84a-4596-866f-3ae4bdd239b5.woff2") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/5f3cd7ba-4e32-4441-9bf8-5bf30a3aebc5.woff2") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/c32355b2-8d74-4222-9d86-fdb16e48a5ce.woff2") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: url("assets/81bf8a26-09d3-4d98-a4cb-1e8b38559022.woff2") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: url("assets/3b00a1fe-4b9f-4682-ae3f-e26509f8a2c8.woff2") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: url("assets/ff14def7-950e-44f9-8130-b8c5b516294b.woff2") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: url("assets/9cbd9905-e84a-4596-866f-3ae4bdd239b5.woff2") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: url("assets/5f3cd7ba-4e32-4441-9bf8-5bf30a3aebc5.woff2") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 800;
-  font-display: swap;
-  src: url("assets/c32355b2-8d74-4222-9d86-fdb16e48a5ce.woff2") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
+
 /* cyrillic-ext */
 /* cyrillic */
 /* vietnamese */
@@ -382,9 +162,11 @@
   /* Единственный блок токенов сайта; значения — по фирменному стилю
      «ИНДУСТРИЯ ЗДОРОВЬЯ» (design-system/soi.uz/PALETTE.md).
 
-     Три цвета: белый фон, синий #0E4AC6 как структурный (вместо чёрного —
-     заголовки, текст, иконки, линии, рамки), лайм #B8F500 точечно на главных
-     действиях и статусах. Чёрного в палитре нет.
+     Два цвета: белый фон и синий #0E4AC6 — он же структурный (заголовки,
+     текст, иконки, линии, рамки) и он же сигнальный на главных действиях.
+     Чёрного в палитре нет. Лайм #B8F500 был третьим цветом и снят целиком
+     (решение заказчика 07.08.2026) — сначала с главной, теперь со всех
+     страниц ради единого стиля.
 
      Имена --slate-*, --navy-*, --cyan-* сохранены: на них ссылаются сотни
      мест, переименование потребовало бы править их все разом. Работают
@@ -392,43 +174,83 @@
 
   /* канон палитры */
   --accent:#0E4AC6; --accent-2:#0a3a9c;    /* структурный синий и его тёмный тон */
-  --cta:#B8F500; --cta-hover:#C5FF19;      /* сигнальный лайм */
-  --danger:#e0492f; --danger-bg:#fdeeeb;   /* ошибки: вне трёх фирменных,
+  /* Сигнальные токены сохранили имена --cta-*, но держат теперь синий: на них
+     ссылается три десятка правил (кнопки, поиск, плитки каталога, футер), и
+     переименование пришлось бы делать разом по всем. Значение одно с
+     --accent — отдельного сигнального цвета на сайте больше нет. */
+  --cta:#0E4AC6; --cta-hover:#0a3a9c;
+  /* Фирменный синий для тёмных подложек — футера и герой-слайдов на тёмной
+     теме. Сам #0E4AC6 на тёмном фоне даёт 2.27:1 и не читается; этот тон —
+     7.06:1 на фоне футера. Нужен именно как акцент на тёмном, не как замена
+     фирменного цвета. */
+  --accent-on-dark:#7FA8F0;
+  --danger:#e0492f; --danger-bg:#fdeeeb;   /* ошибки: вне фирменной пары,
                                               но сигнал об ошибке не может
-                                              быть лаймовым или синим */
-  --cta-ink:#0E4AC6;                       /* подпись на лайме — только синяя:
-                                              белая даёт контраст 1.3:1 */
+                                              быть синим */
+  --cta-ink:#FFFFFF;                       /* подпись на синем — белая, 7.46:1;
+                                              прежде здесь был синий по лайму */
   --bg-soft:#F4F7FD;                       /* акцентные информационные блоки */
-  --ink-soft:#274A40; --mute:#5A736A;
+  --ink-soft:#33445E; --mute:#667085;
   --line-2:#E8EFFB;
 
   /* фон и поверхности — «воздух», 80% пространства */
   --bg:#FFFFFF; --bg-2:#F4F7FD; --surface:#FFFFFF;
   --line:#CAD6E4; --line-soft:#dfe6ef;
 
-  /* Текст. Решение заказчика: весь текст сайта — #0B2D25, тёмно-зелёный.
-     Цвет лежит вне палитры из трёх (белый / синий #0E4AC6 / лайм), где текст
-     положен синий; зафиксирован как исключение. Вторичные оттенки сдвинуты в
-     ту же гамму, иначе подписи оставались синеватыми рядом с зелёным текстом.
-     Синий остаётся за ссылками и активными состояниями (--accent). */
-  --ink:#0B2D25; --ink-2:#1E4A3E;
-  --slate-700:#274A40; --slate-600:#3C5F54; --slate-500:#5A736A; --slate-400:#7E9188; --slate-300:#A8B5AE;
+  /* Текст — единая сине-серая шкала (решение заказчика 07.08.2026: палитру
+     текста пересматриваем ради единства всех страниц).
+
+     Заменила тёмно-зелёную гамму (--ink был #0B2D25, вторичные — #5A736A и
+     соседние). Зелёный не входил ни в одну версию фирменной палитры и спорил
+     с синим #0E4AC6: рядом с ним подписи отдавали болотным. Новая шкала —
+     нейтральный тёмный с синим подтоном, один род с фирменным цветом.
+
+     Раньше главная жила на своих значениях (#17212B / #667085), остальные 16
+     страниц — на зелёных. Теперь источник один, и локальные переопределения
+     на главной больше не нужны.
+
+     Контраст на белом проверен, все текстовые ступени проходят WCAG AA:
+       --ink 15.7:1 · --ink-2 9.9:1 · --slate-700 7.3:1
+       --slate-600 6.0:1 · --slate-500 4.9:1 · --slate-400 4.5:1
+
+     --slate-400 специально держится у самого порога 4.5:1, а не светлее:
+     страницы набирают им живой текст 14-15px (подписи к цифрам, лиды
+     разделов — .clp-sub, .clp-stat-l и соседние), а не только декор. При
+     первой сборке шкалы он был #8A97AB с контрастом 2.96:1, и этот текст
+     переставал читаться.
+
+     --slate-300 (1.86:1) — единственная ступень вне текста: границы,
+     разделители, неактивные иконки. Набирать им текст нельзя. */
+  --ink:#16233B; --ink-2:#33445E;
+  --slate-700:#47576F; --slate-600:#55647C; --slate-500:#63718A; --slate-400:#6A7790; --slate-300:#B6BFCC;
 
   /* синяя шкала */
   --blue-700:#0a3a9c; --blue-600:#0E4AC6; --blue-500:#2b72e3; --blue-400:#4d8eee; --blue-50:#eaf2ff;
-  --navy-900:#071A33; --navy-850:#0b1f3a; --navy-800:#0d2650; --navy-700:#123565;
+  /* Тёмная шкала — подложка футера и тёмных блоков. Сдвинута в тон фирменного
+     #0E4AC6 (решение заказчика 07.08.2026: футер оставляем тёмным, цвет
+     подобрать). Прежние значения были холоднее и жили сами по себе; теперь
+     это затемнённый фирменный синий. Белый текст на --navy-900 даёт 16.9:1. */
+  --navy-900:#0B1C3A; --navy-850:#0F2447; --navy-800:#143059; --navy-700:#1B3E6E;
 
   /* статусы. «В наличии» — лаймовая плашка с синей подписью (п.3 ТЗ);
      «под заказ» и «предзаказ» остаются нейтральными, чтобы лайм не потерял
      сигнальность от частого повторения. */
   --success:#0E4AC6; --success-bg:#eaf2ff; --amber:#b87213; --amber-bg:#faf0dc; --violet:#6454d4;
-  --grad-brand:linear-gradient(125deg,#B8F500 0%,#C5FF19 100%);
+  /* Фирменный градиент — синий вместо снятого лайма. Держит те же две
+     остановки, чтобы кнопки на нём (.btn-primary, .search-btn, плитки
+     каталога) не потеряли объём. Подпись на нём — --cta-ink, теперь белая. */
+  --grad-brand:linear-gradient(125deg,#0E4AC6 0%,#1657D8 100%);
   --grad-hero:linear-gradient(160deg,#FFFFFF 0%,#F4F7FD 45%,#eaf2ff 100%);
 
-  /* шрифты. --sans и --serif — псевдонимы --font: обоими набрана Manrope,
+  /* шрифты. --sans и --serif — псевдонимы --font: обоими набран Montserrat,
      засечного начертания на сайте нет. Оставлены, чтобы не править разом
-     все места вызова; уходят на этапе 7. */
-  --font:"Manrope",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+     все места вызова; уходят на этапе 7.
+
+     Стек повторяет референс medcomp.ru: Montserrat, Helvetica, Arial.
+     Helvetica и Arial здесь — подстраховка на случай, если основной шрифт
+     не загрузился: обе метрически близки к Montserrat и есть в macOS и
+     Windows соответственно, поэтому подмена не ломает вёрстку. */
+  --font:"Montserrat",Helvetica,Arial,sans-serif;
   --mono:"Geist Mono","JetBrains Mono",ui-monospace,monospace;
 
   /* радиус */
@@ -445,7 +267,12 @@
      заголовками. При таком выборе 90% из 777 кеглей сдвинулись не более чем
      на 1 px, максимальный сдвиг — 2 px. Всё, что крупнее 40 px, оставлено
      как есть: это единичные заголовки экранов. */
-  --fs-1:11px; --fs-2:12px; --fs-3:13px; --fs-4:14px; --fs-5:16px;
+  /* Нижняя ступень поднята с 11 до 12px: на ней набраны надзаголовки, теги
+     кейсов, суммы и дисклеймер — 93 места по проекту, и все они нарушали
+     правило «тело текста не мельче 12px». Правим ступень, а не каждое место:
+     иначе следующий компонент снова возьмёт --fs-1 и вернёт 11px.
+     Ступень совпала с --fs-2 намеренно — 11px в шкале больше нет. */
+  --fs-1:12px; --fs-2:12px; --fs-3:13px; --fs-4:14px; --fs-5:16px;
   --fs-6:18px; --fs-7:22px; --fs-8:28px; --fs-9:38px;
   --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
   --sp-5:24px; --sp-6:32px; --sp-7:48px; --sp-8:64px;
@@ -707,19 +534,51 @@ img{max-width:100%;display:block}
 .z-corp .foot-soc{width:34px;height:34px;border-radius:var(--r-sm);background:rgba(255,255,255,.08);color:var(--slate-300);display:flex;align-items:center;justify-content:center;transition:.16s}
 .z-corp .foot-soc:hover{background:rgba(255,255,255,.18);color:#fff}
 
+/* ===== зона нажатия ==========================================================
+   Норма для пальца — 44×44 px. Часть органов управления меньше: бургер и
+   кнопки шапки 40-42, иконки соцсетей 34. Увеличивать сами элементы нельзя —
+   поедет вёрстка шапки и футера, поэтому расширяем только область нажатия
+   прозрачным псевдоэлементом. Внешне ничего не меняется, попасть пальцем
+   становится можно.
+
+   inset считается от текущего размера: -5px вокруг 34px даёт 44. */
+.z-corp .burger, .z-corp .co-act, .z-corp .foot-soc,
+.z-corp .theme-btn, .z-corp .co-nav .nav-dd-btn, .z-corp .lang-dd-btn { position:relative; }
+.z-corp .burger::after, .z-corp .co-act::after, .z-corp .foot-soc::after,
+.z-corp .theme-btn::after, .z-corp .co-nav .nav-dd-btn::after, .z-corp .lang-dd-btn::after {
+  content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:100%; min-width:44px; height:44px; border-radius:inherit; }
+
 /* ===== light minimalist footer (corp shell) ===== */
 .z-corp .foot{background:var(--surface);color:var(--slate-600);padding:0;font-size:var(--fs-4)}
 .z-corp .foot .wrap{padding-top:0;padding-bottom:0}
-.z-corp .foot .fcols{grid-template-columns:1.35fr .85fr 1fr 1.15fr 1.25fr;gap:32px;padding:56px 0 34px}
+/* Расстановка по образцу заказчика (06.08.2026): бренд + описание + контакты
+   одной колонкой слева, между ними колонки навигации, справа — соцсети и под
+   ними реквизиты за тонкой линией. Первая колонка шире прочих, потому что
+   несёт три блока; последняя фиксированной доли, чтобы иконки соцсетей не
+   разъезжались. Средних колонок две — «О компании» и «Каталог» (группу
+   «Услуги» из футера убрали, см. footerNavCols). Через repeat(auto-fit,…)
+   это записать нельзя: auto-repeat запрещён рядом с fr-треками, и браузер
+   отбрасывает всё объявление целиком. Появится ещё одна группа — её
+   подхватит grid-auto-columns, сетка не развалится. */
+.z-corp .foot .fcols{grid-template-columns:1.5fr repeat(2,.95fr) 1.7fr;grid-auto-columns:1fr;gap:40px 36px;padding:64px 0 40px;align-items:start}
 .z-corp .foot .f-brand{display:flex;align-items:center;gap:11px;margin-bottom:16px}
 .z-corp .foot .f-wordmark{font-size:var(--fs-5);font-weight:800;letter-spacing:-.01em;color:var(--ink)}
-.z-corp .foot .fabout{color:var(--slate-600);max-width:280px;margin:0 0 16px}
+.z-corp .foot .fabout{color:var(--slate-600);max-width:320px;margin:0 0 22px}
 .z-corp .foot .cb-phone{color:var(--ink)!important}
 .z-corp .foot h5{color:var(--ink)}
 .z-corp .foot ul a{color:var(--slate-600)}
 .z-corp .foot ul a:hover{color:var(--blue-600)}
-.z-corp .foot .foot-contact{display:flex;flex-direction:column;gap:11px}
-.z-corp .foot .foot-contact li{color:var(--slate-600);font-size:var(--fs-4);line-height:1.5}
+/* Контакты: иконка в своей колонке, текст во второй — многострочный блок
+   телефонов выравнивается по левому краю, а не съезжает под иконку. */
+.z-corp .foot .foot-contact{display:flex;flex-direction:column;gap:13px}
+.z-corp .foot .foot-contact li{color:var(--slate-600);font-size:var(--fs-4);line-height:1.5;display:grid;grid-template-columns:16px 1fr;gap:10px;align-items:start}
+.z-corp .foot .fc-ic{color:var(--slate-400);margin-top:3px;flex-shrink:0}
+/* Правая колонка: заголовок, соцсети, копирайт под ними. */
+.z-corp .foot .fcol-follow .foot-socials{margin-bottom:20px}
+/* text-wrap:pretty не даёт «Все права / защищены.» и подобным коротким
+   хвостам оставаться на отдельной строке в узкой колонке. */
+.z-corp .foot .foot-copy{font-size:var(--fs-2);line-height:1.6;color:var(--slate-500);margin:0;text-wrap:pretty}
 .z-corp .foot .fc-map{display:inline-flex;align-items:center;gap:6px;color:var(--blue-600);font-weight:600;cursor:pointer}
 .z-corp .foot .fc-map:hover{text-decoration:underline}
 .z-corp .foot-news-col p{font-size:var(--fs-3);color:var(--slate-500);line-height:1.5;margin:0 0 14px}
@@ -1759,7 +1618,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .z-corp .foot .fc-h{display:block;margin-bottom:3px;font-size:var(--fs-1);font-weight:800;
   letter-spacing:.06em;text-transform:uppercase;color:#fff}
 .z-corp .foot .fc-grp a{color:inherit}
-.z-corp .foot .fc-grp a:hover{color:var(--cta)}
+.z-corp .foot .fc-grp a:hover{color:var(--accent-on-dark)}
 
 /* Дисклеймер и строка реквизитов выключены по формату: абзац длинный и
    идёт во всю ширину, при рваном правом крае он выглядел обрывком. */
@@ -1781,19 +1640,22 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .z-corp .foot .foot-contact li{font-size:var(--fs-3)}
 
 /* ===== цвет заголовков ====================================================
-   Решение заказчика: все заголовки сайта — #0B2D25. Цвет лежит вне палитры
-   из трёх (белый / синий #0E4AC6 / лайм), зафиксирован как исключение.
+   Заголовки берут --ink — тот же токен, что и основной текст. Раньше здесь
+   стоял литерал #0B2D25 (тёмно-зелёный), и он был главной причиной, по
+   которой перекраска главной не расходилась на остальные страницы: правило
+   с (0,2,1) перебивало и .sx-h2, и .sx. Через токен цвет теперь меняется в
+   одном месте — в :root.
 
    Правило общее для обеих оболочек — корпоративной и каталожной. Из него
    выведены контексты с тёмной или цветной подложкой: там заголовок белый и
-   тёмно-зелёный на нём не читается. Возврат к inherit, а не к конкретному
+   тёмный на нём не читается. Возврат к inherit, а не к конкретному
    цвету, — чтобы каждый такой блок сохранил свой (герой берёт цвет от темы
    слайда, плитки «Экосистемы» — белый от собственного фона).
 
    Специфичность (0,2,1): у части блоков есть свои правила вида «.sx-case h3»
    с (0,1,1), и без этого запаса цвет к ним не применялся. */
 .z-corp h1, .z-corp h2, .z-corp h3,
-.z-catalog h1, .z-catalog h2, .z-catalog h3{color:#0B2D25}
+.z-catalog h1, .z-catalog h2, .z-catalog h3{color:var(--ink)}
 
 .z-corp .soi-chero-stage h1, .z-corp .soi-chero-stage h2, .z-corp .soi-chero-stage h3,
 .z-corp .eco-t h1, .z-corp .eco-t h2, .z-corp .eco-t h3,
@@ -1822,21 +1684,21 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .z-corp .foot-bot,
 .z-corp .foot-bot span,
 .z-corp .foot-pay span{color:#A9BCD8}
-.z-corp .foot ul a:hover,.z-corp .foot .fc-map{color:var(--cta)}
+.z-corp .foot ul a:hover,.z-corp .foot .fc-map{color:var(--accent-on-dark)}
 /* Логотип нарисован тёмным по светлому — на тёмном фоне выворачиваем. */
 .z-corp .foot .foot-logo{filter:brightness(0) invert(1)}
 .z-corp .foot-news input{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.18);color:#fff}
 .z-corp .foot-news input::placeholder{color:#7D8EA8}
-.z-corp .foot-news input:focus{border-color:var(--cta)}
-.z-corp .foot-news button{background:var(--cta);color:var(--cta-ink)}
-.z-corp .foot-news button:hover{background:var(--cta-hover)}
-.z-corp .foot-news-ok{color:var(--cta)}
+.z-corp .foot-news input:focus{border-color:var(--accent-on-dark)}
+.z-corp .foot-news button{background:var(--accent-on-dark);color:#0B1C3A}
+.z-corp .foot-news button:hover{background:#9AC0F8}
+.z-corp .foot-news-ok{color:var(--accent-on-dark)}
 .z-corp .foot-news-err{margin-top:10px;font-size:var(--fs-3);font-weight:600;color:#FF9C8A}
 .z-corp .foot-lang button{background:transparent;border-color:rgba(255,255,255,.22);color:#A9BCD8}
-.z-corp .foot-lang button:hover{border-color:var(--cta);color:var(--cta)}
-.z-corp .foot-lang button.on{background:var(--cta);border-color:var(--cta);color:var(--cta-ink)}
+.z-corp .foot-lang button:hover{border-color:var(--accent-on-dark);color:var(--accent-on-dark)}
+.z-corp .foot-lang button.on{background:var(--accent-on-dark);border-color:var(--accent-on-dark);color:#0B1C3A}
 .z-corp .foot-soc{background:rgba(255,255,255,.08);color:#A9BCD8}
-.z-corp .foot-soc:hover{background:var(--cta);color:var(--cta-ink)}
+.z-corp .foot-soc:hover{background:var(--accent-on-dark);color:#0B1C3A}
 .z-corp .foot-pay span{border-color:rgba(255,255,255,.16)}
 
 /* Весь текст футера — белый. Приглушённые оттенки (--slate-*, полупрозрачный
@@ -1855,6 +1717,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .z-corp .foot-disclaimer,
 .z-corp .foot-bot,
 .z-corp .foot-bot span,
+/* Копирайт и иконки контактов подчиняются тому же решению «весь текст
+   футера белый»: раньше эту роль играл .foot-bot. */
+.z-corp .foot .foot-copy,
+.z-corp .foot .fc-ic,
 .z-corp .foot-pay span,
 .z-corp .foot-soc{color:#fff}
 
@@ -1871,7 +1737,7 @@ body{background:var(--surface)}
 .z-corp .foot-bot span{font-size:var(--fs-2)}
 .z-corp .foot ul a:hover,
 .z-corp .foot .fc-grp a:hover,
-.z-corp .foot .fc-map{color:var(--cta)}
+.z-corp .foot .fc-map{color:var(--accent-on-dark)}
 
 
 @media(max-width:1180px){.foot .fcols{grid-template-columns:repeat(3,1fr)}}
@@ -3570,277 +3436,7 @@ html{scroll-padding-top:72px}
 /* latin-ext */
 /* latin */
 </style>
-<style>/* cyrillic-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: url("assets/81bf8a26-09d3-4d98-a4cb-1e8b38559022.woff2") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: url("assets/3b00a1fe-4b9f-4682-ae3f-e26509f8a2c8.woff2") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: url("assets/ff14def7-950e-44f9-8130-b8c5b516294b.woff2") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: url("assets/9cbd9905-e84a-4596-866f-3ae4bdd239b5.woff2") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: url("assets/5f3cd7ba-4e32-4441-9bf8-5bf30a3aebc5.woff2") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: url("assets/c32355b2-8d74-4222-9d86-fdb16e48a5ce.woff2") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/81bf8a26-09d3-4d98-a4cb-1e8b38559022.woff2") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/3b00a1fe-4b9f-4682-ae3f-e26509f8a2c8.woff2") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/ff14def7-950e-44f9-8130-b8c5b516294b.woff2") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/9cbd9905-e84a-4596-866f-3ae4bdd239b5.woff2") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/5f3cd7ba-4e32-4441-9bf8-5bf30a3aebc5.woff2") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("assets/c32355b2-8d74-4222-9d86-fdb16e48a5ce.woff2") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("assets/81bf8a26-09d3-4d98-a4cb-1e8b38559022.woff2") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("assets/3b00a1fe-4b9f-4682-ae3f-e26509f8a2c8.woff2") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("assets/ff14def7-950e-44f9-8130-b8c5b516294b.woff2") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("assets/9cbd9905-e84a-4596-866f-3ae4bdd239b5.woff2") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("assets/5f3cd7ba-4e32-4441-9bf8-5bf30a3aebc5.woff2") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 500;
-  font-display: swap;
-  src: url("assets/c32355b2-8d74-4222-9d86-fdb16e48a5ce.woff2") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/81bf8a26-09d3-4d98-a4cb-1e8b38559022.woff2") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/3b00a1fe-4b9f-4682-ae3f-e26509f8a2c8.woff2") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/ff14def7-950e-44f9-8130-b8c5b516294b.woff2") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/9cbd9905-e84a-4596-866f-3ae4bdd239b5.woff2") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/5f3cd7ba-4e32-4441-9bf8-5bf30a3aebc5.woff2") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("assets/c32355b2-8d74-4222-9d86-fdb16e48a5ce.woff2") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-/* cyrillic-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/81bf8a26-09d3-4d98-a4cb-1e8b38559022.woff2") format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
-}
-/* cyrillic */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/3b00a1fe-4b9f-4682-ae3f-e26509f8a2c8.woff2") format('woff2');
-  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
-}
-/* greek */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/ff14def7-950e-44f9-8130-b8c5b516294b.woff2") format('woff2');
-  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
-}
-/* vietnamese */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/9cbd9905-e84a-4596-866f-3ae4bdd239b5.woff2") format('woff2');
-  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
-}
-/* latin-ext */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/5f3cd7ba-4e32-4441-9bf8-5bf30a3aebc5.woff2") format('woff2');
-  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
-}
-/* latin */
-@font-face {
-  font-family: 'Manrope';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("assets/c32355b2-8d74-4222-9d86-fdb16e48a5ce.woff2") format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-</style>
+<style></style>
 </head>
 <body>
 <div id="si-root"></div>
@@ -3869,41 +3465,41 @@ html{scroll-padding-top:72px}
 <!-- A3 catalog feed: populates window.DATA.{CATEGORIES,BRANDS,PRODUCTS} from the REST API -->
 <script src="app/catalog-remote.js?v=1785999916"></script>
 <script src="admin/ui.jsx?v=1782416018"></script>
-<script src="dist/app/ui-atoms.js?v=1786016852"></script>
-<script src="dist/app/header.js?v=1786016852"></script>
-<script src="dist/app/hero-wave.js?v=1786016852"></script>
-<script src="dist/app/home-page.js?v=1786016852"></script>
-<script src="dist/app/catalog.js?v=1786016852"></script>
-<script src="dist/app/product-detail.js?v=1786016852"></script>
-<script src="dist/app/cart.js?v=1786016852"></script>
-<script src="dist/app/brand-profile.js?v=1786016852"></script>
-<script src="dist/app/company-info.js?v=1786016852"></script>
-<script src="dist/app/floating-widgets.js?v=1786016852"></script>
-<script src="dist/app/account.js?v=1786016852"></script>
-<script src="dist/app/footer.js?v=1786016852"></script>
-<script src="dist/app/app-entry.js?v=1786016852"></script>
-<script src="dist/app/compare.js?v=1786016852"></script>
-<script src="dist/app/filters.js?v=1786016852"></script>
-<script src="dist/app/catalog-tree.js?v=1786016852"></script>
-<script src="dist/app/map.js?v=1786016852"></script>
-<script src="dist/app/quiz.js?v=1786016852"></script>
-<script src="dist/app/reviews.js?v=1786016852"></script>
-<script src="dist/app/auth.js?v=1786016852"></script>
-<script src="dist/app/wishlist.js?v=1786016852"></script>
-<script src="dist/app/order-track.js?v=1786016852"></script>
-<script src="dist/app/error-boundary.js?v=1786016852"></script>
-<script src="dist/app/app-root.js?v=1786016852"></script>
+<script src="dist/app/ui-atoms.js?v=1786277920"></script>
+<script src="dist/app/header.js?v=1786277920"></script>
+<script src="dist/app/hero-wave.js?v=1786277920"></script>
+<script src="dist/app/home-page.js?v=1786277920"></script>
+<script src="dist/app/catalog.js?v=1786277920"></script>
+<script src="dist/app/product-detail.js?v=1786277920"></script>
+<script src="dist/app/cart.js?v=1786277920"></script>
+<script src="dist/app/brand-profile.js?v=1786277920"></script>
+<script src="dist/app/company-info.js?v=1786277920"></script>
+<script src="dist/app/floating-widgets.js?v=1786277920"></script>
+<script src="dist/app/account.js?v=1786277920"></script>
+<script src="dist/app/footer.js?v=1786277920"></script>
+<script src="dist/app/app-entry.js?v=1786277920"></script>
+<script src="dist/app/compare.js?v=1786277920"></script>
+<script src="dist/app/filters.js?v=1786277920"></script>
+<script src="dist/app/catalog-tree.js?v=1786277920"></script>
+<script src="dist/app/map.js?v=1786277920"></script>
+<script src="dist/app/quiz.js?v=1786277920"></script>
+<script src="dist/app/reviews.js?v=1786277920"></script>
+<script src="dist/app/auth.js?v=1786277920"></script>
+<script src="dist/app/wishlist.js?v=1786277920"></script>
+<script src="dist/app/order-track.js?v=1786277920"></script>
+<script src="dist/app/error-boundary.js?v=1786277920"></script>
+<script src="dist/app/app-root.js?v=1786277920"></script>
 
-<script src="dist/app/tweaks-panel.js?v=1786016852"></script>
-<script src="dist/app/certificates.js?v=1786016852"></script>
-<script src="dist/app/home-sections.js?v=1786016852"></script>
-<script src="dist/app/inner-pages.js?v=1786016852"></script>
-<script src="dist/app/testimonials.js?v=1786016852"></script>
-<script src="dist/app/search.js?v=1786016852"></script>
-<script src="dist/app/staff-training.js?v=1786016852"></script>
-<script src="dist/app/service-support.js?v=1786016852"></script>
-<script src="dist/app/checkout.js?v=1786016852"></script>
-<script src="dist/app/news.js?v=1786016852"></script>
+<script src="dist/app/tweaks-panel.js?v=1786277920"></script>
+<script src="dist/app/certificates.js?v=1786277920"></script>
+<script src="dist/app/home-sections.js?v=1786277920"></script>
+<script src="dist/app/inner-pages.js?v=1786277920"></script>
+<script src="dist/app/testimonials.js?v=1786277920"></script>
+<script src="dist/app/search.js?v=1786277920"></script>
+<script src="dist/app/staff-training.js?v=1786277920"></script>
+<script src="dist/app/service-support.js?v=1786277920"></script>
+<script src="dist/app/checkout.js?v=1786277920"></script>
+<script src="dist/app/news.js?v=1786277920"></script>
 
 
 
