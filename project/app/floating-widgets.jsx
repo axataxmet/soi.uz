@@ -45,31 +45,6 @@ function BackToTop() {
   );
 }
 
-/* ── page loader ──────────────────────────────────────────────────────── */
-/* Shown once per hard load (not on client-side route changes — those are the
-   SPA's job, not the boot screen's). 1.8s fixed floor rather than tied to any
-   real readiness signal: the page has no single "everything is here" event
-   (fonts, catalog data and the CMS overlay all resolve independently), and a
-   floor that occasionally outlasts the content is a far smaller sin than a
-   loader that flashes for 40ms on a fast connection. */
-function PageLoader() {
-  const [hide, setHide] = useStateW(false);
-  const [gone, setGone] = useStateW(false);
-  useEffectW(() => {
-    const t1 = setTimeout(() => setHide(true), 1800);
-    const t2 = setTimeout(() => setGone(true), 2100);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, []);
-  if (gone) return null;
-  return (
-    <div className={"page-loader" + (hide ? " hide" : "")} aria-hidden={hide}>
-      <div className="pl-ring" />
-      <img className="pl-mark" src={window.__asset("assets/soi-mark.svg")} alt="" />
-      <div className="pl-bar"><div className="pl-bar-in" /></div>
-    </div>
-  );
-}
-
 /* ── quick quote modal ────────────────────────────────────────────────── */
 /* A different lead shape from the widget's channels (name/phone/
    email/message vs name/phone/time-slot) and a real submit: POST /submissions
@@ -192,4 +167,4 @@ function FloatingWidgets({ lang, go }) {
   );
 }
 
-Object.assign(window, { FloatingWidgets, QuickQuoteModal, ScrollProgress, BackToTop, PageLoader });
+Object.assign(window, { FloatingWidgets, QuickQuoteModal, ScrollProgress, BackToTop });

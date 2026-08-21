@@ -486,7 +486,10 @@ function ContactsPage({ t, lang, go }) {
   return (
     <div>
       <PageHero t={t} lang={lang} go={go} title={t.nav_contacts} />
-      <section className="section">
+      {/* ct-section снимает верхний отступ секции: у шапки страницы свои 56px
+          снизу, и вместе с ними получалось 112px пустоты до первой карточки.
+          Модификатор, а не правка .section — та стоит на всех страницах. */}
+      <section className="section ct-section">
         <div className="wrap">
           {/* Адреса: две равные карточки. */}
           <div className="ct-places reveal">

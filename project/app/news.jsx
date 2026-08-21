@@ -397,7 +397,6 @@ function App() {
 
   return (
     <div className="z-corp">
-      <PageLoader />
       <ScrollProgress />
       <CoHeader t={t} lang={lang} setLang={setLang} go={go} goCat={goCat} route={route} theme={theme} toggleTheme={toggleTheme} data-comment-anchor="b2aa7d60a7-a-121-13" />
       {catReady && (

@@ -475,6 +475,9 @@ img{max-width:100%;display:block}
    Форма «Написать нам» снята 21.08.2026, вместе с ней ушли стили .cinfo/.cgrp/
    .cform — страница пересобрана на карточках. Карточки повторяют язык главной:
    волосяная рамка, радиус 18px, никакой тени, подсветка рамки при наведении. */
+/* Верхний отступ снят: шапка страницы уже даёт 56px снизу, вместе с обычными
+   56px секции до первой карточки набегало 112px пустоты. */
+.z-corp .section.ct-section{padding-top:0}
 .z-corp .ct-places,.z-corp .ct-reach{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .z-corp .ct-reach{margin-top:20px}
 .z-corp .ct-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:26px 28px;transition:border-color .25s}
@@ -2453,19 +2456,10 @@ body:has(.cmpbar.show){--btt-bottom:96px}
 /* Подъём над панелью сравнения — через --btt-bottom выше, разом для обоих. */
 @media(max-width:640px){:root{--btt-size:44px;--btt-bottom:20px;--btt-right:16px}}
 
-/* ── page loader ─────────────────────────────────────────────────────── */
-.page-loader{position:fixed;inset:0;z-index:999;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
-  transition:opacity .3s ease,visibility .3s ease}
-[data-theme="dark"] .page-loader{background:var(--navy-900,#0b1d33)}
-.page-loader.hide{opacity:0;visibility:hidden}
-.pl-mark{width:44px;height:44px;position:absolute;animation:plPulse 1.4s ease-in-out infinite}
-.pl-ring{width:76px;height:76px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--blue-600);animation:plSpin .9s linear infinite}
-.pl-bar{width:160px;height:3px;border-radius:2px;background:var(--line);overflow:hidden}
-.pl-bar-in{height:100%;width:40%;background:var(--blue-600);border-radius:2px;animation:plBar 1.8s cubic-bezier(.4,0,.2,1) forwards}
-@keyframes plPulse{0%,100%{opacity:.55;transform:scale(.94)}50%{opacity:1;transform:scale(1.04)}}
-@keyframes plSpin{to{transform:rotate(360deg)}}
-@keyframes plBar{0%{width:0%}60%{width:75%}100%{width:100%}}
-@media (prefers-reduced-motion: reduce){.pl-mark,.pl-ring,.pl-bar-in{animation:none}}
+/* Экран загрузки (.page-loader) снят по решению заказчика 21.08.2026 —
+   вместе с компонентом PageLoader и его стилями. Он держал страницу
+   закрытой фиксированные 1,8 секунды независимо от того, как быстро она
+   на самом деле готова. */
 
 /* ===== account page ===== */
 .acc-login-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-xl);padding:36px 32px;box-shadow:var(--sh-lg)}
@@ -3530,7 +3524,7 @@ html{scroll-padding-top:72px}
 
 <script src="core/data.js?v=1782416018"></script>
 <script src="core/catalog-data.js?v=1782600023"></script>
-<script src="app/data.js?v=1787336691"></script>
+<script src="app/data.js?v=1787337551"></script>
 
 <!-- ===== catalog (app) data + components — loaded once, no iframe ===== -->
 <script src="app/cms-store.js?v=1785999916"></script>
@@ -3544,41 +3538,41 @@ html{scroll-padding-top:72px}
 <!-- A3 catalog feed: populates window.DATA.{CATEGORIES,BRANDS,PRODUCTS} from the REST API -->
 <script src="app/catalog-remote.js?v=1785999916"></script>
 <script src="admin/ui.jsx?v=1782416018"></script>
-<script src="dist/app/ui-atoms.js?v=1787336691"></script>
-<script src="dist/app/header.js?v=1787336691"></script>
-<script src="dist/app/hero-wave.js?v=1787336691"></script>
-<script src="dist/app/home-page.js?v=1787336691"></script>
-<script src="dist/app/catalog.js?v=1787336691"></script>
-<script src="dist/app/product-detail.js?v=1787336691"></script>
-<script src="dist/app/cart.js?v=1787336691"></script>
-<script src="dist/app/brand-profile.js?v=1787336691"></script>
-<script src="dist/app/company-info.js?v=1787336691"></script>
-<script src="dist/app/floating-widgets.js?v=1787336691"></script>
-<script src="dist/app/account.js?v=1787336691"></script>
-<script src="dist/app/footer.js?v=1787336691"></script>
-<script src="dist/app/app-entry.js?v=1787336691"></script>
-<script src="dist/app/compare.js?v=1787336691"></script>
-<script src="dist/app/filters.js?v=1787336691"></script>
-<script src="dist/app/catalog-tree.js?v=1787336691"></script>
-<script src="dist/app/map.js?v=1787336691"></script>
-<script src="dist/app/quiz.js?v=1787336691"></script>
-<script src="dist/app/reviews.js?v=1787336691"></script>
-<script src="dist/app/auth.js?v=1787336691"></script>
-<script src="dist/app/wishlist.js?v=1787336691"></script>
-<script src="dist/app/order-track.js?v=1787336691"></script>
-<script src="dist/app/error-boundary.js?v=1787336691"></script>
-<script src="dist/app/app-root.js?v=1787336691"></script>
+<script src="dist/app/ui-atoms.js?v=1787337551"></script>
+<script src="dist/app/header.js?v=1787337551"></script>
+<script src="dist/app/hero-wave.js?v=1787337551"></script>
+<script src="dist/app/home-page.js?v=1787337551"></script>
+<script src="dist/app/catalog.js?v=1787337551"></script>
+<script src="dist/app/product-detail.js?v=1787337551"></script>
+<script src="dist/app/cart.js?v=1787337551"></script>
+<script src="dist/app/brand-profile.js?v=1787337551"></script>
+<script src="dist/app/company-info.js?v=1787337551"></script>
+<script src="dist/app/floating-widgets.js?v=1787337551"></script>
+<script src="dist/app/account.js?v=1787337551"></script>
+<script src="dist/app/footer.js?v=1787337551"></script>
+<script src="dist/app/app-entry.js?v=1787337551"></script>
+<script src="dist/app/compare.js?v=1787337551"></script>
+<script src="dist/app/filters.js?v=1787337551"></script>
+<script src="dist/app/catalog-tree.js?v=1787337551"></script>
+<script src="dist/app/map.js?v=1787337551"></script>
+<script src="dist/app/quiz.js?v=1787337551"></script>
+<script src="dist/app/reviews.js?v=1787337551"></script>
+<script src="dist/app/auth.js?v=1787337551"></script>
+<script src="dist/app/wishlist.js?v=1787337551"></script>
+<script src="dist/app/order-track.js?v=1787337551"></script>
+<script src="dist/app/error-boundary.js?v=1787337551"></script>
+<script src="dist/app/app-root.js?v=1787337551"></script>
 
-<script src="dist/app/tweaks-panel.js?v=1787336691"></script>
-<script src="dist/app/certificates.js?v=1787336691"></script>
-<script src="dist/app/home-sections.js?v=1787336691"></script>
-<script src="dist/app/inner-pages.js?v=1787336691"></script>
-<script src="dist/app/testimonials.js?v=1787336691"></script>
-<script src="dist/app/search.js?v=1787336691"></script>
-<script src="dist/app/staff-training.js?v=1787336691"></script>
-<script src="dist/app/service-support.js?v=1787336691"></script>
-<script src="dist/app/checkout.js?v=1787336691"></script>
-<script src="dist/app/news.js?v=1787336691"></script>
+<script src="dist/app/tweaks-panel.js?v=1787337551"></script>
+<script src="dist/app/certificates.js?v=1787337551"></script>
+<script src="dist/app/home-sections.js?v=1787337551"></script>
+<script src="dist/app/inner-pages.js?v=1787337551"></script>
+<script src="dist/app/testimonials.js?v=1787337551"></script>
+<script src="dist/app/search.js?v=1787337551"></script>
+<script src="dist/app/staff-training.js?v=1787337551"></script>
+<script src="dist/app/service-support.js?v=1787337551"></script>
+<script src="dist/app/checkout.js?v=1787337551"></script>
+<script src="dist/app/news.js?v=1787337551"></script>
 
 
 
