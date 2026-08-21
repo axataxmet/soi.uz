@@ -71,7 +71,7 @@ function PageLoader() {
 }
 
 /* ── quick quote modal ────────────────────────────────────────────────── */
-/* Same visual family as CallbackModal but a different lead shape (name/phone/
+/* A different lead shape from the widget's channels (name/phone/
    email/message vs name/phone/time-slot) and a real submit: POST /submissions
    is public (SubmissionsController @Public()) and already exists for exactly
    this — no new backend needed. A honeypot field catches simple bots: it's
@@ -149,68 +149,19 @@ function QuickQuoteModal({ lang, onClose }) {
   );
 }
 
-function CallbackModal({ lang, onClose }) {
-  const lv = (ru, uz, en) => lang==="uz"?uz:lang==="en"?en:ru;
-  const [sent, setSent] = useStateW(false);
-  const [time, setTime] = useStateW("now");
-  return (
-    <div className="modal-ov" onClick={onClose}>
-      <div className="modal" style={{maxWidth:420}} onClick={e=>e.stopPropagation()}>
-        {!sent ? (
-          <>
-            <div className="modal-head">
-              <button className="modal-close" onClick={onClose}><Icon name="x" size={20}/></button>
-              <h3>{lv("Перезвоните мне","Qayta qo\u02bbng\u02bbiring","Call me back")}</h3>
-              <p>{lv("Менеджер свяжется с вами в течение 15 минут","Menejer 15 daqiqa ichida bog\u02bbanadi","Manager will call within 15 minutes")}</p>
-            </div>
-            <div className="modal-body">
-              <form onSubmit={e=>{e.preventDefault();setSent(true);}}>
-                <div className="field"><label>{lv("Ваше имя","Ismingiz","Your name")}</label><input required placeholder={lv("Иванов Иван","Ismingiz","Your name")} /></div>
-                <div className="field"><label>{lv("Номер телефона","Telefon raqami","Phone number")}</label><input required placeholder="+998 __ ___-__-__" /></div>
-                <div className="field">
-                  <label>{lv("Удобное время","Qulay vaqt","Preferred time")}</label>
-                  <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:6}}>
-                    {[[lv("Сейчас","Hozir","Now"),"now"],[lv("Утром 9–12","Ertalab 9–12","Morning 9–12"),"morning"],[lv("После обеда 12–18","Tushdan keyin 12–18","Afternoon 12–18"),"afternoon"]].map(([l,v])=>(
-                      <button type="button" key={v}
-                        style={{padding:"8px 14px",borderRadius:9,fontWeight:700,fontSize:13,border:"1.5px solid",cursor:"pointer",background:time===v?"var(--blue-600)":"#fff",color:time===v?"#fff":"var(--slate-700)",borderColor:time===v?"var(--blue-600)":"var(--line)"}}
-                        onClick={()=>setTime(v)}>{l}</button>
-                    ))}
-                  </div>
-                </div>
-                <button type="submit" className="btn btn-primary btn-block btn-lg" style={{marginTop:8}}>
-                  <Icon name="phone" size={18}/>{lv("Жду звонка","Qo\u02bbng\u02bbiriqni kutaman","Request call")}
-                </button>
-              </form>
-            </div>
-          </>
-        ) : (
-          <div className="modal-body">
-            <div className="modal-ok">
-              <div className="ok-ic"><Icon name="check" size={34} sw={2.4}/></div>
-              <h3>{lv("Заявка принята!","Ariza qabul qilindi!","Request received!")}</h3>
-              <p>{lv("Менеджер позвонит вам в ближайшее время.","Menejer tez orada qo\u02bbng\u02bbiradi.","Manager will call you shortly.")}</p>
-              <button className="btn btn-primary btn-lg" onClick={onClose}>{lv("Готово","Tayyor","Done")}</button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
 function FloatingWidgets({ lang, go }) {
-  const lv = (ru, uz, en) => lang==="uz"?uz:lang==="en"?en:ru;
   const [open, setOpen] = useStateW(false);
-  const [cbOpen, setCbOpen] = useStateW(false);
   const [pulse, setPulse] = useStateW(true);
 
   // stop pulse after first open
   const handleOpen = () => { setOpen(!open); setPulse(false); };
 
+  /* Адреса — из общего источника в app/data.js: те же ссылки стоят на странице
+     контактов, и расходиться им нельзя. Пункт «Перезвоните мне» снят по
+     решению заказчика 21.08.2026 — остались два мессенджера. */
   const CHANNELS = [
-    { icon:"tg", label:"Telegram",    color:"var(--blue-500)", bg:"var(--blue-50)", href:"https://t.me/UzMedEx_bot" },
-    { icon:"wa", label:"WhatsApp",    color:"#25D366", bg:"var(--bg-2)", href:"https://wa.me/998773870001?text=Здравствуйте!%20Пишу%20с%20ИНДУСТРИЯ%20ЗДОРОВЬЯ." },
-    { icon:"phone", label:lv("Перезвоните мне","Qayta qo\u02bbng\u02bbiring","Call me back"), color:"var(--blue-600)", bg:"var(--bg-2)", cb:true },
+    { icon:"tg", label:"Telegram", color:"var(--blue-500)", bg:"var(--blue-50)", href:window.SOC_TELEGRAM },
+    { icon:"wa", label:"WhatsApp", color:"#25D366",         bg:"var(--bg-2)",    href:window.SOC_WHATSAPP },
   ];
 
   return (
@@ -219,12 +170,7 @@ function FloatingWidgets({ lang, go }) {
         {open && (
           <div className="fab-channels">
             {CHANNELS.map((ch,i)=>(
-              ch.cb
-                ? <button key={i} className="fab-ch" style={{"--ch-color":ch.color,"--ch-bg":ch.bg}} onClick={()=>{setCbOpen(true);setOpen(false);}}>
-                    <span className="fab-ch-ic"><Icon name="phone" size={18}/></span>
-                    <span className="fab-ch-label">{ch.label}</span>
-                  </button>
-                : <a key={i} className="fab-ch" style={{"--ch-color":ch.color,"--ch-bg":ch.bg}} href={ch.href} target="_blank" rel="noopener">
+              <a key={i} className="fab-ch" style={{"--ch-color":ch.color,"--ch-bg":ch.bg}} href={ch.href} target="_blank" rel="noopener">
                     <span className="fab-ch-ic">
                       {ch.icon==="tg"
                         ? <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.07 9.74c-.15.68-.55.84-1.12.52l-3.1-2.29-1.5 1.44c-.17.17-.31.31-.63.31l.22-3.17 5.74-5.18c.25-.22-.05-.34-.39-.12L7.18 14.6l-3.04-.95c-.66-.21-.67-.66.14-.97L17.06 7.2c.55-.2 1.03.13.88.99z"/></svg>
@@ -236,15 +182,14 @@ function FloatingWidgets({ lang, go }) {
             ))}
           </div>
         )}
-        {/* Пузырь реплики, не трубка: виджет открывает Telegram/WhatsApp, то
-            есть переписку, а звонок — лишь один из трёх каналов внутри. */}
+        {/* Пузырь реплики, не трубка: виджет открывает Telegram и WhatsApp,
+            то есть переписку. */}
         <button className={"fab-main "+(pulse?"pulse":"")} onClick={handleOpen} aria-label="Contact">
           <Icon name={open?"x":"chat"} size={22} sw={2} />
         </button>
       </div>
-      {cbOpen && <CallbackModal lang={lang} onClose={()=>setCbOpen(false)} />}
     </>
   );
 }
 
-Object.assign(window, { FloatingWidgets, CallbackModal, QuickQuoteModal, ScrollProgress, BackToTop, PageLoader });
+Object.assign(window, { FloatingWidgets, QuickQuoteModal, ScrollProgress, BackToTop, PageLoader });

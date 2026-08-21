@@ -471,13 +471,53 @@ img{max-width:100%;display:block}
 .z-corp .val-it p{font-size:var(--fs-4);color:var(--slate-600);line-height:1.55}
 
 
-.z-corp .cinfo{display:flex;flex-direction:column;gap:26px}
-.z-corp .cinfo .cgrp h4{font-size:var(--fs-3);font-weight:800;color:var(--slate-700);margin-bottom:9px;text-transform:uppercase;letter-spacing:.03em}
-.z-corp .cinfo .cgrp div{font-size:var(--fs-4);color:var(--slate-600);line-height:1.7}
-.z-corp .cform{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:30px;box-shadow:var(--sh)}
-.z-corp .cform label{display:block;font-size:var(--fs-3);font-weight:700;color:var(--slate-700);margin-bottom:6px}
-.z-corp .cform input, .z-corp .cform textarea{width:100%;border:1.5px solid var(--line);border-radius:var(--r-sm);padding:12px 14px;font-size:var(--fs-4);font-family:inherit;margin-bottom:16px;outline:none;transition:.15s;color:var(--ink);background:var(--surface)}
-.z-corp .cform input:focus, .z-corp .cform textarea:focus{border-color:var(--blue-500);box-shadow:var(--sh-sm)}
+/* ── страница «Контакты» ──────────────────────────────────────────────────
+   Форма «Написать нам» снята 21.08.2026, вместе с ней ушли стили .cinfo/.cgrp/
+   .cform — страница пересобрана на карточках. Карточки повторяют язык главной:
+   волосяная рамка, радиус 18px, никакой тени, подсветка рамки при наведении. */
+.z-corp .ct-places,.z-corp .ct-reach{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.z-corp .ct-reach{margin-top:20px}
+.z-corp .ct-card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:26px 28px;transition:border-color .25s}
+.z-corp .ct-card:hover{border-color:var(--blue-400)}
+.z-corp .ct-card-h{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.z-corp .ct-card-h h3{font-size:var(--fs-5);font-weight:800;color:var(--ink);letter-spacing:-.01em}
+.z-corp .ct-ic{flex-shrink:0;width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:var(--blue-50);color:var(--blue-600)}
+.z-corp .ct-addr{font-size:var(--fs-4);font-weight:600;color:var(--ink);line-height:1.55;margin-bottom:12px}
+.z-corp .ct-hours{list-style:none;display:flex;flex-direction:column;gap:6px}
+.z-corp .ct-hours li{font-size:var(--fs-3);color:var(--slate-600);line-height:1.5;padding-left:14px;position:relative}
+.z-corp .ct-hours li::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--line-2)}
+
+/* Строка списка — целиком ссылка: палец попадает в неё всю, а не в мелкий
+   номер. Высота с запасом от 44px, между строками зазор — рекомендация по
+   размеру и разносу зон нажатия. */
+.z-corp .ct-list{list-style:none;display:flex;flex-direction:column;gap:8px}
+.z-corp .ct-list a{display:flex;align-items:center;gap:13px;min-height:52px;padding:8px 12px;margin:0 -12px;border-radius:12px;text-decoration:none;transition:background .18s}
+.z-corp .ct-list a:hover{background:var(--bg)}
+.z-corp .ct-list a:focus-visible{outline:2px solid var(--blue-600);outline-offset:2px}
+.z-corp .ct-list-ic{flex-shrink:0;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--slate-500);transition:background .18s,color .18s}
+.z-corp .ct-list a:hover .ct-list-ic{background:var(--blue-50);color:var(--blue-600)}
+.z-corp .ct-list-tx{display:flex;flex-direction:column;gap:1px;min-width:0}
+.z-corp .ct-list-lb{font-size:var(--fs-2);color:var(--slate-500);line-height:1.35}
+.z-corp .ct-list-vl{font-size:var(--fs-4);font-weight:700;color:var(--ink);line-height:1.35}
+
+.z-corp .ct-msgr{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+.z-corp .ct-btn{flex:1 1 150px;display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:0 18px;border-radius:var(--r-pill);font-size:var(--fs-4);font-weight:700;color:#fff;text-decoration:none;transition:filter .18s,transform .12s}
+.z-corp .ct-btn:hover{filter:brightness(1.07)}
+.z-corp .ct-btn:active{transform:scale(.98)}
+.z-corp .ct-btn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+/* Фирменные цвета мессенджеров, а не палитра сайта: узнаваемость кнопки здесь
+   важнее единообразия — по цвету её находят раньше, чем читают подпись. */
+.z-corp .ct-btn.tg{background:#229ED9}
+.z-corp .ct-btn.wa{background:#25D366}
+
+@media(max-width:820px){
+  .z-corp .ct-places,.z-corp .ct-reach{grid-template-columns:1fr}
+  .z-corp .ct-card{padding:22px 20px}
+}
+@media(prefers-reduced-motion:reduce){
+  .z-corp .ct-card,.z-corp .ct-list a,.z-corp .ct-list-ic,.z-corp .ct-btn{transition:none}
+  .z-corp .ct-btn:active{transform:none}
+}
 
 
 .z-corp .xband{position:relative;overflow:hidden;border-radius:var(--r-xl);background:linear-gradient(120deg,var(--navy-900),var(--blue-700));color:#fff;padding:54px 56px;display:flex;align-items:center;gap:40px;flex-wrap:wrap}
@@ -742,13 +782,30 @@ img{max-width:100%;display:block}
 [data-theme="dark"] .z-corp .hstat b{color:#eef3fa}
 [data-theme="dark"] .z-corp .page-hero{background:linear-gradient(180deg,#0c1726,#0a1320)}
 [data-theme="dark"] .z-corp .section.alt{background:#0b1623}
-[data-theme="dark"] .z-corp .scard, [data-theme="dark"] .z-corp .proj-card, [data-theme="dark"] .z-corp .lic-card, [data-theme="dark"] .z-corp .cform, [data-theme="dark"] .z-corp .brand-chip{background:var(--surface);border-color:var(--line)}
+[data-theme="dark"] .z-corp .scard, [data-theme="dark"] .z-corp .proj-card, [data-theme="dark"] .z-corp .lic-card, [data-theme="dark"] .z-corp .ct-card, [data-theme="dark"] .z-corp .brand-chip{background:var(--surface);border-color:var(--line)}
+/* Контакты в тёмной теме: цвета заданы литералами, а не токенами.
+   Причина — во втором блоке [data-theme="dark"] ниже по файлу цепочка
+   псевдонимов схлопывается: --navy-800 → --navy-900 → #040c18, затем
+   --line → --navy-800 и --ink → --line. В итоге текст, рамка и фон
+   получают один и тот же цвет, и содержимое карточки исчезает.
+   Тот же приём уже применён выше к .h-sec (color:#eef3fa).
+   Сам дефект темы общий для сайта и лечится отдельно. */
+[data-theme="dark"] .z-corp .ct-card-h h3,
+[data-theme="dark"] .z-corp .ct-addr,
+[data-theme="dark"] .z-corp .ct-list-vl{color:#eef3fa}
+[data-theme="dark"] .z-corp .ct-card{border-color:#243348}
+[data-theme="dark"] .z-corp .ct-card:hover{border-color:var(--blue-400)}
+[data-theme="dark"] .z-corp .ct-ic{background:#16273f;color:var(--blue-400)}
+[data-theme="dark"] .z-corp .ct-list-ic{background:#16273f;color:var(--slate-400)}
+[data-theme="dark"] .z-corp .ct-list a:hover{background:#16273f}
+[data-theme="dark"] .z-corp .ct-list a:hover .ct-list-ic{background:#1d3352;color:var(--blue-400)}
+[data-theme="dark"] .z-corp .ct-hours li::before{background:#33465e}
 [data-theme="dark"] .z-corp .scard .ic{background:#16273f}
 [data-theme="dark"] .z-corp .eyebrow{background:#16273f;border-color:#23344a;color:var(--blue-400)}
 [data-theme="dark"] .z-corp .btn-ghost{background:var(--surface);border-color:var(--line);color:var(--ink)}
 [data-theme="dark"] .z-corp .btn-ghost:hover{background:var(--bg-2)}
 [data-theme="dark"] .z-corp .proj-photo, [data-theme="dark"] .z-corp .team-photo, [data-theme="dark"] .z-corp .lic-thumb{background:#16273f}
-[data-theme="dark"] .z-corp .cform input, [data-theme="dark"] .z-corp .cform textarea{background:var(--bg-2);color:var(--ink)}
+[data-theme="dark"] .z-corp .ct-list a:hover, [data-theme="dark"] .z-corp .ct-list-ic{background:var(--bg-2)}
 [data-theme="dark"] .z-corp .lang-sw, [data-theme="dark"] .z-corp .theme-btn, [data-theme="dark"] .z-corp .burger{border-color:var(--line);background:var(--surface)}
 [data-theme="dark"] .z-corp .uhead{background:var(--surface);border-color:var(--line)}
 [data-theme="dark"] .z-corp .drawer{background:var(--surface)}
@@ -3473,7 +3530,7 @@ html{scroll-padding-top:72px}
 
 <script src="core/data.js?v=1782416018"></script>
 <script src="core/catalog-data.js?v=1782600023"></script>
-<script src="app/data.js?v=1787335462"></script>
+<script src="app/data.js?v=1787336691"></script>
 
 <!-- ===== catalog (app) data + components — loaded once, no iframe ===== -->
 <script src="app/cms-store.js?v=1785999916"></script>
@@ -3487,41 +3544,41 @@ html{scroll-padding-top:72px}
 <!-- A3 catalog feed: populates window.DATA.{CATEGORIES,BRANDS,PRODUCTS} from the REST API -->
 <script src="app/catalog-remote.js?v=1785999916"></script>
 <script src="admin/ui.jsx?v=1782416018"></script>
-<script src="dist/app/ui-atoms.js?v=1787335462"></script>
-<script src="dist/app/header.js?v=1787335462"></script>
-<script src="dist/app/hero-wave.js?v=1787335462"></script>
-<script src="dist/app/home-page.js?v=1787335462"></script>
-<script src="dist/app/catalog.js?v=1787335462"></script>
-<script src="dist/app/product-detail.js?v=1787335462"></script>
-<script src="dist/app/cart.js?v=1787335462"></script>
-<script src="dist/app/brand-profile.js?v=1787335462"></script>
-<script src="dist/app/company-info.js?v=1787335462"></script>
-<script src="dist/app/floating-widgets.js?v=1787335462"></script>
-<script src="dist/app/account.js?v=1787335462"></script>
-<script src="dist/app/footer.js?v=1787335462"></script>
-<script src="dist/app/app-entry.js?v=1787335462"></script>
-<script src="dist/app/compare.js?v=1787335462"></script>
-<script src="dist/app/filters.js?v=1787335462"></script>
-<script src="dist/app/catalog-tree.js?v=1787335462"></script>
-<script src="dist/app/map.js?v=1787335462"></script>
-<script src="dist/app/quiz.js?v=1787335462"></script>
-<script src="dist/app/reviews.js?v=1787335462"></script>
-<script src="dist/app/auth.js?v=1787335462"></script>
-<script src="dist/app/wishlist.js?v=1787335462"></script>
-<script src="dist/app/order-track.js?v=1787335462"></script>
-<script src="dist/app/error-boundary.js?v=1787335462"></script>
-<script src="dist/app/app-root.js?v=1787335462"></script>
+<script src="dist/app/ui-atoms.js?v=1787336691"></script>
+<script src="dist/app/header.js?v=1787336691"></script>
+<script src="dist/app/hero-wave.js?v=1787336691"></script>
+<script src="dist/app/home-page.js?v=1787336691"></script>
+<script src="dist/app/catalog.js?v=1787336691"></script>
+<script src="dist/app/product-detail.js?v=1787336691"></script>
+<script src="dist/app/cart.js?v=1787336691"></script>
+<script src="dist/app/brand-profile.js?v=1787336691"></script>
+<script src="dist/app/company-info.js?v=1787336691"></script>
+<script src="dist/app/floating-widgets.js?v=1787336691"></script>
+<script src="dist/app/account.js?v=1787336691"></script>
+<script src="dist/app/footer.js?v=1787336691"></script>
+<script src="dist/app/app-entry.js?v=1787336691"></script>
+<script src="dist/app/compare.js?v=1787336691"></script>
+<script src="dist/app/filters.js?v=1787336691"></script>
+<script src="dist/app/catalog-tree.js?v=1787336691"></script>
+<script src="dist/app/map.js?v=1787336691"></script>
+<script src="dist/app/quiz.js?v=1787336691"></script>
+<script src="dist/app/reviews.js?v=1787336691"></script>
+<script src="dist/app/auth.js?v=1787336691"></script>
+<script src="dist/app/wishlist.js?v=1787336691"></script>
+<script src="dist/app/order-track.js?v=1787336691"></script>
+<script src="dist/app/error-boundary.js?v=1787336691"></script>
+<script src="dist/app/app-root.js?v=1787336691"></script>
 
-<script src="dist/app/tweaks-panel.js?v=1787335462"></script>
-<script src="dist/app/certificates.js?v=1787335462"></script>
-<script src="dist/app/home-sections.js?v=1787335462"></script>
-<script src="dist/app/inner-pages.js?v=1787335462"></script>
-<script src="dist/app/testimonials.js?v=1787335462"></script>
-<script src="dist/app/search.js?v=1787335462"></script>
-<script src="dist/app/staff-training.js?v=1787335462"></script>
-<script src="dist/app/service-support.js?v=1787335462"></script>
-<script src="dist/app/checkout.js?v=1787335462"></script>
-<script src="dist/app/news.js?v=1787335462"></script>
+<script src="dist/app/tweaks-panel.js?v=1787336691"></script>
+<script src="dist/app/certificates.js?v=1787336691"></script>
+<script src="dist/app/home-sections.js?v=1787336691"></script>
+<script src="dist/app/inner-pages.js?v=1787336691"></script>
+<script src="dist/app/testimonials.js?v=1787336691"></script>
+<script src="dist/app/search.js?v=1787336691"></script>
+<script src="dist/app/staff-training.js?v=1787336691"></script>
+<script src="dist/app/service-support.js?v=1787336691"></script>
+<script src="dist/app/checkout.js?v=1787336691"></script>
+<script src="dist/app/news.js?v=1787336691"></script>
 
 
 

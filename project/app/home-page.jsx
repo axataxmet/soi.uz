@@ -97,7 +97,10 @@ const SITE_CONTACTS_DEFAULTS = {
   email: "info@soi.uz",
   address: "100069, Ташкент, Узбекистан, ул. МКАД, д. 16",
   mapUrl: "https://maps.google.com/?q=100069,+Ташкент,+ул.+МКАД,+16",
-  telegram: "https://t.me/soi",
+  /* Из общего источника (app/data.js): этот же адрес стоит на странице
+     контактов и в плавающем виджете. Значение — запасное, поверх него
+     ложится site_contacts из админки, если там заполнено. */
+  telegram: window.SOC_TELEGRAM,
   instagram: "https://instagram.com/soi",
   facebook: "https://facebook.com/soi",
   youtube: "https://youtube.com/@soi",

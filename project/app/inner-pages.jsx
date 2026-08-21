@@ -466,65 +466,110 @@ function ServicesPage({ t, lang, go }) {
 }
 
 /* ===== CONTACTS ===== */
+/* Телефоны вынесены в данные, а не в разметку: их три, у каждого своя роль,
+   и номер нужен дважды — в подписи и в ссылке tel:. Дублировать цифры в двух
+   местах трижды — верный способ однажды поправить только одно из них. */
+const CONTACT_PHONES = [
+{ tel: "+998772250001", show: "+998 (77) 225-00-01", icon: "phone",
+  label: ["Общие вопросы (приёмная)", "Umumiy savollar (qabulxona)", "General enquiries (reception)"] },
+{ tel: "+998772240001", show: "+998 (77) 224-00-01", icon: "cart",
+  label: ["Отдел продаж (заказы и цены)", "Sotuv bo'limi (buyurtma va narxlar)", "Sales (orders and prices)"] },
+{ tel: "+998772230001", show: "+998 (77) 223-00-01", icon: "shield",
+  label: ["Сервисный центр (поддержка)", "Servis markazi (qo'llab-quvvatlash)", "Service centre (support)"] }];
+
 function ContactsPage({ t, lang, go }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
-  const [sent, setSent] = useState(false);
+  /* Форма «Написать нам» снята по решению заказчика 21.08.2026. Вместе с ней
+     ушла и единственная причина держать страницу в две колонки: остались
+     только контактные данные, и теперь они разложены по карточкам во всю
+     ширину. Заявку по-прежнему можно оставить через плавающий виджет связи. */
   return (
     <div>
       <PageHero t={t} lang={lang} go={go} title={t.nav_contacts} />
       <section className="section">
         <div className="wrap">
-          <div className="grid-2" style={{ gap: 48, alignItems: "flex-start" }}>
-            <div className="cinfo reveal">
-              <div className="cgrp">
-                <h4>{t.c_office}</h4>
-                <div>{t.c_office_addr}<br />{t.c_days_off}</div>
+          {/* Адреса: две равные карточки. */}
+          <div className="ct-places reveal">
+            <article className="ct-card">
+              <div className="ct-card-h">
+                <span className="ct-ic"><CoIcon name="pin" size={20} /></span>
+                <h3>{t.c_office}</h3>
               </div>
-              <div className="cgrp">
-                <h4>{t.c_wh}</h4>
-                {/* Свой адрес, а не c_office_addr: раньше здесь стоял ключ
-                    офиса, и склад показывался по адресу офиса. */}
-                <div>
-                  {t.c_wh_addr}<br />
-                  {t.c_wh_docs}<br />
-                  {t.c_wh_pickup}<br />
-                  {t.c_days_off}
-                </div>
-              </div>
-              <div className="cgrp">
-                <h4>{t.c_phones}</h4>
-                {/* Номера кликабельны: со смартфона страница контактов
-                    открывается чаще всего именно чтобы позвонить. */}
-                <div>
-                  {lv("Общие вопросы (приёмная)", "Umumiy savollar (qabulxona)", "General enquiries (reception)")}: <a href="tel:+998772250001">+998 (77) 225-00-01</a><br />
-                  {lv("Отдел продаж (заказы и цены)", "Sotuv bo'limi (buyurtma va narxlar)", "Sales (orders and prices)")}: <a href="tel:+998772240001">+998 (77) 224-00-01</a><br />
-                  {lv("Сервисный центр (поддержка)", "Servis markazi (qo'llab-quvvatlash)", "Service centre (support)")}: <a href="tel:+998772230001">+998 (77) 223-00-01</a>
-                </div>
-              </div>
-              <div className="cgrp">
-                <h4>{t.c_mail}</h4>
-                <div><a href={"mailto:" + t.u_mail}>{t.u_mail}</a></div>
-              </div>
-            </div>
-            <div className="cform reveal">
-              <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 18 }}>{t.c_form_t}</h3>
-              {sent ?
-              <div style={{ padding: "40px 20px", textAlign: "center" }}>
-                  <div style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--success-bg)", color: "var(--success)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}><CoIcon name="check" size={28} /></div>
-                  <div style={{ fontSize: 16, fontWeight: 700 }}>{lv("Заявка отправлена!", "Ariza yuborildi!", "Request sent!")}</div>
-                  <p style={{ fontSize: 14, color: "var(--slate-500)", marginTop: 6 }}>{lv("Мы свяжемся с вами в ближайшее время.", "Tez orada siz bilan bog'lanamiz.", "We will contact you shortly.")}</p>
-                </div> :
+              <p className="ct-addr">{t.c_office_addr}</p>
+              <ul className="ct-hours">
+                <li>{t.c_days_off}</li>
+              </ul>
+            </article>
 
-              <form onSubmit={(e) => {e.preventDefault();setSent(true);}}>
-                  <label>{t.c_name}</label>
-                  <input required placeholder={t.c_name} />
-                  <label>{t.c_phone}</label>
-                  <input required type="tel" placeholder="+998 __ ___ __ __" />
-                  <label>{t.c_msg}</label>
-                  <textarea rows="4" placeholder={t.c_msg}></textarea>
-                  <button className="btn btn-pri" style={{ width: "100%", justifyContent: "center" }} type="submit">{t.c_send}</button>
-                </form>
-              }
+            <article className="ct-card">
+              <div className="ct-card-h">
+                <span className="ct-ic"><CoIcon name="truck" size={20} /></span>
+                <h3>{t.c_wh}</h3>
+              </div>
+              {/* Свой адрес, а не c_office_addr: раньше здесь стоял ключ
+                  офиса, и склад показывался по адресу офиса. */}
+              <p className="ct-addr">{t.c_wh_addr}</p>
+              <ul className="ct-hours">
+                <li>{t.c_wh_docs}</li>
+                <li>{t.c_wh_pickup}</li>
+                <li>{t.c_days_off}</li>
+              </ul>
+            </article>
+          </div>
+
+          {/* Способы связи: телефоны слева, почта и мессенджеры справа. */}
+          <div className="ct-reach reveal">
+            <div className="ct-card">
+              <div className="ct-card-h">
+                <span className="ct-ic"><CoIcon name="phone" size={20} /></span>
+                <h3>{t.c_phones}</h3>
+              </div>
+              {/* Вся строка — ссылка tel:, а не только цифры: со смартфона
+                  страницу контактов открывают в основном чтобы позвонить,
+                  и попадать нужно в крупную область, а не в мелкий номер. */}
+              <ul className="ct-list">
+                {CONTACT_PHONES.map((p) => (
+                  <li key={p.tel}>
+                    <a href={"tel:" + p.tel}>
+                      <span className="ct-list-ic"><CoIcon name={p.icon} size={17} /></span>
+                      <span className="ct-list-tx">
+                        <span className="ct-list-lb">{lv(p.label[0], p.label[1], p.label[2])}</span>
+                        <span className="ct-list-vl">{p.show}</span>
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="ct-card">
+              <div className="ct-card-h">
+                <span className="ct-ic"><CoIcon name="mail" size={20} /></span>
+                <h3>{lv("Почта и мессенджеры", "Pochta va messenjerlar", "Email and messengers")}</h3>
+              </div>
+              <ul className="ct-list">
+                <li>
+                  <a href={"mailto:" + t.u_mail}>
+                    <span className="ct-list-ic"><CoIcon name="mail" size={17} /></span>
+                    <span className="ct-list-tx">
+                      <span className="ct-list-lb">{t.c_mail}</span>
+                      <span className="ct-list-vl">{t.u_mail}</span>
+                    </span>
+                  </a>
+                </li>
+              </ul>
+              {/* После снятия формы мессенджеры стали основным способом
+                  написать — поэтому они кнопками, а не строкой списка. */}
+              <div className="ct-msgr">
+                <a className="ct-btn tg" href={SOC_TELEGRAM} target="_blank" rel="noopener">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.07 9.74c-.15.68-.55.84-1.12.52l-3.1-2.29-1.5 1.44c-.17.17-.31.31-.63.31l.22-3.17 5.74-5.18c.25-.22-.05-.34-.39-.12L7.18 14.6l-3.04-.95c-.66-.21-.67-.66.14-.97L17.06 7.2c.55-.2 1.03.13.88.99z" /></svg>
+                  Telegram
+                </a>
+                <a className="ct-btn wa" href={SOC_WHATSAPP} target="_blank" rel="noopener">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.52 3.48A11.9 11.9 0 0 0 12 0C5.37 0 0 5.37 0 12a11.9 11.9 0 0 0 1.6 6l-1.7 6.18 6.33-1.66A11.9 11.9 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.22-3.48-8.52zM12 21.9c-1.74 0-3.43-.47-4.92-1.35l-.35-.21-3.76.98.99-3.66-.23-.37A9.88 9.88 0 0 1 2.1 12c0-5.47 4.43-9.9 9.9-9.9a9.86 9.86 0 0 1 9.9 9.9c0 5.47-4.43 9.9-9.9 9.9zm5.42-7.41c-.3-.15-1.76-.87-2.03-.97s-.47-.15-.67.15-.77.97-.94 1.17-.35.22-.65.07a8.14 8.14 0 0 1-2.4-1.48 9.05 9.05 0 0 1-1.66-2.07c-.17-.3 0-.46.13-.61.12-.13.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52s-.67-1.6-.91-2.2c-.24-.58-.48-.5-.67-.5h-.57a1.1 1.1 0 0 0-.79.37c-.27.3-1.03 1-1.03 2.45s1.06 2.84 1.2 3.04c.15.2 2.07 3.16 5.02 4.44.7.3 1.25.48 1.67.62.7.22 1.34.19 1.84.11.56-.08 1.76-.72 2-1.42.25-.7.25-1.3.17-1.42s-.27-.2-.57-.35z" /></svg>
+                  WhatsApp
+                </a>
+              </div>
             </div>
           </div>
         </div>
