@@ -345,7 +345,7 @@ img{max-width:100%;display:block}
 .z-corp .nav-links a:hover{color:var(--blue-600);background:var(--bg)}
 .z-corp .nav-links a.on{color:var(--blue-700);background:var(--blue-50)}
 .z-corp .nav-sp{flex:1}
-.z-corp .nav-cta{flex-shrink:0}
+.z-corp .nav-cta{flex-shrink:0;border-radius:var(--r-pill)!important}
 .z-corp .btn-pri.nav-cta{background:var(--blue-600)}
 .z-corp .btn-pri.nav-cta:hover{background:var(--blue-700);filter:none}
 .z-corp .burger{display:none;width:42px;height:42px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);align-items:center;justify-content:center;cursor:pointer;color:var(--ink)}
@@ -601,7 +601,7 @@ img{max-width:100%;display:block}
 @media(max-width:520px){.z-corp .foot .fcols{grid-template-columns:1fr;padding:44px 0 30px}.z-corp .foot-news{max-width:360px}}
 
 
-.z-corp .drawer-ov{position:fixed;inset:0;background:rgba(9,24,48,.5);z-index:300;display:none}
+.z-corp .drawer-ov{position:fixed;inset:0;background:rgba(9,24,48,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:300;display:none}
 .z-corp .drawer-ov.on{display:block}
 .z-corp .drawer{position:fixed;top:0;right:0;bottom:0;width:300px;max-width:84vw;background:var(--surface);z-index:301;transform:translateX(100%);transition:transform .28s cubic-bezier(.16,1,.3,1);padding:24px;display:flex;flex-direction:column;gap:6px}
 .z-corp .drawer.on{transform:none}
@@ -923,7 +923,8 @@ img{max-width:100%;display:block}
 @keyframes catSearchIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
 
 .z-corp .co-actions{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.z-corp .co-act{position:relative;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;border-radius:var(--r-sm);color:var(--slate-600,var(--mute));cursor:pointer;transition:background .14s,color .14s}
+.z-corp .co-act{position:relative;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:transparent;border-radius:var(--r-pill);color:var(--slate-600,var(--mute));cursor:pointer;transition:background .14s,color .14s,border-color .14s}
+.z-corp .co-act:hover{background:var(--bg);border-color:var(--slate-400,var(--line-2))}
 .z-corp .co-act:hover{background:var(--blue-50);color:var(--blue-600)}
 .z-corp .co-act:focus-visible{outline:2px solid var(--blue-500);outline-offset:2px}
 .z-corp .co-act-cart{color:var(--blue-600)}
@@ -2353,18 +2354,61 @@ body{background:var(--surface)}
 @media(max-width:860px){.info-layout{grid-template-columns:1fr}.info-stats{grid-template-columns:repeat(2,1fr)}.brand-hero-inner{flex-wrap:wrap}.brand-hero-stats{flex-wrap:wrap}.info-contact-grid{grid-template-columns:1fr}}
 
 /* ===== FAB widget ===== */
-.fab-wrap{position:fixed;bottom:28px;right:28px;z-index:66;display:flex;flex-direction:column;align-items:flex-end;gap:10px;transition:bottom .3s cubic-bezier(.16,1,.3,1)}
-/* lift FAB above the compare bar when it is shown */
-body:has(.cmpbar.show) .fab-wrap{bottom:96px}
-.fab-main{width:56px;height:56px;border-radius:50%;background:var(--grad-brand);color:var(--cta-ink);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-lg);transition:.18s;border:none;cursor:pointer}
+/* Правый нижний угол делят два элемента: кнопка «наверх» и виджет связи
+   прямо над ней. Геометрия вынесена в переменные, потому что положение
+   виджета вычисляется из размеров кнопки — иначе стопка разъезжается при
+   правке любого из двух, а они объявлены в разных местах файла.
+   --corner-gap — просвет между ними. */
+/* Диаметр виджета равен диаметру кнопки: две круглые кнопки в одной стопке
+   разного размера читались как разные по важности. Одна переменная на оба —
+   значит и центры совпадают без поправки, и мобильные 44px подхватываются. */
+:root{--corner-gap:12px;--btt-size:48px;--btt-bottom:28px;--btt-right:28px;--fab-size:var(--btt-size)}
+/* Виджет встаёт над кнопкой; по горизонтали центры совмещены, поэтому правый
+   отступ сдвинут на половину разницы диаметров (56 против 48 → −4px). */
+.fab-wrap{position:fixed;z-index:66;display:flex;flex-direction:column;align-items:flex-end;gap:10px;
+  bottom:calc(var(--btt-bottom) + var(--btt-size) + var(--corner-gap));
+  right:calc(var(--btt-right) + (var(--btt-size) - var(--fab-size)) / 2);
+  transition:bottom .3s cubic-bezier(.16,1,.3,1)}
+/* Панель сравнения поднимает всю стопку: переопределяем только --btt-bottom,
+   и виджет уезжает вверх вслед за кнопкой сам. */
+body:has(.cmpbar.show){--btt-bottom:96px}
+.fab-main{width:var(--fab-size);height:var(--fab-size);border-radius:50%;background:var(--grad-brand);color:var(--cta-ink);display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-lg);transition:.18s;border:none;cursor:pointer}
 .fab-main:hover{transform:scale(1.07);box-shadow:var(--sh-lg)}
 .fab-main.pulse{animation:fab-pulse 2.4s ease-in-out 1.5s 3}
 @keyframes fab-pulse{0%,100%{box-shadow:0 6px 22px rgba(120,160,0,.35)}50%{box-shadow:0 6px 22px rgba(120,160,0,.35),0 0 0 12px rgba(26,95,208,.12)}}
 .fab-channels{display:flex;flex-direction:column;gap:8px;align-items:flex-end;animation:fade .15s}
 .fab-ch{display:flex;align-items:center;gap:10px;border:none;cursor:pointer;background:var(--ch-bg,#fff);color:var(--ch-color,var(--blue-600));border-radius:var(--r-xl);padding:10px 16px 10px 12px;font-weight:700;font-size:var(--fs-4);font-family:var(--font);box-shadow:var(--sh);white-space:nowrap;transition:.13s;text-decoration:none}
+/* Плашки канала выезжают влево — в сторону страницы, а не за правый край. */
 .fab-ch:hover{transform:translateX(-4px);box-shadow:var(--sh-lg)}
 .fab-ch-ic{width:30px;height:30px;border-radius:50%;background:var(--ch-color);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .fab-ch-label{color:var(--ink)}
+
+/* ── scroll progress bar ─────────────────────────────────────────────── */
+.scroll-progress{position:fixed;top:0;left:0;width:100%;height:3px;z-index:400;background:var(--blue-600);transform-origin:0 50%;transform:scaleX(0);will-change:transform}
+@media (prefers-reduced-motion: reduce){.scroll-progress{transition:none}}
+
+/* ── back to top ─────────────────────────────────────────────────────── */
+.back-to-top{position:fixed;bottom:var(--btt-bottom);right:var(--btt-right);z-index:65;width:var(--btt-size);height:var(--btt-size);border-radius:50%;border:none;cursor:pointer;
+  background:var(--blue-600);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-lg);
+  opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .3s cubic-bezier(.16,1,.3,1),transform .3s cubic-bezier(.16,1,.3,1),background .18s}
+.back-to-top.show{opacity:1;transform:none;pointer-events:auto}
+.back-to-top:hover{background:var(--blue-700,var(--blue-600));transform:translateY(-3px)}
+/* Подъём над панелью сравнения — через --btt-bottom выше, разом для обоих. */
+@media(max-width:640px){:root{--btt-size:44px;--btt-bottom:20px;--btt-right:16px}}
+
+/* ── page loader ─────────────────────────────────────────────────────── */
+.page-loader{position:fixed;inset:0;z-index:999;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;
+  transition:opacity .3s ease,visibility .3s ease}
+[data-theme="dark"] .page-loader{background:var(--navy-900,#0b1d33)}
+.page-loader.hide{opacity:0;visibility:hidden}
+.pl-mark{width:44px;height:44px;position:absolute;animation:plPulse 1.4s ease-in-out infinite}
+.pl-ring{width:76px;height:76px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--blue-600);animation:plSpin .9s linear infinite}
+.pl-bar{width:160px;height:3px;border-radius:2px;background:var(--line);overflow:hidden}
+.pl-bar-in{height:100%;width:40%;background:var(--blue-600);border-radius:2px;animation:plBar 1.8s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes plPulse{0%,100%{opacity:.55;transform:scale(.94)}50%{opacity:1;transform:scale(1.04)}}
+@keyframes plSpin{to{transform:rotate(360deg)}}
+@keyframes plBar{0%{width:0%}60%{width:75%}100%{width:100%}}
+@media (prefers-reduced-motion: reduce){.pl-mark,.pl-ring,.pl-bar-in{animation:none}}
 
 /* ===== account page ===== */
 .acc-login-card{background:#fff;border:1px solid var(--line);border-radius:var(--r-xl);padding:36px 32px;box-shadow:var(--sh-lg)}
@@ -3144,7 +3188,7 @@ body:has(.cmpbar.show) .fab-wrap{bottom:96px}
 
 /* ===== corporate header polish: fixed menu bar + dropdown layering ===== */
 .z-corp{--soi-head-h:calc(72px + env(safe-area-inset-top,0px));padding-top:var(--soi-head-h)}
-.z-corp > nav.nav.co-nav{display:block!important;position:fixed!important;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:900!important;background:rgba(255,255,255,.97);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);box-shadow:var(--sh-sm);transition:background .22s ease,box-shadow .22s ease,border-color .22s ease}
+.z-corp > nav.nav.co-nav{display:block!important;position:fixed!important;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:900!important;background:rgba(255,255,255,.97);backdrop-filter:saturate(180%) blur(16px);-webkit-backdrop-filter:saturate(180%) blur(16px);box-shadow:var(--sh-sm);border-bottom:1px solid var(--line);transition:background .22s ease,box-shadow .22s ease,border-color .22s ease}
 .z-corp > nav.nav.co-nav.scrolled{background:rgba(255,255,255,.985);border-bottom-color:rgba(190,205,226,.95);box-shadow:var(--sh-lg)}
 .z-corp .co-nav .co-nav-wrap{position:relative;height:72px;gap:18px;transition:height .22s ease,gap .22s ease}
 .z-corp .co-nav.scrolled .co-nav-wrap{height:62px;gap:16px}
@@ -3152,10 +3196,13 @@ body:has(.cmpbar.show) .fab-wrap{bottom:96px}
 .z-corp .co-nav.scrolled .co-brand{height:46px;width:46px}
 .z-corp .co-nav .co-brand-mark{width:50px;height:50px;object-fit:contain;transition:width .22s ease,height .22s ease,filter .18s ease}
 .z-corp .co-nav.scrolled .co-brand-mark{width:44px;height:44px}
-.z-corp .co-nav .co-nav-links{display:flex;align-items:center;gap:4px;margin-left:4px;min-width:0}
+.z-corp .co-nav .co-nav-links{display:flex;align-items:center;gap:8px;margin-left:4px;min-width:0}
 .z-corp .co-nav .nav-dd{position:relative;display:inline-flex;align-items:center;height:42px}
+/* Цвет сведён к --slate-600 — тому же токену, что у языка/темы/иконок справа
+   (09.08.2026): раньше пункты меню были на тон темнее и холоднее (--navy-700),
+   и строка читалась как два разных цвета текста без функциональной причины. */
 .z-corp .co-nav .co-nav-links>a,
-.z-corp .co-nav .nav-dd-btn{height:40px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 12px;border:1px solid transparent;border-radius:var(--r-sm);background:transparent;color:var(--navy-700);font-family:var(--font);font-size:var(--fs-4);font-weight:700;line-height:1;white-space:nowrap;cursor:pointer;transition:background .15s,color .15s,border-color .15s,box-shadow .15s,transform .15s}
+.z-corp .co-nav .nav-dd-btn{height:40px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 12px;border:1px solid transparent;border-radius:var(--r-sm);background:transparent;color:var(--slate-600);font-family:var(--font);font-size:var(--fs-4);font-weight:700;line-height:1;white-space:nowrap;cursor:pointer;transition:background .15s,color .15s,border-color .15s,box-shadow .15s,transform .15s}
 .z-corp .co-nav .co-nav-links>a:hover,
 .z-corp .co-nav .nav-dd-btn:hover,
 .z-corp .co-nav .nav-dd-btn.on{background:var(--bg-2);border-color:var(--line-soft);color:var(--blue-700);box-shadow:var(--sh-sm)}
@@ -3180,17 +3227,25 @@ body:has(.cmpbar.show) .fab-wrap{bottom:96px}
 .z-corp .co-nav .lang-dd-item:hover,
 .z-corp .co-nav .lang-dd-item.on{background:var(--blue-50);color:var(--blue-700)}
 .z-corp .co-nav .lang-dd-item>span:last-child{font-size:var(--fs-1);font-weight:800;color:var(--slate-400)}
-.z-corp .co-nav .nav-utils{display:inline-flex;align-items:center;gap:4px;flex-shrink:0}
+/* 4px → 8px: значки почти соприкасались, целиться пальцем/курсором в один
+   из двух было неудобно (09.08.2026). */
+.z-corp .co-nav .nav-utils{display:inline-flex;align-items:center;gap:8px;flex-shrink:0}
 .z-corp .co-nav .lang-dd{position:relative;display:inline-flex;align-items:center}
+/* Цвет сведён к тому же токену, что у пунктов меню и иконок корзины/избранного
+   (--slate-600) — раньше здесь стоял --navy-700, чуть темнее и холоднее, и на
+   общей строке из пяти элементов два выделялись оттенком без причины. */
 .z-corp .co-nav .lang-dd-btn,
-.z-corp .co-nav .theme-btn{height:40px;min-width:40px;display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:var(--r-sm);background:transparent;color:var(--navy-700);cursor:pointer;transition:background .15s,color .15s,border-color .15s,transform .15s}
+.z-corp .co-nav .theme-btn{height:40px;min-width:40px;display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:var(--r-sm);background:transparent;color:var(--slate-600);cursor:pointer;transition:background .15s,color .15s,border-color .15s,transform .15s}
 .z-corp .co-nav .lang-dd-btn{gap:7px;padding:0 11px;font-family:var(--font);font-size:var(--fs-4);font-weight:700}
+/* Без рамки в любом состоянии (09.08.2026): обратную связь при наведении даёт
+   только подложка. Прозрачная рамка в базовом правиле оставлена — она держит
+   габарит, чтобы кнопка не дёргалась на 2px, но цвет ей больше не задаётся. */
 .z-corp .co-nav .lang-dd-btn:hover,
-.z-corp .co-nav .theme-btn:hover{background:var(--blue-50);border-color:var(--line-soft);color:var(--blue-700)}
+.z-corp .co-nav .theme-btn:hover{background:var(--blue-50);color:var(--blue-700)}
 .z-corp .co-nav .theme-btn{font-size:var(--fs-5)}
 .z-corp .co-nav .nav-sep{width:1px;height:24px;background:var(--line-soft);margin:0 2px;flex-shrink:0}
-.z-corp .co-nav .co-actions{gap:4px}
-.z-corp .co-nav .co-act{width:40px;height:40px;border-radius:var(--r-sm);transition:width .18s ease,height .18s ease,background .15s,color .15s,transform .15s}
+.z-corp .co-nav .co-actions{gap:8px}
+.z-corp .co-nav .co-act{width:40px;height:40px;border-radius:var(--r-pill);transition:width .18s ease,height .18s ease,background .15s,color .15s,transform .15s,border-color .15s}
 .z-corp .co-nav .co-act:active{transform:scale(.97)}
 .z-corp .co-nav.scrolled .co-act{width:38px;height:38px}
 .z-corp .drawer{visibility:hidden;pointer-events:none;transition:transform .28s cubic-bezier(.16,1,.3,1),visibility 0s linear .28s}
@@ -3253,6 +3308,7 @@ body:has(.cmpbar.show) .fab-wrap{bottom:96px}
   .z-corp .co-nav .co-nav-wrap{height:66px}
   .z-corp .co-nav.scrolled .co-nav-wrap{height:60px}
   .z-corp .co-nav .co-nav-links{display:none}
+  .z-corp .co-nav .nav-cta{display:none}
   .z-corp .co-nav .nav-utils{margin-left:auto}
   .z-corp .co-nav .co-brand-mark{width:48px;height:48px}
   .z-corp .co-nav.scrolled .co-brand,.z-corp .co-nav.scrolled .co-brand-mark{width:44px;height:44px}
@@ -3278,6 +3334,10 @@ body:has(.cmpbar.show) .fab-wrap{bottom:96px}
   .z-corp .co-nav .co-cat-search{order:2;justify-self:start}
   .z-corp .co-nav .co-mobile-actions{order:3;justify-self:end;margin-left:0;display:flex;align-items:center;gap:6px}
   .z-corp .co-nav .nav-utils{display:none}
+  /* On mobile the header collapses to logo/search/cart/burger — the consult
+     pill has no slot in that grid and would sit on top of the logo. It moves
+     into the drawer (.drawer-cta) instead, so it stays reachable. */
+  .z-corp .co-nav .nav-cta{display:none}
   .z-corp .co-nav .co-actions{order:4;margin-left:auto}
   .z-corp .co-nav .burger{order:5}
   .z-corp .co-nav .lang-dd-btn{min-width:38px;height:38px;padding:0 7px;gap:0;font-size:var(--fs-3)}
@@ -3336,94 +3396,56 @@ html{scroll-padding-top:72px}
   .crumb-cur,.co-crumb-cur{max-width:60vw;overflow:hidden;text-overflow:ellipsis}
 }
 
+/* NVIDIA-restyle шапки (тёмная плавающая стеклянная панель) снята 09.08.2026
+   по прямому запросу — воспроизвести форму бар-меню из примера readdy.cc:
+   сплошная светлая полупрозрачная полоса на всю ширину, без плавающей
+   тёмной панели. Снятие блока не требует замены: под ним уже лежал рабочий
+   светлый вариант шапки (правила выше в этом файле — .co-nav фон/тень/бордер,
+   .nav-links a, .nav-primary, .co-act, .lang-dd-btn и т.д.), написанный до
+   того, как сюда наложили тёмное стекло, и уже учитывающий тёмную тему сайта
+   через свои собственные [data-theme="dark"] правила. Он просто снова
+   стал видимым. */
+
 /* ============================================================
-   NVIDIA-restyle шапки (перенос бар-меню из soi-uz / :3000):
-   плавающая тёмная стеклянная панель + зелёные (лаймовые) акценты.
-   Всегда тёмная, независимо от светлой/тёмной темы тела — как первый
-   шаг миграции сайта на тёмный стиль. Токены: night #0b2d25, лайм var(--cta).
+   Прозрачная шапка над hero главной (09.08.2026): пока пользователь не
+   проскроллил и виден тёмный фото-hero, бар прозрачный и белый — как в
+   readdy.cc. На любой другой странице и после скролла хедер остаётся тем,
+   каким он был до этого блока (сплошной светлый) — там за шапкой светлый
+   фон (.page-hero), и белый текст на нём был бы нечитаем.
+   Класс .home-top ставится в CoHeader (certificates.jsx) только когда
+   route.view === "home" && !scrolled.
    ============================================================ */
-.z-corp{--nv-night:#0b2d25;--nv-lime:var(--cta);--nv-lime-hi:var(--cta-hover)}
-/* внешний элемент — прозрачный, задаёт отступ, чтобы панель «плавала» */
-.z-corp > nav.nav.co-nav,
-[data-theme="dark"] .z-corp > nav.nav.co-nav,
-.z-corp > nav.nav.co-nav.scrolled,
-[data-theme="dark"] .z-corp > nav.nav.co-nav.scrolled{
-  /* Тень здесь была остатком от прежней сплошной шапки: сам элемент прозрачен
-     и растянут во всю ширину, поэтому «0 1px 2px» рисовалась тонкой линией
-     через всю страницу под плавающей панелью. Тень несёт сама панель. */
-  background:transparent!important;border:0!important;box-shadow:none!important;
-  padding:12px 14px 0;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
-/* внутренняя стеклянная панель */
-/* Плавающая шапка шла по 1200 при контенте в 1280 и заметно не совпадала с
-   ним по краям. Ширина взята из общего токена; внутренний отступ выровнен с
-   отступом контента, поэтому логотип встаёт над текстовой колонкой. */
-.z-corp .co-nav .co-nav-wrap{
-  max-width:var(--maxw);margin:0 auto;border-radius:var(--r-lg);
-  background:rgba(7,26,51,.72);
-  border:1px solid rgba(255,255,255,.10);
-  box-shadow:var(--sh-lg);
-  backdrop-filter:saturate(150%) blur(18px);-webkit-backdrop-filter:saturate(150%) blur(18px);
-  height:60px!important;padding:0 32px;gap:16px}
-.z-corp .co-nav.scrolled .co-nav-wrap{height:56px!important}
-/* логотип — белый на тёмном */
-.z-corp .co-nav .co-brand-mark{filter:brightness(0) invert(1)}
-/* пункты меню — «пилюли», белый текст, зелёные акценты */
-.z-corp .co-nav .co-nav-links>a,
-.z-corp .co-nav .nav-dd-btn{
-  color:rgba(255,255,255,.85)!important;background:transparent!important;
-  border:0!important;border-radius:var(--r-pill);font-weight:600}
-.z-corp .co-nav .co-nav-links>a:hover,
-.z-corp .co-nav .nav-dd-btn:hover,
-.z-corp .co-nav .nav-dd-btn.on{
-  background:rgba(255,255,255,.12)!important;color:#fff!important;box-shadow:var(--sh-sm)}
-.z-corp .co-nav .co-nav-links>a.on{background:rgba(255,255,255,.14)!important;color:#fff!important}
-/* Каталог (primary) — лаймовая кнопка с тёмным текстом */
-.z-corp .co-nav .co-nav-links>a.nav-primary{
-  background:var(--nv-lime)!important;color:#03120e!important;border:0!important;font-weight:800;
-  box-shadow:var(--sh-lg)}
-.z-corp .co-nav .co-nav-links>a.nav-primary:hover{background:var(--nv-lime-hi)!important;color:#03120e!important}
-/* Стрелка того же тона, что и подпись рядом: свой цвет её глушил до ~.25 альфы
-   против .85 у текста, и она читалась как отключённая. */
-.z-corp .co-nav .nav-dd-chevron,
-.z-corp .co-nav .lang-dd-chevron{color:inherit}
-.z-corp .co-nav .nav-dd-btn.on .nav-dd-chevron,
-.z-corp .co-nav .lang-dd-btn[aria-expanded="true"] .lang-dd-chevron{color:var(--nv-lime-hi)}
-/* выпадающие меню — тёмное стекло, зелёная левая рамка при hover */
-.z-corp .co-nav .nav-dd-menu,
-.z-corp .co-nav .lang-dd-menu{
-  background:rgba(7,26,51,.96)!important;border:1px solid rgba(255,255,255,.10)!important;
-  border-radius:16px!important;box-shadow:var(--sh-xl);
-  backdrop-filter:saturate(150%) blur(18px);-webkit-backdrop-filter:saturate(150%) blur(18px)}
-.z-corp .co-nav .nav-dd-item,
-.z-corp .co-nav .lang-dd-item{
-  color:rgba(255,255,255,.82)!important;border-left:2px solid transparent;border-radius:var(--r-sm)}
-.z-corp .co-nav .nav-dd-item:hover,
-.z-corp .co-nav .lang-dd-item:hover,
-.z-corp .co-nav .lang-dd-item.on{
-  background:rgba(255,255,255,.06)!important;color:#fff!important;border-left-color:var(--nv-lime)}
-.z-corp .co-nav .lang-dd-item>span:last-child{color:var(--nv-lime-hi)!important}
-/* переключатели языка/темы, иконки-инструменты */
-.z-corp .co-nav .lang-dd-btn,
-.z-corp .co-nav .theme-btn,
-.z-corp .co-nav .co-act,
-[data-theme="dark"] .z-corp .co-nav .lang-dd-btn,
-[data-theme="dark"] .z-corp .co-nav .theme-btn,
-[data-theme="dark"] .z-corp .co-nav .co-act{color:rgba(255,255,255,.8)!important;background:transparent!important;border:0!important;border-radius:var(--r-pill)}
-.z-corp .co-nav .lang-dd-btn:hover,
-.z-corp .co-nav .theme-btn:hover,
-.z-corp .co-nav .co-act:hover,
-[data-theme="dark"] .z-corp .co-nav .lang-dd-btn:hover,
-[data-theme="dark"] .z-corp .co-nav .theme-btn:hover,
-[data-theme="dark"] .z-corp .co-nav .co-act:hover{background:rgba(255,255,255,.12)!important;color:var(--nv-lime-hi)!important}
-.z-corp .co-nav .nav-sep{background:rgba(255,255,255,.16)!important}
-/* бейджи-счётчики — лайм */
-.z-corp .co-nav .co-badge,
-.z-corp .co-nav .co-act-cart .co-badge{background:var(--nv-lime)!important;color:#03120e!important}
-/* каталожный поиск + мобильные действия в тёмной панели */
-.z-corp .co-nav .co-cat-search-trigger,
-.z-corp .co-nav .co-mobile-act{background:rgba(255,255,255,.08)!important;border:0!important;color:rgba(255,255,255,.85)!important}
-.z-corp .co-nav .co-cat-search-trigger:hover,
-.z-corp .co-nav .co-mobile-act:hover{background:rgba(255,255,255,.16)!important;color:var(--nv-lime-hi)!important}
+.z-corp .co-nav.home-top{
+  background:transparent!important;border-bottom-color:transparent!important;
+  box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.z-corp .co-nav.home-top .co-brand-mark{filter:brightness(0) invert(1)}
+.z-corp .co-nav.home-top .co-nav-links>a,
+.z-corp .co-nav.home-top .nav-dd-btn{color:rgba(255,255,255,.92)!important;background:transparent!important}
+.z-corp .co-nav.home-top .co-nav-links>a:hover,
+.z-corp .co-nav.home-top .nav-dd-btn:hover,
+.z-corp .co-nav.home-top .nav-dd-btn.on,
+.z-corp .co-nav.home-top .co-nav-links>a.on{background:rgba(255,255,255,.14)!important;color:#fff!important}
+.z-corp .co-nav.home-top .nav-sep{background:rgba(255,255,255,.24)!important}
+/* Язык и переключатель темы — без рамки и над hero тоже (09.08.2026):
+   в обычном состоянии её у них нет, и белая обводка появлялась только здесь,
+   из-за чего эти две кнопки выбивались из ряда. Круглые иконки (.co-act) и
+   бургер рамку сохраняют — на фото без неё они теряются. */
+.z-corp .co-nav.home-top .lang-dd-btn,
+.z-corp .co-nav.home-top .theme-btn{color:rgba(255,255,255,.92)!important;border-color:transparent!important;background:transparent!important}
+.z-corp .co-nav.home-top .co-act,
+.z-corp .co-nav.home-top .burger{color:rgba(255,255,255,.92)!important;border-color:rgba(255,255,255,.35)!important;background:transparent!important}
+.z-corp .co-nav.home-top .lang-dd-btn:hover,
+.z-corp .co-nav.home-top .theme-btn:hover{background:rgba(255,255,255,.14)!important}
+.z-corp .co-nav.home-top .co-act:hover{background:rgba(255,255,255,.14)!important;border-color:rgba(255,255,255,.5)!important}
+/* «Консультация» — прозрачная пилюля с рамкой, а не сплошная синяя: сплошной
+   синий на фото-hero не терялся бы, но и не читался бы как «то же самое,
+   что после скролла» — по примеру readdy кнопка тоже становится обычной
+   заливкой только на сплошном хедере. */
+.z-corp .co-nav.home-top .nav-cta{background:rgba(255,255,255,.16)!important;color:#fff!important;border:1px solid rgba(255,255,255,.4)!important;box-shadow:none!important}
+.z-corp .co-nav.home-top .nav-cta:hover{background:rgba(255,255,255,.26)!important}
+/* Выпадающие меню остаются сплошными светлыми в любом состоянии шапки —
+   открытая панель — самостоятельный слой над контентом, а не часть
+   прозрачного бара, и белый текст на ней потерялся бы. */
 </style>
 <style>/* latin-ext */
 /* latin */
@@ -3465,41 +3487,41 @@ html{scroll-padding-top:72px}
 <!-- A3 catalog feed: populates window.DATA.{CATEGORIES,BRANDS,PRODUCTS} from the REST API -->
 <script src="app/catalog-remote.js?v=1785999916"></script>
 <script src="admin/ui.jsx?v=1782416018"></script>
-<script src="dist/app/ui-atoms.js?v=1786277920"></script>
-<script src="dist/app/header.js?v=1786277920"></script>
-<script src="dist/app/hero-wave.js?v=1786277920"></script>
-<script src="dist/app/home-page.js?v=1786277920"></script>
-<script src="dist/app/catalog.js?v=1786277920"></script>
-<script src="dist/app/product-detail.js?v=1786277920"></script>
-<script src="dist/app/cart.js?v=1786277920"></script>
-<script src="dist/app/brand-profile.js?v=1786277920"></script>
-<script src="dist/app/company-info.js?v=1786277920"></script>
-<script src="dist/app/floating-widgets.js?v=1786277920"></script>
-<script src="dist/app/account.js?v=1786277920"></script>
-<script src="dist/app/footer.js?v=1786277920"></script>
-<script src="dist/app/app-entry.js?v=1786277920"></script>
-<script src="dist/app/compare.js?v=1786277920"></script>
-<script src="dist/app/filters.js?v=1786277920"></script>
-<script src="dist/app/catalog-tree.js?v=1786277920"></script>
-<script src="dist/app/map.js?v=1786277920"></script>
-<script src="dist/app/quiz.js?v=1786277920"></script>
-<script src="dist/app/reviews.js?v=1786277920"></script>
-<script src="dist/app/auth.js?v=1786277920"></script>
-<script src="dist/app/wishlist.js?v=1786277920"></script>
-<script src="dist/app/order-track.js?v=1786277920"></script>
-<script src="dist/app/error-boundary.js?v=1786277920"></script>
-<script src="dist/app/app-root.js?v=1786277920"></script>
+<script src="dist/app/ui-atoms.js?v=1786906800"></script>
+<script src="dist/app/header.js?v=1786906800"></script>
+<script src="dist/app/hero-wave.js?v=1786906800"></script>
+<script src="dist/app/home-page.js?v=1786906800"></script>
+<script src="dist/app/catalog.js?v=1786906800"></script>
+<script src="dist/app/product-detail.js?v=1786906800"></script>
+<script src="dist/app/cart.js?v=1786906800"></script>
+<script src="dist/app/brand-profile.js?v=1786906800"></script>
+<script src="dist/app/company-info.js?v=1786906800"></script>
+<script src="dist/app/floating-widgets.js?v=1786906800"></script>
+<script src="dist/app/account.js?v=1786906800"></script>
+<script src="dist/app/footer.js?v=1786906800"></script>
+<script src="dist/app/app-entry.js?v=1786906800"></script>
+<script src="dist/app/compare.js?v=1786906800"></script>
+<script src="dist/app/filters.js?v=1786906800"></script>
+<script src="dist/app/catalog-tree.js?v=1786906800"></script>
+<script src="dist/app/map.js?v=1786906800"></script>
+<script src="dist/app/quiz.js?v=1786906800"></script>
+<script src="dist/app/reviews.js?v=1786906800"></script>
+<script src="dist/app/auth.js?v=1786906800"></script>
+<script src="dist/app/wishlist.js?v=1786906800"></script>
+<script src="dist/app/order-track.js?v=1786906800"></script>
+<script src="dist/app/error-boundary.js?v=1786906800"></script>
+<script src="dist/app/app-root.js?v=1786906800"></script>
 
-<script src="dist/app/tweaks-panel.js?v=1786277920"></script>
-<script src="dist/app/certificates.js?v=1786277920"></script>
-<script src="dist/app/home-sections.js?v=1786277920"></script>
-<script src="dist/app/inner-pages.js?v=1786277920"></script>
-<script src="dist/app/testimonials.js?v=1786277920"></script>
-<script src="dist/app/search.js?v=1786277920"></script>
-<script src="dist/app/staff-training.js?v=1786277920"></script>
-<script src="dist/app/service-support.js?v=1786277920"></script>
-<script src="dist/app/checkout.js?v=1786277920"></script>
-<script src="dist/app/news.js?v=1786277920"></script>
+<script src="dist/app/tweaks-panel.js?v=1786906800"></script>
+<script src="dist/app/certificates.js?v=1786906800"></script>
+<script src="dist/app/home-sections.js?v=1786906800"></script>
+<script src="dist/app/inner-pages.js?v=1786906800"></script>
+<script src="dist/app/testimonials.js?v=1786906800"></script>
+<script src="dist/app/search.js?v=1786906800"></script>
+<script src="dist/app/staff-training.js?v=1786906800"></script>
+<script src="dist/app/service-support.js?v=1786906800"></script>
+<script src="dist/app/checkout.js?v=1786906800"></script>
+<script src="dist/app/news.js?v=1786906800"></script>
 
 
 

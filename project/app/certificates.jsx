@@ -19,9 +19,16 @@ const SI_ICONS = {
   star: '<path d="M12 3l2.6 5.7 6.4.6-4.8 4.2 1.5 6.3L12 17l-5.7 3.1 1.5-6.3L3 9.3l6.4-.6z"/>',
   globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 4 6 4 9s-1.5 6.5-4 9c-2.5-2.5-4-6-4-9s1.5-6.5 4-9z"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/>',
-  cart: '<path d="M3 4h2l2.4 12.4a1 1 0 0 0 1 .8h9.3a1 1 0 0 0 1-.8L21 8H6"/><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/>',
-  heart: '<path d="M12 20s-7-4.6-9.2-9.1C1.3 7.8 3 4.5 6.2 4.5c2 0 3.2 1.2 3.8 2.3.6-1.1 1.8-2.3 3.8-2.3 3.2 0 4.9 3.3 3.4 6.4C19 15.4 12 20 12 20z"/>',
-  compare: '<path d="M4 7h12M12 3l4 4-4 4M20 17H8M12 13l-4 4 4 4"/>',
+  /* Корзина, избранное и сравнение перерисованы 09.08.2026: прежние были
+     самодельными и выбивались из набора — у корзины ручка не сходилась с
+     кузовом, сравнение рисовалось двумя стрелками (это скорее «обмен», а не
+     «сравнить»). Взяты общепринятые начертания: тележка с двумя колёсами,
+     сердце из двух дуг, аптекарские весы. */
+  cart: '<circle cx="9" cy="20" r="1.5"/><circle cx="18.5" cy="20" r="1.5"/><path d="M2.5 3h2.2l2.6 11.6a1.7 1.7 0 0 0 1.7 1.3h9.3a1.7 1.7 0 0 0 1.7-1.3L21.5 7H5.3"/>',
+  heart: '<path d="M19 13.6c1.4-1.4 2.8-3 2.8-5.2A5.2 5.2 0 0 0 16.6 3c-1.7 0-2.9.5-4.6 2-1.7-1.5-2.9-2-4.6-2A5.2 5.2 0 0 0 2.2 8.4c0 2.2 1.4 3.8 2.8 5.2L12 20.6Z"/>',
+  /* Весы — принятый в рознице знак сравнения. Коромысло прямое, а не
+     провисающее: на 20px изгиб сливался со чашами и рисунок читался пятном. */
+  compare: '<path d="M12 4v16M8.5 20h7"/><path d="M4 8h16"/><path d="m4 8-2.4 6.2a4.2 4.2 0 0 0 4.8 0Z"/><path d="m20 8 2.4 6.2a4.2 4.2 0 0 1-4.8 0Z"/>',
   user: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/>'
 };
 
@@ -136,13 +143,45 @@ function corpNavItems(lang) {
   { view: "contacts", label: lvh("Контакты", "Kontaktlar", "Contacts") }];
 }
 
+/* Колонки футера. От меню в шапке отличаются двумя вещами (решение заказчика,
+   06.08.2026): группы «Услуги» в футере нет, а сам пункт стоит в «О компании»
+   сразу под «Партнёрами» и ведёт на страницу услуг целиком.
+
+   Живёт здесь, а не в каждом футере: их два — CoFooter в этом файле и Footer в
+   home-page.jsx, — и раньше такие списки уже расходились между собой. Меню в
+   шапке по-прежнему читает corpNavItems напрямую и остаётся с выпадающими
+   «Услугами». */
+function footerNavCols(lang) {
+  const lvh = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
+  return corpNavItems(lang)
+  .filter((it) => it.children && it.id !== "services")
+  .map((col) => {
+    if (col.id !== "company") return col;
+    const children = col.children.slice();
+    const after = children.findIndex((ch) => ch.view === "partners");
+    children.splice(after < 0 ? children.length : after + 1, 0,
+    { view: "services", label: lvh("Услуги", "Xizmatlar", "Services") });
+    return Object.assign({}, col, { children });
+  });
+}
+
 function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
   const scrolled = useScrolled();
   route = route || { view: "" };
   goCat = goCat || ((sub, param, q) => go("catalog"));
   const counts = useCatCounts();
   const [drawer, setDrawer] = useState(false);
+  const [qqOpen, setQqOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
+
+  // Body scroll lock while the drawer is open — otherwise the page behind it
+  // keeps scrolling under a swipe/wheel, which reads as broken on mobile.
+  useEffect(() => {
+    if (!drawer) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = prev; };
+  }, [drawer]);
   const [q, setQ] = useState("");
   const [catSearchOpen, setCatSearchOpen] = useState(false);
   const catSearchInputRef = useRef(null);
@@ -254,7 +293,7 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
 
   return (
     <>
-      <nav className={"nav co-nav" + (scrolled ? " scrolled" : "")}>
+      <nav className={"nav co-nav" + (scrolled ? " scrolled" : "") + (route.view === "home" && !scrolled ? " home-top" : "")}>
         <div className="wrap co-nav-wrap" data-comment-anchor="4cafdc525e-div-115-9">
           <div className="brand co-brand" onClick={() => go("home")}>
             <img className="brand-mark co-brand-mark" src={window.__asset("assets/soi-mark.svg")} alt="ИНДУСТРИЯ ЗДОРОВЬЯ" data-comment-anchor="8aa68b19bd-img-117-13" />
@@ -343,6 +382,10 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
                 <Langs place="nav" />
                 <ThemeBtn />
               </div>
+              {/* Кнопка «Консультация» убрана из бар-меню 09.08.2026 по прямому
+                  указанию. Заявку по-прежнему можно оставить: на мобильном —
+                  из выезжающего меню (.drawer-cta ниже), на любой ширине —
+                  через плавающий виджет связи слева внизу. */}
               <span className="nav-sep" aria-hidden="true"></span>
               <Actions />
             </>
@@ -367,6 +410,10 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
           <CoIcon name="search" size={18} />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={searchPh} aria-label="Search" />
         </form>
+        <button className="btn btn-pri btn-block drawer-cta" onClick={() => { setDrawer(false); setQqOpen(true); }}>
+          <CoIcon name="phone" size={16} />
+          {lvh("Заказать консультацию", "Konsultatsiya buyurtma qilish", "Request a consultation")}
+        </button>
         {corpNav.flatMap((item) =>
         item.children
           ? [{ _heading: true, label: item.label, key: "h-" + item.id }].concat(item.children.map((c, i) => ({ ...c, key: item.id + "-" + i })))
@@ -377,6 +424,7 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
           : <a key={it.key} className={route.view === it.view ? "on" : ""} onClick={() => { it.catSub ? goCat(it.catSub) : go(it.view, navParams(it)); setDrawer(false); }} style={it.primary ? { color: "var(--blue-600, var(--blue-600))", fontWeight: 600 } : undefined}>{it.label}</a>
         )}
       </aside>
+      {qqOpen && <QuickQuoteModal lang={lang} onClose={() => setQqOpen(false)} />}
     </>);
 
 }
@@ -452,19 +500,55 @@ function CoFooter({ t, lang, go, goCat, setLang }) {
     <footer className="foot">
       <div className="wrap">
         <div className="fcols">
-          <div>
+          {/* Первая колонка по образцу заказчика: бренд, описание и контакты
+              одним блоком, каждая строка контакта — со своей иконкой. Раньше
+              контакты стояли отдельной пятой колонкой с заголовком; тексты те
+              же, изменилось только место и подача. */}
+          <div className="fcol-brand">
             <div className="f-brand">
               <img className="foot-logo" src={LOGO_SRC} alt="" style={{ width: 40, height: 40 }} />
               <span className="f-wordmark">{lv("ИНДУСТРИЯ ЗДОРОВЬЯ", "SOG'LIQ INDUSTRIYASI", "HEALTH INDUSTRY")}</span>
             </div>
             <p className="fabout">{t.f_about}</p>
+            <ul className="foot-contact">
+              {/* Состав колонки повторяет страницу «Контакты» и берёт те же ключи
+                  словаря (t.c_*), чтобы адрес и часы работы не разъезжались.
+                  Телефон сервиса на странице вписан в разметку, а не в настройки
+                  сайта, — здесь он задан так же. */}
+              {/* Офис и склад стоят по одному адресу, часы работы вынесены на
+                  страницу «Контакты» — в футере остаётся один адрес. */}
+              <li className="fc-grp">
+                <CoIcon name="pin" size={16} className="fc-ic" />
+                <span>{t.c_office_addr || contacts.address}</span>
+              </li>
+              {/* Первые два номера берутся из настроек сайта и правятся в админке;
+                  третий там не хранится и задан здесь — так же, как на странице
+                  «Контакты». */}
+              <li className="fc-grp">
+                <CoIcon name="phone" size={16} className="fc-ic" />
+                <span>
+                  <a href={telHref(contacts.phone)}>{lv("Приёмная","Qabulxona","Reception")}: {contacts.phone}</a><br />
+                  <a href={telHref(contacts.phone2)}>{lv("Отдел продаж","Sotuv bo'limi","Sales")}: {contacts.phone2}</a><br />
+                  <a href={telHref("+998772230001")}>{lv("Сервисный отдел","Servis bo'limi","Service department")}: +998 (77) 223-00-01</a>
+                </span>
+              </li>
+              <li className="fc-grp">
+                <CoIcon name="mail" size={16} className="fc-ic" />
+                <span>E-mail: <a href={"mailto:" + SITE_MAIL}>{SITE_MAIL}</a></span>
+              </li>
+            </ul>
           </div>
           {/* Колонки навигации собираются из той же структуры, что и меню в
               шапке (corpNavItems): раньше футер держал свой список ссылок и
               расходился с меню при каждой правке навигации. Пункты, которые
               умеет открывать только каталожная оболочка (прайс-лист), уходят
               через goCat — корпоративный go() дал бы на них пустой экран. */}
-          {corpNavItems(lang).filter((it) => it.children).map((col) => (
+          {/* Колонка «Услуги» из футера убрана (решение заказчика), а сам пункт
+              переехал в «О компании» под «Партнёры» и ведёт на страницу услуг.
+              Перестроение локальное: corpNavItems — общий источник для меню в
+              шапке, и правка там убрала бы выпадающий список «Услуги» из
+              навигации, чего не просили. */}
+          {footerNavCols(lang).map((col) => (
             <div key={col.id}>
               <h5>{col.label}</h5>
               <ul>
@@ -487,26 +571,27 @@ function CoFooter({ t, lang, go, goCat, setLang }) {
               </ul>
             </div>
           ))}
-          <div>
-            <h5>{t.f_contacts}</h5>
-            <ul className="foot-contact">
-              {/* Состав колонки повторяет страницу «Контакты» и берёт те же ключи
-                  словаря (t.c_*), чтобы адрес и часы работы не разъезжались.
-                  Телефон сервиса на странице вписан в разметку, а не в настройки
-                  сайта, — здесь он задан так же. */}
-              {/* Офис и склад стоят по одному адресу, часы работы вынесены на
-                  страницу «Контакты» — в футере остаётся один адрес. */}
-              <li className="fc-grp">{t.c_office_addr || contacts.address}</li>
-              {/* Первые два номера берутся из настроек сайта и правятся в админке;
-                  третий там не хранится и задан здесь — так же, как на странице
-                  «Контакты». */}
-              <li className="fc-grp">
-                <a href={telHref(contacts.phone)}>{lv("Приёмная","Qabulxona","Reception")}: {contacts.phone}</a><br />
-                <a href={telHref(contacts.phone2)}>{lv("Отдел продаж","Sotuv bo'limi","Sales")}: {contacts.phone2}</a><br />
-                <a href={telHref("+998772230001")}>{lv("Сервисный отдел","Servis bo'limi","Service department")}: +998 (77) 223-00-01</a>
-              </li>
-              <li className="fc-grp">E-mail: <a href={"mailto:" + SITE_MAIL}>{SITE_MAIL}</a></li>
-            </ul>
+          {/* Последняя колонка образца: соцсети под заголовком «Следите за
+              нами». Раньше здесь же, под тонкой линией, стояли и реквизиты —
+              в узкой колонке короткий текст всё равно переносился на три
+              строки. Реквизиты вынесены ниже, во всю ширину футера (та же
+              техника, что у дисклеймера через ряд), текст и ссылки не
+              менялись. */}
+          <div className="fcol-follow">
+            <h5>{lv("Следите за нами", "Bizni kuzating", "Follow us")}</h5>
+            <div className="foot-socials">
+              <a href={contacts.telegram} target="_blank" rel="noopener" title="Telegram" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.07 9.74c-.15.68-.56.85-1.13.53l-3.13-2.3-1.51 1.45c-.17.17-.31.31-.63.31l.22-3.18 5.79-5.23c.25-.22-.06-.35-.39-.12L6.07 13.88l-3.07-.96c-.67-.21-.68-.67.14-.99l11.97-4.62c.55-.2 1.04.13.83.88z" /></svg></a>
+              <a href={contacts.instagram} target="_blank" rel="noopener" title="Instagram" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg></a>
+              <a href={contacts.facebook} target="_blank" rel="noopener" title="Facebook" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" /></svg></a>
+              <a href={contacts.youtube} target="_blank" rel="noopener" title="YouTube" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.75 8.55 16.2 12l-6.45 3.45V8.55z" /></svg></a>
+            </div>
+            <p className="foot-copy">
+              {lv("© 2026 ООО «ИНДУСТРИЯ ЗДОРОВЬЯ».", "© 2026 «SOG’LIQ INDUSTRIYASI» MChJ.", "© 2026 HEALTH INDUSTRY LLC.")}
+              <br />
+              {lv("Все права защищены.", "Barcha huquqlar himoyalangan.", "All rights reserved.")}
+              <br />
+              {lv("Использование материалов сайта разрешено только с согласия правообладателя.", "Sayt materiallaridan foydalanish faqat huquq egasining roziligi bilan ruxsat etiladi.", "Use of site materials is permitted only with the rightsholder's consent.")}
+            </p>
           </div>
         </div>
         <div className="foot-disclaimer">
@@ -517,15 +602,6 @@ function CoFooter({ t, lang, go, goCat, setLang }) {
           {lv("Технические характеристики, изображения и копии документов — регистрационных удостоверений, сертификатов и деклараций о соответствии, свидетельств об утверждении типа средств измерений — размещены ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» справочно: они не являются публичной офертой и основанием для претензий. Производитель вправе изменить комплектацию и характеристики без уведомления. Перед применением изучите инструкцию (паспорт изделия) или обратитесь к специалисту. Сайт использует файлы cookie: они помогают узнавать вас, оценивать пользовательский опыт и улучшать сайт. Состав обрабатываемых данных и условия — в политике конфиденциальности.",
           "Texnik xususiyatlar, tasvirlar va hujjatlar nusxalari — ro‘yxatdan o‘tkazish guvohnomalari, muvofiqlik sertifikatlari va deklaratsiyalari, o‘lchash vositalari turini tasdiqlash guvohnomalari — «SOG’LIQ INDUSTRIYASI» MChJ tomonidan ma’lumot uchun joylashtirilgan: ular ommaviy oferta va da’vo asosi emas. Ishlab chiqaruvchi butlanish va xususiyatlarni ogohlantirishsiz o‘zgartirishi mumkin. Qo‘llashdan oldin yo‘riqnoma (buyum pasporti) bilan tanishing yoki mutaxassisga murojaat qiling. Sayt cookie fayllaridan foydalanadi: ular sizni tanish, foydalanuvchi tajribasini baholash va saytni yaxshilash uchun kerak. Qayta ishlanadigan ma’lumotlar tarkibi va shartlari — maxfiylik siyosatida.",
           "Technical specifications, images and copies of documents — registration certificates, certificates and declarations of conformity, measuring instrument type approvals — are published by SOG’LIQ INDUSTRIYASI LLC for reference: they are not a public offer or grounds for claims. The manufacturer may change configuration and specifications without notice. Before use, read the instructions (device passport) or consult a specialist. The site uses cookies: they help recognise you, assess your experience and improve the site. What data we process and on what terms is set out in the privacy policy.")}
-        </div>
-        <div className="foot-bot">
-          <span>{lv(`ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Ташкент • ИНН: 312513138 • ${SITE_MAIL}`, `«SOG’LIQ INDUSTRIYASI» MChJ • 100069, Toshkent • STIR: 312513138 • ${SITE_MAIL}`, `LLC «HEALTH INDUSTRY» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Tashkent • TIN: 312513138 • ${SITE_MAIL}`)}</span>
-          <div className="foot-socials">
-            <a href={contacts.telegram} target="_blank" rel="noopener" title="Telegram" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.07 9.74c-.15.68-.56.85-1.13.53l-3.13-2.3-1.51 1.45c-.17.17-.31.31-.63.31l.22-3.18 5.79-5.23c.25-.22-.06-.35-.39-.12L6.07 13.88l-3.07-.96c-.67-.21-.68-.67.14-.99l11.97-4.62c.55-.2 1.04.13.83.88z" /></svg></a>
-            <a href={contacts.instagram} target="_blank" rel="noopener" title="Instagram" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg></a>
-            <a href={contacts.facebook} target="_blank" rel="noopener" title="Facebook" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" /></svg></a>
-            <a href={contacts.youtube} target="_blank" rel="noopener" title="YouTube" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.75 8.55 16.2 12l-6.45 3.45V8.55z" /></svg></a>
-          </div>
         </div>
       </div>
     </footer>);

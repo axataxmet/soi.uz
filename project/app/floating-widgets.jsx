@@ -1,5 +1,153 @@
 /* ИНДУСТРИЯ ЗДОРОВЬЯ — Floating widgets: FAB + chat channels + callback modal */
-const { useState: useStateW } = React;
+const { useState: useStateW, useEffect: useEffectW, useRef: useRefW } = React;
+
+/* ── scroll progress bar ─────────────────────────────────────────────────
+   Fixed hairline under the header; width tracks how much of the document has
+   scrolled past. rAF-throttled so it doesn't add a scroll-jank source of its
+   own — the one thing a progress bar must never do. */
+function ScrollProgress() {
+  const [pct, setPct] = useStateW(0);
+  useEffectW(() => {
+    let ticking = false;
+    const compute = () => {
+      ticking = false;
+      const h = document.documentElement;
+      const max = h.scrollHeight - h.clientHeight;
+      setPct(max > 0 ? Math.min(100, (h.scrollTop / max) * 100) : 0);
+    };
+    const onScroll = () => { if (!ticking) { ticking = true; requestAnimationFrame(compute); } };
+    compute();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("resize", onScroll); };
+  }, []);
+  return <div className="scroll-progress" style={{ transform: "scaleX(" + (pct / 100) + ")" }} />;
+}
+
+/* ── back to top ──────────────────────────────────────────────────────── */
+function BackToTop() {
+  const [show, setShow] = useStateW(false);
+  useEffectW(() => {
+    const onScroll = () => setShow(window.scrollY > 600);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+    <button
+      className={"back-to-top" + (show ? " show" : "")}
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      aria-label="Scroll to top"
+      tabIndex={show ? 0 : -1}
+    >
+      <Icon name="chevronUp" size={20} sw={2.4} />
+    </button>
+  );
+}
+
+/* ── page loader ──────────────────────────────────────────────────────── */
+/* Shown once per hard load (not on client-side route changes — those are the
+   SPA's job, not the boot screen's). 1.8s fixed floor rather than tied to any
+   real readiness signal: the page has no single "everything is here" event
+   (fonts, catalog data and the CMS overlay all resolve independently), and a
+   floor that occasionally outlasts the content is a far smaller sin than a
+   loader that flashes for 40ms on a fast connection. */
+function PageLoader() {
+  const [hide, setHide] = useStateW(false);
+  const [gone, setGone] = useStateW(false);
+  useEffectW(() => {
+    const t1 = setTimeout(() => setHide(true), 1800);
+    const t2 = setTimeout(() => setGone(true), 2100);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+  if (gone) return null;
+  return (
+    <div className={"page-loader" + (hide ? " hide" : "")} aria-hidden={hide}>
+      <div className="pl-ring" />
+      <img className="pl-mark" src={window.__asset("assets/soi-mark.svg")} alt="" />
+      <div className="pl-bar"><div className="pl-bar-in" /></div>
+    </div>
+  );
+}
+
+/* ── quick quote modal ────────────────────────────────────────────────── */
+/* Same visual family as CallbackModal but a different lead shape (name/phone/
+   email/message vs name/phone/time-slot) and a real submit: POST /submissions
+   is public (SubmissionsController @Public()) and already exists for exactly
+   this — no new backend needed. A honeypot field catches simple bots: it's
+   visually hidden but present in the DOM, so a human never fills it and a
+   scripted submit that fills every field trips it. */
+function QuickQuoteModal({ lang, onClose }) {
+  const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
+  const [sent, setSentQ] = useStateW(false);
+  const [busy, setBusy] = useStateW(false);
+  const [err, setErr] = useStateW("");
+  const [msg, setMsg] = useStateW("");
+  const MSG_MAX = 500;
+
+  const submit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    if (form.elements.company.value) return; // honeypot tripped — drop silently, no error shown to the bot
+    setErr(""); setBusy(true);
+    try {
+      await window.api.create("submissions", {
+        name: form.elements.name.value,
+        phone: form.elements.phone.value,
+        email: form.elements.email.value || undefined,
+        message: form.elements.message.value || undefined,
+        source: "consultation_modal",
+      });
+      setSentQ(true);
+    } catch (e2) {
+      setErr(lv("Не удалось отправить. Попробуйте ещё раз или позвоните нам.", "Yuborilmadi. Qayta urinib koʻring yoki bizga qoʻngʻiring.", "Couldn't send. Please try again or call us."));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="modal-ov" onClick={onClose}>
+      <div className="modal" style={{ maxWidth: 440 }} onClick={(e) => e.stopPropagation()}>
+        {!sent ? (
+          <>
+            <div className="modal-head">
+              <button className="modal-close" onClick={onClose}><Icon name="x" size={20} /></button>
+              <h3>{lv("Заказать консультацию", "Konsultatsiya buyurtma qilish", "Request a consultation")}</h3>
+              <p>{lv("Оставьте заявку — мы свяжемся с вами в течение рабочего дня", "Ariza qoldiring — ish kuni davomida bogʻanamiz", "Leave a request — we'll reach out within one business day")}</p>
+            </div>
+            <div className="modal-body">
+              <form onSubmit={submit}>
+                <input type="text" name="company" tabIndex={-1} autoComplete="off" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }} aria-hidden="true" />
+                <div className="field"><label>{lv("Имя", "Ismingiz", "Name")}</label><input name="name" required placeholder={lv("Ваше имя", "Ismingiz", "Your name")} /></div>
+                <div className="field"><label>{lv("Телефон", "Telefon", "Phone")}</label><input name="phone" required placeholder="+998 (__) ___-__-__" /></div>
+                <div className="field"><label>Email</label><input name="email" type="email" placeholder="email@example.com" /></div>
+                <div className="field">
+                  <label>{lv("Сообщение", "Xabar", "Message")}</label>
+                  <textarea name="message" rows={3} maxLength={MSG_MAX} value={msg} onChange={(e) => setMsg(e.target.value)} placeholder={lv("Что вас интересует?", "Sizni nima qiziqtiradi?", "What are you interested in?")} />
+                  <div style={{ textAlign: "right", fontSize: 12, color: "var(--slate-500)", marginTop: 4 }}>{msg.length}/{MSG_MAX}</div>
+                </div>
+                {err && <p style={{ color: "var(--danger, #d13c3c)", fontSize: 13, margin: "0 0 10px" }}>{err}</p>}
+                <button type="submit" className="btn btn-primary btn-block btn-lg" disabled={busy} style={{ marginTop: 4 }}>
+                  {busy ? lv("Отправка…", "Yuborilmoqda…", "Sending…") : lv("Отправить заявку", "Arizani yuborish", "Send request")}
+                </button>
+              </form>
+            </div>
+          </>
+        ) : (
+          <div className="modal-body">
+            <div className="modal-ok">
+              <div className="ok-ic"><Icon name="check" size={34} sw={2.4} /></div>
+              <h3>{lv("Заявка отправлена!", "Ariza yuborildi!", "Request sent!")}</h3>
+              <p>{lv("Мы свяжемся с вами в течение рабочего дня.", "Ish kuni davomida siz bilan bogʻanamiz.", "We'll get back to you within one business day.")}</p>
+              <button className="btn btn-primary btn-lg" onClick={onClose}>{lv("Готово", "Tayyor", "Done")}</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function CallbackModal({ lang, onClose }) {
   const lv = (ru, uz, en) => lang==="uz"?uz:lang==="en"?en:ru;
@@ -88,8 +236,10 @@ function FloatingWidgets({ lang, go }) {
             ))}
           </div>
         )}
+        {/* Пузырь реплики, не трубка: виджет открывает Telegram/WhatsApp, то
+            есть переписку, а звонок — лишь один из трёх каналов внутри. */}
         <button className={"fab-main "+(pulse?"pulse":"")} onClick={handleOpen} aria-label="Contact">
-          <Icon name={open?"x":"phone"} size={22} sw={2} />
+          <Icon name={open?"x":"chat"} size={22} sw={2} />
         </button>
       </div>
       {cbOpen && <CallbackModal lang={lang} onClose={()=>setCbOpen(false)} />}
@@ -97,4 +247,4 @@ function FloatingWidgets({ lang, go }) {
   );
 }
 
-Object.assign(window, { FloatingWidgets, CallbackModal });
+Object.assign(window, { FloatingWidgets, CallbackModal, QuickQuoteModal, ScrollProgress, BackToTop, PageLoader });

@@ -24,6 +24,11 @@ const CORP_VIEW_TO_SLUG = {
   about: "about", tenders: "tenders", documents: "documents", news: "news",
   contacts: "contacts", partners: "partners", licenses: "licenses", reviews: "reviews"
 };
+/* Карточки на главной строят из этой карты настоящий href, чтобы быть
+   ссылками, а не div с обработчиком: так работают средний клик, Cmd-клик и
+   индексация. Источник один — иначе адреса в карточках и в роутере разойдутся
+   при первом же переименовании раздела. */
+window.corpViewToPath = (view) => "/" + (CORP_VIEW_TO_SLUG[view] || view || "");
 // catalog category pretty slug <-> data id
 const CAT_SLUG_TO_ID = { equipment: "equipment", "medical-furniture": "furniture", instruments: "instruments", consumables: "consumables", diagnostics: "diagnostics", surgery: "surgery", sterilization: "sterilization", physio: "physio", emergency: "emergency" };
 const CAT_ID_TO_SLUG = { furniture: "medical-furniture" };
@@ -392,6 +397,8 @@ function App() {
 
   return (
     <div className="z-corp">
+      <PageLoader />
+      <ScrollProgress />
       <CoHeader t={t} lang={lang} setLang={setLang} go={go} goCat={goCat} route={route} theme={theme} toggleTheme={toggleTheme} data-comment-anchor="b2aa7d60a7-a-121-13" />
       {catReady && (
         <div className="z-catalog" style={{ display: isCatalog ? "block" : "none" }}>
@@ -438,6 +445,8 @@ function App() {
           onChange={(v) => setTweak("accent", v === "var(--blue-600)" ? "cyan" : v === "var(--blue-600)" ? "lavender" : "blue")} />
       </TweaksPanel>
       }
+      {!isCatalog && <FloatingWidgets lang={lang} go={go} />}
+      <BackToTop />
     </div>);
 
 }

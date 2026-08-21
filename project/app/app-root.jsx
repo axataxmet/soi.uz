@@ -418,7 +418,28 @@ function App(props) {
       <StickyBar t={t} lang={lang} setLang={setLang} store={store} go={go} query={query} setQuery={setQuery} theme={theme} toggleTheme={toggleTheme} openMega={openMega} setOpenMega={setOpenMega} route={route} />
       {openMega && <MegaMenu t={t} lang={lang} go={go} onClose={() => setOpenMega(false)} />}
       <main className="app-main">{loading ? <PageSkeleton view={v} /> : <div key={routeKey} className="page-fade">{page}</div>}</main>
-      <Footer t={t} lang={lang} go={go} setLang={setLang} />
+      {/* Футер на весь сайт один — CoFooter из certificates.jsx (решение
+          заказчика 07.08.2026). Раньше каталожная оболочка рендерила
+          собственный Footer из home-page.jsx: разметка та же, но навигация
+          своя, и её приходилось править дважды.
+
+          Корпоративные разделы («О компании», «Услуги» и прочие) живут во
+          внешней оболочке, поэтому переход к ним идёт сообщением soi-conav —
+          тем же, что уже шлёт go() выше. Прежний Footer вместо этого проверял
+          `window.parent !== window` и, не найдя iframe, уходил на
+          soi.uz.html — файла с таким именем в проекте нет ни одного коммита,
+          так что все ссылки футера в каталоге вели в пустую страницу.
+
+          Каталожные адреса (категории, прайс-лист) остаются на локальном
+          go() — внешняя оболочка для них не нужна. */}
+      <CoFooter
+        t={t} lang={lang} setLang={setLang}
+        go={(view, params) => {
+          if (view === "catalog") return go("catalog", params || {});
+          try { (window.parent || window).postMessage({ type: "soi-conav", view, from: "catalog" }, "*"); } catch (e) {}
+          window.scrollTo({ top: 0, behavior: "instant" });
+        }}
+        goCat={(sub, param, q) => go(sub || "catalog", { param, q })} />
       <CompareBar t={t} lang={lang} store={store} go={go} />
       {/* Модалка КП уходит порталом в body. Она живёт в каталожной оболочке, а
           та на корпоративных страницах скрыта (display:none) — модалка

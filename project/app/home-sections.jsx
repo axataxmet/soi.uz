@@ -51,7 +51,7 @@ function CoHomePage({ t, lang, go }) {
     SoiEcosystem = window.SoiEcosystem, SoiExpertise = window.SoiExpertise,
     SoiCatalogCards = window.SoiCatalogCards,
     SoiDirections = window.SoiDirections, SoiCatalogPortal = window.SoiCatalogPortal,
-    SoiImpact = window.SoiImpact, SoiBrands = window.SoiBrands,
+    SoiBrands = window.SoiBrands,
     SoiCases = window.SoiCases, SoiReviews = window.SoiReviews, SoiNews = window.SoiNews, SoiFinalCTA = window.SoiFinalCTA;
   return (
     <div className="sx">
@@ -61,7 +61,6 @@ function CoHomePage({ t, lang, go }) {
       <SoiExpertise lang={lang} go={go} />
       <SoiCatalogCards lang={lang} go={go} />
       <SoiDirections lang={lang} go={go} />
-      <SoiImpact lang={lang} />
       <SoiCases lang={lang} go={go} />
       <SoiReviews lang={lang} go={go} />
       <SoiBrands lang={lang} go={go} />

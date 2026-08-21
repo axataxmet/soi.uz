@@ -58,6 +58,14 @@ function siteFigures() {
 window.siteFigures = siteFigures;
 window.SITE_FIGURES_DEFAULTS = SITE_FIGURES_DEFAULTS;
 
+/* Значения блока «Масштаб платформы». Сам блок с главной снят 09.08.2026, и
+   на сайте эти данные больше не читаются — оставлены потому, что раздел для
+   них остался в админке (project/admin/homepage.jsx, настройка
+   homepage_impact), а её трогать нельзя по отдельному решению заказчика.
+
+   Если блок не вернут, снимать надо парой: сначала раздел в админке, потом
+   эти значения. Удалить только здесь — оставить в админке форму, которая
+   сохраняет настройку в никуда. */
 const IMPACT_DEFAULTS = {
   eyebrow: { ru: "Масштаб платформы", uz: "Platforma miqyosi", en: "Platform scale" },
   title: {
@@ -346,29 +354,29 @@ function Hero({ t, lang, go }) {
 .soi-chero-slide.t-light .soi-chero-col { color:var(--blue-600); }
 
 .soi-chero-badge { font-size:var(--fs-4); font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin:0 0 12px; }
-.soi-chero-slide.t-dark  .soi-chero-badge { color:#d0fa4d; }
-.soi-chero-slide.t-light .soi-chero-badge { color:#6f9600; }
+.soi-chero-slide.t-dark  .soi-chero-badge { color:#A8C4F6; }
+.soi-chero-slide.t-light .soi-chero-badge { color:var(--blue-600); }
 
 .soi-chero-h1 { font-size:clamp(30px,5vw,54px); font-weight:800; line-height:1.1; letter-spacing:-.03em; margin:0; }
 .soi-chero-sub { font-size:clamp(16px,1.6vw,20px); line-height:1.6; margin:16px 0 0; }
 .soi-chero-slide.t-dark  .soi-chero-sub { color:rgba(255,255,255,.9); }
 .soi-chero-slide.t-light .soi-chero-sub { color:#374151; }
 
-/* pill CTAs — lime primary with dark label, as on the source */
+/* pill CTAs — сплошной фирменный синий с белой подписью (лайм снят) */
 .soi-chero-cta { display:flex; flex-wrap:wrap; gap:12px; margin-top:32px; }
 .soi-chero-btn { display:inline-flex; align-items:center; justify-content:center; gap:9px;
   padding:14px 26px; border-radius:var(--r-pill); font-family:inherit; font-size:var(--fs-5); font-weight:700;
   cursor:pointer; border:1px solid transparent; transition:background .2s, color .2s, border-color .2s, transform .18s; }
 .soi-chero-btn:hover { transform:translateY(-2px); }
-.soi-chero-btn.primary { background:var(--cta); color:var(--blue-600); }
-.soi-chero-btn.primary:hover { background:var(--cta-hover); }
+.soi-chero-btn.primary { background:var(--blue-600); color:#fff; }
+.soi-chero-btn.primary:hover { background:var(--blue-700); }
 .soi-chero-btn .arr { display:inline-flex; transition:transform .2s; }
 .soi-chero-btn.primary:hover .arr { transform:translateX(4px); }
 .soi-chero-slide.t-dark  .soi-chero-btn.ghost { background:transparent; color:#fff; border-color:rgba(255,255,255,.6); }
-.soi-chero-slide.t-dark  .soi-chero-btn.ghost:hover { border-color:var(--cta-hover); color:var(--cta-hover); }
+.soi-chero-slide.t-dark  .soi-chero-btn.ghost:hover { border-color:#fff; color:#fff; background:rgba(255,255,255,.12); }
 .soi-chero-slide.t-light .soi-chero-btn.ghost { background:transparent; color:var(--navy-900); border-color:rgba(17,24,39,.4); }
 .soi-chero-slide.t-light .soi-chero-btn.ghost:hover { border-color:var(--blue-600); color:var(--blue-600); }
-.soi-chero-btn:focus-visible { outline:2px solid var(--cta-hover); outline-offset:3px; }
+.soi-chero-btn:focus-visible { outline:2px solid var(--blue-500); outline-offset:3px; }
 
 /* staggered reveal, replayed per slide */
 .soi-chero-anim { opacity:0; transform:translateY(16px);
@@ -378,16 +386,23 @@ function Hero({ t, lang, go }) {
 /* segmented progress bars with timer fill */
 .soi-chero-bars { position:absolute; bottom:32px; left:50%; transform:translateX(-50%); z-index:20;
   display:flex; gap:12px; width:100%; max-width:var(--maxw); padding:0 32px; }
+/* Индикатор слайдера — самая мелкая цель на странице: полоска 16px по высоте,
+   попасть пальцем почти нельзя. Сама полоска остаётся тонкой (она показывает
+   время до переключения), а зона нажатия расширена псевдоэлементом до 44px. */
+.soi-chero-bar::after { content:""; position:absolute; left:0; right:0; top:50%;
+  transform:translateY(-50%); height:44px; }
 .soi-chero-bar { position:relative; height:16px; width:96px; max-width:20%; padding:0;
   background:none; border:none; cursor:pointer; }
 .soi-chero-bar-track { position:absolute; left:0; top:50%; transform:translateY(-50%);
   height:3px; width:100%; border-radius:var(--r-pill); overflow:hidden; transition:background .2s; }
 .soi-chero-stage.t-dark  .soi-chero-bar-track { background:rgba(255,255,255,.25); }
 .soi-chero-stage.t-light .soi-chero-bar-track { background:rgba(17,24,39,.2); }
-.soi-chero-bar:hover .soi-chero-bar-track { background:rgba(197,255,25,.6); }
-.soi-chero-bar:focus-visible .soi-chero-bar-track { outline:2px solid var(--cta-hover); outline-offset:2px; }
-.soi-chero-bar-fill { position:absolute; inset:0 auto 0 0; display:block; background:var(--cta);
+.soi-chero-bar:hover .soi-chero-bar-track { background:rgba(255,255,255,.55); }
+.soi-chero-stage.t-light .soi-chero-bar:hover .soi-chero-bar-track { background:rgba(14,74,198,.45); }
+.soi-chero-bar:focus-visible .soi-chero-bar-track { outline:2px solid var(--blue-500); outline-offset:2px; }
+.soi-chero-bar-fill { position:absolute; inset:0 auto 0 0; display:block; background:#fff;
   animation:soiCheroBar linear forwards; }
+.soi-chero-stage.t-light .soi-chero-bar-fill { background:var(--blue-600); }
 @keyframes soiCheroBar { from{width:0;} to{width:100%;} }
 
 @media (max-width:520px){
@@ -709,102 +724,10 @@ function CtaBand({ t }) {
    которого в футере соседствовали две разные почты. */
 const SITE_MAIL = "info@sogliqindustriyasi.uz";
 
-function Footer({ t, lang, go, setLang }) {
-  const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
-  const contacts = useSiteContacts();
-  const coNav = (view) => {
-    if (window.parent && window.parent !== window) window.parent.postMessage({ type: "soi-conav", view }, "*");
-    else location.href = "soi.uz.html#/" + (view === "home" ? "" : view);
-  };
-  return (
-    <footer className="foot">
-      <div className="wrap">
-        <div className="fcols">
-          <div>
-            <div className="f-brand">
-              <img className="foot-logo" src={window.__asset("assets/soi-mark.svg")} alt="ИНДУСТРИЯ ЗДОРОВЬЯ" style={{ width: 40, height: 40 }} />
-              <span className="f-wordmark">{lv("ИНДУСТРИЯ ЗДОРОВЬЯ", "SOG'LIQ INDUSTRIYASI", "HEALTH INDUSTRY")}</span>
-            </div>
-            <p className="fabout">{t.foot_about}</p>
-          </div>
-          {/* Колонки собираются из той же структуры, что и меню в шапке
-              (corpNavItems в certificates.jsx): два футера и меню держали три
-              независимых списка ссылок и расходились. Битые ссылки на PDF
-              (assets/company-card.pdf и соседние — файлов в проекте нет)
-              убраны вместе со своей колонкой. */}
-          {corpNavItems(lang).filter((it) => it.children).map((col) => (
-            <div key={col.id}>
-              <h5>{col.label}</h5>
-              <ul>
-                {col.children.map((ch, i) => (
-                  <li key={i}>
-                    <a onClick={() => {
-                      if (ch.catSub) return go("catalog", {});
-                      if (ch.catKey) {
-                        const cats = (window.DATA && window.DATA.CATEGORIES) || [];
-                        const found = cats.find((c) => c.id === ch.catKey || c.slug === ch.catKey);
-                        return go("catalog", found ? { cat: found.id } : {});
-                      }
-                      return coNav(ch.view);
-                    }}>{ch.label}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-          <div>
-            <h5>{t.foot_contacts}</h5>
-            <ul className="foot-contact">
-              {/* Состав колонки повторяет страницу «Контакты» и берёт те же ключи
-                  словаря (t.c_*), чтобы адрес и часы работы не разъезжались.
-                  Телефон сервиса на странице вписан в разметку, а не в настройки
-                  сайта, — здесь он задан так же. */}
-              {/* Офис и склад стоят по одному адресу, часы работы вынесены на
-                  страницу «Контакты» — в футере остаётся один адрес. */}
-              <li className="fc-grp">{t.c_office_addr || contacts.address}</li>
-              {/* Первые два номера берутся из настроек сайта и правятся в админке;
-                  третий там не хранится и задан здесь — так же, как на странице
-                  «Контакты». */}
-              <li className="fc-grp">
-                <a href={telHref(contacts.phone)}>{lv("Приёмная","Qabulxona","Reception")}: {contacts.phone}</a><br />
-                <a href={telHref(contacts.phone2)}>{lv("Отдел продаж","Sotuv bo'limi","Sales")}: {contacts.phone2}</a><br />
-                <a href={telHref("+998772230001")}>{lv("Сервисный отдел","Servis bo'limi","Service department")}: +998 (77) 223-00-01</a>
-              </li>
-              <li className="fc-grp">E-mail: <a href={"mailto:" + SITE_MAIL}>{SITE_MAIL}</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="foot-disclaimer">
-          {/* Тот же дисклеймер, что в корпоративном футере (certificates.jsx):
-              тексты обязаны совпадать дословно. */}
-          {lang === "uz" ? "Texnik xususiyatlar, tasvirlar va hujjatlar nusxalari — ro‘yxatdan o‘tkazish guvohnomalari, muvofiqlik sertifikatlari va deklaratsiyalari, o‘lchash vositalari turini tasdiqlash guvohnomalari — «SOG’LIQ INDUSTRIYASI» MChJ tomonidan ma’lumot uchun joylashtirilgan: ular ommaviy oferta va da’vo asosi emas. Ishlab chiqaruvchi butlanish va xususiyatlarni ogohlantirishsiz o‘zgartirishi mumkin. Qo‘llashdan oldin yo‘riqnoma (buyum pasporti) bilan tanishing yoki mutaxassisga murojaat qiling. Sayt cookie fayllaridan foydalanadi: ular sizni tanish, foydalanuvchi tajribasini baholash va saytni yaxshilash uchun kerak. Qayta ishlanadigan ma’lumotlar tarkibi va shartlari — maxfiylik siyosatida."
-            : lang === "en" ? "Technical specifications, images and copies of documents — registration certificates, certificates and declarations of conformity, measuring instrument type approvals — are published by SOG’LIQ INDUSTRIYASI LLC for reference: they are not a public offer or grounds for claims. The manufacturer may change configuration and specifications without notice. Before use, read the instructions (device passport) or consult a specialist. The site uses cookies: they help recognise you, assess your experience and improve the site. What data we process and on what terms is set out in the privacy policy."
-            : "Технические характеристики, изображения и копии документов — регистрационных удостоверений, сертификатов и деклараций о соответствии, свидетельств об утверждении типа средств измерений — размещены ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» справочно: они не являются публичной офертой и основанием для претензий. Производитель вправе изменить комплектацию и характеристики без уведомления. Перед применением изучите инструкцию (паспорт изделия) или обратитесь к специалисту. Сайт использует файлы cookie: они помогают узнавать вас, оценивать пользовательский опыт и улучшать сайт. Состав обрабатываемых данных и условия — в политике конфиденциальности."}
-        </div>
-        <div className="foot-bot">
-          <span>
-            {lang === "uz" ? `«SOG’LIQ INDUSTRIYASI» MChJ • 100069, Toshkent • STIR: 312513138 • ${SITE_MAIL}` : lang === "en" ? `LLC «HEALTH INDUSTRY» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Tashkent • TIN: 312513138 • ${SITE_MAIL}` : `ООО «ИНДУСТРИЯ ЗДОРОВЬЯ» (SOG’LIQ INDUSTRIYASI MCHJ) • 100069, Ташкент • ИНН: 312513138 • ${SITE_MAIL}`}
-          </span>
-          <div className="foot-socials">
-            <a href={contacts.telegram} target="_blank" rel="noopener" title="Telegram" className="foot-soc">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.07 9.74c-.15.68-.56.85-1.13.53l-3.13-2.3-1.51 1.45c-.17.17-.31.31-.63.31l.22-3.18 5.79-5.23c.25-.22-.06-.35-.39-.12L6.07 13.88l-3.07-.96c-.67-.21-.68-.67.14-.99l11.97-4.62c.55-.2 1.04.13.83.88z"/></svg>
-            </a>
-            <a href={contacts.instagram} target="_blank" rel="noopener" title="Instagram" className="foot-soc">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
-            </a>
-            <a href={contacts.facebook} target="_blank" rel="noopener" title="Facebook" className="foot-soc">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/></svg>
-            </a>
-            <a href={contacts.youtube} target="_blank" rel="noopener" title="YouTube" className="foot-soc">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.7 15.5V8.5l6.3 3.5-6.3 3.5z"/></svg>
-            </a>
-          </div>
-
-        </div>
-      </div>
-    </footer>);
-
-}
+/* Footer убран 07.08.2026: футер на весь сайт теперь один — CoFooter
+   в certificates.jsx. Здесь лежала его вторая копия для каталожной
+   оболочки: разметка совпадала, расходилась только навигация, и каждую
+   правку приходилось делать дважды. Точка подключения — app-root.jsx. */
 
 function EquipScenarios({ t, lang, go }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
@@ -927,31 +850,73 @@ function SoiPlatformCSS() {
     s.id = id;
     s.textContent = `
 /* ── tokens ─────────────────────────────────────────────────────────────
-   Фирменный стиль: белое поле, синий var(--blue-600) вместо чёрного на тексте и
-   структуре, и один сигнальный цвет — лайм, только на главных действиях.
-   Подпись на лайме синяя: белая на нём даёт контраст 1.3:1.
+   Фирменный стиль главной: белое поле, синий #0E4AC6 как единственный
+   акцент, нейтральный тёмный текст. Лайма здесь нет — сигнальную роль
+   на главных действиях принял на себя синий с белой подписью.
+
+   Палитра берётся из глобальных токенов (:root в index.html), а не задаётся
+   здесь литералами. Так было до 07.08.2026: главную перекрасили одну, и её
+   значения (#17212B / #667085) пришлось прописать на месте, чтобы не задеть
+   остальные страницы. Теперь единый стиль заказан для всего сайта, глобальная
+   шкала уже сине-серая — и локальная копия стала лишней: она бы тихо
+   разъезжалась с остальными шестнадцатью страницами при каждой правке :root.
+
    Имена --sx-blue и прочие остаются псевдонимами, чтобы шестнадцать мест
-   вызова не пришлось править по одному. Стена плиток «Экосистемы» пока
-   держит собственные оттенки (--eco-h/--eco-a) — её пересборка отдельной
-   задачей. */
-.sx { --sx-ink:var(--ink); --sx-ink-soft:var(--ink-2); --sx-mute:var(--slate-500);
+   вызова не пришлось править по одному. --sx-lime тоже сохранён как имя:
+   на него ссылаются восемь правил, и все они теперь дают синий. Стена
+   плиток «Экосистемы» пока держит собственные оттенки (--eco-h/--eco-a) —
+   её пересборка отдельной задачей. */
+.sx { --sx-ink:var(--ink); --sx-ink-soft:var(--ink-2); --sx-mute:var(--mute);
   --sx-line:var(--line); --sx-line-2:var(--line-2); --sx-card:#FFFFFF; --sx-bg:#FFFFFF; --sx-bg-soft:var(--bg-2);
-  --sx-accent:var(--blue-600); --sx-lime:var(--cta); --sx-lime-ink:var(--blue-600);
+  --sx-accent:var(--blue-600); --sx-lime:var(--blue-600); --sx-lime-ink:#FFFFFF;
+  /* фирменный синий в слабых долях — заливки, рамки, подложки паттерна */
+  --sx-tint-08:rgba(14,74,198,.08); --sx-tint-12:rgba(14,74,198,.12); --sx-tint-20:rgba(14,74,198,.20);
   /* aliases — old names, new restraint */
   --sx-blue:var(--blue-600); --sx-blue-2:var(--blue-700); --sx-cyan:var(--blue-600); --sx-violet:var(--blue-600); --sx-green:var(--blue-600); --sx-amber:#b87213;
   --sx-shadow:0 1px 2px rgba(14,74,198,.05);
   --sx-shadow-lg:0 1px 2px rgba(14,74,198,.06), 0 12px 32px rgba(14,74,198,.08);
-  --sx-r:16px; --sx-r-sm:10px;
-  font-family:'Manrope',system-ui,-apple-system,sans-serif; }
+  /* 18px, not global --r-lg (16px): референс readdy.cc держит более крупный
+     радиус на всех карточках второй половины страницы (rounded-2xl). */
+  --sx-r:18px; --sx-r-sm:10px;
+  font-family:'Montserrat',Helvetica,Arial,sans-serif; }
 [data-theme="dark"] .sx { --sx-ink:#E8EFFB; --sx-ink-soft:#B9C9E4; --sx-mute:#8FA2BE;
   --sx-line:var(--navy-800); --sx-line-2:var(--navy-850); --sx-card:var(--navy-900); --sx-bg:var(--navy-900); --sx-bg-soft:var(--navy-900);
-  --sx-accent:#7FA8F0; --sx-lime:var(--cta); --sx-lime-ink:var(--navy-800);
+  --sx-accent:#7FA8F0; --sx-lime:#2b72e3; --sx-lime-ink:#FFFFFF;
   --sx-blue:#7FA8F0; --sx-blue-2:#A8C4F6; --sx-cyan:#7FA8F0;
+  --sx-tint-08:rgba(127,168,240,.10); --sx-tint-12:rgba(127,168,240,.16); --sx-tint-20:rgba(127,168,240,.24);
   --sx-shadow:0 1px 2px rgba(0,0,0,.4);
   --sx-shadow-lg:0 1px 2px rgba(0,0,0,.4), 0 16px 40px rgba(0,0,0,.5); }
 
 .sx { background:var(--sx-bg); color:var(--sx-ink); }
 .sx *, .sx *::before, .sx *::after { box-sizing:border-box; }
+
+/* Исключения по заголовкам: блоки со своей подложкой (герой, плитки
+   «Экосистемы», ctaband) держат собственный цвет, иначе они почернели бы
+   под общим правилом «.z-corp h1,h2,h3».
+
+   Само общее правило здесь больше не дублируется: в index.html оно теперь
+   читает var(--ink), тот же токен, что и .sx, — повторять нечего. Раньше там
+   стоял литерал #0B2D25, и эта копия существовала только чтобы его перебить
+   на главной. */
+.z-corp .sx .soi-chero-stage h1, .z-corp .sx .soi-chero-stage h2, .z-corp .sx .soi-chero-stage h3,
+.z-corp .sx .eco-t h1, .z-corp .sx .eco-t h2, .z-corp .sx .eco-t h3,
+.z-corp .sx .ctaband h1, .z-corp .sx .ctaband h2, .z-corp .sx .ctaband h3,
+.z-corp .sx [class*="-ctaband"] h1, .z-corp .sx [class*="-ctaband"] h2, .z-corp .sx [class*="-ctaband"] h3,
+.z-corp .sx .sxp-card.feat h1, .z-corp .sx .sxp-card.feat h2, .z-corp .sx .sxp-card.feat h3 { color:inherit; }
+
+/* Фон главной оставлен чистым: решение заказчика от 06.08.2026 — никаких
+   декоративных слоёв поверх подложек. Присланный из Figma паттерн («линзы»)
+   был подключён и снят по этому же решению; вместе с ним удалён ассет
+   assets/soi-pattern.svg. Прочая декорация — .sxp-glow, .sx-cp-aurora,
+   .sx-cta-aurora — была выключена
+   (display:none) ещё раньше; разметку под них не трогаем, чтобы не
+   переписывать шесть компонентов ради снятия уже невидимого.
+
+   Фирменный цвет остаётся присутствовать заливками (--sx-tint-*), а не
+   рисунком: это и есть заказанные «10-20%». */
+/* .sx впереди — базовый «.sx-cta» объявлен ниже по этому же файлу и при
+   равной специфичности выиграл бы порядком. */
+.sx .sx-cta { background:var(--sx-tint-08); border-color:var(--sx-tint-20); }
 .sx-wrap { max-width:var(--maxw); margin:0 auto; padding:0 32px; }
 .sx-section { padding:clamp(64px,8vw,108px) 0; position:relative; }
 /* Светлые секции выключены: фон страниц — только белый. Правило оставлено
@@ -968,14 +933,11 @@ function SoiPlatformCSS() {
    grey caption — the heading under it is doing the work now. */
 /* Надзаголовок секции. Один вид на все секции главной: два правила были
    побайтово одинаковыми и жили в разных концах файла. */
-.sx-eyebrow,
-.sx-eyebrow::before { content:""; width:16px; height:1px; border-radius:0; background:var(--sx-line); }
 .sx-h2 { font-size:clamp(32px,4.4vw,54px); font-weight:800; line-height:1.04; letter-spacing:-.035em; color:var(--sx-ink); margin:14px 0 0; text-wrap:balance; }
 .sx-sub { font-size:clamp(16px,1.5vw,18px); line-height:1.6; color:var(--sx-mute); margin-top:14px; max-width:600px; }
 .sx-head { margin-bottom:44px; }
 .sx-head.center { text-align:center; }
 .sx-head.center .sx-sub { margin-left:auto; margin-right:auto; }
-.sx-head.center .sx-eyebrow::before { display:none; }
 
 /* link */
 .sx-link { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-4); font-weight:700; color:var(--sx-blue); cursor:pointer; transition:gap .2s, color .2s; }
@@ -1000,7 +962,9 @@ function SoiPlatformCSS() {
    so a tile reads as a deep field rather than a flat swatch of colour. */
 .eco-t { --eco-h:#0B4EDB; --eco-a:#5C9DFF;
   position:relative; grid-area:var(--eco-area); isolation:isolate; display:flex; flex-direction:column;
-  padding:20px; border-radius:var(--r-lg); overflow:hidden; color:#fff;
+  /* 24px/18px — не глобальный --r-lg (16px): формы карточек на главной сведены
+     к масштабу readdy.cc (rounded-2xl, p-6), локально для этой плитки. */
+  padding:24px; border-radius:18px; overflow:hidden; color:#fff;
   background:
     radial-gradient(115% 115% at 100% 0%, color-mix(in srgb, var(--eco-a) 22%, transparent), transparent 60%),
     linear-gradient(150deg,
@@ -1011,49 +975,43 @@ function SoiPlatformCSS() {
     0 1px 0 0 rgba(255,255,255,.10) inset,
     0 0 0 1px color-mix(in srgb, var(--eco-a) 14%, transparent) inset,
     0 20px 44px -24px color-mix(in srgb, var(--eco-h) 70%, #000); }
-/* The ground is not static: two soft blobs of the tile's own accent drift across
-   it, and a wide highlight sweeps over now and then. Both layers sit behind the
-   content (z-index:-1, under .eco-photo) and animate transform only, so a wall
-   of six tiles costs the compositor and not the main thread. The sweeps are
-   deliberately out of phase — tiles flashing in unison read as a glitch. */
-@keyframes ecoDrift {
-  0%   { transform:translate3d(-7%,-5%,0) scale(1.12); }
-  50%  { transform:translate3d(7%,5%,0) scale(1.28); }
-  100% { transform:translate3d(-7%,-5%,0) scale(1.12); }
-}
-@keyframes ecoSheen {
-  0%, 62% { transform:translateX(-130%) skewX(-12deg); }
-  100%    { transform:translateX(320%) skewX(-12deg); }
-}
-.eco-t::before, .eco-t::after { content:""; position:absolute; z-index:-1; pointer-events:none; }
-.eco-t::before { inset:-30%;
+/* Подложка плитки — два мягких пятна её же акцента, статично.
+
+   Прежде пятна ползали по плитке (ecoDrift, 19 с) и поверх раз в девять секунд
+   пробегала светлая полоса (ecoSheen) — шесть плиток мерцали вразнобой, чтобы
+   не вспыхивать разом. Снято по решению заказчика 08.08.2026: движение ничего
+   не сообщало о содержимом и на деловой странице читалось дешёвым эффектом.
+
+   Градиенты оставлены — они дают плитке объём. Ушла только анимация, вместе с
+   ней will-change:transform: шесть слоёв постоянно висели в отдельных слоях
+   композитора без всякой пользы. */
+.eco-t::before { content:""; position:absolute; z-index:-1; pointer-events:none;
+  inset:0;
   background:
     radial-gradient(38% 44% at 24% 28%, color-mix(in srgb, var(--eco-a) 30%, transparent), transparent 68%),
-    radial-gradient(34% 40% at 76% 74%, color-mix(in srgb, var(--eco-a) 20%, transparent), transparent 70%);
-  animation:ecoDrift 19s ease-in-out infinite; will-change:transform; }
-.eco-t::after { top:-40%; bottom:-40%; left:0; width:34%;
-  background:linear-gradient(90deg, transparent, rgba(255,255,255,.13), transparent);
-  animation:ecoSheen 9s ease-in-out infinite; will-change:transform; }
-.eco-t.catalog::before { animation-duration:21s; }
-.eco-t.training::before, .eco-t.training::after { animation-delay:-3.5s; }
-.eco-t.tender::before, .eco-t.tender::after { animation-delay:-6s; }
-.eco-t.brands::before, .eco-t.brands::after { animation-delay:-1.8s; }
-.eco-t.service::before, .eco-t.service::after { animation-delay:-8s; }
-.eco-t.delivery::before, .eco-t.delivery::after { animation-delay:-4.6s; }
+    radial-gradient(34% 40% at 76% 74%, color-mix(in srgb, var(--eco-a) 20%, transparent), transparent 70%); }
 
-.eco-t.catalog { --eco-area:catalog; --eco-h:#0B4EDB; --eco-a:#5C9DFF; }
-.eco-t.training { --eco-area:training; --eco-h:#008C5E; --eco-a:#37D89B; }
-.eco-t.tender { --eco-area:tender; --eco-h:#4C2D91; --eco-a:#A98BFF; }
-.eco-t.brands { --eco-area:brands; --eco-h:#C25A06; --eco-a:#FF9257; }
-.eco-t.service { --eco-area:service; --eco-h:#006C96; --eco-a:#43CFF0; }
-.eco-t.delivery { --eco-area:delivery; --eco-h:#0A4A96; --eco-a:#6FB0FF; }
+/* Плитки были раскрашены в шесть разных цветов — зелёный, фиолетовый,
+   оранжевый, бирюзовый; на главной с одним фирменным цветом это читалось
+   радугой. Теперь все шесть — тот же #0E4AC6, различаются только глубиной:
+   стена остаётся читаемой (соседние плитки не сливаются), но не спорит с
+   палитрой. Рецепт плитки не тронут — правятся ровно две переменные на класс. */
+.eco-t.catalog  { --eco-area:catalog;  --eco-h:#0E4AC6; --eco-a:#8CB4F5; }
+.eco-t.brands   { --eco-area:brands;   --eco-h:#0D46B8; --eco-a:#86AFF3; }
+.eco-t.training { --eco-area:training; --eco-h:#0B3EA8; --eco-a:#7FA8F0; }
+.eco-t.service  { --eco-area:service;  --eco-h:#0A3796; --eco-a:#789FEC; }
+.eco-t.delivery { --eco-area:delivery; --eco-h:#082E7E; --eco-a:#6E9BEA; }
+.eco-t.tender   { --eco-area:tender;   --eco-h:#06265F; --eco-a:#6593E6; }
 
 /* ── shared across tiles — keep OUT of any per-section block ──────────────
    These belong to no single tile: .eco-live is the tenders badge, .eco-brand
    dresses the brand wall. Twice now they were deleted by a wholesale rewrite of
    the tenders CSS because they happened to sit inside it. */
-.eco-live { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border-radius:var(--r-pill); font-size:var(--fs-1); font-weight:700;
-  background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16); color:rgba(255,255,255,.82); white-space:nowrap; }
+/* Отметка обновления — просто строка с пульсирующей точкой, без пилюли
+   (решение заказчика 08.08.2026). Подложка и рамка делали из служебной
+   пометки ещё один элемент управления, хотя нажимать её не на что. */
+.eco-live { display:inline-flex; align-items:center; gap:8px; font-size:var(--fs-1); font-weight:700;
+  color:rgba(255,255,255,.82); white-space:nowrap; }
 .eco-live::before { content:""; width:7px; height:7px; border-radius:50%; background:var(--blue-400); box-shadow:var(--sh-sm); animation:ecoPulse 2.4s ease-out infinite; }
 @keyframes ecoPulse { 70% { box-shadow:0 0 0 7px rgba(77,142,238,0); } 100% { box-shadow:0 0 0 0 rgba(77,142,238,0); } }
 /* One line, clipped: the wall is a proof of breadth, not a list. Wrapping it
@@ -1098,7 +1056,10 @@ function SoiPlatformCSS() {
 
 /* actions */
 .eco-foot { margin-top:auto; padding-top:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-.eco-cta { display:inline-flex; align-items:center; gap:9px; padding:9px 14px; border-radius:var(--r); border:1px solid rgba(255,255,255,.16);
+/* min-height до нормы 44px: кнопка была 36px по высоте. Ширины хватало,
+   поэтому подняли только высоту — padding оставлен прежним, вид почти не
+   изменился. */
+.eco-cta { min-height:44px; display:inline-flex; align-items:center; gap:9px; padding:9px 14px; border-radius:var(--r); border:1px solid rgba(255,255,255,.16);
   background:rgba(255,255,255,.10); color:#fff; font-size:var(--fs-3); font-weight:700; cursor:pointer; text-align:left;
   transition:background .2s, border-color .2s, gap .2s; }
 .eco-cta:hover { background:rgba(255,255,255,.17); border-color:rgba(255,255,255,.3); gap:13px; }
@@ -1120,7 +1081,10 @@ function SoiPlatformCSS() {
    opposite treatment to a small eyebrow: tracking pulled back in (wide letter
    spacing at 21px reads as a logotype, not a title) and a tighter line height,
    because a fifty-character line will take two rows on any tile width. */
-.eco-t.tender h3.tnd-eyebrow { display:block; margin:0; font-size:var(--fs-7); font-weight:800;
+/* Кегль плавающий: плитка сузилась до шести колонок, и на фиксированном --fs-7
+   заголовок из пятидесяти прописных занимал четыре строки — больше, чем сами
+   цифры под ним. clamp даёт ему ужаться на узкой плитке, не мельча на широкой. */
+.eco-t.tender h3.tnd-eyebrow { display:block; margin:0; font-size:clamp(15px,1.5vw,20px); font-weight:800;
   letter-spacing:.015em; line-height:1.18; text-transform:uppercase; color:#fff; text-wrap:balance; }
 .eco-t.tender > p { margin-top:8px; max-width:62ch; }
 
@@ -1128,38 +1092,112 @@ function SoiPlatformCSS() {
    inside a bordered grid was three frames deep and read as clutter. What ranks
    them now is size — the lead figure is nearly twice the others — and a hairline
    between columns, which is what a dashboard uses. */
-.tnd-kpis {display:grid; grid-template-columns:1.25fr 1fr 1fr 1fr; gap:0; margin-top:16px}
-.tnd-kpi { padding:13px 16px; position:relative; }
-.tnd-kpi + .tnd-kpi { box-shadow:inset 1px 0 0 0 rgba(255,255,255,.10); }
-.tnd-kpi:first-child { padding-left:0; }
-.tnd-kpi-v { font-size:var(--fs-8); font-weight:800; line-height:1; letter-spacing:-.035em; font-variant-numeric:tabular-nums; color:#fff; }
-.tnd-kpi.lead .tnd-kpi-v { font-size:var(--fs-9); color:#fff; }
-.tnd-kpi.lead .tnd-kpi-l { color:rgba(255,255,255,.8); font-weight:600; }
-.tnd-kpi-l { margin-top:5px; font-size:var(--fs-4); line-height:1.25; color:rgba(255,255,255,.58); }
+/* Bento-раскладка по макету заказчика (08.08.2026): каждая величина в своей
+   карточке, размеры карточек разные.
 
-/* two sections, side by side, parted by a rule rather than by borders */
-.tnd-cols { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); gap:0 24px; margin-top:14px; align-items:start; }
-.tnd-sec { min-width:0; }
-.tnd-sec + .tnd-sec { padding-left:28px; margin-left:-28px; border-left:1px solid rgba(255,255,255,.10); }
-.tnd-sec-h {display:flex; align-items:baseline; justify-content:space-between; gap:10px; padding-bottom:8px;
+     колонка 1 — «активных закупок» и под ней категории;
+     колонка 2 — «новых» и «закрываются», одна под другой;
+     колонка 3 — площадки, во всю высоту блока.
+
+   Прежде четыре цифры стояли в ряд, разделённые вертикальными линиями, а
+   списки лежали сплошной полосой под ними: главное число ничем не отличалось
+   от справочных, кроме кегля. Карточки задают вес явно. */
+/* Две колонки: слева «активных закупок» и под ней категории, справа площадки.
+   Средняя колонка ушла вместе с цифрами «новых» и «закрываются за неделю».
+   Левая шире — под ведущей цифрой стоят категории, а их названия
+   («Медицинское оборудование») длиннее всего в блоке и при равных долях
+   обрезались многоточием. */
+/* stretch, а не start: карточки должны кончаться на одной линии, хотя списки
+   в них разной длины — пять категорий против четырёх площадок. */
+.tnd-kpis { display:grid; grid-template-columns:1.5fr 1fr; grid-auto-rows:auto;
+  gap:10px; margin-top:12px; align-items:stretch; }
+.tnd-kpi { position:relative; padding:12px 16px; border-radius:var(--r);
+  background:rgba(255,255,255,.05); }
+/* Ведущая цифра занимает свою колонку целиком, остальные встают по порядку. */
+.tnd-kpi.lead { grid-column:1; grid-row:1; }
+/* Цифры укрупнены (решение заказчика 08.08.2026): ради них плитку и смотрят,
+   а прежде они соперничали по весу со списками под ними. Заданы в rem, а не
+   через --fs-*: шкала обрывается на --fs-9, следующего шага в ней нет.
+
+   Один размер на обе карточки: прежде левая шла 2.6rem, правая 2.2rem, и
+   рядом это читалось как разные по важности величины, хотя карточки
+   равноправны (решение заказчика 09.08.2026 — унифицировать). */
+.tnd-kpi-v { font-size:2.6rem; font-weight:800; line-height:1; letter-spacing:-.035em; font-variant-numeric:tabular-nums; color:#fff; }
+/* Цифра и подпись — в одну строку. Выравнивание по базовой линии, а не по
+   центру: у кегля 2.6rem и 15px центры не совпадают, и подпись «плавала» бы
+   относительно числа. Перенос разрешён — на узкой плитке длинная подпись
+   уходит под цифру, а не выдавливает её из карточки. */
+.tnd-kpi-head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+/* Подписи одинаковы в обеих карточках: слева стояли вес 600 и прозрачность
+   .8, справа — 400 и .58, из-за чего левая читалась заметно плотнее. */
+.tnd-kpi-l { font-size:var(--fs-4); font-weight:600; line-height:1.25; color:rgba(255,255,255,.8); }
+
+/* Сворачивание снято (решение заказчика 08.08.2026): списки показаны всегда,
+   и органов управления у них нет. Отсюда убраны курсор, шевронки, состояния
+   наведения и фокуса — карточка снова просто карточка, а не кнопка.
+   Разметка вернулась с <details>/<summary> на обычные блоки. */
+/* Разделитель над списком одинаков в обеих карточках — см. .tnd-sec ниже.
+   Собственных отступов у строк здесь больше нет: они шли 4px/6px против
+   5px/8px в категориях, и списки стояли с разным шагом. */
+.tnd-kpi-list { margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,.12); }
+/* Площадки — правая колонка. Обе карточки тянутся на высоту ряда, поэтому
+   стоят вровень независимо от того, в какой из них список длиннее. */
+.tnd-kpi-src { grid-column:2; }
+.tnd-kpi { align-self:stretch; }
+
+/* Категории живут внутри карточки «активных закупок», а не рядом с ней:
+   они раскладывают на части то же самое число. Отделены от цифры линией —
+   своей подложки не имеют, иначе получилась бы карточка внутри карточки. */
+.tnd-sec { min-width:0; margin-top:12px; padding-top:10px;
+  border-top:1px solid rgba(255,255,255,.12); }
+/* Заголовок стоит в строке с цифрой и прижат к правому краю карточки:
+   margin-left:auto отталкивает его от подписи, а перенос строки в .tnd-kpi-head
+   уводит его вниз на узкой плитке, где втроём они не помещаются. */
+.tnd-sec-h { margin-left:auto; padding-bottom:0;
   font-size:var(--fs-1); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.5)}
-.tnd-sec-h b { font-weight:700; font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); }
+
 
 /* rows — platforms and categories share one shape */
-.tnd-row { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px;
-  width:100%; padding:6px 8px; margin:0 -8px; border:0; background:transparent; color:inherit; font:inherit; text-align:left;
+.tnd-row { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px;
+  width:100%; padding:5px 8px; margin:0 -8px; border:0; background:transparent; color:inherit; font:inherit; text-align:left;
   border-radius:var(--r-sm); text-decoration:none; transition:background .18s ease, color .18s ease, transform .18s ease; }
-/* Categories carry a money column between the name and the count. */
-.tnd-row.cat { grid-template-columns:3px 1fr auto auto; gap:0 9px; }
+/* Категории снова несут сумму: полоска, название, сумма, количество. Сумма
+   возвращена в строку по решению заказчика 08.08.2026 — из подсказки её было
+   не видно без наведения. */
+.tnd-row.cat { grid-template-columns:3px minmax(0,1fr) auto auto; gap:0 9px; align-items:baseline; }
 a.tnd-row, button.tnd-row { cursor:pointer; }
 .tnd-row + .tnd-row { box-shadow:var(--sh-sm); }
+/* Поочерёдная подсветка: активная строка в полную силу, остальные приглушены.
+   Гасим только непрозрачность и фон — не цвет текста: так строка не меняет
+   размеров и соседи не дёргаются.
+
+   .62, а не .3-.4: приглушённые строки остаются читаемыми. Список — не
+   декорация, в нём цифры по категориям, и пользователь должен видеть их все
+   разом, а подсветка лишь ведёт взгляд. */
+.tnd-sec .tnd-row, .tnd-kpi-list .tnd-row { opacity:.62; transition:opacity .45s ease, background .45s ease, transform .18s ease; }
+.tnd-sec .tnd-row.is-lit, .tnd-kpi-list .tnd-row.is-lit { opacity:1; background:rgba(255,255,255,.08); }
+/* Наведение и фокус всегда сильнее автоподсветки: пользователь ведёт сам. */
+.tnd-sec .tnd-row:hover, .tnd-kpi-list .tnd-row:hover,
+.tnd-sec .tnd-row:focus-visible, .tnd-kpi-list .tnd-row:focus-visible { opacity:1; }
+@media (prefers-reduced-motion: reduce){
+  /* Таймер не заводится (см. useRowCycle), но правило нужно и здесь: без него
+     строки остались бы приглушёнными навсегда. */
+  .tnd-sec .tnd-row, .tnd-kpi-list .tnd-row { opacity:1; transition:none; }
+}
+
 /* Nudged, not scaled: scaling a row inside a dense list shoves its neighbours
    around, and transform keeps the work off the layout thread either way. */
 .tnd-row:hover { background:rgba(255,255,255,.09); transform:translateX(3px); }
 .tnd-row:focus-visible { outline:2px solid #fff; outline-offset:-2px; }
-.tnd-row-n { font-size:var(--fs-3); font-weight:600; color:rgba(255,255,255,.9); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* Названия переносятся, а не обрезаются многоточием (решение заказчика
+   08.08.2026): «Медицинские инструменты» в узкой колонке превращалось в
+   «Медицинские инструм…», и строку нельзя было прочитать не наводя курсор. */
+.tnd-row-n { font-size:var(--fs-3); font-weight:600; color:rgba(255,255,255,.9);
+  min-width:0; overflow-wrap:anywhere; }
 .tnd-row-v { font-size:var(--fs-3); font-weight:700; font-variant-numeric:tabular-nums; color:#fff; min-width:18px; text-align:right; }
-.tnd-row-sum { font-size:var(--fs-2); font-variant-numeric:tabular-nums; color:rgba(255,255,255,.5); white-space:nowrap; }
+/* Сумма — справочная величина рядом с названием: мельче и тусклее счётчика,
+   иначе две цифры в строке читаются как равные по значимости. */
+.tnd-row-sum { font-size:var(--fs-1); font-variant-numeric:tabular-nums; color:rgba(255,255,255,.55); white-space:nowrap; }
 .tnd-row.zero .tnd-row-n, .tnd-row.zero .tnd-row-v, .tnd-row.zero .tnd-row-sum { color:rgba(255,255,255,.45); }
 .tnd-dot { width:7px; height:7px; border-radius:50%; background:var(--blue-400); }
 .tnd-dot.off { background:rgba(255,255,255,.28); }
@@ -1171,27 +1209,36 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 .tnd-row.cat.zero .tnd-bar { background:rgba(255,255,255,.25); }
 
 @media (max-width:1080px) {
-  /* Two-up, the vertical hairlines have to be redrawn as a cross: the third
-     cell now starts a new line and needs a rule above it, not beside it. */
-  .tnd-kpis { grid-template-columns:1fr 1fr; }
-  .tnd-kpi:nth-child(odd) { padding-left:0; }
-  .tnd-kpi:nth-child(even) { box-shadow:inset 1px 0 0 0 rgba(255,255,255,.10); }
-  .tnd-kpi:nth-child(n+3) { box-shadow:inset 0 1px 0 0 rgba(255,255,255,.10); }
-  .tnd-kpi:nth-child(4) { box-shadow:inset 1px 0 0 0 rgba(255,255,255,.10), inset 0 1px 0 0 rgba(255,255,255,.10); }
-  .tnd-cols { grid-template-columns:1fr; gap:22px 0; }
-  .tnd-sec + .tnd-sec { padding-left:0; margin-left:0; border-left:0; }
+  /* Узкая плитка — карточки в один столбец, каждая своей строкой. Прежние
+     правила рисовали здесь сетку из тонких линий между четырьмя ячейками;
+     ни линий, ни четырёх ячеек больше нет — карточки разделяет зазор. */
+  .tnd-kpis { grid-template-columns:1fr; }
+  .tnd-kpi.lead, .tnd-kpi-src, .tnd-kpi-src[open] {
+    grid-column:1; grid-row:auto; align-self:auto; }
 }
 @media (max-width:680px) {
   .tnd-top { grid-template-columns:auto 1fr; }
   .tnd-top .eco-live { grid-column:1 / -1; justify-self:start; }
   /* Fifty characters of caps need a step down before they take four lines. */
   .eco-t.tender h3.tnd-eyebrow { font-size:var(--fs-5); }
-  .tnd-kpi.lead .tnd-kpi-v { font-size:var(--fs-8); }
-  .tnd-kpi-v { font-size:var(--fs-7); }
-  /* The money column is the first thing to go when the row runs out of width —
-     the count and the name are what the reader is scanning for. */
-  .tnd-row.cat { grid-template-columns:3px 1fr auto; }
+  /* Кегль сбавлен, но остаётся общим для обеих карточек: раздельные размеры
+     (--fs-8 слева и --fs-7 справа) здесь и ломали унификацию на телефоне. */
+  .tnd-kpi-v { font-size:var(--fs-8); }
+  /* Сумма — первое, что уходит, когда строке не хватает ширины: читатель
+     ищет название и количество. Без display:none сумма оставалась в разметке
+     и попадала в неявную колонку — счётчик срывался на следующую строку, и
+     список рассыпался.
+
+     На широких экранах сумма на месте: она возвращена туда по решению
+     заказчика 08.08.2026. */
+  .tnd-row.cat { grid-template-columns:3px minmax(0,1fr) auto; }
   .tnd-row-sum { display:none; }
+
+  /* Строки списков и ссылки направлений — до нормы 44px. Это цели для пальца,
+     а не для курсора: на десктопе они остаются плотными (32 и 30px), потому
+     что там курсор точный и высота блоков важнее. */
+  .tnd-row { min-height:44px; }
+  .sx-dir-links a { min-height:44px; display:flex; align-items:center; }
 }
 
 /* The map no longer claims a block of its own height: it sits behind the copy,
@@ -1216,9 +1263,8 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
   .eco-map-flow { animation:none; stroke-dasharray:none; stroke-dashoffset:0; stroke-width:.9; opacity:.5; }
   .eco-map-dot { animation:none; opacity:.85; }
   .eco-map-ping { display:none; }
-  /* The drifting ground keeps its still frame; the sweep goes away entirely. */
-  .eco-t::before { animation:none; transform:none; }
-  .eco-t::after { display:none; }
+  /* Подложка плиток больше не анимируется ни при каких настройках — гасить
+     нечего, правила для .eco-t::before/::after убраны вместе с анимацией. */
 }
 
 @media (max-width:1080px) {
@@ -1240,13 +1286,40 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 }
 
 /* ── directions ─────────────────────────────────────── */
-.sx-dir-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:18px; }
-.sx-dir { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:26px 24px; cursor:pointer; transition:transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s, border-color .3s; }
-.sx-dir:hover { transform:translateY(-4px); box-shadow:var(--sh-sm); }
-.sx-dir-ic { width:50px; height:50px; border-radius:var(--r); display:flex; align-items:center; justify-content:center; margin-bottom:18px; }
+/* Воздуха между карточками и внутри них добавлено (решение заказчика
+   08.08.2026): 18 → 30px в сетке, 26/24 → 34/30px внутри. Раньше четыре
+   карточки читались сплошным массивом — белого поля между ними почти не
+   оставалось. */
+.sx-dir-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:30px; }
+/* Внутренний отступ вернули к 24px (решение от 09.08.2026, поверх записи
+   выше от 08.08.2026) — карточки сведены к масштабу readdy.cc. Сетка между
+   карточками (gap:30px) не тронута: пользователь просил про отступ внутри
+   карточки, не про воздух между ними. */
+.sx-dir { position:relative; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:24px; transition:transform .3s cubic-bezier(.16,1,.3,1), border-color .3s; }
+/* Тень на hover заменена подсветкой рамки — readdy.cc держит карточки
+   полностью плоскими (box-shadow:none) во всех состояниях, глубину даёт
+   только смена цвета рамки и сдвиг по Y. */
+.sx-dir:hover { transform:translateY(-4px); border-color:var(--sx-accent); }
+/* Заголовок — единственная ссылка карточки; её зона нажатия растянута на всю
+   карточку. cursor:pointer держится на этом слое, а не на самом блоке: иначе
+   палец-курсор появлялся бы и там, где нажимать нечего. */
+.sx-dir-t { color:inherit; text-decoration:none; }
+.sx-dir-t::after { content:""; position:absolute; inset:0; border-radius:inherit; cursor:pointer; }
+/* Ссылки на отдельные направления лежат над растянутой зоной, иначе она
+   перехватывала бы клики по ним. */
+.sx-dir-links { position:relative; z-index:1; }
+/* Фокус с клавиатуры показываем на всей карточке, а не на строке заголовка —
+   нажатие всё равно относится к ней целиком. */
+.sx-dir:focus-within { outline:2px solid var(--sx-accent); outline-offset:3px; }
+.sx-dir-t:focus-visible { outline:none; }
+/* Иконка: один фирменный тон на все группы, подложка — он же в 10%.
+   Контейнер вырос с 50 до 72px следом за глифом (26 → 39px), чтобы вокруг
+   знака остался тот же воздух, а не впритык к краям. */
+.sx-dir-ic { width:72px; height:72px; border-radius:var(--r); display:flex; align-items:center; justify-content:center; margin-bottom:22px;
+  background:rgba(14,74,198,.10); color:var(--sx-accent); }
 .sx-dir h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.25; }
 .sx-dir-links { margin-top:14px; display:flex; flex-direction:column; gap:2px; }
-.sx-dir-links a { font-size:var(--fs-3); color:var(--sx-mute); padding:5px 0; transition:color .18s, padding-left .18s; }
+.sx-dir-links a { display:block; font-size:var(--fs-3); color:var(--sx-mute); text-decoration:none; padding:5px 0; transition:color .18s, padding-left .18s; }
 .sx-dir-links a:hover { color:var(--sx-blue); padding-left:5px; }
 
 /* ── impact band (dark interlude) ───────────────────── */
@@ -1254,22 +1327,6 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    other dark moments. They are now paper: a hairline card on the canvas, with
    the aurora and the blueprint grid switched off. Contrast comes from the
    ecosystem tiles and the hero photograph, and from nothing else. */
-.sx-impact { position:relative; background:var(--sx-card); border:1px solid var(--sx-line); border-radius:var(--r-xl); padding:clamp(40px,5vw,68px); overflow:hidden; }
-.sx-impact-aurora { position:absolute; inset:0; background:
-  radial-gradient(ellipse 60% 80% at 15% 30%, rgba(14,74,198,.35),transparent 70%),
-  radial-gradient(ellipse 50% 70% at 85% 70%, rgba(20,184,224,.25),transparent 65%),
-  radial-gradient(ellipse 40% 60% at 60% 10%, rgba(100,84,212,.2),transparent 60%); }
-.sx-impact-grid-ov { position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px); background-size:44px 44px; -webkit-mask-image:radial-gradient(ellipse 90% 90% at 50% 0%,#000 30%,transparent 80%); mask-image:radial-gradient(ellipse 90% 90% at 50% 0%,#000 30%,transparent 80%); }
-.sx-impact-inner { position:relative; z-index:1; }
-.sx-impact-aurora, .sx-impact-grid-ov { display:none; }
-.sx-impact .sx-eyebrow { color:var(--sx-mute); }
-.sx-impact .sx-eyebrow::before { background:var(--sx-line); }
-.sx-impact h2 { font-size:clamp(28px,3.6vw,44px); font-weight:800; letter-spacing:-.032em; color:var(--sx-ink); margin:14px 0 0; max-width:680px; line-height:1.08; }
-.sx-impact-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-top:44px; }
-.sx-metric-n { font-size:clamp(34px,4vw,52px); font-weight:800; letter-spacing:-.03em; line-height:1; color:var(--sx-ink); }
-.sx-metric-n .u { color:var(--sx-accent); }
-.sx-metric-l { font-size:var(--fs-4); color:var(--sx-mute); margin-top:10px; line-height:1.4; }
-.sx-metric { padding-left:20px; border-left:1px solid var(--sx-line); }
 
 /* ── brands pill list (2 rows, clipped) ───────────────── */
 .sx-brands-title { display:inline-flex; align-items:center; gap:8px; }
@@ -1328,27 +1385,64 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 }
 
 /* ── proof / cases ──────────────────────────────────── */
-.sx-cases { display:flex; flex-wrap:wrap; justify-content:center; gap:20px; }
-.sx-case { flex:1 1 300px; max-width:calc(33.333% - 14px); min-width:280px; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; transition:transform .3s cubic-bezier(.16,1,.3,1), box-shadow .3s; display:flex; flex-direction:column; }
-.sx-case:hover { transform:translateY(-5px); box-shadow:var(--sh-sm); }
-.sx-case-cover { aspect-ratio:16/10; background:linear-gradient(135deg,var(--sx-bg-soft),var(--sx-line-2)); display:flex; align-items:center; justify-content:center; color:var(--sx-mute); overflow:hidden; }
+/* Колонки сетки проектов заданы не здесь, а рядом с брейкпоинтами .sxc-grid
+   (см. «сетки на три колонки» ниже): там они идут после одноклассовых правил
+   .sxc-grid и выигрывают порядком при равной специфичности.
+   Флексовые flex/max-width/min-width с карточки убраны: в grid они не работали
+   как задумано, а max-width:33.333% зажимал карточку внутри и без того более
+   узкой колонки, оставляя пустоту справа. */
+.sx-case { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; transition:transform .3s cubic-bezier(.16,1,.3,1), border-color .3s; display:flex; flex-direction:column; }
+.sx-case:hover { transform:translateY(-5px); border-color:var(--sx-accent); }
+/* Два класса в селекторе — чтобы победить .sxc-media (3/4), который лежит
+   ниже по файлу и достался обложке заодно: этот же элемент носит оба класса,
+   и при равной специфичности выигрывал более поздний. Портретная пропорция
+   каталога здесь неуместна — у проекта в кадре здание, а не витрина. */
+.sxc-media.sx-case-cover { aspect-ratio:16/10; background:linear-gradient(135deg,var(--sx-bg-soft),var(--sx-line-2)); display:flex; align-items:center; justify-content:center; color:var(--sx-mute); overflow:hidden; }
 .sx-case-cover img { width:100%; height:100%; object-fit:cover; }
 .sx-case-body { padding:20px 22px; flex:1; display:flex; flex-direction:column; }
-.sx-case-tag { display:inline-flex; align-self:flex-start; font-size:var(--fs-1); font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--sx-blue); background:color-mix(in srgb,var(--sx-blue) 9%,transparent); padding:5px 11px; border-radius:var(--r-sm); margin-bottom:11px; }
-.sx-case h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); line-height:1.25; letter-spacing:-.01em; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+/* Бейдж типа проекта: нейтральная серая пилюля, не синяя плашка (09.08.2026,
+   по образцу readdy.cc). Синий на ней конкурировал с синими заголовками
+   и кнопками секции — тип проекта это ярлык, а не действие. */
+/* nowrap + многоточие, а не перенос: «КОМПЛЕКСНОЕ ОСНАЩЕНИЕ» с разрядкой
+   требует ~235px, а колонка карточки при трёх в ряд даёт 234 — пилюля
+   ломалась на две строки и вырастала до 48px. Теги приходят из CMS и могут
+   быть любой длины, поэтому обрезаем, а не подгоняем кегль под один тег. */
+/* display:block + width:fit-content, а не inline-flex: на inline-flex
+   text-overflow:ellipsis не действует, и длинный тег из CMS обрезался
+   «в обрыв», без многоточия. */
+.sx-case-tag { display:block; width:fit-content; align-self:flex-start; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  font-size:var(--fs-1); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--sx-ink-soft); background:var(--sx-bg-soft); padding:6px 12px; border-radius:var(--r-pill); margin-bottom:13px; }
+.sx-case h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); line-height:1.25; letter-spacing:-.01em; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 .sx-case p { font-size:var(--fs-4); color:var(--sx-mute); line-height:1.55; margin:8px 0 0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
-.sx-case-meta {display:flex; gap:18px; margin-top:auto; padding-top:14px; font-size:var(--fs-3); color:var(--sx-mute)}
-.sx-case-meta b { color:var(--sx-ink); }
+/* Мета отбита волосяной линией и держится на иконках вместо подписей
+   «Год:»/«Регион:» — булавка и календарь читаются быстрее слова. */
+.sx-case-meta {display:flex; flex-wrap:wrap; gap:8px 18px; margin-top:auto; padding-top:14px; border-top:1px solid var(--sx-line); font-size:var(--fs-3); color:var(--sx-mute)}
+.sx-case-meta > span { display:inline-flex; align-items:center; gap:7px; }
+.sx-case-meta svg { flex-shrink:0; color:var(--sx-mute); }
 
 /* ── news ───────────────────────────────────────────── */
-.sx-news { display:grid; grid-template-columns:repeat(3,1fr); gap:20px; }
-.sx-ncard { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; transition:transform .3s, box-shadow .3s; }
-.sx-ncard:hover { transform:translateY(-4px); box-shadow:var(--sh-sm); }
-.sx-ncard-cover { aspect-ratio:16/9; background:linear-gradient(135deg,var(--sx-bg-soft),var(--sx-line-2)); display:flex; align-items:center; justify-content:center; color:var(--sx-mute); overflow:hidden; }
+/* Колонки — там же, где у проектов (см. «сетки на три колонки»). Раньше здесь
+   стоял одноклассовый .sx-news с тремя колонками, и он был мёртв дважды: класс
+   не был проставлен в разметке вовсе, а по специфичности он всё равно проиграл
+   бы четырём колонкам .sxc-grid. Новости из-за этого шли по четыре в ряд —
+   вернее, три занимали три колонки из четырёх, оставляя пустоту справа. */
+.sx-ncard { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; transition:transform .3s, border-color .3s; }
+.sx-ncard:hover { transform:translateY(-4px); border-color:var(--sx-accent); }
+/* Два класса — по той же причине, что и у обложки проекта: перебиваем
+   портретный 3/4 из .sxc-media. */
+.sxc-media.sx-ncard-cover { aspect-ratio:16/9; background:linear-gradient(135deg,var(--sx-bg-soft),var(--sx-line-2)); display:flex; align-items:center; justify-content:center; color:var(--sx-mute); overflow:hidden; }
 .sx-ncard-cover img { width:100%; height:100%; object-fit:cover; }
 .sx-ncard-body { padding:20px; }
-.sx-ncard-date { font-size:var(--fs-2); color:var(--sx-mute); font-weight:600; }
-.sx-ncard h3 { font-size:var(--fs-5); font-weight:700; color:var(--sx-ink); line-height:1.35; margin-top:8px; }
+/* Дата в разрядку заглавными (09.08.2026, по образцу readdy.cc): так она
+   читается как рубрика-надзаголовок, а не как часть заголовка новости. */
+.sx-ncard-date { font-size:var(--fs-1); color:var(--sx-mute); font-weight:700; text-transform:uppercase; letter-spacing:.1em; }
+.sx-ncard h3 { font-size:var(--fs-5); font-weight:700; color:var(--sx-ink); line-height:1.35; margin-top:10px; }
+/* Явное приглашение открыть статью: раньше карточка была кликабельна целиком,
+   но ничем об этом не сообщала. */
+.sx-ncard-more { display:inline-flex; align-items:center; gap:8px; margin-top:14px;
+  font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--sx-accent); }
+.sx-ncard-more svg { transition:transform .2s; }
+.sx-ncard:hover .sx-ncard-more svg { transform:translateX(4px); }
 
 /* ── catalog portal ──────────────────────────────────── */
 .sx-cp { position:relative; background:var(--sx-card); border:1px solid var(--sx-line); border-radius:var(--r-xl); padding:clamp(36px,5vw,64px); overflow:hidden; }
@@ -1402,12 +1496,15 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 .sx-rev-head { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:40px; }
 .sx-rev-head-left h2 { display:flex; align-items:center; gap:8px; cursor:pointer; }
 .sx-rev-head-left h2:hover { color:var(--sx-blue); }
-.sx-rev-tabs {display:flex; gap:0; align-items:center; flex-shrink:0}
-.sx-rev-tab { padding:10px 20px; font-size:var(--fs-4); font-weight:600; color:var(--sx-mute); background:transparent; border:none; cursor:pointer; font-family:inherit; position:relative; transition:color .18s; white-space:nowrap; }
-.sx-rev-tab::after { content:""; position:absolute; bottom:-2px; left:0; right:0; height:2px; background:var(--sx-blue); transform:scaleX(0); transition:transform .22s cubic-bezier(.16,1,.3,1); border-radius:2px 2px 0 0; }
-.sx-rev-tab.on { color:var(--sx-ink); }
-.sx-rev-tab.on::after { transform:scaleX(1); }
-.sx-rev-tab:focus-visible { outline:2px solid var(--sx-blue); outline-offset:2px; border-radius:4px 4px 0 0; }
+/* Сегментированный переключатель-пилюля (09.08.2026, по образцу readdy.cc):
+   раньше вкладки подчёркивались снизу тонкой линией. Пилюля показывает,
+   что это выбор одного из двух, а не две отдельные ссылки. */
+.sx-rev-tabs {display:inline-flex; gap:2px; align-items:center; flex-shrink:0;
+  margin-top:16px; padding:4px; background:var(--sx-bg-soft); border:1px solid var(--sx-line); border-radius:var(--r-pill)}
+.sx-rev-tab { min-height:38px; padding:9px 20px; font-size:var(--fs-4); font-weight:600; color:var(--sx-mute); background:transparent; border:none; border-radius:var(--r-pill); cursor:pointer; font-family:inherit; position:relative; transition:color .18s, background .18s; white-space:nowrap; }
+.sx-rev-tab.on { color:#fff; background:var(--sx-accent); }
+.sx-rev-tab:not(.on):hover { color:var(--sx-ink); }
+.sx-rev-tab:focus-visible { outline:2px solid var(--sx-blue); outline-offset:2px; }
 /* Карусель выровнена по остальным блокам: раньше стрелки стояли в потоке и
    вдавливали ленту карточек на 58 px внутрь, из-за чего письма не совпадали
    по левому краю ни с заголовком блока, ни с карточками соседних секций.
@@ -1437,9 +1534,26 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 .sx-rev-doc > img { object-fit:cover; object-position:top; }
 .sx-rev-body { flex:1; min-width:0; display:flex; flex-direction:column; }
 .sx-rev-badges { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:12px; }
-.sx-rev-badge { display:inline-flex; align-items:center; gap:6px; font-size:var(--fs-2); font-weight:600; color:var(--sx-blue); border:1.5px solid color-mix(in srgb,var(--sx-blue) 28%,transparent); border-radius:var(--r-sm); padding:4px 10px; line-height:1.3; }
+/* Серая пилюля вместо синей рамки (09.08.2026, по образцу readdy.cc): роль и
+   город — это ярлык, а не действие, и синим они конкурировали с заголовком. */
+.sx-rev-badge { display:inline-flex; align-items:center; gap:6px; max-width:100%; min-width:0; white-space:nowrap; overflow:hidden;
+  font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--sx-ink-soft); background:var(--sx-bg-soft); border:none; border-radius:var(--r-pill); padding:6px 12px; line-height:1.3; }
+/* Обрезаем подпись, а не саму пилюлю: иначе булавка уехала бы под обрез. */
+.sx-rev-badge > span { overflow:hidden; text-overflow:ellipsis; }
+.sx-rev-badge svg { color:var(--sx-accent); }
 .sx-rev-org { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); line-height:1.25; letter-spacing:-.015em; margin:0 0 10px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .sx-rev-quote { font-size:var(--fs-4); line-height:1.65; color:var(--sx-mute); flex:1; margin:0; display:-webkit-box; -webkit-line-clamp:5; -webkit-box-orient:vertical; overflow:hidden; }
+/* Футер карточки: «Читать полностью» слева, круглая стрелка справа. Раньше у
+   карточки не было явного приглашения открыть письмо — кликабельной была
+   только миниатюра, и об этом никто не догадывался. */
+.sx-rev-more { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:14px;
+  width:100%; padding:0; background:none; border:none; cursor:pointer; font-family:inherit; text-align:left; }
+.sx-rev-more:focus-visible { outline:2px solid var(--sx-accent); outline-offset:3px; border-radius:var(--r-sm); }
+.sx-rev-more-t { font-size:var(--fs-3); color:var(--sx-mute); }
+.sx-rev-more-arr { display:flex; align-items:center; justify-content:center; flex-shrink:0; width:38px; height:38px;
+  border-radius:50%; border:1px solid var(--sx-line); color:var(--sx-ink); background:var(--sx-card);
+  transition:background .2s, border-color .2s, color .2s; }
+.sx-rev-card:hover .sx-rev-more-arr { background:var(--sx-accent); border-color:var(--sx-accent); color:#fff; }
 @media(max-width:820px){
   .sx-rev-card { flex:0 0 calc(100% - 10px); }
   .sx-rev-doc { width:88px; }
@@ -1473,14 +1587,13 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
   .sx-bento { grid-template-columns:repeat(2,1fr); grid-template-areas:
     "catalog catalog" "reg reg" "tender service" "brands equip"; }
   .sx-dir-grid { grid-template-columns:repeat(2,1fr); }
-  .sx-impact-grid { grid-template-columns:repeat(2,1fr); gap:32px 24px; }
-  .sx-cases, .sx-news { grid-template-columns:1fr; }
+  /* Колонки проектов и новостей на узких экранах — в блоке «сетки на три
+     колонки» ниже, вместе с остальными их брейкпоинтами. */
 }
 @media (max-width:560px){
   .sx-bento { grid-template-columns:1fr; grid-template-areas:"catalog" "reg" "tender" "service" "brands" "equip"; }
   .sx-dir-grid { grid-template-columns:1fr; }
-  .sx-impact-grid { grid-template-columns:1fr 1fr; }
-  .sx-impact, .sx-cta { border-radius:var(--r-lg); }
+  .sx-cta { border-radius:var(--r-lg); }
 }
     `;
     document.head.appendChild(s);
@@ -1693,6 +1806,33 @@ function EcoUzMap({ lang }) {
   );
 }
 
+/* Поочерёдная подсветка строк в списках плитки мониторинга: активна одна
+   строка, остальные приглушены, фокус идёт по кругу (решение заказчика
+   08.08.2026 — дать дашборду динамику).
+
+   Возвращает индекс активной строки. Списки получают каждый свой вызов с
+   разным интервалом, поэтому крутятся независимо и не мигают в такт.
+
+   При prefers-reduced-motion таймер не заводится вовсе и возвращается -1 —
+   тогда ни одна строка не выделена и все читаются в полную силу. Это не
+   украшение, которое можно просто «замедлить»: бесконечное движение на
+   странице мешает людям с вестибулярными расстройствами и тем, кому трудно
+   удерживать внимание. */
+function useRowCycle(count, ms) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    if (!count) return;
+    const mq = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq && mq.matches) return;
+    const id = setInterval(() => setI((p) => (p + 1) % count), ms);
+    return () => clearInterval(id);
+  }, [count, ms]);
+  if (!count) return -1;
+  const mq = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)");
+  if (mq && mq.matches) return -1;
+  return i % count;
+}
+
 function SoiEcosystem({ lang, go }) {
   const eco = useHomeSetting("homepage_ecosystem", ECO_DEFAULTS);
   const pulse = useEcoPulse();
@@ -1746,6 +1886,11 @@ function SoiEcosystem({ lang, go }) {
   const liveProducts = pulse.products != null && pulse.products >= 100 ? pulse.products : null;
   const brandWall = pulse.brands.filter((b) => b && b.name).slice(0, 5);
   const showWall = brandWall.length >= 3;
+
+  /* Интервалы намеренно разные и не кратные друг другу: на общих 2500 мс оба
+     списка переключались бы синхронно и плитка мигала бы целиком. */
+  const catLit = useRowCycle(tndCats.length, 2400);
+  const srcLit = useRowCycle(srcs.length, 3100);
 
 
   return (
@@ -1818,71 +1963,87 @@ function SoiEcosystem({ lang, go }) {
               )}
             </div>
 
-            {/* Four figures, ranked rather than boxed: the lead one carries the
-                headline claim and the rest step down in size. They used to sit in
-                bordered cells — a card inside a card inside a card. */}
+            {/* Две величины в карточках: сколько закупок идёт сейчас и на
+                скольких площадках мы смотрим. «Новых за неделю» и «закрываются
+                за неделю» сняты по решению заказчика 08.08.2026. */}
             <div className="tnd-kpis">
-              {[
-                { v: st ? st.active : "—", l: _lv(lang, "активных закупок", "faol xarid", "active lots"), lead: true },
-                { v: st ? st.newWeek : "—", l: _lv(lang, "новых за неделю", "haftada yangi", "new this week") },
-                { v: st ? st.endingWeek : "—", l: _lv(lang, "закрываются за неделю", "hafta ichida yopiladi", "closing this week") },
-                // Counted off the list below, not from stats: the server counts
-                // feeds (Etender publishes two) and the panel counts platforms.
-                { v: srcs.length || "—", l: _lv(lang, "площадок мониторинга", "kuzatilayotgan maydoncha", "platforms watched") },
-              ].map((k, i) => (
-                <div className={"tnd-kpi" + (k.lead ? " lead" : "")} key={i}>
-                  <div className="tnd-kpi-v"><EcoCount value={k.v} /></div>
-                  <div className="tnd-kpi-l">{k.l}</div>
+              <div className="tnd-kpi lead">
+                {/* Цифра и подпись стоят в строку (решение заказчика
+                    08.08.2026). Обёртка нужна, чтобы flex собрал именно эту
+                    пару: ниже в карточке лежат ещё категории, и без неё они
+                    встали бы третьей колонкой той же строки. */}
+                <div className="tnd-kpi-head">
+                  <div className="tnd-kpi-v"><EcoCount value={st ? st.active : "—"} /></div>
+                  <div className="tnd-kpi-l">{_lv(lang, "активных закупок", "faol xarid", "active lots")}</div>
+                  {/* Заголовок списка поднят в строку с цифрой (решение
+                      заказчика 08.08.2026): отдельной строкой он съедал высоту,
+                      а в правой карточке такого заголовка нет вовсе — карточки
+                      не совпадали по ритму. */}
+                  <div className="tnd-sec-h">
+                    {_lv(lang, "Категории закупок", "Xarid kategoriyalari", "Procurement categories")}
+                  </div>
                 </div>
-              ))}
-            </div>
 
-            <div className="tnd-cols">
-              <div className="tnd-sec">
-                <div className="tnd-sec-h">
-                  {_lv(lang, "Площадки мониторинга", "Kuzatilayotgan maydonchalar", "Platforms watched")}
-                  <b>{srcs.length}</b>
+                {/* Категории лежат внутри этой же карточки (решение заказчика
+                    08.08.2026): они раскладывают на части ровно то число,
+                    что стоит над ними, — сумма по категориям и есть «активные
+                    закупки». Отдельной карточкой рядом связь не читалась.
+
+                    Обычный блок, а не <details>: список показан всегда, и
+                    сворачивать его нечем — управление снято по решению
+                    заказчика. */}
+                <div className="tnd-sec">
+                  {tndCats.map((c, i) => (
+                    <button
+                      className={"tnd-row cat" + (c.count ? "" : " zero") + (i === catLit ? " is-lit" : "")}
+                      key={c.id}
+                      /* One accent, five weights of it: five different hues inside a
+                         violet tile is exactly the acid the brief rules out. */
+                      style={{ "--bar": (1 - i * 0.15).toFixed(2) }}
+                      onClick={() => go("tenders", { cat: c.id })}
+                      title={_lv(lang, "Открыть тендеры: ", "Tenderlarni ochish: ", "Open tenders: ") + c.label}
+                    >
+                      <span className="tnd-bar" />
+                      <span className="tnd-row-n">{c.label}</span>
+                      <span className="tnd-row-sum">{tndMoney(c.sum, lang)}</span>
+                      <span className="tnd-row-v">{c.count}</span>
+                    </button>
+                  ))}
                 </div>
-                {srcs.map((s) => (
-                  <a
-                    className={"tnd-row" + (s.count ? "" : " zero")}
-                    key={s.id}
-                    href={s.site}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    /* What the platform is, on hover — the API already ships the
-                       description in all three languages. */
-                    title={(s.description ? _lv(lang, s.description.ru, s.description.uz, s.description.en) + " · " : "") + s.site}
-                  >
-                    <span className={"tnd-dot" + (s.count ? "" : " off")} />
-                    <span className="tnd-row-n">{s.name}</span>
-                    <span className="tnd-row-v">{s.count || "—"}</span>
-                  </a>
-                ))}
               </div>
 
-              <div className="tnd-sec">
-                <div className="tnd-sec-h">
-                  {_lv(lang, "Категории закупок", "Xarid kategoriyalari", "Procurement categories")}
-                  <b>{st ? st.active : ""}</b>
+              {/* Площадки: цифра и под ней список. Раньше под цифрой стояла
+                  ещё и свёрнутая строка «Площадки мониторинга 4» — то же число
+                  во второй раз. Сворачивание снято по решению заказчика,
+                  список показан всегда.
+
+                  Число берётся из длины списка, а не из статистики: сервер
+                  считает ленты (Etender публикует две), а панель — площадки. */}
+              <div className="tnd-kpi tnd-kpi-src">
+                <div className="tnd-kpi-head">
+                  <div className="tnd-kpi-v"><EcoCount value={srcs.length || "—"} /></div>
+                  <div className="tnd-kpi-l">
+                    {_lv(lang, "площадок мониторинга", "kuzatilayotgan maydoncha", "platforms watched")}
+                  </div>
                 </div>
-                {tndCats.map((c, i) => (
-                  <button
-                    className={"tnd-row cat" + (c.count ? "" : " zero")}
-                    key={c.id}
-                    /* One accent, five weights of it: five different hues inside a
-                       violet tile is exactly the acid the brief rules out. */
-                    style={{ "--bar": (1 - i * 0.15).toFixed(2) }}
-                    onClick={() => go("tenders", { cat: c.id })}
-                    title={_lv(lang, "Открыть тендеры: ", "Tenderlarni ochish: ", "Open tenders: ") + c.label}
-                  >
-                    <span className="tnd-bar" />
-                    <span className="tnd-row-n">{c.label}</span>
-                    <span className="tnd-row-sum">{tndMoney(c.sum, lang)}</span>
-                    <span className="tnd-row-v">{c.count}</span>
-                  </button>
-                ))}
+                <div className="tnd-kpi-list">
+                  {srcs.map((s, si) => (
+                    <a
+                      className={"tnd-row" + (s.count ? "" : " zero") + (si === srcLit ? " is-lit" : "")}
+                      key={s.id}
+                      href={s.site}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={(s.description ? _lv(lang, s.description.ru, s.description.uz, s.description.en) + " · " : "") + s.site}
+                    >
+                      <span className={"tnd-dot" + (s.count ? "" : " off")} />
+                      <span className="tnd-row-n">{s.name}</span>
+                      <span className="tnd-row-v">{s.count || "—"}</span>
+                    </a>
+                  ))}
+                </div>
               </div>
+
             </div>
 
             <div className="eco-foot" style={{ paddingTop: 12 }}>
@@ -2024,7 +2185,7 @@ function SoiExpertise({ lang, go }) {
 @media(min-width:1024px){ .sxp-grid { display:flex; flex-wrap:nowrap; align-items:stretch; } }
 
 .sxp-card { position:relative; display:flex; flex-direction:column; overflow:hidden; text-align:left;
-  min-height:460px; padding:28px; border-radius:var(--r-xl); cursor:pointer; font-family:inherit;
+  min-height:460px; padding:28px; border-radius:var(--sx-r); cursor:pointer; font-family:inherit;
   border:1px solid var(--sx-line); background:var(--sx-card); color:var(--sx-ink);
   transition:flex-grow .5s ease, background .35s, border-color .35s, transform .35s; }
 @media(min-width:1024px){ .sxp-card { flex:1 1 0; } .sxp-card:hover { flex-grow:1.35; } }
@@ -2035,23 +2196,23 @@ function SoiExpertise({ lang, go }) {
 
 .sxp-bignum { position:absolute; right:12px; bottom:-48px; font-size:9rem; font-weight:800; line-height:1;
   user-select:none; pointer-events:none; color:rgba(16,21,18,.04); }
-.sxp-card.feat .sxp-bignum { color:rgba(22,33,11,.08); }
+.sxp-card.feat .sxp-bignum { color:rgba(255,255,255,.14); }
 
 .sxp-top { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .sxp-no { font-size:var(--fs-2); font-weight:700; color:var(--sx-mute); }
-.sxp-card.feat .sxp-no { color:rgba(22,33,11,.6); }
+.sxp-card.feat .sxp-no { color:rgba(255,255,255,.72); }
 .sxp-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
   border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
   transition:transform .3s, background .3s, border-color .3s, color .3s; }
 .sxp-card:hover .sxp-arrow { transform:rotate(45deg); background:var(--sx-lime); border-color:var(--sx-lime); color:var(--sx-lime-ink); }
-.sxp-card.feat .sxp-arrow { border-color:rgba(22,33,11,.25); color:var(--sx-lime-ink); }
+.sxp-card.feat .sxp-arrow { border-color:rgba(255,255,255,.35); color:var(--sx-lime-ink); }
 .sxp-card.feat:hover .sxp-arrow { background:transparent; }
 
 .sxp-t { position:relative; z-index:1; margin:40px 0 0; max-width:16rem; font-size:var(--fs-7); font-weight:700;
   line-height:1.2; letter-spacing:-.02em; }
 .sxp-d { position:relative; z-index:1; margin:12px 0 0; max-width:20rem; font-size:var(--fs-4); line-height:1.6;
   color:var(--sx-mute); }
-.sxp-card.feat .sxp-d { color:rgba(22,33,11,.72); }
+.sxp-card.feat .sxp-d { color:rgba(255,255,255,.82); }
 
 /* grid-rows 0fr→1fr: высота подстраивается ровно под контент */
 .sxp-expand { position:relative; z-index:1; display:grid; grid-template-rows:0fr;
@@ -2062,20 +2223,20 @@ function SoiExpertise({ lang, go }) {
 .sxp-card:hover .sxp-expand-in, .sxp-card:focus-visible .sxp-expand-in { opacity:1; }
 .sxp-comp { margin:0; font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em;
   color:var(--sx-mute); }
-.sxp-card.feat .sxp-comp { color:rgba(22,33,11,.55); }
+.sxp-card.feat .sxp-comp { color:rgba(255,255,255,.68); }
 .sxp-proof { margin:4px 0 0; font-size:var(--fs-3); font-weight:500; color:var(--sx-ink); }
 .sxp-card.feat .sxp-proof { color:var(--sx-lime-ink); }
 .sxp-list { list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:6px; }
 .sxp-list li { display:flex; align-items:flex-start; gap:8px; font-size:var(--fs-2); line-height:1.4;
   color:var(--sx-mute); }
-.sxp-card.feat .sxp-list li { color:rgba(22,33,11,.72); }
+.sxp-card.feat .sxp-list li { color:rgba(255,255,255,.82); }
 .sxp-dot { flex-shrink:0; width:6px; height:6px; margin-top:5px; border-radius:50%; background:var(--sx-accent); }
 .sxp-card.feat .sxp-dot { background:var(--sx-lime-ink); }
 
 .sxp-more {position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between;
   gap:8px; margin-top:auto; padding-top:16px;
   font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--sx-ink)}
-.sxp-card.feat .sxp-more {border-top-color:rgba(22,33,11,.18); color:var(--sx-lime-ink)}
+.sxp-card.feat .sxp-more {border-top-color:rgba(255,255,255,.24); color:var(--sx-lime-ink)}
 .sxp-more-arr { font-size:var(--fs-5); transition:transform .3s; }
 .sxp-card:hover .sxp-more-arr { transform:translateX(4px); }
 
@@ -2107,14 +2268,20 @@ function SoiExpertise({ lang, go }) {
           {EXPERTISE_ITEMS.map((it, i) => {
             const no = String(i + 1).padStart(2, "0");
             return (
-              <div
+              /* Ссылка, а не div с role="button": карточка ведёт на страницу
+                 услуги, и подменять её кнопкой значит терять средний клик,
+                 Cmd-клик и место в поисковом индексе. Адрес строится из той же
+                 карты, что и роутер (window.corpViewToPath). */
+              <a
                 key={i}
                 className={"sxp-card sx-rv" + (i === 0 ? " feat" : "")}
                 style={{ "--i": i }}
-                role="button"
-                tabIndex={0}
-                onClick={() => go(it.nav)}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(it.nav); } }}
+                href={(window.corpViewToPath && window.corpViewToPath(it.nav)) || "/" + it.nav}
+                onClick={(e) => {
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                  e.preventDefault();
+                  go(it.nav);
+                }}
               >
                 <span className="sxp-bignum" aria-hidden>{no}</span>
                 <div className="sxp-top">
@@ -2140,7 +2307,7 @@ function SoiExpertise({ lang, go }) {
                   {_lv(lang, "Подробнее", "Batafsil", "Read more")}
                   <span className="sxp-more-arr" aria-hidden>→</span>
                 </div>
-              </div>
+              </a>
             );
           })}
         </div>
@@ -2194,13 +2361,28 @@ function SoiCatalogCards({ lang, go }) {
 @media(min-width:640px){ .sxc-grid { grid-template-columns:1fr 1fr; } }
 @media(min-width:1024px){ .sxc-grid { grid-template-columns:repeat(4,1fr); } }
 
+/* ── сетки на три колонки: проекты и новости ──────────────────────────────
+   Каталог идёт по четыре в ряд, проекты и новости — по три (как в readdy.cc).
+   Селекторы двухклассовые и стоят сразу после брейкпоинтов .sxc-grid: только
+   так они перебивают его четыре колонки — при равной специфичности решает
+   порядок, а одноклассовый .sx-cases/.sx-news из прежней версии проигрывал
+   вовсе. Порядок mobile-first: одна колонка, с 640 — две, с 1024 — три. */
+.sxc-grid.sx-cases, .sxc-grid.sx-news { grid-template-columns:1fr; }
+@media(min-width:640px){ .sxc-grid.sx-cases, .sxc-grid.sx-news { grid-template-columns:1fr 1fr; } }
+@media(min-width:1024px){ .sxc-grid.sx-cases, .sxc-grid.sx-news { grid-template-columns:repeat(3,1fr); } }
+
+/* Карточка — <a>, поэтому гасим наследие ссылки: подчёркивание и синий цвет
+   текста. Цвет заголовка задаёт .sxc-t, но color:inherit нужен, чтобы номер
+   и стрелка не позеленели от пользовательских стилей ссылок. */
 .sxc-card { overflow:hidden; border-radius:var(--sx-r); border:1px solid var(--sx-line); background:var(--sx-card);
   cursor:pointer; text-align:left; padding:0; font-family:inherit; display:flex; flex-direction:column;
+  text-decoration:none; color:inherit;
   transition:box-shadow .3s, border-color .3s; }
+.sxc-card:hover { text-decoration:none; }
 [data-theme="dark"] .sxc-card { background:var(--sx-card); border-color:var(--sx-line); }
 .sxc-card:hover { border-color:var(--sx-ink-soft); }
 .sxc-card:focus-visible { outline:2px solid var(--sx-ink); outline-offset:3px; }
-.sxc-media { aspect-ratio:4/3; overflow:hidden; }
+.sxc-media { aspect-ratio:3/4; overflow:hidden; }
 .sxc-media img { display:block; width:100%; height:100%; object-fit:cover;
   transition:transform .5s cubic-bezier(.16,1,.3,1); }
 .sxc-card:hover .sxc-media img { transform:scale(1.06); }
@@ -2212,7 +2394,33 @@ function SoiCatalogCards({ lang, go }) {
 .sxc-arr { display:flex; align-items:center; justify-content:center; flex-shrink:0; width:44px; height:44px;
   border-radius:50%; border:1px solid var(--sx-line); color:var(--sx-ink);
   transition:transform .3s, background .3s, border-color .3s, color .3s; }
-.sxc-card:hover .sxc-arr { transform:rotate(45deg); background:var(--sx-lime); border-color:var(--sx-lime); color:var(--sx-lime-ink); }
+/* Наведение на карточку: круг заливается фирменным синим, стрелка белеет.
+   Поворот на 45° убран — стрелка ведёт в раздел, то есть вправо, а повёрнутая
+   указывала по диагонали «наружу», как ссылка на другой сайт. */
+.sxc-card:hover .sxc-arr,
+.sxc-card:focus-visible .sxc-arr { background:var(--sx-accent); border-color:var(--sx-accent); color:#fff; }
+
+/* ── Каталог: подпись на фото (модификатор .ov) ─────────────────────────
+   Решение 09.08.2026, по образцу readdy.cc: номер, заголовок и стрелка легли
+   прямо на снимок поверх тёмного градиента, вместо белой плашки под ним.
+
+   Всё через модификатор, а НЕ правкой базовых .sxc-card/.sxc-media: те же
+   два класса носят карточки «Реализованных проектов» (.sx-case) и «Новостей»
+   (.sx-ncard) — там подпись остаётся под фотографией, и правка базы сломала
+   бы обе секции разом. */
+.sxc-card.ov { position:relative; display:block; aspect-ratio:3/4; }
+.sxc-card.ov .sxc-media { position:absolute; inset:0; aspect-ratio:auto; }
+/* Градиент — псевдоэлемент подложки, а не слой в разметке: подпись должна
+   читаться на любом снимке, что бы на нём ни было. */
+.sxc-card.ov .sxc-media::after { content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, transparent 42%, rgba(4,10,20,.74) 100%); pointer-events:none; }
+.sxc-card.ov .sxc-no { position:absolute; z-index:1; top:16px; left:20px; color:rgba(255,255,255,.82); }
+.sxc-card.ov .sxc-foot { position:absolute; z-index:1; inset:auto 16px 18px 20px; padding:0;
+  align-items:flex-end; }
+.sxc-card.ov .sxc-t { margin:0; color:#fff; }
+.sxc-card.ov .sxc-arr { border:none; background:rgba(255,255,255,.96); color:var(--sx-ink); }
+.sxc-card.ov:hover .sxc-arr,
+.sxc-card.ov:focus-visible .sxc-arr { background:var(--sx-accent); color:#fff; }
 
 @media (prefers-reduced-motion: reduce){
   .sxc-card, .sxc-media img, .sxc-arr,   .sxc-card:hover .sxc-media img { transform:none; }
@@ -2246,27 +2454,39 @@ function SoiCatalogCards({ lang, go }) {
         </div>
 
         <div className="sxc-grid">
+          {/* Карточка — настоящая ссылка на адрес категории (/catalog/<slug>),
+              а не div с обработчиком. Кликабельна она была и раньше, но без
+              href у неё не работало то, чего ждут от плитки каталога: открыть
+              в новой вкладке средним кликом или Cmd/Ctrl, скопировать адрес,
+              попасть в индекс поисковика.
+
+              Переход остаётся внутренним: обычный клик перехватываем и отдаём
+              роутеру. Клик с модификатором и не левой кнопкой не трогаем —
+              иначе новая вкладка снова перестанет открываться. Обработчик
+              клавиатуры не нужен, <a href> нажимается по Enter сам. */}
           {CATALOG_CARDS.map((card, i) => (
-            <div
+            <a
               key={card.slug}
-              className="sxc-card sx-rv"
+              className="sxc-card ov sx-rv"
               style={{ "--i": i }}
-              role="button"
-              tabIndex={0}
-              onClick={() => goCard(card)}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); goCard(card); } }}
+              href={"/catalog/" + card.slug}
+              onClick={(e) => {
+                if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                e.preventDefault();
+                goCard(card);
+              }}
             >
               <div className="sxc-media">
                 <img src={window.__asset("assets/catalog/" + card.slug + ".jpg")} alt="" loading="lazy" />
               </div>
+              {/* Номер вынесен из .sxc-foot: в варианте .ov он стоит в верхнем
+                  углу снимка, а подпись со стрелкой — в нижнем. */}
+              <span className="sxc-no">{String(i + 1).padStart(2, "0")}</span>
               <div className="sxc-foot">
-                <div>
-                  <span className="sxc-no">{String(i + 1).padStart(2, "0")}</span>
-                  <h3 className="sxc-t">{_lv(lang, card.t.ru, card.t.uz, card.t.en)}</h3>
-                </div>
+                <h3 className="sxc-t">{_lv(lang, card.t.ru, card.t.uz, card.t.en)}</h3>
                 <span className="sxc-arr" aria-hidden><Icon name="arrowRight" size={18} /></span>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </div>
@@ -2306,12 +2526,45 @@ function SoiDirections({ lang, go }) {
           {DIRECTION_GROUPS.map((g, i) => {
             const dirs = getDirsForGroup(g.id).slice(0, 4);
             return (
-              <div className="sx-dir sx-rv" key={g.id} style={{ "--i": i }} onClick={() => go("catalog", { dir: dirs[0] && dirs[0].id })}>
-                <div className="sx-dir-ic" style={{ background: g.color + "18", color: g.color }}><Icon name={g.icon} size={26} /></div>
-                <h3>{_lv(lang, g.ru, g.uz, g.en)}</h3>
+              /* Карточка перестала быть div с onClick: без tabindex и role она
+                 не бралась ни клавиатурой, ни скринридером — мышью работала, для
+                 остальных не существовала.
+
+                 Обернуть карточку целиком в <a> нельзя: внутри уже лежат ссылки
+                 на отдельные направления, а вложенные <a> — невалидная разметка,
+                 браузер их разорвёт. Поэтому ссылка одна, на заголовке, а её
+                 область нажатия растянута на карточку псевдоэлементом
+                 (.sx-dir-t::after). Внутренние ссылки подняты над этим слоем и
+                 продолжают работать сами по себе. */
+              <div className="sx-dir sx-rv" key={g.id} style={{ "--i": i }}>
+                {/* Цвет иконки больше не берётся из g.color: данные групп несут
+                    свои оттенки (среди них зелёный и бирюзовый), и на белой
+                    странице с одним фирменным синим это читалось разнобоем.
+                    Цвет и подложка заданы в CSS — один тон на все группы.
+                    Глиф увеличен с 26 до 39px, как просили — в полтора раза. */}
+                <div className="sx-dir-ic"><Icon name={g.icon} size={39} /></div>
+                <h3>
+                  <a
+                    className="sx-dir-t"
+                    href="/catalog"
+                    onClick={(e) => {
+                      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                      e.preventDefault();
+                      go("catalog", { dir: dirs[0] && dirs[0].id });
+                    }}
+                  >{_lv(lang, g.ru, g.uz, g.en)}</a>
+                </h3>
                 <div className="sx-dir-links">
                   {dirs.map((d) => (
-                    <a key={d.id} onClick={(e) => { e.stopPropagation(); go("catalog", { dir: d.id }); }}>{_lv(lang, d.ru, d.uz, d.en)}</a>
+                    <a
+                      key={d.id}
+                      href="/catalog"
+                      onClick={(e) => {
+                        if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                        e.preventDefault();
+                        go("catalog", { dir: d.id });
+                      }}
+                    >{_lv(lang, d.ru, d.uz, d.en)}</a>
                   ))}
                 </div>
               </div>
@@ -2323,37 +2576,9 @@ function SoiDirections({ lang, go }) {
   );
 }
 
-function SoiImpact({ lang }) {
-  const impact = useHomeSetting("homepage_impact", IMPACT_DEFAULTS);
-  const itx = (field) => trTx(impact, field, lang);
-  const metrics = [1, 2, 3, 4].map((n) => ({
-    n: impact[`stat${n}_val`] || "",
-    u: impact[`stat${n}_unit`] || "",
-    l: itx(`stat${n}_label`),
-  }));
-  return (
-    <section className="sx-section">
-      <div className="sx-wrap">
-        <div className="sx-impact sx-rv">
-          <div className="sx-impact-aurora" />
-          <div className="sx-impact-grid-ov" />
-          <div className="sx-impact-inner">
-            <span className="sx-eyebrow">{itx("eyebrow")}</span>
-            <h2>{itx("title")}</h2>
-            <div className="sx-impact-grid">
-              {metrics.map((m, i) => (
-                <div className="sx-metric sx-rv" key={i} style={{ "--i": i }}>
-                  <div className="sx-metric-n"><SoiCountUp value={m.n} /><span className="u">{m.u}</span></div>
-                  <div className="sx-metric-l">{m.l}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
+/* Блок «Масштаб платформы» (SoiImpact) удалён 09.08.2026 по решению
+   заказчика. Вместе с ним ушёл и его CSS: .sx-impact*, .sx-metric* и
+   .sx-eyebrow — последний использовался только здесь. */
 
 function SoiCountUp({ value }) {
   const ref = useRef(null);
@@ -2569,9 +2794,11 @@ function SoiCases({ lang, go }) {
                 {c.tag && <span className="sx-case-tag">{tx(c.tag)}</span>}
                 <h3>{tx(c.title)}</h3>
                 <p>{tx(c.desc)}</p>
+                {/* Регион перед годом: в readdy место стоит первым, и так
+                    читается естественнее — «где», потом «когда». */}
                 <div className="sx-case-meta">
-                  {c.year && <span>{_lv(lang, "Год", "Yil", "Year")}: <b>{c.year}</b></span>}
-                  {c.region && <span>{_lv(lang, "Регион", "Hudud", "Region")}: <b>{tx(c.region)}</b></span>}
+                  {c.region && <span><Icon name="pin" size={15} />{tx(c.region)}</span>}
+                  {c.year && <span><Icon name="calendar" size={15} />{c.year}</span>}
                 </div>
               </div>
             </div>
@@ -2733,12 +2960,24 @@ function SoiReviews({ lang, go }) {
                         : <DocThumb color={color}/>}
                   </div>
                   <div className="sx-rev-body">
+                    {/* Роль и город — одна пилюля, как в readdy: два ярлыка
+                        рядом читались как два независимых фильтра. Инлайновый
+                        цвет снят — он перебивал серую заливку из CSS. */}
                     <div className="sx-rev-badges">
-                      <span className="sx-rev-badge" style={{ color, borderColor: color + "48" }}>{typeLabel}</span>
-                      {region && <span className="sx-rev-badge"><Icon name="pin" size={12}/>{region}</span>}
+                      <span className="sx-rev-badge">
+                        <Icon name="pin" size={12}/>
+                        <span>{typeLabel}{region ? " · " + region : ""}</span>
+                      </span>
                     </div>
                     <h3 className="sx-rev-org">{org}</h3>
                     {text && <p className="sx-rev-quote">{text}</p>}
+                    {/* Кнопка, а не div: подпись обещает открыть письмо, и
+                        нажатие обязано работать — в том числе с клавиатуры. */}
+                    <button className="sx-rev-more" type="button" onClick={open}
+                      aria-label={lv("Открыть письмо","Xatni ochish","Open letter") + ": " + org}>
+                      <span className="sx-rev-more-t">{lv("Читать полностью","To'liq o'qish","Read in full")}</span>
+                      <span className="sx-rev-more-arr" aria-hidden><Icon name="arrowRight" size={16}/></span>
+                    </button>
                   </div>
                 </div>
                 );
@@ -2791,16 +3030,18 @@ function SoiNews({ lang, go }) {
               "Company deliveries and projects, changes in medical device regulation and new equipment.")}</p>
           </div>
         </div>
-        <div className="sxc-grid">
+        <div className="sxc-grid sx-news">
           {news.map((n, i) => (
-            <div
+            /* Настоящая <button>, а не div с role="button": карточка открывает
+               модалку, то есть действие внутри страницы, а не переход. Родной
+               элемент сам даёт фокус, Enter и пробел — свои обработчики клавиш
+               больше не нужны. Ссылкой её делать нельзя: адреса у модалки нет. */
+            <button
+              type="button"
               key={n.id || i}
               className="sxc-card sx-ncard sx-rv"
               style={{ "--i": i }}
-              role="button"
-              tabIndex={0}
               onClick={() => setViewer(n)}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setViewer(n); } }}
               aria-label={_lv(lang, "Открыть новость", "Yangilikni ochish", "Open news item") + ": " + tx(n.title)}
             >
               <div className="sxc-media sx-ncard-cover">
@@ -2809,8 +3050,14 @@ function SoiNews({ lang, go }) {
               <div className="sx-ncard-body">
                 <div className="sx-ncard-date">{fmt(n.date)}</div>
                 <h3>{tx(n.title)}</h3>
+                {/* span, не ссылка: вся карточка уже <button>, и вложенная
+                    интерактивная обёртка внутри неё невалидна. */}
+                <span className="sx-ncard-more">
+                  {_lv(lang, "Читать статью", "Maqolani o'qish", "Read article")}
+                  <Icon name="arrowRight" size={14} />
+                </span>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -2948,7 +3195,6 @@ function HomePage({ t, lang, store, go }) {
       <SoiCatalogCards lang={lang} go={go} />
       <SoiDirections lang={lang} go={go} />
       <SoiCatalogPortal lang={lang} go={go} />
-      <SoiImpact lang={lang} />
       <SoiBrands lang={lang} go={go} />
       <SoiCases lang={lang} go={go} />
       <SoiNews lang={lang} go={go} />
@@ -2956,13 +3202,13 @@ function HomePage({ t, lang, store, go }) {
     </div>);
 }
 
-Object.assign(window, { HomePage, Footer, Hero, CategoryGrid, FeaturedRow, TrustBand, BrandStrip, CtaBand, HeroVideoSlot });
+Object.assign(window, { HomePage, Hero, CategoryGrid, FeaturedRow, TrustBand, BrandStrip, CtaBand, HeroVideoSlot });
 /* Expose the new platform homepage building blocks so the corp shell (home-sections.jsx → CoHomePage)
    can compose the exact same Stripe/Vercel-grade design without duplicating ~600 lines.
    These components close over the catalog-scope `Icon`, which is a shared global, so they render
    identically regardless of which shell calls them. */
 Object.assign(window, {
   SoiPlatformCSS, useSoiReveal, SoiHero: Hero,
-  SoiEcosystem, SoiExpertise, SoiCatalogCards, SoiDirections, SoiCatalogPortal, SoiImpact, SoiBrands, SoiCases, SoiReviews, SoiNews, SoiFinalCTA,
+  SoiEcosystem, SoiExpertise, SoiCatalogCards, SoiDirections, SoiCatalogPortal, SoiBrands, SoiCases, SoiReviews, SoiNews, SoiFinalCTA,
   SoiCaseModal: CaseModal,
 });
