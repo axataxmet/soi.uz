@@ -23,9 +23,27 @@ export class CrmService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  /* Отдаём только поля настроек, без служебных колонок строки.
+     Раньше здесь был `{ ...DEFAULTS, ...row }`, и наружу утекали id и
+     updatedAt. Админка присылает полученный объект обратно без изменений, а
+     ValidationPipe поднят с forbidNonWhitelisted — сохранение падало с
+     «property id should not exist, property updatedAt should not exist».
+     Чинится здесь, а не в админке: лишние поля незачем отдавать в принципе,
+     и любой другой клиент наступил бы на те же грабли.
+
+     null из необязательных колонок заменяется значением по умолчанию (пустой
+     строкой): в форме это поле ввода, и null в нём превратился бы в строку
+     «null» при первом же сохранении. */
   async getConfig() {
     const row = await this.prisma.crmConfig.findUnique({ where: { id: SINGLETON_ID } });
-    return row ? { ...DEFAULTS, ...row } : { ...DEFAULTS };
+    const out: Record<string, unknown> = { ...DEFAULTS };
+    if (row) {
+      const src = row as unknown as Record<string, unknown>;
+      for (const key of Object.keys(DEFAULTS)) {
+        if (src[key] !== undefined && src[key] !== null) out[key] = src[key];
+      }
+    }
+    return out as unknown as UpdateCrmConfigDto;
   }
 
   async setConfig(dto: UpdateCrmConfigDto) {
