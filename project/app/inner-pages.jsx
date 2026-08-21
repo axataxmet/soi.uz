@@ -65,7 +65,7 @@ function AboutPage({ t, lang, go }) {
       founded + " yildan O'zbekistonda tibbiy uskunalarni rasmiy yetkazib beruvchi va integrator.",
       "Official supplier and integrator of medical equipment in Uzbekistan since " + founded + ".")} />
       <section className="section">
-        <div className="wrap" style={{ fontFamily: "Manrope" }}>
+        <div className="wrap" style={{ fontFamily: "Montserrat, Helvetica, Arial, sans-serif" }}>
           <div className="grid-2" style={{ alignItems: "center", gap: 48 }}>
             <div className="reveal">
               <span className="eyebrow line">{lv("О нас", "Biz haqimizda", "About us")}</span>
