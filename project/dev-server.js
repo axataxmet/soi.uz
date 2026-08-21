@@ -25,11 +25,18 @@ const types = {
 
 function safePath(urlPath) {
   const decoded = decodeURIComponent((urlPath || "/").split("?")[0]);
-  const normalized = path.normalize(decoded).replace(/^(\.\.[/\\])+/, "");
-  return path.join(root, normalized);
+  // Make the path relative and resolve against the server root to avoid
+  // path-traversal (absolute or leading `/` would otherwise bypass `root`).
+  const rel = decoded.replace(/^[/\\]+/, "");
+  const resolved = path.resolve(root, rel);
+  const rootResolved = path.resolve(root);
+  if (resolved === rootResolved || resolved.startsWith(rootResolved + path.sep)) {
+    return resolved;
+  }
+  return rootResolved;
 }
 
-function send(res, file, range) {
+function send(req, res, file, range) {
   const type = types[path.extname(file).toLowerCase()] || "application/octet-stream";
 
   // Media needs byte ranges — Safari refuses to play video served without them.
@@ -55,6 +62,11 @@ function send(res, file, range) {
         "Content-Length": end - start + 1,
         "Cache-Control": "no-store",
       });
+      // For HEAD requests do not send the body.
+      if (req.method === "HEAD") {
+        res.end();
+        return;
+      }
       fs.createReadStream(file, { start, end }).pipe(res);
     });
     return;
@@ -69,7 +81,11 @@ function send(res, file, range) {
     const headers = { "Content-Type": type, "Cache-Control": "no-store" };
     if (/^video\//.test(type)) headers["Accept-Ranges"] = "bytes";
     res.writeHead(200, headers);
-    res.end(data);
+    if (req.method === "HEAD") {
+      res.end();
+    } else {
+      res.end(data);
+    }
   });
 }
 
@@ -126,7 +142,9 @@ function proxyApi(req, res) {
 
 http
   .createServer((req, res) => {
-    if (PROXIED.some((p) => req.url === p || req.url.startsWith(p + "/"))) {
+    // Use the parsed pathname for proxy decisions (req.url may contain query).
+    const pathname = new URL(req.url, `http://localhost`).pathname;
+    if (PROXIED.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
       proxyApi(req, res);
       return;
     }
@@ -136,8 +154,8 @@ http
       return;
     }
     const file = resolveFile(req.url);
-    send(res, file, req.headers.range);
+    send(req, res, file, req.headers.range);
   })
   .listen(port, () => {
-    console.log(`SOI.UZ static server running at http://127.0.0.1:${port}`);
+    console.log(`SOI.UZ static server running at http://localhost:${port}`);
   });
