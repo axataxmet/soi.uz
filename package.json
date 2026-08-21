@@ -7,12 +7,15 @@
     "dev": "node project/dev-server.js",
     "build:app": "node scripts/build.js",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots"
   },
   "devDependencies": {
     "@babel/core": "^8.0.1",
     "@babel/preset-env": "^8.0.2",
     "@babel/preset-react": "^8.0.1",
+    "@playwright/test": "^1.62.1",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0"
   }

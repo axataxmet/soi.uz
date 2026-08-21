@@ -31,8 +31,29 @@ Thumbs.db
 # ── coverage / test output ──
 coverage/
 
+# Playwright: отчёт и снимки расхождений — производные, пересоздаются прогоном.
+# Сами эталоны (tests/visual/baseline/) versioned намеренно: без них сравнивать
+# не с чем, и на чистой машине первый прогон молча создал бы новые.
+tests/visual/report/
+test-results/
+
+# Сторонний плагин-скилл (github.com/nextlevelbuilder/ui-ux-pro-max-skill),
+# установлен локально по просьбе пользователя 07.08.2026. 8.2 МБ, включая
+# бинарные TTF-шрифты — не тот вес, который стоит тащить в историю git.
+# У каждого, кто клонирует репозиторий, эти данные не подтянутся сами:
+# ставить командой из PLUGINS.md рядом с этим файлом (если понадобится).
+.claude/skills/
+
 # e-tender isolated Prisma client (regenerated)
 server/prisma/etender/generated/
 
 # stray copied directory, unrelated to this project
 project/app/Claude/
+
+# Сторонние скиллы агентов, установленные локально (8.2 МБ, включая бинарные
+# шрифты) — та же причина, что и у .claude/skills/ выше: производное от
+# внешнего репозитория, а не код проекта.
+.agents/
+
+# Локальная конфигурация стороннего CLI — у каждого своя.
+.codex/
