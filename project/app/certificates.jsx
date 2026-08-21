@@ -143,24 +143,26 @@ function corpNavItems(lang) {
   { view: "contacts", label: lvh("Контакты", "Kontaktlar", "Contacts") }];
 }
 
-/* Колонки футера. От меню в шапке отличаются двумя вещами (решение заказчика,
-   06.08.2026): группы «Услуги» в футере нет, а сам пункт стоит в «О компании»
-   сразу под «Партнёрами» и ведёт на страницу услуг целиком.
+/* Колонки футера. От меню в шапке отличаются тем, что отдельной группы
+   «Услуги» здесь нет, а сам пункт стоит внутри «О компании» (решение
+   заказчика 06.08.2026). Порядок внутри колонки задан заказчиком
+   21.08.2026: «Услуги» и «Контакты» замыкают список, после «Новостей».
 
    Живёт здесь, а не в каждом футере: их два — CoFooter в этом файле и Footer в
    home-page.jsx, — и раньше такие списки уже расходились между собой. Меню в
    шапке по-прежнему читает corpNavItems напрямую и остаётся с выпадающими
-   «Услугами». */
+   «Услугами», а «Контакты» там — самостоятельный пункт верхнего уровня. */
 function footerNavCols(lang) {
   const lvh = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   return corpNavItems(lang)
   .filter((it) => it.children && it.id !== "services")
   .map((col) => {
     if (col.id !== "company") return col;
-    const children = col.children.slice();
-    const after = children.findIndex((ch) => ch.view === "partners");
-    children.splice(after < 0 ? children.length : after + 1, 0,
-    { view: "services", label: lvh("Услуги", "Xizmatlar", "Services") });
+    /* Дописываем в конец, а не вставляем после «Партнёров»: два последних
+       пункта колонки идут именно в этом порядке. */
+    const children = col.children.concat([
+    { view: "services", label: lvh("Услуги", "Xizmatlar", "Services") },
+    { view: "contacts", label: lvh("Контакты", "Kontaktlar", "Contacts") }]);
     return Object.assign({}, col, { children });
   });
 }

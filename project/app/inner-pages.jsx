@@ -478,23 +478,32 @@ function ContactsPage({ t, lang, go }) {
             <div className="cinfo reveal">
               <div className="cgrp">
                 <h4>{t.c_office}</h4>
-                <div>{t.c_office_addr}<br />{t.c_office_h}</div>
+                <div>{t.c_office_addr}<br />{t.c_days_off}</div>
               </div>
               <div className="cgrp">
                 <h4>{t.c_wh}</h4>
-                <div>{t.c_office_addr}<br />{t.c_wh_h}</div>
+                {/* Свой адрес, а не c_office_addr: раньше здесь стоял ключ
+                    офиса, и склад показывался по адресу офиса. */}
+                <div>
+                  {t.c_wh_addr}<br />
+                  {t.c_wh_docs}<br />
+                  {t.c_wh_pickup}<br />
+                  {t.c_days_off}
+                </div>
               </div>
               <div className="cgrp">
                 <h4>{t.c_phones}</h4>
+                {/* Номера кликабельны: со смартфона страница контактов
+                    открывается чаще всего именно чтобы позвонить. */}
                 <div>
-                  {lv("Приёмная", "Qabulxona", "Reception")}: +998 (77) 225-00-01<br />
-                  {lv("Отдел продаж", "Sotuv bo'limi", "Sales")}: +998 (77) 224-00-01<br />
-                  {lv("Сервис", "Servis", "Service")}: +998 (77) 223-00-01
+                  {lv("Общие вопросы (приёмная)", "Umumiy savollar (qabulxona)", "General enquiries (reception)")}: <a href="tel:+998772250001">+998 (77) 225-00-01</a><br />
+                  {lv("Отдел продаж (заказы и цены)", "Sotuv bo'limi (buyurtma va narxlar)", "Sales (orders and prices)")}: <a href="tel:+998772240001">+998 (77) 224-00-01</a><br />
+                  {lv("Сервисный центр (поддержка)", "Servis markazi (qo'llab-quvvatlash)", "Service centre (support)")}: <a href="tel:+998772230001">+998 (77) 223-00-01</a>
                 </div>
               </div>
               <div className="cgrp">
                 <h4>{t.c_mail}</h4>
-                <div>{t.u_mail}</div>
+                <div><a href={"mailto:" + t.u_mail}>{t.u_mail}</a></div>
               </div>
             </div>
             <div className="cform reveal">

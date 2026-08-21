@@ -55,8 +55,16 @@ window.SI = (function () {
       // contacts
       c_form_t: "Написать нам", c_name: "Ваше имя", c_phone: "Телефон", c_msg: "Сообщение",
       c_send: "Отправить заявку", c_office: "Офис", c_wh: "Склад", c_phones: "Телефоны", c_mail: "E-mail",
-      c_office_addr: "100069, Ташкент, Узбекистан, ул. МКАД, д. 16", c_office_h: "Пн–Пт, 8:00–17:00 (без перерывов)",
-      c_wh_h: "Выписка: Пн–Пт, 8:00–16:30 · Отгрузка: до 17:00",
+      /* c_office_addr читает и футер (CoFooter), поэтому значение общее.
+         Остальные ключи ниже — только страница «Контакты». */
+      c_office_addr: "100069, Ташкент, Узбекистан, ул. МКАД, д. 16",
+      /* Адрес склада отдельным ключом: до 21.08.2026 страница подставляла
+         сюда адрес офиса, и склад показывался по адресу офиса. */
+      c_wh_addr: "г. Ташкент, Яшнабадский район, улица Муйнак, д. 241, с. 4",
+      c_wh_docs: "Оформление документов: Понедельник – Пятница, с 9:00 до 17:30",
+      c_wh_pickup: "Выдача товара со склада: Понедельник – Пятница, с 9:00 до 18:00",
+      /* Одна строка на оба блока — в макете заказчика она повторяется. */
+      c_days_off: "Выходные дни: Суббота и Воскресенье (работаем без перерывов на обед с пн по пт)",
     },
     uz: {
       code: "UZ",
@@ -98,8 +106,11 @@ window.SI = (function () {
       f_rights: "© 2026 SOG’LIQ INDUSTRIYASI. Barcha huquqlar himoyalangan.",
       c_form_t: "Bizga yozing", c_name: "Ismingiz", c_phone: "Telefon", c_msg: "Xabar",
       c_send: "Ariza yuborish", c_office: "Ofis", c_wh: "Ombor", c_phones: "Telefonlar", c_mail: "E-mail",
-      c_office_addr: "100069, Toshkent, O'zbekiston, MKAD ko'ch., 16-uy", c_office_h: "Du–Ju, 8:00–17:00 (tanaffussiz)",
-      c_wh_h: "Hujjat: Du–Ju, 8:00–16:30 · Jo'natish: 17:00 gacha",
+      c_office_addr: "100069, Toshkent, O'zbekiston, MKAD ko'ch., 16-uy",
+      c_wh_addr: "Toshkent sh., Yashnobod tumani, Mo'ynoq ko'chasi, 241-uy, 4-bino",
+      c_wh_docs: "Hujjatlarni rasmiylashtirish: dushanba – juma, 9:00 dan 17:30 gacha",
+      c_wh_pickup: "Tovarni omburdan berish: dushanba – juma, 9:00 dan 18:00 gacha",
+      c_days_off: "Dam olish kunlari: shanba va yakshanba (dushanbadan jumagacha tushlik tanaffusisiz ishlaymiz)",
     },
     en: {
       code: "EN",
@@ -141,8 +152,11 @@ window.SI = (function () {
       f_rights: "© 2026 HEALTH INDUSTRY. All rights reserved.",
       c_form_t: "Write to us", c_name: "Your name", c_phone: "Phone", c_msg: "Message",
       c_send: "Send request", c_office: "Office", c_wh: "Warehouse", c_phones: "Phones", c_mail: "E-mail",
-      c_office_addr: "100069, Tashkent, Uzbekistan, MKAD st., 16", c_office_h: "Mon–Fri, 8:00–17:00 (no breaks)",
-      c_wh_h: "Documents: Mon–Fri, 8:00–16:30 · Shipment: until 17:00",
+      c_office_addr: "100069, Tashkent, Uzbekistan, MKAD st., 16",
+      c_wh_addr: "Tashkent, Yashnabad district, Muynak street, 241, bldg. 4",
+      c_wh_docs: "Paperwork: Monday – Friday, 9:00 to 17:30",
+      c_wh_pickup: "Goods pickup from warehouse: Monday – Friday, 9:00 to 18:00",
+      c_days_off: "Days off: Saturday and Sunday (Mon–Fri without lunch breaks)",
     },
   };
 
