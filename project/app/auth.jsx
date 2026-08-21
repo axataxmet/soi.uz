@@ -27,7 +27,15 @@ const COOKIE_TXT = {
   },
 };
 
-function CookieBanner({ lang, go }) {
+/* Баннер живёт в корпоративной оболочке (App в news.jsx) и потому виден на
+   любой странице. До 22.08.2026 он монтировался в app-root.jsx — оболочке
+   каталога, которая на остальных разделах скрыта, — и согласие спрашивалось
+   только у тех, кто зашёл в каталог.
+
+   goCat нужен для ссылки на политику: сама страница политики (InfoPage) живёт
+   в каталожной оболочке, и добраться до неё можно только через неё. У
+   корпоративного go() вида «info» нет — он молча открыл бы главную. */
+function CookieBanner({ lang, go, goCat }) {
   const [show, setShow] = useCkState(false);
   const c = COOKIE_TXT[lang] || COOKIE_TXT.ru;
 
@@ -43,6 +51,15 @@ function CookieBanner({ lang, go }) {
     setShow(false);
   };
 
+  /* Открыть политику — не то же самое, что согласиться. Раньше этот переход
+     записывал выбор «accept», то есть согласие на всё фиксировалось за то, что
+     человек пошёл читать условия. Баннер остаётся на экране, выбор за
+     пользователем. */
+  const openPolicy = () => {
+    if (goCat) goCat("info", "privacy");
+    else go("info", { p: "privacy" });
+  };
+
   if (!show) return null;
 
   return (
@@ -51,7 +68,7 @@ function CookieBanner({ lang, go }) {
         <div className="cookie-ic"><Icon name="shield" size={22} /></div>
         <div className="cookie-text">
           <div className="cookie-title">{c.title}</div>
-          <p>{c.body} <a onClick={() => { go("info", { p: "privacy" }); decide("accept"); }}>{c.policy}</a></p>
+          <p>{c.body} <a onClick={openPolicy}>{c.policy}</a></p>
         </div>
         <div className="cookie-actions">
           <button className="btn btn-outline" onClick={() => decide("necessary")}>{c.necessary}</button>

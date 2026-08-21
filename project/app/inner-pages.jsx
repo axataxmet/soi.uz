@@ -564,7 +564,7 @@ function ContactsPage({ t, lang, go }) {
               {/* После снятия формы мессенджеры стали основным способом
                   написать — поэтому они кнопками, а не строкой списка. */}
               <div className="ct-msgr">
-                <a className="ct-btn tg" href={SOC_TELEGRAM} target="_blank" rel="noopener">
+                <a className="ct-btn tg" href={SOC_TELEGRAM_CHAT} target="_blank" rel="noopener">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.07 9.74c-.15.68-.55.84-1.12.52l-3.1-2.29-1.5 1.44c-.17.17-.31.31-.63.31l.22-3.17 5.74-5.18c.25-.22-.05-.34-.39-.12L7.18 14.6l-3.04-.95c-.66-.21-.67-.66.14-.97L17.06 7.2c.55-.2 1.03.13.88.99z" /></svg>
                   Telegram
                 </a>

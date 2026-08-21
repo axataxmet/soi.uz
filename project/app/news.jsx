@@ -446,6 +446,10 @@ function App() {
       }
       {!isCatalog && <FloatingWidgets lang={lang} go={go} />}
       <BackToTop />
+      {/* Без условия по разделу: согласие спрашивается при входе на сайт, на
+          какую бы страницу человек ни попал. goCat нужен для ссылки на
+          политику — она живёт в каталожной оболочке. */}
+      <CookieBanner lang={lang} go={go} goCat={goCat} />
     </div>);
 
 }

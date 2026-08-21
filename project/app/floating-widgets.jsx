@@ -135,7 +135,7 @@ function FloatingWidgets({ lang, go }) {
      контактов, и расходиться им нельзя. Пункт «Перезвоните мне» снят по
      решению заказчика 21.08.2026 — остались два мессенджера. */
   const CHANNELS = [
-    { icon:"tg", label:"Telegram", color:"var(--blue-500)", bg:"var(--blue-50)", href:window.SOC_TELEGRAM },
+    { icon:"tg", label:"Telegram", color:"var(--blue-500)", bg:"var(--blue-50)", href:window.SOC_TELEGRAM_CHAT },
     { icon:"wa", label:"WhatsApp", color:"#25D366",         bg:"var(--bg-2)",    href:window.SOC_WHATSAPP },
   ];
 

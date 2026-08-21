@@ -9,6 +9,12 @@
    файл уходит в браузер каждому посетителю и лежит в открытом репозитории.
    Их место — настройки CRM в админке (поля telegramToken и telegramChatId),
    они хранятся в базе и наружу не отдаются. */
+/* Два разных адреса Telegram, и путать их нельзя:
+   SOC_TELEGRAM_CHAT — бот, ему пишут. Стоит на кнопках связи: страница
+   контактов и плавающий виджет.
+   SOC_TELEGRAM — канал, на него подписываются. Стоит только в футере, в блоке
+   «Следите за нами» (через site_contacts). Заказчик просил его не трогать. */
+window.SOC_TELEGRAM_CHAT = "https://t.me/Sogliq_Industriyasi_bot";
 window.SOC_TELEGRAM = "https://t.me/Sogliq_Industriyasi";
 window.SOC_WHATSAPP_PHONE = "998772250001";
 window.SOC_WHATSAPP =
