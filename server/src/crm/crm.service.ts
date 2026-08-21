@@ -37,6 +37,41 @@ export class CrmService {
     return this.getConfig();
   }
 
+  /* Отправка с проверкой ответа.
+     fetch не бросает исключение на 4xx/5xx: при неверном chat_id, отозванном
+     токене или заблокированном боте Telegram отвечает 400, а прежний код
+     считал заявку отправленной и молчал — сбой обнаруживался только вручную.
+     Ошибки не пробрасываются наружу: заявка уже сохранена, и падение доставки
+     не должно её задевать. Возвращаемое значение позволяет вызывающему
+     отличить успех от отказа. */
+  private async postJson(label: string, url: string, body: unknown): Promise<boolean> {
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const text = await res.text().catch(() => '');
+      let ok = res.ok;
+      /* Telegram отвечает кодом 4xx на большинство ошибок, но поле ok в теле —
+         более надёжный признак: на часть ответов приходит 200 с ok:false. */
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed && typeof parsed.ok === 'boolean') ok = ok && parsed.ok;
+      } catch {
+        /* не JSON — судим по коду ответа */
+      }
+      if (!ok) {
+        this.logger.warn(`${label}: HTTP ${res.status} — ${text.slice(0, 300)}`);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      this.logger.warn(`${label}: запрос не ушёл — ${(e as Error).message}`);
+      return false;
+    }
+  }
+
   // Fired after a submission is persisted. Never throws — a CRM relay failure
   // must never affect the (already-saved) lead or the caller's response.
   async relayLead(dto: CreateSubmissionDto) {
@@ -77,26 +112,36 @@ export class CrmService {
         tags_values: [{ name: 'ИНДУСТРИЯ ЗДОРОВЬЯ' }, { name: 'Заявка-сайт' }],
       };
 
+      /* Каналы независимы: отказ amoCRM не должен отменять отправку в Telegram.
+         Раньше оба вызова стояли голым await внутри общего try, и сбой первого
+         уводил выполнение в catch — уведомление не уходило вовсе, хотя с самим
+         Telegram всё было в порядке. postJson гасит ошибку внутри себя. */
       if (cfg.mode === 'proxy' && cfg.proxyUrl) {
-        await fetch(cfg.proxyUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            _type: 'soi_lead',
-            lead,
-            noteText,
-            subdomain: cfg.subdomain,
-            token: cfg.token,
-            pipelineId: cfg.pipelineId,
-            statusId: cfg.statusId,
-          }),
+        await this.postJson('amoCRM (proxy)', cfg.proxyUrl, {
+          _type: 'soi_lead',
+          lead,
+          noteText,
+          subdomain: cfg.subdomain,
+          token: cfg.token,
+          pipelineId: cfg.pipelineId,
+          statusId: cfg.statusId,
         });
       } else if (cfg.mode === 'direct' && cfg.subdomain && cfg.token) {
-        await fetch(`https://${cfg.subdomain}/api/v4/leads/complex`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.token}` },
-          body: JSON.stringify([lead]),
-        });
+        /* Заголовок Authorization — единственное отличие от общего помощника,
+           поэтому запрос остаётся здесь, но с той же проверкой ответа. */
+        try {
+          const res = await fetch(`https://${cfg.subdomain}/api/v4/leads/complex`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.token}` },
+            body: JSON.stringify([lead]),
+          });
+          if (!res.ok) {
+            const detail = await res.text().catch(() => '');
+            this.logger.warn(`amoCRM (direct): HTTP ${res.status} — ${detail.slice(0, 300)}`);
+          }
+        } catch (e) {
+          this.logger.warn(`amoCRM (direct): запрос не ушёл — ${(e as Error).message}`);
+        }
       }
 
       if (cfg.telegramToken && cfg.telegramChatId) {
@@ -112,11 +157,17 @@ export class CrmService {
           '',
           `<i>Источник: ${dto.source || 'Форма на сайте'}</i>`,
         ].filter(Boolean).join('\n');
-        await fetch(`https://api.telegram.org/bot${cfg.telegramToken}/sendMessage`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: cfg.telegramChatId, text, parse_mode: 'HTML' }),
-        });
+        /* Токен в адресе — поэтому в метку он не попадает: она уходит в лог,
+           а лог читают и пересылают. */
+        const sent = await this.postJson(
+          `Telegram (chat ${cfg.telegramChatId})`,
+          `https://api.telegram.org/bot${cfg.telegramToken}/sendMessage`,
+          { chat_id: cfg.telegramChatId, text, parse_mode: 'HTML' },
+        );
+        if (sent) this.logger.log(`Заявка отправлена в Telegram (chat ${cfg.telegramChatId})`);
+      } else {
+        /* Молчание тут раньше было неотличимо от успешной отправки. */
+        this.logger.warn('Telegram не настроен: не заполнены telegramToken или telegramChatId');
       }
     } catch (e) {
       this.logger.warn(`CRM relay failed: ${(e as Error).message}`);
