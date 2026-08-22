@@ -125,6 +125,37 @@ export class TelegramService {
     return this.config.get<string>('TELEGRAM_WEBHOOK_SECRET') || '';
   }
 
+  /* Ретрансляция исходного обновления в amoCRM.
+
+     Telegram доставляет вебхук строго по одному адресу, поэтому «работает и
+     бот, и amoCRM» достижимо только так: обновление принимаем мы, обрабатываем
+     онбординг, и следом отдаём копию тем же телом в прокси amoCRM. Раньше
+     вебхук был уведён прямо на prx.amocrm.com — тогда до нашего сервера не
+     доходило вообще ничего, и онбординг молчал.
+
+     Адрес живёт в TELEGRAM_FORWARD_URL (server/.env), а не в git: в него
+     вшит токен бота. Пусто — ретрансляция просто выключена.
+
+     Намеренно не await: amoCRM недоступен или отвечает медленно — это не
+     повод задерживать ответ Telegram (он повторит доставку) и тем более не
+     повод терять сообщение клиента. Ошибку только пишем в лог. */
+  private forwardToAmo(update: TgUpdate): void {
+    const url = this.config.get<string>('TELEGRAM_FORWARD_URL') || '';
+    if (!url) return;
+    /* Свой секрет вебхука не передаём: он предназначен только для проверки
+       «это правда Telegram» на нашей стороне. amoCRM опознаёт вызов по
+       токену в query-строке своего адреса. */
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(update),
+    })
+      .then((res) => {
+        if (!res.ok) this.logger.warn(`Ретрансляция в amoCRM: HTTP ${res.status}`);
+      })
+      .catch((e: Error) => this.logger.warn(`Ретрансляция в amoCRM не ушла: ${e.message}`));
+  }
+
   /* Вызов к Telegram с проверкой ответа: fetch не бросает исключение на 4xx,
      и без разбора тела отказ выглядел бы как успешная отправка.
 
@@ -171,6 +202,12 @@ export class TelegramService {
      нарастающей, и один сбойный апдейт превратился бы в поток повторов. */
   async handleUpdate(update: TgUpdate): Promise<void> {
     try {
+      /* Первым делом и безусловно: копия обновления уходит в amoCRM, что бы
+         дальше ни решила наша логика. Ставим до всех проверок и ранних
+         return'ов — иначе, например, незаданный токен бота лишил бы amoCRM
+         сообщений заодно с нами. */
+      this.forwardToAmo(update);
+
       const cfg = await this.crm.getConfig();
       const token = cfg.telegramToken || '';
       const group = cfg.telegramChatId || '';
