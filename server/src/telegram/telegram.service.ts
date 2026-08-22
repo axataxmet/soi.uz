@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CrmService } from '../crm/crm.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 /* Приём сообщений от Telegram.
    До 22.08.2026 бот работал только «на выход»: код умел лишь отправить
@@ -23,6 +24,7 @@ type TgMessage = {
   photo?: unknown[];
   document?: unknown;
   voice?: unknown;
+  reply_to_message?: TgMessage;
 };
 export type TgUpdate = { update_id: number; message?: TgMessage; edited_message?: TgMessage };
 
@@ -36,6 +38,7 @@ export class TelegramService {
   constructor(
     private readonly crm: CrmService,
     private readonly config: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
 
   get webhookSecret(): string {
@@ -43,8 +46,16 @@ export class TelegramService {
   }
 
   /* Вызов к Telegram с проверкой ответа: fetch не бросает исключение на 4xx,
-     и без разбора тела отказ выглядел бы как успешная отправка. */
-  private async call(token: string, method: string, body: unknown): Promise<boolean> {
+     и без разбора тела отказ выглядел бы как успешная отправка.
+
+     Возвращает поле result, а не просто признак успеха: при пересылке нужен
+     message_id отправленного в группу сообщения — по нему потом находится
+     автор, когда менеджер отвечает реплаем. */
+  private async call(
+    token: string,
+    method: string,
+    body: unknown,
+  ): Promise<Record<string, any> | null> {
     try {
       const res = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
         method: 'POST',
@@ -52,18 +63,21 @@ export class TelegramService {
         body: JSON.stringify(body),
       });
       const text = await res.text().catch(() => '');
-      let ok = res.ok;
+      let parsed: any = null;
       try {
-        const parsed = JSON.parse(text);
-        if (parsed && typeof parsed.ok === 'boolean') ok = ok && parsed.ok;
+        parsed = JSON.parse(text);
       } catch {
         /* не JSON — судим по коду ответа */
       }
-      if (!ok) this.logger.warn(`${method}: HTTP ${res.status} — ${text.slice(0, 300)}`);
-      return ok;
+      const ok = res.ok && (!parsed || parsed.ok !== false);
+      if (!ok) {
+        this.logger.warn(`${method}: HTTP ${res.status} — ${text.slice(0, 300)}`);
+        return null;
+      }
+      return (parsed && parsed.result) || {};
     } catch (e) {
       this.logger.warn(`${method}: запрос не ушёл — ${(e as Error).message}`);
-      return false;
+      return null;
     }
   }
 
@@ -80,16 +94,22 @@ export class TelegramService {
       const msg = update.message || update.edited_message;
       if (!msg) return;
 
-      /* Только личные чаты. Бот состоит в служебной группе, и её сообщения
-         тоже приходят сюда — без этой проверки ответ менеджера пересылался бы
-         обратно в ту же группу, замыкая круг. */
-      if (msg.chat.type !== 'private') return;
-
       const cfg = await this.crm.getConfig();
       const token = cfg.telegramToken || '';
       const group = cfg.telegramChatId || '';
       if (!token) {
         this.logger.warn('Приём включён, но токен бота не задан — ответить нечем');
+        return;
+      }
+
+      /* Сообщение из служебной группы — это ответ менеджера. Пересылаем его
+         автору и на этом заканчиваем: без разделения по типу чата ответ ушёл
+         бы обратно в ту же группу, замыкая круг.
+
+         Режим приватности бота при этом не мешает: в группе он получает
+         реплаи на собственные сообщения, а именно ими и отвечают. */
+      if (msg.chat.type !== 'private') {
+        if (group && String(msg.chat.id) === String(group)) await this.relayReply(token, msg);
         return;
       }
 
@@ -134,13 +154,72 @@ export class TelegramService {
 
       const sent = await this.call(token, 'sendMessage', {
         chat_id: group,
-        text: parts.join('\n'),
+        text: parts.join('\n') + '\n\n<i>Ответьте на это сообщение — ответ уйдёт отправителю.</i>',
         parse_mode: 'HTML',
       });
-      if (sent) this.logger.log(`Сообщение от ${this.who(msg)} передано в группу`);
+      if (!sent) return;
+      this.logger.log(`Сообщение от ${this.who(msg)} передано в группу`);
+
+      /* Запоминаем, какому чату соответствует сообщение в группе. Без этой
+         записи реплай менеджера некуда было бы адресовать. */
+      if (sent.message_id) {
+        await this.prisma.telegramThread
+          .upsert({
+            where: { groupMessageId: sent.message_id },
+            update: { userChatId: String(msg.chat.id), userName: this.who(msg) },
+            create: {
+              groupMessageId: sent.message_id,
+              userChatId: String(msg.chat.id),
+              userName: this.who(msg),
+            },
+          })
+          .catch((e: Error) => this.logger.warn(`Связь сообщений не сохранена: ${e.message}`));
+      }
     } catch (e) {
       this.logger.warn(`Обработка обновления не удалась: ${(e as Error).message}`);
     }
+  }
+
+  /* Ответ менеджера из группы — обратно автору.
+     Срабатывает только на реплай к сообщению, которое бот сам туда прислал:
+     обычная переписка сотрудников в группе никого не касается и наружу не
+     уходит. */
+  private async relayReply(token: string, msg: TgMessage): Promise<void> {
+    const target = msg.reply_to_message;
+    if (!target) return;
+
+    const thread = await this.prisma.telegramThread
+      .findUnique({ where: { groupMessageId: target.message_id } })
+      .catch(() => null);
+    if (!thread) return;
+
+    const text = (msg.text || msg.caption || '').trim();
+    if (!text) {
+      await this.call(token, 'sendMessage', {
+        chat_id: msg.chat.id,
+        reply_to_message_id: msg.message_id,
+        text: '⚠️ Вложения бот пересылать не умеет — ответьте текстом.',
+      });
+      return;
+    }
+
+    const delivered = await this.call(token, 'sendMessage', {
+      chat_id: thread.userChatId,
+      text,
+    });
+
+    /* Подтверждение обязательно: без него менеджер не знает, дошёл ли ответ.
+       Частый случай отказа — человек заблокировал бота, и тогда молчание
+       выглядело бы как успешная отправка. */
+    await this.call(token, 'sendMessage', {
+      chat_id: msg.chat.id,
+      reply_to_message_id: msg.message_id,
+      text: delivered
+        ? `✅ Отправлено: ${thread.userName || 'пользователю'}`
+        : '❌ Не доставлено. Вероятно, пользователь заблокировал бота или удалил чат.',
+    });
+
+    if (delivered) this.logger.log(`Ответ менеджера доставлен: ${thread.userName}`);
   }
 
   private async sendWelcome(token: string, chatId: number): Promise<void> {

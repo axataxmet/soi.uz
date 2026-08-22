@@ -528,3 +528,21 @@ model MediaFile {
 // prisma/etender/schema.prisma (Postgres schema `etender`, separate connection
 // pool) so tender read load stays off the main pool and the module can later be
 // extracted into its own service. See src/etender/.
+
+// Связь пересланного сообщения в служебной группе с личным чатом автора.
+// Нужна для ответа: менеджер отвечает реплаем в группе, и по id того
+// сообщения бот находит, кому переслать ответ. Хранится в базе, а не в
+// памяти процесса — иначе перезапуск сервера обрывал бы все начатые
+// переписки, и реплай уходил бы в пустоту.
+model TelegramThread {
+  // id сообщения в группе — по нему ищем при ответе.
+  groupMessageId Int      @id
+  // id личного чата. Строкой: идентификаторы Telegram выходят за пределы
+  // 32-битного целого, а обратно он всё равно уходит как chat_id.
+  userChatId     String
+  userName       String?
+  createdAt      DateTime @default(now())
+
+  @@index([userChatId])
+  @@map("telegram_threads")
+}
