@@ -115,6 +115,11 @@ export class TelegramService {
 
       const text = (msg.text || msg.caption || '').trim();
 
+      /* Отмечаем чат как известный сразу, любым первым сообщением — не
+         только /start. Возвращает true один раз, для самого первого
+         сообщения из этого чата, каким бы оно ни было. */
+      const isFirstContact = await this.registerContact(msg.chat.id);
+
       if (text === '/start' || text === '/help') {
         await this.sendWelcome(token, msg.chat.id);
         return;
@@ -124,6 +129,16 @@ export class TelegramService {
       if (!text && !hasAttachment && !msg.contact) {
         await this.sendWelcome(token, msg.chat.id);
         return;
+      }
+
+      /* Первое сообщение из этого чата — приветствие обязательно, даже если
+         человек сразу написал вопрос текстом, а не начал с /start: иначе
+         часть контактов миновала бы приветствие вовсе. Ветки выше уже сами
+         шлют приветствие и на этот случай не срабатывают повторно — здесь
+         только путь «сразу написал по делу». Дальше сообщение всё равно
+         обрабатывается как обычно — этот блок не return'ит. */
+      if (isFirstContact) {
+        await this.sendWelcome(token, msg.chat.id);
       }
 
       /* Сначала подтверждение автору, потом пересылка: если группа настроена
@@ -220,6 +235,20 @@ export class TelegramService {
     });
 
     if (delivered) this.logger.log(`Ответ менеджера доставлен: ${thread.userName}`);
+  }
+
+  /* Отмечает чат как известный (insert-if-not-exists) и возвращает true,
+     если запись только что создана — то есть это первое сообщение из чата.
+     На ошибку БД отвечает false: не срывать обработку сообщения из-за того,
+     что не получилось проверить, писали ли этому чату раньше — в худшем
+     случае лишний раз не пришлёт приветствие, а не потеряет сообщение. */
+  private async registerContact(chatId: number): Promise<boolean> {
+    try {
+      await this.prisma.telegramContact.create({ data: { chatId: String(chatId) } });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   private async sendWelcome(token: string, chatId: number): Promise<void> {
