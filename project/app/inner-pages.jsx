@@ -371,6 +371,21 @@ function LicensesPage({ t, lang, go }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const txx = (o) => (o && (o[lang] || o.ru)) || "";
   const [viewer, setViewer] = React.useState(null);
+
+  /* Документы читаются в состояние с подпиской на CMS, а не вызовом
+     window.CMS.list() прямо в разметке. Прежний вариант брал список один раз
+     при отрисовке: адаптер догружает документы из API асинхронно, и к этому
+     моменту в локальном хранилище было пусто. Страница оставалась без единой
+     карточки до тех пор, пока перерисовку не вызовет что-нибудь постороннее —
+     на посетителе с чистым браузером раздел выглядел пустым.
+     Тот же приём уже применён в LeadershipSection выше. */
+  const [docs, setDocs] = React.useState(() => (window.CMS ? window.CMS.list("documents") : []));
+  React.useEffect(() => {
+    if (!window.CMS) return;
+    const read = () => setDocs(window.CMS.list("documents"));
+    read();
+    return window.CMS.on ? window.CMS.on("documents", read) : undefined;
+  }, []);
   return (
     <div>
       <PageHero t={t} lang={lang} go={go} title={t.nav_licenses}
@@ -387,7 +402,7 @@ function LicensesPage({ t, lang, go }) {
             { id: "legal", label: lv("Правовая информация", "Huquqiy ma'lumot", "Legal information") }];
 
             // managed documents from the admin CMS (visible only)
-            const all = (window.CMS ? window.CMS.list("documents") : []).filter((d) => d.status !== "hidden");
+            const all = docs.filter((d) => d.status !== "hidden");
 
             const cardCms = (d) => {
               const url = (d.file && (d.file.data || d.file.url)) || d.href || "";
