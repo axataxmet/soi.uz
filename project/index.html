@@ -454,7 +454,7 @@ img{max-width:100%;display:block}
 .z-corp .lic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px}
 .z-corp .lic-card{border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--surface);transition:.16s}
 .z-corp .lic-card:hover{border-color:var(--blue-400);box-shadow:var(--sh-sm)}
-.z-corp .lic-thumb{aspect-ratio:210/297;border-radius:var(--r-sm);background:#fff;border:1px solid var(--line);overflow:hidden;box-shadow:var(--sh)}
+.z-corp .lic-thumb{position:relative;aspect-ratio:210/297;border-radius:var(--r-sm);background:#fff;border:1px solid var(--line);overflow:hidden;box-shadow:var(--sh)}
 .z-corp .lic-thumb>img,.z-corp .lic-thumb>svg{width:100%;height:100%;display:block}
 .z-corp .lic-thumb>img{object-fit:cover;object-position:top}
 .z-corp .lic-thumb.clickable{cursor:pointer;transition:transform .2s,box-shadow .2s}
@@ -462,6 +462,14 @@ img{max-width:100%;display:block}
 .z-corp .lic-thumb.clickable:focus-visible{outline:2px solid var(--blue-600);outline-offset:2px}
 .z-corp .lic-card .lt{font-size:var(--fs-4);font-weight:700;line-height:1.35;text-align:center}
 .z-corp .lic-dl{display:inline-flex;align-items:center;gap:7px;font-size:var(--fs-3);font-weight:700;color:var(--blue-600);margin-top:auto}
+/* превью PDF ещё рендерится — пульсирующая заглушка вместо статичной обложки,
+   чтобы «загружается» не выглядело как «файл не найден» */
+.z-corp .lic-thumb-skel{width:100%;height:100%;background:linear-gradient(100deg,var(--bg-2) 30%,var(--line-soft) 50%,var(--bg-2) 70%);background-size:220% 100%;animation:licSkel 1.3s ease-in-out infinite}
+@keyframes licSkel{0%{background-position:120% 0}100%{background-position:-20% 0}}
+@media(prefers-reduced-motion:reduce){.z-corp .lic-thumb-skel{animation:none}}
+/* число страниц у многостраничного документа */
+.z-corp .lic-pages-badge{position:absolute;top:10px;right:10px;background:rgba(15,23,42,.72);color:#fff;font-size:var(--fs-1);font-weight:700;letter-spacing:.02em;padding:3px 8px;border-radius:40px;pointer-events:none}
+.z-corp .lic-empty{padding:64px 0;text-align:center;color:var(--slate-400,var(--slate-300));font-size:var(--fs-4)}
 
 
 .z-corp .val-list{display:flex;flex-direction:column;gap:18px}

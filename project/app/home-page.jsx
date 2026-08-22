@@ -2821,7 +2821,7 @@ function RevPdfThumb({ url, alt, fallback }) {
   React.useEffect(() => {
     let on = true; setSrc(null); setErr(false);
     if (!url || !window.rvpRenderPdfPage) { setErr(true); return; }
-    window.rvpRenderPdfPage(url, 260).then((d) => on && setSrc(d)).catch(() => on && setErr(true));
+    window.rvpRenderPdfPage(url, 260).then((d) => on && setSrc(d.src)).catch(() => on && setErr(true));
     return () => { on = false; };
   }, [url]);
   if (src && !err) return <img src={src} alt={alt} loading="lazy" />;
