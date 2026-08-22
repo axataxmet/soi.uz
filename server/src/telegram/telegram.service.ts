@@ -8,9 +8,18 @@ import { PrismaService } from '../prisma/prisma.service';
    уведомление о заявке с сайта. Всё, что писали боту люди, копилось в очереди
    Telegram без ответа — на момент подключения там лежало 11 сообщений.
 
+   С 23.08.2026 первое обращение из чата запускает короткий онбординг:
+   выбор языка (кнопки под сообщением) → запрос контакта (кнопка «Поделиться
+   номером» на клавиатуре, либо «Пропустить») → обычное приветствие. Шаг
+   хранится в TelegramContact.step ('lang' | 'contact' | 'done'), поэтому
+   переживает перезапуск процесса и не сбрасывается на каждое сообщение.
+
    Обновления приходят вебхуком на POST /api/telegram/webhook. Подлинность
    запроса проверяется заголовком X-Telegram-Bot-Api-Secret-Token: адрес
    эндпоинта публичный, и без проверки написать в группу мог бы кто угодно. */
+
+type Lang = 'ru' | 'uz' | 'en';
+const LANGS: Lang[] = ['ru', 'uz', 'en'];
 
 type TgChat = { id: number; type: string; title?: string; first_name?: string; username?: string };
 type TgUser = { id: number; first_name?: string; last_name?: string; username?: string };
@@ -26,10 +35,81 @@ type TgMessage = {
   voice?: unknown;
   reply_to_message?: TgMessage;
 };
-export type TgUpdate = { update_id: number; message?: TgMessage; edited_message?: TgMessage };
+type TgCallbackQuery = { id: string; from: TgUser; message?: TgMessage; data?: string };
+export type TgUpdate = {
+  update_id: number;
+  message?: TgMessage;
+  edited_message?: TgMessage;
+  callback_query?: TgCallbackQuery;
+};
 
 const SITE = 'https://soi.uz';
 const PHONE = '+998 (77) 225-00-01';
+
+/* Тексты онбординга и приветствия по языкам. Собраны в одном месте, а не
+   раскиданы по методам — иначе при добавлении фразы легко забыть один из
+   трёх языков. */
+const T: Record<Lang, {
+  askContact: string;
+  shareContact: string;
+  skip: string;
+  thanksContact: string;
+  skippedContact: string;
+  welcomeIntro: string;
+  welcomeQuestion: string;
+  urgent: string;
+  catalogBtn: string;
+  leadBtn: string;
+  contactsBtn: string;
+  received: string;
+  attachmentOnly: string;
+}> = {
+  ru: {
+    askContact: 'Поделитесь номером телефона, чтобы менеджер мог связаться с вами напрямую — либо нажмите «Пропустить».',
+    shareContact: '📱 Поделиться номером',
+    skip: 'Пропустить',
+    thanksContact: 'Спасибо, номер сохранён.',
+    skippedContact: 'Хорошо, продолжим без номера.',
+    welcomeIntro: 'Это бот компании <b>ИНДУСТРИЯ ЗДОРОВЬЯ</b>.\n\nПоставляем медицинское оборудование, мебель, инструменты и расходные материалы для клиник Узбекистана.',
+    welcomeQuestion: 'Напишите ваш вопрос прямо здесь — менеджер ответит в рабочее время.',
+    urgent: 'Срочный вопрос — позвоните',
+    catalogBtn: '🩺 Каталог оборудования',
+    leadBtn: '📄 Оставить заявку',
+    contactsBtn: '📞 Контакты',
+    received: 'Спасибо, сообщение получено. Менеджер ответит в рабочее время: понедельник – пятница.',
+    attachmentOnly: '(вложение без текста — откройте чат с отправителем)',
+  },
+  uz: {
+    askContact: 'Menejer siz bilan bevosita bog’lansin uchun telefon raqamingizni yuboring — yoki «O’tkazib yuborish» tugmasini bosing.',
+    shareContact: '📱 Raqamni yuborish',
+    skip: 'O’tkazib yuborish',
+    thanksContact: 'Rahmat, raqam saqlandi.',
+    skippedContact: 'Yaxshi, raqamsiz davom etamiz.',
+    welcomeIntro: 'Bu <b>SOG‘LIQ INDUSTRIYASI</b> kompaniyasining boti.\n\nO‘zbekiston klinikalari uchun tibbiy uskuna, mebel, asboblar va sarf materiallarini yetkazib beramiz.',
+    welcomeQuestion: 'Savolingizni shu yerga yozing — menejer ish vaqtida javob beradi.',
+    urgent: 'Shoshilinch savol — qo’ng’iroq qiling',
+    catalogBtn: '🩺 Uskunalar katalogi',
+    leadBtn: '📄 Ariza qoldirish',
+    contactsBtn: '📞 Kontaktlar',
+    received: 'Rahmat, xabaringiz qabul qilindi. Menejer ish vaqtida javob beradi: dushanba – juma.',
+    attachmentOnly: '(matnsiz fayl — yuboruvchi bilan chatni oching)',
+  },
+  en: {
+    askContact: 'Share your phone number so a manager can reach you directly — or tap «Skip».',
+    shareContact: '📱 Share phone number',
+    skip: 'Skip',
+    thanksContact: 'Thanks, your number is saved.',
+    skippedContact: 'Alright, we’ll continue without a phone number.',
+    welcomeIntro: 'This is the <b>HEALTH INDUSTRY</b> company bot.\n\nWe supply medical equipment, furniture, instruments and consumables for clinics in Uzbekistan.',
+    welcomeQuestion: 'Write your question right here — a manager will reply during business hours.',
+    urgent: 'Urgent question — call',
+    catalogBtn: '🩺 Equipment catalog',
+    leadBtn: '📄 Leave a request',
+    contactsBtn: '📞 Contacts',
+    received: 'Thank you, your message has been received. A manager will reply during business hours: Monday – Friday.',
+    attachmentOnly: '(attachment without text — open the chat with the sender)',
+  },
+};
 
 @Injectable()
 export class TelegramService {
@@ -91,9 +171,6 @@ export class TelegramService {
      нарастающей, и один сбойный апдейт превратился бы в поток повторов. */
   async handleUpdate(update: TgUpdate): Promise<void> {
     try {
-      const msg = update.message || update.edited_message;
-      if (!msg) return;
-
       const cfg = await this.crm.getConfig();
       const token = cfg.telegramToken || '';
       const group = cfg.telegramChatId || '';
@@ -101,6 +178,14 @@ export class TelegramService {
         this.logger.warn('Приём включён, но токен бота не задан — ответить нечем');
         return;
       }
+
+      if (update.callback_query) {
+        await this.handleCallback(token, update.callback_query);
+        return;
+      }
+
+      const msg = update.message || update.edited_message;
+      if (!msg) return;
 
       /* Сообщение из служебной группы — это ответ менеджера. Пересылаем его
          автору и на этом заканчиваем: без разделения по типу чата ответ ушёл
@@ -113,86 +198,202 @@ export class TelegramService {
         return;
       }
 
-      const text = (msg.text || msg.caption || '').trim();
-
-      /* Отмечаем чат как известный сразу, любым первым сообщением — не
-         только /start. Возвращает true один раз, для самого первого
-         сообщения из этого чата, каким бы оно ни было. */
-      const isFirstContact = await this.registerContact(msg.chat.id);
-
-      if (text === '/start' || text === '/help') {
-        await this.sendWelcome(token, msg.chat.id);
-        return;
-      }
-
-      const hasAttachment = Boolean(msg.photo || msg.document || msg.voice);
-      if (!text && !hasAttachment && !msg.contact) {
-        await this.sendWelcome(token, msg.chat.id);
-        return;
-      }
-
-      /* Первое сообщение из этого чата — приветствие обязательно, даже если
-         человек сразу написал вопрос текстом, а не начал с /start: иначе
-         часть контактов миновала бы приветствие вовсе. Ветки выше уже сами
-         шлют приветствие и на этот случай не срабатывают повторно — здесь
-         только путь «сразу написал по делу». Дальше сообщение всё равно
-         обрабатывается как обычно — этот блок не return'ит. */
-      if (isFirstContact) {
-        await this.sendWelcome(token, msg.chat.id);
-      }
-
-      /* Сначала подтверждение автору, потом пересылка: если группа настроена
-         неверно, человек всё равно получит ответ и не останется в тишине. */
-      await this.call(token, 'sendMessage', {
-        chat_id: msg.chat.id,
-        text:
-          'Спасибо, сообщение получено. Менеджер ответит в рабочее время: ' +
-          'понедельник – пятница.\n\n' +
-          `Срочный вопрос — позвоните: ${PHONE}`,
-      });
-
-      if (!group) {
-        this.logger.warn('Сообщение боту получено, но группа для пересылки не задана');
-        return;
-      }
-
-      const parts = [
-        '💬 <b>Сообщение боту</b>',
-        '',
-        `<b>От:</b> ${this.escape(this.who(msg))}`,
-        `<b>ID:</b> <code>${msg.from?.id ?? msg.chat.id}</code>`,
-        msg.contact?.phone_number && `<b>Телефон:</b> ${this.escape(msg.contact.phone_number)}`,
-        '',
-        text ? this.escape(text) : '(вложение без текста — откройте чат с отправителем)',
-        hasAttachment && text ? '\n<i>К сообщению приложен файл</i>' : '',
-      ].filter(Boolean);
-
-      const sent = await this.call(token, 'sendMessage', {
-        chat_id: group,
-        text: parts.join('\n') + '\n\n<i>Ответьте на это сообщение — ответ уйдёт отправителю.</i>',
-        parse_mode: 'HTML',
-      });
-      if (!sent) return;
-      this.logger.log(`Сообщение от ${this.who(msg)} передано в группу`);
-
-      /* Запоминаем, какому чату соответствует сообщение в группе. Без этой
-         записи реплай менеджера некуда было бы адресовать. */
-      if (sent.message_id) {
-        await this.prisma.telegramThread
-          .upsert({
-            where: { groupMessageId: sent.message_id },
-            update: { userChatId: String(msg.chat.id), userName: this.who(msg) },
-            create: {
-              groupMessageId: sent.message_id,
-              userChatId: String(msg.chat.id),
-              userName: this.who(msg),
-            },
-          })
-          .catch((e: Error) => this.logger.warn(`Связь сообщений не сохранена: ${e.message}`));
-      }
+      await this.handlePrivateMessage(token, group, msg);
     } catch (e) {
       this.logger.warn(`Обработка обновления не удалась: ${(e as Error).message}`);
     }
+  }
+
+  /* Личное сообщение боту. Сначала решает, на каком шаге онбординга чат
+     находится (lang → contact → done), и либо продвигает онбординг дальше,
+     либо, если он уже пройден, обрабатывает сообщение как раньше. */
+  private async handlePrivateMessage(token: string, group: string, msg: TgMessage): Promise<void> {
+    const chatId = msg.chat.id;
+    const text = (msg.text || msg.caption || '').trim();
+
+    /* Запись создаётся явно со step:'lang' — DEFAULT в колонке ('done')
+       нужен только для чатов, заведённых до онбординга миграцией, чтобы их
+       не отправило на повторный выбор языка. */
+    const contact = await this.prisma.telegramContact.upsert({
+      where: { chatId: String(chatId) },
+      update: {},
+      create: { chatId: String(chatId), step: 'lang' },
+    });
+
+    if (contact.step === 'lang') {
+      await this.askLanguage(token, chatId);
+      return;
+    }
+
+    if (contact.step === 'contact') {
+      const lang = (contact.lang as Lang) || 'ru';
+      const t = T[lang];
+
+      if (msg.contact?.phone_number) {
+        await this.prisma.telegramContact.update({
+          where: { chatId: String(chatId) },
+          data: { phone: msg.contact.phone_number, step: 'done' },
+        });
+        await this.call(token, 'sendMessage', {
+          chat_id: chatId,
+          text: t.thanksContact,
+          reply_markup: { remove_keyboard: true },
+        });
+        await this.sendWelcome(token, chatId, lang);
+        return;
+      }
+
+      if (text.toLowerCase() === t.skip.toLowerCase()) {
+        await this.prisma.telegramContact.update({ where: { chatId: String(chatId) }, data: { step: 'done' } });
+        await this.call(token, 'sendMessage', {
+          chat_id: chatId,
+          text: t.skippedContact,
+          reply_markup: { remove_keyboard: true },
+        });
+        await this.sendWelcome(token, chatId, lang);
+        return;
+      }
+
+      /* Пока номер не дан и кнопка «Пропустить» не нажата — держим на этом
+         шаге и переспрашиваем, а не проваливаемся в обычную пересылку:
+         контакт для этого и запрашивается как обязательный шаг онбординга. */
+      await this.askContact(token, chatId, lang);
+      return;
+    }
+
+    // step === 'done' — обычный разговор
+    const lang = (contact.lang as Lang) || 'ru';
+    const t = T[lang];
+
+    if (text === '/start' || text === '/help') {
+      await this.sendWelcome(token, chatId, lang);
+      return;
+    }
+
+    const hasAttachment = Boolean(msg.photo || msg.document || msg.voice);
+    if (!text && !hasAttachment && !msg.contact) {
+      await this.sendWelcome(token, chatId, lang);
+      return;
+    }
+
+    /* Сначала подтверждение автору, потом пересылка: если группа настроена
+       неверно, человек всё равно получит ответ и не останется в тишине. */
+    await this.call(token, 'sendMessage', {
+      chat_id: chatId,
+      text: `${t.received}\n\n${t.urgent}: ${PHONE}`,
+    });
+
+    if (!group) {
+      this.logger.warn('Сообщение боту получено, но группа для пересылки не задана');
+      return;
+    }
+
+    const parts = [
+      '💬 <b>Сообщение боту</b>',
+      '',
+      `<b>От:</b> ${this.escape(this.who(msg))}`,
+      `<b>ID:</b> <code>${msg.from?.id ?? chatId}</code>`,
+      `<b>Язык:</b> ${lang}`,
+      (msg.contact?.phone_number || contact.phone) &&
+        `<b>Телефон:</b> ${this.escape(msg.contact?.phone_number || contact.phone || '')}`,
+      '',
+      text ? this.escape(text) : t.attachmentOnly,
+      hasAttachment && text ? '\n<i>К сообщению приложен файл</i>' : '',
+    ].filter(Boolean);
+
+    const sent = await this.call(token, 'sendMessage', {
+      chat_id: group,
+      text: parts.join('\n') + '\n\n<i>Ответьте на это сообщение — ответ уйдёт отправителю.</i>',
+      parse_mode: 'HTML',
+    });
+    if (!sent) return;
+    this.logger.log(`Сообщение от ${this.who(msg)} передано в группу`);
+
+    /* Запоминаем, какому чату соответствует сообщение в группе. Без этой
+       записи реплай менеджера некуда было бы адресовать. */
+    if (sent.message_id) {
+      await this.prisma.telegramThread
+        .upsert({
+          where: { groupMessageId: sent.message_id },
+          update: { userChatId: String(chatId), userName: this.who(msg) },
+          create: {
+            groupMessageId: sent.message_id,
+            userChatId: String(chatId),
+            userName: this.who(msg),
+          },
+        })
+        .catch((e: Error) => this.logger.warn(`Связь сообщений не сохранена: ${e.message}`));
+    }
+  }
+
+  /* Нажатие инлайн-кнопки выбора языка. Единственный сценарий колбэков на
+     сегодня — если data не начинается с 'lang:', молча гасим часики на
+     кнопке и ничего не делаем. */
+  private async handleCallback(token: string, cq: TgCallbackQuery): Promise<void> {
+    const data = cq.data || '';
+    const chatId = cq.message?.chat.id;
+    if (!chatId || !data.startsWith('lang:')) {
+      await this.call(token, 'answerCallbackQuery', { callback_query_id: cq.id });
+      return;
+    }
+
+    const lang = data.slice('lang:'.length) as Lang;
+    if (!LANGS.includes(lang)) {
+      await this.call(token, 'answerCallbackQuery', { callback_query_id: cq.id });
+      return;
+    }
+
+    await this.prisma.telegramContact.upsert({
+      where: { chatId: String(chatId) },
+      update: { lang, step: 'contact' },
+      create: { chatId: String(chatId), lang, step: 'contact' },
+    });
+
+    await this.call(token, 'answerCallbackQuery', { callback_query_id: cq.id });
+
+    /* Убираем клавиатуру у сообщения с выбором языка — иначе на неё можно
+       нажать повторно, и бот переспросит контакт заново без видимой причины. */
+    if (cq.message) {
+      await this.call(token, 'editMessageReplyMarkup', {
+        chat_id: chatId,
+        message_id: cq.message.message_id,
+        reply_markup: { inline_keyboard: [] },
+      });
+    }
+
+    await this.askContact(token, chatId, lang);
+  }
+
+  /* Первый шаг онбординга: выбор языка. Текст трёхъязычный сразу — до этого
+     момента бот ещё не знает, на каком языке говорить. */
+  private async askLanguage(token: string, chatId: number): Promise<void> {
+    await this.call(token, 'sendMessage', {
+      chat_id: chatId,
+      text: 'Выберите язык / Tilni tanlang / Choose your language',
+      reply_markup: {
+        inline_keyboard: [[
+          { text: '🇷🇺 Русский', callback_data: 'lang:ru' },
+          { text: '🇺🇿 O\'zbek', callback_data: 'lang:uz' },
+          { text: '🇬🇧 English', callback_data: 'lang:en' },
+        ]],
+      },
+    });
+  }
+
+  /* Второй шаг онбординга: запрос контакта через кнопку клавиатуры
+     (request_contact — Telegram сам подставит номер владельца аккаунта) или
+     пропуск обычной кнопкой-текстом. */
+  private async askContact(token: string, chatId: number, lang: Lang): Promise<void> {
+    const t = T[lang];
+    await this.call(token, 'sendMessage', {
+      chat_id: chatId,
+      text: t.askContact,
+      reply_markup: {
+        keyboard: [[{ text: t.shareContact, request_contact: true }], [{ text: t.skip }]],
+        resize_keyboard: true,
+        one_time_keyboard: true,
+      },
+    });
   }
 
   /* Ответ менеджера из группы — обратно автору.
@@ -237,35 +438,17 @@ export class TelegramService {
     if (delivered) this.logger.log(`Ответ менеджера доставлен: ${thread.userName}`);
   }
 
-  /* Отмечает чат как известный (insert-if-not-exists) и возвращает true,
-     если запись только что создана — то есть это первое сообщение из чата.
-     На ошибку БД отвечает false: не срывать обработку сообщения из-за того,
-     что не получилось проверить, писали ли этому чату раньше — в худшем
-     случае лишний раз не пришлёт приветствие, а не потеряет сообщение. */
-  private async registerContact(chatId: number): Promise<boolean> {
-    try {
-      await this.prisma.telegramContact.create({ data: { chatId: String(chatId) } });
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  private async sendWelcome(token: string, chatId: number): Promise<void> {
+  private async sendWelcome(token: string, chatId: number, lang: Lang): Promise<void> {
+    const t = T[lang];
     await this.call(token, 'sendMessage', {
       chat_id: chatId,
       parse_mode: 'HTML',
-      text:
-        'Здравствуйте! Это бот компании <b>ИНДУСТРИЯ ЗДОРОВЬЯ</b>.\n\n' +
-        'Поставляем медицинское оборудование, мебель, инструменты и расходные ' +
-        'материалы для клиник Узбекистана.\n\n' +
-        'Напишите ваш вопрос прямо здесь — менеджер ответит в рабочее время.\n' +
-        `Срочный вопрос — позвоните: ${PHONE}`,
+      text: `${t.welcomeIntro}\n\n${t.welcomeQuestion}\n${t.urgent}: ${PHONE}`,
       reply_markup: {
         inline_keyboard: [
-          [{ text: '🩺 Каталог оборудования', url: `${SITE}/catalog` }],
-          [{ text: '📄 Оставить заявку', url: `${SITE}/contacts` }],
-          [{ text: '📞 Контакты', url: `${SITE}/contacts` }],
+          [{ text: t.catalogBtn, url: `${SITE}/catalog` }],
+          [{ text: t.leadBtn, url: `${SITE}/contacts` }],
+          [{ text: t.contactsBtn, url: `${SITE}/contacts` }],
         ],
       },
     });
