@@ -10,35 +10,6 @@ function _figs() { return window.siteFigures ? window.siteFigures() : { catalog:
 
 function buildInfoContent(contacts) {
 return {
-  about: {
-    ru: {
-      title: "О компании",
-      sections: [
-        { head: "Кто мы", body: "ИНДУСТРИЯ ЗДОРОВЬЯ — специализированная платформа поставки медицинского оборудования и расходных материалов для государственных и частных медицинских учреждений Республики Узбекистан. Работаем с 2014 года. За 12 лет мы стали одним из ведущих B2B-поставщиков медтехники в стране." },
-        { head: "Наша миссия", body: "Сделать профессиональное медицинское оборудование мирового уровня доступным для каждой клиники, больницы и медицинского центра в Узбекистане — с прямыми ценами от производителей, сертификацией, монтажом и послепродажным обслуживанием." },
-        { head: "Преимущества", list: ["Прямые контракты с 120+ заводами-производителями в 18 странах", "Собственный склад в Ташкенте площадью 3 000 м²", "Инженерный центр: монтаж, пуско-наладка, обучение персонала", "Полный пакет регистрационных удостоверений МЗ РУз", "Доставка во все 14 регионов республики", "Лизинг и рассрочка платежа для бюджетных организаций"] },
-        { head: "Цифры", get stats(){ const F=_figs(); return [{n:F.catalog+"+",l:"Наименований оборудования"},{n:F.brands+"+",l:"Брендов-производителей"},{n:F.regions,l:"Регионов доставки"},{n:F.years+"+",l:"Лет на рынке"}]; } },
-      ]
-    },
-    uz: {
-      title: "Kompaniya haqida",
-      sections: [
-        { head: "Biz kimizmiz", body: "SOG’LIQ INDUSTRIYASI — O'zbekiston Respublikasining davlat va xususiy tibbiyot muassasalari uchun tibbiy uskunalar va sarf materiallarini yetkazib berish platformasi. 2014 yildan beri faoliyat yuritamiz." },
-        { head: "Bizning maqsadimiz", body: "Jahon darajasidagi professional tibbiy uskunalarni O'zbekistondagi har bir klinika, kasalxona va tibbiy markazga ishlab chiqaruvchilardan to'g'ridan-to'g'ri narxlarda, sertifikatlash, montaj va servis bilan birga taqdim etish." },
-        { head: "Afzalliklar", list: ["18 mamlakatdagi 120+ ishlab chiqaruvchi zavod bilan to'g'ridan-to'g'ri shartnomalar", "Toshkentda 3 000 m² ombor", "Muhandislik markazi: montaj, ishga tushirish, xodimlarni o'qitish", "OʻzR SSV roʻyxatdan oʻtkazish guvohnomalarining toʻliq to'plami", "Respublikaning barcha 14 hududiga yetkazib berish", "Budjet tashkilotlari uchun lizing va bo'lib to'lash"] },
-        { head: "Raqamlarda", get stats(){ const F=_figs(); return [{n:F.catalog+"+",l:"Uskuna nomi"},{n:F.brands+"+",l:"Hamkor brendlar"},{n:F.regions,l:"Yetkazish hududi"},{n:F.years+"+",l:"Yillik tajriba"}]; } },
-      ]
-    },
-    en: {
-      title: "About Us",
-      sections: [
-        { head: "Who we are", body: "HEALTH INDUSTRY is a specialized B2B platform for medical equipment supply to public and private healthcare institutions across Uzbekistan. Operating since 2014, we have become one of the country's leading medical technology distributors." },
-        { head: "Our mission", body: "To make world-class professional medical equipment accessible to every clinic, hospital and medical centre in Uzbekistan — with direct factory prices, certification, installation and after-sales service." },
-        { head: "Advantages", list: ["Direct contracts with 120+ manufacturers in 18 countries", "Own 3,000 m² warehouse in Tashkent", "Engineering centre: installation, commissioning, staff training", "Full MoH Uzbekistan registration certificate package", "Delivery to all 14 regions of the republic", "Leasing and instalment options for public institutions"] },
-        { head: "By the numbers", get stats(){ const F=_figs(); return [{n:F.catalog+"+",l:"Equipment items"},{n:F.brands+"+",l:"Partner brands"},{n:F.regions,l:"Delivery regions"},{n:F.years+"+",l:"Years on the market"}]; } },
-      ]
-    }
-  },
   service: {
     ru: { title: "Сервис и гарантия", sections: [
       { head: "Гарантийные обязательства", body: "На всё оборудование из нашего каталога предоставляется официальная гарантия производителя — 24 месяца. В гарантийный период устранение неисправностей, замена дефектных комплектующих и выезд инженера осуществляются бесплатно." },
@@ -81,10 +52,6 @@ return {
       { head: "Partner requirements", list: ["ISO 13485 certification or equivalent", "Product registration certificates (or willingness to obtain them)", "Minimum 12-month manufacturer's warranty on all products", "Technical support capacity or readiness to train our engineers", "Competitive pricing"] },
       { head: "How to join", body: `Fill out the application form or call us at ${contacts.phone}. Our partner development manager will contact you within one business day.` },
     ]}
-  },
-  contacts: {
-    ru: { title: "Контакты" },
-    en: { title: "Contacts" },
   },
   privacy: {
     ru: { title: "Политика конфиденциальности", sections: [
@@ -346,7 +313,10 @@ function InfoPage({ t, lang, go, params }) {
   const lv   = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const contacts = useSiteContacts();
   const INFO_CONTENT = buildInfoContent(contacts);
-  const data = INFO_CONTENT[key] || INFO_CONTENT.about;
+  /* Запасной раздел — «Сервис и гарантия»: прежний about удалён 22.08.2026 как
+     дубль корпоративной /about, и обращение к нему давало undefined, а следом
+     падение на data[lang]. */
+  const data = INFO_CONTENT[key] || INFO_CONTENT.service;
   const page = data[lang] || data.ru || data.en;
   if (!page || !page.sections) {
     // contacts or fallback
@@ -508,4 +478,4 @@ function InfoPage({ t, lang, go, params }) {
   );
 }
 
-Object.assign(window, { InfoPage });
+Object.assign(window, { InfoPage, buildInfoContent });

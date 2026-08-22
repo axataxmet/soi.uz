@@ -85,8 +85,8 @@ function SitemapPage({ t, lang, go }) {
         </Section>
 
         <Section title={lv("Компания", "Kompaniya", "Company")}>
-          <Link onClick={() => go("info", { p: "about" })}>{lv("О компании", "Kompaniya haqida", "About us")}</Link>
-          <Link onClick={() => go("info", { p: "contacts" })}>{lv("Контакты", "Kontaktlar", "Contacts")}</Link>
+          <Link onClick={() => go("about", {})}>{lv("О компании", "Kompaniya haqida", "About us")}</Link>
+          <Link onClick={() => go("contacts", {})}>{lv("Контакты", "Kontaktlar", "Contacts")}</Link>
           <Link onClick={() => go("news", {})}>{lv("Новости и статьи", "Yangiliklar va maqolalar", "News & articles")}</Link>
           <Link onClick={() => go("tenders", {})}>{lv("Тендеры", "Tenderlar", "Tenders")}</Link>
           <Link onClick={() => go("partners", {})}>{lv("Бренды и производители", "Brendlar va ishlab chiqaruvchilar", "Brands & manufacturers")}</Link>

@@ -116,8 +116,8 @@ function MobileDrawer({ t, lang, go, store, open, onClose }) {
           {label:lv("Прайс-лист","Narxlar","Price list"), view:"price"},
           {label:lv("Тендеры","Tenderlar","Tenders"), view:"tenders"},
           {label:lv("Новости","Yangiliklar","News"), view:"news"},
-          {label:lv("О компании","Haqimizda","About"), view:"info", params:{p:"about"}},
-          {label:lv("Контакты","Kontaktlar","Contacts"), view:"info", params:{p:"contacts"}},
+          {label:lv("О компании","Haqimizda","About"), view:"about"},
+          {label:lv("Контакты","Kontaktlar","Contacts"), view:"contacts"},
         ].map((item,i) => (
           <div key={i} className="mob-nav-item" onClick={()=>{ go(item.view, item.params||{}); onClose(); }}>
             {item.label}

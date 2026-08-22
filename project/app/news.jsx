@@ -75,6 +75,14 @@ function legacyHashSegments() {
 }
 function parseUrl() {
   const seg = segmentsOfPath();
+  /* Снятая страница — переписываем адрес на актуальный и разбираем уже его.
+     replaceState, а не pushState: иначе «назад» возвращало бы на удалённый
+     адрес, и посетитель ходил бы по кругу. */
+  const gone = GONE_PATHS[seg.join("/")];
+  if (gone) {
+    try { history.replaceState({ soi: true }, "", gone); } catch (e) {}
+    return parseSegments(gone.split("/").filter(Boolean));
+  }
   return parseSegments(seg.length ? seg : legacyHashSegments());
 }
 /* Категория в адресе — человекочитаемый slug, а не cuid из базы: ссылка вида
@@ -125,6 +133,20 @@ function catHashFromRoute(view, params) {
   if (view === "info") return "/catalog/info/" + (params.p || "");
   return "/catalog/" + view;
 }
+/* Снятые страницы каталожной оболочки (22.08.2026). Каждая дублировала
+   корпоративную, причём с расходящимся содержимым: «О компании» в каталоге
+   утверждала «работаем с 2014 года», тогда как /about говорит «с 2019».
+
+   Адреса не выбрасываются, а перенаправляются: на них могли остаться внешние
+   ссылки и закладки, а 404 вместо страницы — худший исход, чем переход на
+   актуальный аналог. Ключ — путь целиком, без ведущего слэша. */
+const GONE_PATHS = {
+  "catalog/info": "/about",
+  "catalog/info/about": "/about",
+  "catalog/info/contacts": "/contacts",
+  "catalog/tenders": "/tenders",
+};
+
 /* The inverse of embedRouteFrom (app-root.jsx): turns the catalog's own route
    announcement (a "soi-route" message, fired by its internal go()) back into
    the {sub, param} shape catNav carries. Without this, a click inside the

@@ -396,7 +396,9 @@ function App(props) {
   else if (v === "news")     page = <CatalogNewsRedirect embed={EMBED_ON} />;
   else if (v === "tracking") page = <TrackingPage t={t} lang={lang} go={go} />;
   else if (v === "info")    page = <InfoPage t={t} lang={lang} go={go} params={p} />;
-  else if (v === "tenders") page = <TendersPage t={t} lang={lang} go={go} />;
+  /* Маршрут «tenders» убран 22.08.2026: в каталоге была вторая страница про
+     госзакупки помимо корпоративной /tenders. Старый адрес перенаправляется
+     на неё (см. REDIRECTS в news.jsx), сама TendersPage больше не вызывается. */
   else if (v === "faq")     page = <FaqPage t={t} lang={lang} go={go} />;
   else if (v === "sitemap") page = <SitemapPage t={t} lang={lang} go={go} />;
   /* Неизвестный раздел — открываем корень каталога. Иначе старая ссылка или
