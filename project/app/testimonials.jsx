@@ -18,40 +18,74 @@ function rvpEnsurePdfJs() {
   return window.__pdfjsLoadP;
 }
 
-/* Кэш: url@width → Promise<dataURL>. Первая страница рендерится один раз,
-   карточка (малая ширина) и модалка (большая) кэшируются отдельно. */
+/* Очередь с ограничением параллелизма: пока на странице документов не видно
+   миниатюр, каждая грузила и рендерила свой PDF одновременно — при десятке
+   документов это забивало сеть и основной поток и страница «тормозила» при
+   открытии. Не больше RVP_MAX_CONCURRENT рендеров одновременно, остальные ждут
+   очереди. */
+const RVP_MAX_CONCURRENT = 3;
+let rvpActive = 0;
+const rvpQueue = [];
+function rvpDrainQueue() {
+  while (rvpActive < RVP_MAX_CONCURRENT && rvpQueue.length) {
+    const { fn, resolve, reject } = rvpQueue.shift();
+    rvpActive++;
+    fn().then(
+      (v) => { rvpActive--; resolve(v); rvpDrainQueue(); },
+      (e) => { rvpActive--; reject(e); rvpDrainQueue(); }
+    );
+  }
+}
+function rvpSchedule(fn) {
+  return new Promise((resolve, reject) => { rvpQueue.push({ fn, resolve, reject }); rvpDrainQueue(); });
+}
+
+/* Документ, загруженный один раз (Promise<pdf>), переиспользуется для рендера
+   любой его страницы — иначе переключение страниц в просмотрщике заново
+   скачивало бы весь файл. */
+const RVP_DOC_CACHE = (window.__rvpDocCache = window.__rvpDocCache || {});
+function rvpGetPdfDoc(url) {
+  if (RVP_DOC_CACHE[url]) return RVP_DOC_CACHE[url];
+  RVP_DOC_CACHE[url] = rvpEnsurePdfJs().then(() => window.pdfjsLib.getDocument(url).promise);
+  RVP_DOC_CACHE[url].catch(() => { delete RVP_DOC_CACHE[url]; });
+  return RVP_DOC_CACHE[url];
+}
+
+/* Кэш: url@width@page → Promise<{src, numPages}>. Карточка (малая ширина) и
+   модалка (большая) кэшируются отдельно, страницы одного документа — тоже. */
 const RVP_PAGE_CACHE = (window.__rvpPageCache = window.__rvpPageCache || {});
-function rvpRenderPdfPage(url, width) {
-  const key = url + "@" + width;
+function rvpRenderPdfPage(url, width, page) {
+  page = page || 1;
+  const key = url + "@" + width + "@" + page;
   if (RVP_PAGE_CACHE[key]) return RVP_PAGE_CACHE[key];
-  RVP_PAGE_CACHE[key] = rvpEnsurePdfJs()
-    .then(() => window.pdfjsLib.getDocument(url).promise)
-    .then((pdf) => pdf.getPage(1))
-    .then((page) => {
-      const base = page.getViewport({ scale: 1 });
-      const vp = page.getViewport({ scale: width / base.width });
+  RVP_PAGE_CACHE[key] = rvpGetPdfDoc(url)
+    .then((pdf) => pdf.getPage(page).then((p) => ({ pdf, p })))
+    .then(({ pdf, p }) => rvpSchedule(() => {
+      const base = p.getViewport({ scale: 1 });
+      const vp = p.getViewport({ scale: width / base.width });
       const canvas = document.createElement("canvas");
       canvas.width = Math.ceil(vp.width);
       canvas.height = Math.ceil(vp.height);
-      return page.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise
-        .then(() => canvas.toDataURL("image/jpeg", 0.88));
-    });
+      return p.render({ canvasContext: canvas.getContext("2d"), viewport: vp }).promise
+        .then(() => ({ src: canvas.toDataURL("image/jpeg", 0.88), numPages: pdf.numPages }));
+    }));
   RVP_PAGE_CACHE[key].catch(() => { delete RVP_PAGE_CACHE[key]; });
   return RVP_PAGE_CACHE[key];
 }
 
-/* Хук: src (dataURL) | loading | error для первой страницы PDF */
-function useRvpPdfPage(url, width, enabled) {
-  const [state, setState] = React.useState({ src: null, err: false });
+/* Хук: src (dataURL) | numPages | loading | error для страницы PDF */
+function useRvpPdfPage(url, width, enabled, page) {
+  page = page || 1;
+  const [state, setState] = React.useState({ src: null, err: false, numPages: null });
   React.useEffect(() => {
     let on = true;
-    setState({ src: null, err: false });
-    if (!enabled || !url) { if (!url && enabled) setState({ src: null, err: true }); return; }
-    rvpRenderPdfPage(url, width)
-      .then((d) => on && setState({ src: d, err: false }))
-      .catch(() => on && setState({ src: null, err: true }));
+    setState((s) => ({ src: null, err: false, numPages: s.numPages }));
+    if (!enabled || !url) { if (!url && enabled) setState({ src: null, err: true, numPages: null }); return; }
+    rvpRenderPdfPage(url, width, page)
+      .then((d) => on && setState({ src: d.src, err: false, numPages: d.numPages }))
+      .catch(() => on && setState({ src: null, err: true, numPages: null }));
     return () => { on = false; };
-  }, [url, width, enabled]);
+  }, [url, width, enabled, page]);
   return state;
 }
 
@@ -74,6 +108,12 @@ function rvpEnsureViewerCss() {
 .rvp-x{position:fixed;top:22px;right:26px;width:42px;height:42px;border-radius:50%;border:none;background:rgba(255,255,255,.14);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .18s;z-index:9110}
 .rvp-x:hover{background:rgba(255,255,255,.28)}
 .rvp-x:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.rvp-pager{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.14);border-radius:40px;padding:8px 10px;z-index:9110;backdrop-filter:blur(6px)}
+.rvp-pager button{width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.16);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .18s}
+.rvp-pager button:hover:not(:disabled){background:rgba(255,255,255,.32)}
+.rvp-pager button:disabled{opacity:.35;cursor:default}
+.rvp-pager button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.rvp-pager span{color:#fff;font-size:var(--fs-3);font-weight:600;min-width:52px;text-align:center;font-variant-numeric:tabular-nums}
 @media(prefers-reduced-motion:reduce){.rvp-overlay,.rvp-sheet-img,.rvp-sheet-fallback{animation:none}}
   `;
   document.head.appendChild(s);
@@ -371,16 +411,24 @@ function SheetViewer({ r, tx, lv, onClose }) {
   const url   = r.letter?.data || "";
   const isImg = r.letter?.type?.startsWith("image/");
   const isPdf = !isImg && !!url;
-  const { src, err } = useRvpPdfPage(url, 1400, isPdf);
+  const [page, setPage] = React.useState(1);
+  React.useEffect(() => { setPage(1); }, [url]);
+  const { src, err, numPages } = useRvpPdfPage(url, 1400, isPdf, page);
   const img = isImg ? url : src;
   const loading = isPdf && !src && !err;
+  const canPrev = isPdf && page > 1;
+  const canNext = isPdf && !!numPages && page < numPages;
   React.useEffect(() => {
-    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowLeft" && canPrev) setPage((p) => p - 1);
+      else if (e.key === "ArrowRight" && canNext) setPage((p) => p + 1);
+    };
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => { document.removeEventListener("keydown", onKey); document.body.style.overflow = prev; };
-  }, []);
+  }, [canPrev, canNext]);
   return (
     <div className="rvp-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label={tx(r.company)}>
       <button className="rvp-x" onClick={onClose} aria-label={lv("Закрыть", "Yopish", "Close")}>
@@ -397,6 +445,17 @@ function SheetViewer({ r, tx, lv, onClose }) {
           {tx(r.desc) && <p>{tx(r.desc)}</p>}
           {tx(r.body) && <p>{tx(r.body)}</p>}
           {tx(r.region) && <p style={{ color: "var(--slate-500)", fontSize: 13 }}>{tx(r.region)}</p>}
+        </div>
+      )}
+      {isPdf && numPages > 1 && (
+        <div className="rvp-pager" onClick={(e) => e.stopPropagation()}>
+          <button disabled={!canPrev} onClick={() => setPage((p) => p - 1)} aria-label={lv("Предыдущая страница", "Oldingi sahifa", "Previous page")}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <span>{page} / {numPages}</span>
+          <button disabled={!canNext} onClick={() => setPage((p) => p + 1)} aria-label={lv("Следующая страница", "Keyingi sahifa", "Next page")}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
         </div>
       )}
     </div>

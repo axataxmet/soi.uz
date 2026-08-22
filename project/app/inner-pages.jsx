@@ -352,18 +352,67 @@ function DocFallbackSheet() {
   );
 }
 
-/* миниатюра первой страницы PDF (общий рендер window.rvpRenderPdfPage), fallback → обложка */
-function DocPdfThumb({ url, alt }) {
+/* миниатюра первой страницы PDF (общий рендер window.rvpRenderPdfPage), fallback → обложка.
+   Рендерится только когда `active` — карточка попала во вьюпорт (см. useLicThumbVisible ниже).
+   На странице с десятками документов рендер всех превью сразу на монтировании
+   грузил и рисовал каждый PDF параллельно — страница ощутимо подвисала при
+   открытии. Ленивый запуск переносит эту работу на момент прокрутки к карточке. */
+function DocPdfThumb({ url, alt, active, onPages }) {
   const [src, setSrc] = React.useState(null);
   const [err, setErr] = React.useState(false);
   React.useEffect(() => {
     let on = true; setSrc(null); setErr(false);
+    if (!active) return;
     if (!url || !window.rvpRenderPdfPage) { setErr(true); return; }
-    window.rvpRenderPdfPage(url, 320).then((d) => on && setSrc(d)).catch(() => on && setErr(true));
+    window.rvpRenderPdfPage(url, 320).then((d) => {
+      if (!on) return;
+      setSrc(d.src);
+      if (onPages && d.numPages > 1) onPages(d.numPages);
+    }).catch(() => on && setErr(true));
     return () => { on = false; };
-  }, [url]);
+  }, [url, active]);
   if (src && !err) return <img src={src} alt={alt} loading="lazy" />;
+  /* пока превью ещё рендерится (карточка видна, но данные не пришли) — пульсирующий
+     плейсхолдер вместо статичной обложки: иначе одинаковая заглушка для «загружается»
+     и «файла нет» читалась как готовый (пустой) результат. */
+  if (active && !err) return <div className="lic-thumb-skel" aria-hidden="true" />;
   return <DocFallbackSheet />;
+}
+
+/* true, когда элемент попал во вьюпорт (с запасом в 500px) — держит ref на
+   переданном узле и один раз переключает флаг, дальше наблюдение не нужно. */
+function useLicThumbVisible(ref) {
+  const [visible, setVisible] = React.useState(false);
+  React.useEffect(() => {
+    if (visible) return;
+    if (typeof IntersectionObserver === "undefined" || !ref.current) { setVisible(true); return; }
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) { setVisible(true); io.disconnect(); }
+    }, { rootMargin: "500px 0px" });
+    io.observe(ref.current);
+    return () => io.disconnect();
+  }, []);
+  return visible;
+}
+
+function LicDocCard({ d, lv, txx, setViewer }) {
+  const ref = React.useRef(null);
+  const visible = useLicThumbVisible(ref);
+  const [pages, setPages] = React.useState(0);
+  const url = (d.file && (d.file.data || d.file.url)) || d.href || "";
+  const openable = !!url && d.status !== "draft";
+  const open = () => { if (openable) setViewer({ letter: { data: url, type: (d.file && d.file.type) || "application/pdf" }, company: d.title }); };
+  return (
+    <div className="lic-card reveal">
+      <div ref={ref} className={"lic-thumb" + (openable ? " clickable" : "")}
+        {...(openable ? { role: "button", tabIndex: 0, onClick: open,
+          onKeyDown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } },
+          "aria-label": lv("Открыть документ", "Hujjatni ochish", "Open document") + ": " + txx(d.title) } : {})}>
+        {openable ? <DocPdfThumb url={url} alt={txx(d.title)} active={visible} onPages={setPages} /> : <DocFallbackSheet />}
+        {pages > 1 && <span className="lic-pages-badge">{pages} {lv("стр.", "sah.", "pg.")}</span>}
+      </div>
+      <div className="lt">{txx(d.title)}</div>
+    </div>);
 }
 
 function LicensesPage({ t, lang, go }) {
@@ -403,29 +452,24 @@ function LicensesPage({ t, lang, go }) {
 
             // managed documents from the admin CMS (visible only)
             const all = docs.filter((d) => d.status !== "hidden");
-
-            const cardCms = (d) => {
-              const url = (d.file && (d.file.data || d.file.url)) || d.href || "";
-              const openable = !!url && d.status !== "draft";
-              const open = () => { if (openable) setViewer({ letter: { data: url, type: (d.file && d.file.type) || "application/pdf" }, company: d.title }); };
+            if (!all.length) {
               return (
-                <div className="lic-card reveal" key={d.id}>
-                  <div className={"lic-thumb" + (openable ? " clickable" : "")}
-                    {...(openable ? { role: "button", tabIndex: 0, onClick: open,
-                      onKeyDown: (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } },
-                      "aria-label": lv("Открыть документ", "Hujjatni ochish", "Open document") + ": " + txx(d.title) } : {})}>
-                    {openable ? <DocPdfThumb url={url} alt={txx(d.title)} /> : <DocFallbackSheet />}
-                  </div>
-                  <div className="lt">{txx(d.title)}</div>
+                <div className="lic-empty">
+                  {lv("Документы скоро появятся.", "Hujjatlar tez orada qo'shiladi.", "Documents will appear here soon.")}
                 </div>);
-            };
+            }
+
             return CATS.map((c) => {
               const cmsItems = all.filter((d) => (d.cat || "company") === c.id);
               if (!cmsItems.length) return null;
               return (
                 <div className="lic-group" key={c.id}>
                   <h3 className="lic-group-h">{c.label} <span>{cmsItems.length}</span></h3>
-                  <div className="lic-grid">{cmsItems.map(cardCms)}</div>
+                  <div className="lic-grid">
+                    {cmsItems.map((d) => (
+                      <LicDocCard key={d.id} d={d} lv={lv} txx={txx} setViewer={setViewer} />
+                    ))}
+                  </div>
                 </div>);
             });
           })()}
