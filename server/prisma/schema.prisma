@@ -546,3 +546,15 @@ model TelegramThread {
   @@index([userChatId])
   @@map("telegram_threads")
 }
+
+// Личные чаты, которым бот уже писал приветствие. Нужна, чтобы отличить
+// первое обращение от повторного: без этой отметки приветствие уходило бы
+// только на /start и на пустое сообщение, а если человек сразу написал текст
+// вопросом — оставался бы без него.
+model TelegramContact {
+  // id личного чата (строкой — как и в TelegramThread.userChatId).
+  chatId      String   @id
+  firstSeenAt DateTime @default(now())
+
+  @@map("telegram_contacts")
+}
