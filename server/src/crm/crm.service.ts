@@ -90,6 +90,19 @@ export class CrmService {
     }
   }
 
+  /* Адрес аккаунта amoCRM из настроек — только хост, без схемы и хвостового
+     слэша. В поле админки естественно вставить его прямо из адресной строки
+     («https://medinfocom.amocrm.ru»), и тогда наивная подстановка давала бы
+     «https://https://medinfocom.amocrm.ru/api/v4» — запрос никуда не уходил.
+     Чиним здесь, а не требованием «вводите правильно»: поле заполняет человек,
+     и вставить полный адрес — самое очевидное, что он сделает. */
+  private amoHost(subdomain?: string): string {
+    return String(subdomain || '')
+      .trim()
+      .replace(/^https?:\/\//i, '')
+      .replace(/\/+$/, '');
+  }
+
   /* Запрос к amoCRM с Bearer-токеном. Отдаёт разобранное тело, а не признак
      успеха: при создании сделки нужен её id, чтобы потом дописывать в неё
      примечания. Наружу не бросает — переписка в Telegram не должна страдать
@@ -100,7 +113,7 @@ export class CrmService {
     body: unknown,
   ): Promise<any | null> {
     try {
-      const res = await fetch(`https://${cfg.subdomain}/api/v4${path}`, {
+      const res = await fetch(`https://${this.amoHost(cfg.subdomain)}/api/v4${path}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.token}` },
         body: JSON.stringify(body),
@@ -256,7 +269,7 @@ export class CrmService {
         /* Заголовок Authorization — единственное отличие от общего помощника,
            поэтому запрос остаётся здесь, но с той же проверкой ответа. */
         try {
-          const res = await fetch(`https://${cfg.subdomain}/api/v4/leads/complex`, {
+          const res = await fetch(`https://${this.amoHost(cfg.subdomain)}/api/v4/leads/complex`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.token}` },
             body: JSON.stringify([lead]),
