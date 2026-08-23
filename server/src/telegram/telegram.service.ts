@@ -320,6 +320,29 @@ export class TelegramService {
       text: `${t.received}\n\n${t.urgent}: ${PHONE}`,
     });
 
+    /* Переписка в amoCRM через API, а не через их Telegram-канал: тот забирает
+       себе вебхук бота, и тогда онбординг не срабатывает вовсе. Первое
+       сообщение заводит сделку, id сохраняется у контакта — дальше сообщения
+       дописываются в неё примечаниями. Не await'им весь блок в общем потоке
+       отправки: CRM недоступна — переписка с клиентом всё равно продолжается. */
+    this.crm
+      .relayTelegramMessage({
+        leadId: contact.amoLeadId,
+        name: this.who(msg),
+        phone: msg.contact?.phone_number || contact.phone,
+        lang,
+        text: text || '(вложение без текста)',
+      })
+      .then((leadId) => {
+        if (leadId && leadId !== contact.amoLeadId) {
+          return this.prisma.telegramContact
+            .update({ where: { chatId: String(chatId) }, data: { amoLeadId: leadId } })
+            .then(() => undefined);
+        }
+        return undefined;
+      })
+      .catch((e: Error) => this.logger.warn(`Связь со сделкой amoCRM не сохранена: ${e.message}`));
+
     if (!group) {
       this.logger.warn('Сообщение боту получено, но группа для пересылки не задана');
       return;

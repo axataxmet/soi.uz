@@ -90,6 +90,114 @@ export class CrmService {
     }
   }
 
+  /* Запрос к amoCRM с Bearer-токеном. Отдаёт разобранное тело, а не признак
+     успеха: при создании сделки нужен её id, чтобы потом дописывать в неё
+     примечания. Наружу не бросает — переписка в Telegram не должна страдать
+     от недоступности CRM. */
+  private async amoRequest(
+    cfg: UpdateCrmConfigDto,
+    path: string,
+    body: unknown,
+  ): Promise<any | null> {
+    try {
+      const res = await fetch(`https://${cfg.subdomain}/api/v4${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${cfg.token}` },
+        body: JSON.stringify(body),
+      });
+      const text = await res.text().catch(() => '');
+      if (!res.ok) {
+        this.logger.warn(`amoCRM ${path}: HTTP ${res.status} — ${text.slice(0, 300)}`);
+        return null;
+      }
+      try {
+        return JSON.parse(text);
+      } catch {
+        /* 204 и пустое тело — для примечаний это нормальный успех */
+        return {};
+      }
+    } catch (e) {
+      this.logger.warn(`amoCRM ${path}: запрос не ушёл — ${(e as Error).message}`);
+      return null;
+    }
+  }
+
+  /* Переписка из Telegram-бота в amoCRM.
+
+     Встроенный Telegram-канал amoCRM здесь намеренно не используется: он
+     забирает себе вебхук бота, и тогда до нашего сервера не доходит ничего —
+     онбординг (выбор языка, запрос контакта) молчит. Поэтому вебхук остаётся
+     у нас, а в amoCRM переписка попадает через API.
+
+     Первое сообщение из чата заводит сделку, последующие дописываются в неё
+     примечаниями: иначе каждая реплика клиента плодила бы отдельную сделку.
+     Возвращает id сделки — вызывающий сохраняет его у контакта.
+
+     Работает только в режиме direct: proxy-режим рассчитан на сторонний
+     приёмник со своим форматом, и слать туда переписку вслепую незачем. */
+  async relayTelegramMessage(input: {
+    leadId?: number | null;
+    name: string;
+    phone?: string | null;
+    lang?: string | null;
+    username?: string | null;
+    text: string;
+  }): Promise<number | null> {
+    try {
+      const cfg = await this.getConfig();
+      if (!cfg.enabled || cfg.mode !== 'direct' || !cfg.subdomain || !cfg.token) return null;
+
+      const noteText = input.text;
+
+      /* Сделка уже есть — только примечание. */
+      if (input.leadId) {
+        const ok = await this.amoRequest(cfg, `/leads/${input.leadId}/notes`, [
+          { note_type: 'common', params: { text: noteText } },
+        ]);
+        return ok ? input.leadId : null;
+      }
+
+      const lead: Record<string, unknown> = {
+        name: `Telegram: ${input.name}`,
+        pipeline_id: cfg.pipelineId ? parseInt(cfg.pipelineId) : undefined,
+        status_id: cfg.statusId && /^\d+$/.test(cfg.statusId) ? parseInt(cfg.statusId) : undefined,
+        responsible_user_id: cfg.responsibleUserId ? parseInt(cfg.responsibleUserId) : undefined,
+        custom_fields_values: [
+          input.phone && { field_code: 'PHONE', values: [{ value: input.phone, enum_code: 'WORK' }] },
+        ].filter(Boolean),
+        _embedded: {
+          contacts: [{
+            name: input.name,
+            first_name: input.name.split(' ')[0] || input.name,
+            last_name: input.name.split(' ').slice(1).join(' ') || '',
+            custom_fields_values: [
+              input.phone && { field_code: 'PHONE', values: [{ value: input.phone, enum_code: 'WORK' }] },
+            ].filter(Boolean),
+          }],
+        },
+        tags_values: [
+          { name: 'ИНДУСТРИЯ ЗДОРОВЬЯ' },
+          { name: 'Telegram-бот' },
+          input.lang && { name: `Язык: ${input.lang}` },
+        ].filter(Boolean),
+      };
+
+      const created = await this.amoRequest(cfg, '/leads/complex', [lead]);
+      /* /leads/complex отвечает массивом вида [{ id, contact_id, ... }]. */
+      const leadId = Array.isArray(created) && created[0] && Number(created[0].id);
+      if (!leadId) return null;
+
+      this.logger.log(`amoCRM: заведена сделка ${leadId} по чату Telegram (${input.name})`);
+      await this.amoRequest(cfg, `/leads/${leadId}/notes`, [
+        { note_type: 'common', params: { text: noteText } },
+      ]);
+      return leadId;
+    } catch (e) {
+      this.logger.warn(`amoCRM (telegram): ${(e as Error).message}`);
+      return null;
+    }
+  }
+
   // Fired after a submission is persisted. Never throws — a CRM relay failure
   // must never affect the (already-saved) lead or the caller's response.
   async relayLead(dto: CreateSubmissionDto) {
