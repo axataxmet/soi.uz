@@ -561,6 +561,10 @@ model TelegramContact {
   phone       String?
   // lang | contact | done — на чём остановился онбординг у этого чата.
   step        String   @default("done")
+  // id сделки в amoCRM. Ставится при первом сообщении из чата, дальше в эту
+  // же сделку дописываются примечания — иначе каждое сообщение клиента
+  // плодило бы отдельную сделку.
+  amoLeadId   Int?
 
   @@map("telegram_contacts")
 }
