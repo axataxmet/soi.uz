@@ -170,14 +170,14 @@ export class CrmService {
         return ok ? input.leadId : null;
       }
 
+      /* Телефон висит на контакте, а не на сделке: field_code PHONE
+         существует только у контакта, и на сделке amoCRM отвечает
+         400 NotSupportedChoice — сделка не создавалась вовсе. */
       const lead: Record<string, unknown> = {
         name: `Telegram: ${input.name}`,
         pipeline_id: cfg.pipelineId ? parseInt(cfg.pipelineId) : undefined,
         status_id: cfg.statusId && /^\d+$/.test(cfg.statusId) ? parseInt(cfg.statusId) : undefined,
         responsible_user_id: cfg.responsibleUserId ? parseInt(cfg.responsibleUserId) : undefined,
-        custom_fields_values: [
-          input.phone && { field_code: 'PHONE', values: [{ value: input.phone, enum_code: 'WORK' }] },
-        ].filter(Boolean),
         _embedded: {
           contacts: [{
             name: input.name,
@@ -236,15 +236,18 @@ export class CrmService {
         pipeline_id: cfg.pipelineId ? parseInt(cfg.pipelineId) : undefined,
         status_id: cfg.statusId ? parseInt(cfg.statusId) : undefined,
         responsible_user_id: cfg.responsibleUserId ? parseInt(cfg.responsibleUserId) : undefined,
-        custom_fields_values: [
-          dto.phone && { field_code: 'PHONE', values: [{ value: dto.phone, enum_code: 'WORK' }] },
-          dto.email && { field_code: 'EMAIL', values: [{ value: dto.email, enum_code: 'WORK' }] },
-        ].filter(Boolean),
+        /* Телефон и почта — поля контакта, не сделки: field_code PHONE/EMAIL
+           у сделки не существует, и amoCRM отвечал 400 NotSupportedChoice,
+           отклоняя заявку целиком. */
         _embedded: {
           contacts: [{
             name: dto.name,
             first_name: dto.name.split(' ')[0] || dto.name,
             last_name: dto.name.split(' ').slice(1).join(' ') || '',
+            custom_fields_values: [
+              dto.phone && { field_code: 'PHONE', values: [{ value: dto.phone, enum_code: 'WORK' }] },
+              dto.email && { field_code: 'EMAIL', values: [{ value: dto.email, enum_code: 'WORK' }] },
+            ].filter(Boolean),
           }],
           companies: meta.org ? [{ name: meta.org }] : [],
         },
