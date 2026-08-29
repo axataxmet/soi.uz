@@ -244,7 +244,7 @@ const HERO_SLIDES = [
   {
     id: "slide-equip",
     theme: "dark",
-    video: "assets/hero-equip.mp4",
+    video: "assets/hero-equipment.mp4",
     bg: "linear-gradient(120deg, #050a14 0%, var(--navy-800) 55%, var(--blue-600) 100%)",
     badge: { ru: "ИНДУСТРИЯ ЗДОРОВЬЯ", uz: "SOGʻLIQ INDUSTRIYASI", en: "HEALTH INDUSTRY" },
     title: { ru: "Медицинские изделия и оснащение", uz: "Tibbiy buyumlar va jihozlash", en: "Medical devices and equipping" },
@@ -257,6 +257,7 @@ const HERO_SLIDES = [
   {
     id: "slide-registration",
     theme: "light",
+    video: "assets/hero-lab.mp4",
     bg: "linear-gradient(135deg, #FFFFFF 0%, var(--blue-50) 55%, var(--line-soft) 100%)",
     badge: { ru: "Услуга", uz: "Xizmat", en: "Service" },
     title: { ru: "Регистрация медицинских изделий в Узбекистане", uz: "O'zbekistonda tibbiy buyumlarni ro'yxatdan o'tkazish", en: "Medical device registration in Uzbekistan" },
@@ -268,6 +269,7 @@ const HERO_SLIDES = [
   {
     id: "slide-service",
     theme: "dark",
+    video: "assets/hero-service.mp4",
     bg: "linear-gradient(120deg, #040c18 0%, var(--blue-700) 70%, var(--blue-500) 100%)",
     badge: { ru: "Сервис", uz: "Servis", en: "Service" },
     title: { ru: "Сервис и обучение персонала", uz: "Servis va xodimlarni o'qitish", en: "Maintenance and staff training" },
