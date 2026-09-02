@@ -39,7 +39,7 @@
   "name": "ИНДУСТРИЯ ЗДОРОВЬЯ",
   "alternateName": ["ООО «ИНДУСТРИЯ ЗДОРОВЬЯ»", "SOG’LIQ INDUSTRIYASI", "HEALTH INDUSTRY"],
   "url": "https://soi.uz/",
-  "logo": "https://soi.uz/corp/logo-mark.svg",
+  "logo": "https://soi.uz/assets/soi-mark.svg",
   "description": "Официальный поставщик и интегратор медицинского оборудования в Республике Узбекистан.",
   "taxID": "312513138",
   "address": {
@@ -58,26 +58,9 @@
   }
 }
 </script>
-<script>
-  // apply saved theme before paint (no flash)
-  try { if (localStorage.getItem("si_theme") === "dark") document.documentElement.setAttribute("data-theme", "dark"); } catch (e) {}
-</script>
-<!-- offline-asset resolver: returns inlined blob URL when bundled standalone, else the path -->
-<script>
-  window.__assetMap = {
-    "assets/soi-mark-white.svg": "soiMarkWhite",
-    "assets/soi-mark.svg": "soiMark",
-    "assets/company-card.pdf": "pdfCompanyCard",
-    "assets/registration.pdf": "pdfRegistration",
-    "assets/egrul.pdf": "pdfEgrul",
-    "assets/supply-contract.pdf": "pdfSupply"
-  };
-  window.__asset = function (p) {
-    var R = window.__resources || {};
-    var id = window.__assetMap[p];
-    return (id && R[id]) || p;
-  };
-</script>
+  <!-- Тема до отрисовки и разрешение путей к ресурсам. Вынесено из inline
+       в файл, чтобы CSP мог запретить инлайновые скрипты целиком. -->
+  <script src="lib/boot.js?v=1788370000"></script>
 <!-- ext-resource dependencies (lifted from JSX string refs so the bundler inlines them) -->
 
 
