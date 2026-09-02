@@ -45,6 +45,11 @@ export class CreateNewsDto {
   @IsString()
   coverUrl?: string;
 
+  @ApiPropertyOptional({ description: 'Ссылка на ролик YouTube (для type = "video")' })
+  @IsOptional()
+  @IsString()
+  youtubeUrl?: string;
+
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   @IsArray()

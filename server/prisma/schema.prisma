@@ -401,12 +401,17 @@ model RegDocument {
 
 model News {
   id        String        @id @default(cuid())
-  type      String        @default("new") // new | article | guide | company | tender | case
+  type      String        @default("new") // new | article | guide | company | tender | case | video
   slug      String?       @unique
   title     Json
   excerpt   Json?
   body      Json?
   coverUrl  String?
+  // Ссылка на ролик YouTube. Витрина умеет показывать публикацию как видео
+  // (type = "video"): вместо обложки — превью с плеером. Раньше поле жило
+  // только во фронтенде и через API не сохранялось, поэтому такую публикацию
+  // нельзя было завести из админки вовсе.
+  youtubeUrl String?
   tags      String[]      @default([])
   date      DateTime?
   status    PublishStatus @default(DRAFT)
