@@ -33,6 +33,8 @@ function AdminNews() {
     body: { ru: "", uz: "", en: "" },
     excerpt: { ru: "" },
     cover: "",
+    type: "new",
+    youtube: "",
     status: "draft",
     date: new Date().toISOString().slice(0, 10),
   });
@@ -129,6 +131,16 @@ function NewsForm({ item, onChange }) {
             <option value="published">Опубликовано</option>
           </select>
         </Field>
+        {/* Категория определяет вкладку на странице новостей и вид карточки.
+            Раньше её нельзя было задать из админки вовсе — всё создавалось
+            с типом по умолчанию «new». Список берём из общих данных, чтобы он
+            не разъехался с фильтрами витрины. */}
+        <Field label="Категория">
+          <select className="adm-select" value={item.type || "new"} onChange={e => set("type", e.target.value)}>
+            {((window.SOI_CORE && window.SOI_CORE.NEWS_CATEGORIES) || [{ id: "new", ru: "Новинки" }])
+              .map(c => <option key={c.id} value={c.id}>{c.ru}</option>)}
+          </select>
+        </Field>
       </div>
 
       <div className="adm-tabs" style={{ marginBottom: 12 }}>
@@ -146,6 +158,21 @@ function NewsForm({ item, onChange }) {
       </Field>
 
       <ImageUpload label="Обложка новости" value={item.cover || ""} onChange={v => set("cover", v)} />
+
+      {/* Ссылка на ролик показывается только для категории «Видео»: для
+          остальных публикаций поле не имеет смысла и лишь запутывало бы.
+          Витрина берёт превью с YouTube, поэтому обложку можно не грузить —
+          но если она задана, используется она. */}
+      {item.type === "video" && (
+        <Field label="Ссылка на видео YouTube">
+          <input
+            className="adm-input"
+            placeholder="https://www.youtube.com/watch?v=..."
+            value={item.youtube || ""}
+            onChange={e => set("youtube", e.target.value)}
+          />
+        </Field>
+      )}
     </div>
   );
 }

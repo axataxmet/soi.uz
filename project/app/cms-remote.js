@@ -74,6 +74,10 @@
         return {
           id: r.id, title: r.title, body: r.body, excerpt: r.excerpt,
           cover: r.coverUrl || "", tags: r.tags || [], type: r.type || "new",
+          /* Витрина называет поле youtube, база — youtubeUrl. Переименование
+             здесь, а не в разметке: адаптер для того и нужен, чтобы фронтенд
+             не знал про имена колонок. */
+          youtube: r.youtubeUrl || "",
           date: r.date ? String(r.date).slice(0, 10) : "",
           status: st, published: st === "published", _remote: true,
         };
@@ -85,6 +89,9 @@
           date: it.date ? new Date(it.date).toISOString() : undefined,
           status: (it.status || (it.published ? "published" : "draft")).toString().toLowerCase() === "published" ? "PUBLISHED" : "DRAFT",
           coverUrl: await resolveMedia(it.cover),
+          /* Пустую строку превращаем в undefined: strip() уберёт ключ целиком,
+             и очистка поля в форме не запишет в базу пустую строку вместо null. */
+          youtubeUrl: it.youtube || undefined,
         });
       },
     },
