@@ -2701,6 +2701,18 @@ function ensureCaseModalCss() {
 .sx-cmod-tag { display:inline-flex; font-size:var(--fs-1); font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--sx-accent); background:var(--sx-bg-soft); border:1px solid var(--sx-line); padding:5px 12px; border-radius:var(--r-sm); margin-bottom:14px; }
 .sx-cmod-body h2 { font-size:var(--fs-7); font-weight:800; color:var(--sx-ink); line-height:1.25; letter-spacing:-.015em; margin:0 0 14px; }
 .sx-cmod-body p { font-size:var(--fs-4); line-height:1.7; color:var(--sx-ink-soft); margin:0; white-space:pre-line; }
+/* Размеченное тело публикации в модалке. Отдельный блок, а не .sx-cmod-body p:
+   у того white-space:pre-line, и в размеченном тексте переносы из исходника
+   превращались бы в лишние пустые строки между абзацами. */
+.sx-cmod-html { font-size:var(--fs-4); line-height:1.7; color:var(--sx-ink-soft); }
+.sx-cmod-html p { font-size:inherit; line-height:inherit; color:inherit; margin:0 0 14px; white-space:normal; }
+.sx-cmod-html p:last-child { margin-bottom:0; }
+.sx-cmod-html h3 { font-size:var(--fs-5); font-weight:700; color:var(--sx-ink); line-height:1.35; margin:22px 0 10px; }
+.sx-cmod-html ul, .sx-cmod-html ol { margin:0 0 14px; padding-left:20px; }
+.sx-cmod-html li { margin-bottom:6px; }
+.sx-cmod-html a { color:var(--blue-600); text-decoration:underline; }
+[data-theme="dark"] .sx-cmod-html { color:#a9b8cc; }
+[data-theme="dark"] .sx-cmod-html h3 { color:#eaf1fb; }
 .sx-cmod-meta {display:flex; flex-wrap:wrap; gap:22px; margin-top:22px; padding-top:18px; font-size:var(--fs-3); color:var(--sx-mute)}
 .sx-cmod-meta b { color:var(--navy-900); }
 .sx-cmod-x { position:fixed; top:22px; right:26px; width:42px; height:42px; border-radius:50%; border:none; background:rgba(255,255,255,.14); color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .18s; z-index:9110; }
@@ -3085,6 +3097,19 @@ function NewsModal({ n, lang, tx, cov, fmt, onClose }) {
   }, []);
   const cover = cov(n.cover);
   const body = tx(n.body) || tx(n.text) || tx(n.desc) || tx(n.excerpt) || "";
+  /* Тело публикации хранится размеченным (абзацы, подзаголовки, списки) — так
+     его пишут в админке и так показывает страница новостей. Здесь же текст
+     выводился как обычная строка, и одна и та же статья на главной
+     открывалась с видимыми тегами «<p>…</p>» вместо форматирования.
+     Чистим тем же cleanArticleHtml, что и страница новостей: иначе два места
+     показывали бы одно и то же по разным правилам. Функция объявлена в
+     соседнем бандле, поэтому есть запасная очистка на случай, если он ещё не
+     загружен. Простой текст без тегов по-прежнему идёт в <p>. */
+  const bodyHtml = /<[a-z][\s\S]*>/i.test(body)
+    ? (typeof cleanArticleHtml === "function"
+        ? cleanArticleHtml(body)
+        : body.replace(/<!--[\s\S]*?-->/g, "").replace(/\s(style|class|lang)="[^"]*"/gi, ""))
+    : null;
   return (
     <div className="sx-cmod-ov" onClick={onClose} role="dialog" aria-modal="true" aria-label={tx(n.title)}>
       <button className="sx-cmod-x" onClick={onClose} aria-label={_lv(lang, "Закрыть", "Yopish", "Close")}>
@@ -3097,7 +3122,9 @@ function NewsModal({ n, lang, tx, cov, fmt, onClose }) {
         <div className="sx-cmod-body">
           {n.date && <span className="sx-cmod-tag">{fmt(n.date)}</span>}
           <h2>{tx(n.title)}</h2>
-          {body && <p style={{ whiteSpace: "pre-line" }}>{body}</p>}
+          {bodyHtml
+            ? <div className="sx-cmod-html" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+            : body && <p style={{ whiteSpace: "pre-line" }}>{body}</p>}
         </div>
       </div>
     </div>
