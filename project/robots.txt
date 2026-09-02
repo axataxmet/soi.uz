@@ -1,0 +1,18 @@
+# ИНДУСТРИЯ ЗДОРОВЬЯ — soi.uz
+
+User-agent: *
+Allow: /
+
+# Админка и служебные точки в индексе не нужны: содержимого для поиска там
+# нет, а карта API — лишняя подсказка сканерам.
+Disallow: /admin
+Disallow: /admin.html
+Disallow: /api/
+
+# Технические параметры сортировки и фильтров каталога плодят дубли одной
+# и той же страницы.
+Disallow: /*?sort=
+Disallow: /*?page=
+Disallow: /*?q=
+
+Sitemap: https://soi.uz/sitemap.xml
