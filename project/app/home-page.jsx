@@ -2862,25 +2862,24 @@ function SoiReviews({ lang, go }) {
     return window.CMS.on("reviews", () => setCmsAll(window.CMS.list("reviews")));
   }, []);
 
-  const BUYERS_STUB = [
-    { id:"namangan", org:lv("Компания «Наманганская областная больница»","«Namangan viloyat kasalxonasi» kompaniyasi","Namangan Regional Hospital"), city:lv("Наманган","Namangan","Namangan"), type:lv("госучреждение","davlat muassasasi","public institution"), cat:lv("Оборудование для отделения диагностики","Diagnostika bo'limi uchun uskunalar","Diagnostic dept. equipment"), text:lv("Выражаем благодарность ИНДУСТРИЯ ЗДОРОВЬЯ за оперативную поставку и качественный монтаж оборудования для отделения диагностики.","Diagnostika bo'limi uchun uskunalarni tezkor yetkazib berish va sifatli o'rnatganlik uchun SOG’LIQ INDUSTRIYASIga minnatdorchilik bildiramiz.","We express gratitude to HEALTH INDUSTRY for prompt delivery and quality installation of diagnostic department equipment."), color:"var(--blue-500)" },
-    { id:"oncology", org:lv("Компания «РСНПМЦ Онкологии»","«RSNPMC Onkologiyasi» kompaniyasi","RSNPMC Oncology Center"), city:lv("Ташкент","Toshkent","Tashkent"), type:lv("госучреждение","davlat muassasasi","public institution"), cat:lv("Лучевая диагностика «под ключ»","«Kalit ostida» nurli diagnostika","Radiology dept. turnkey"), text:lv("Комплексное оснащение отделения лучевой диагностики выполнено под ключ, с обучением персонала и полным пакетом документов.","Nurli diagnostika bo'limini kompleks jihozlash kalit ostida amalga oshirildi, xodimlarni o'qitish va to'liq hujjatlar to'plami bilan.","Complete turnkey outfitting of the radiology department including staff training and full documentation package."), color:"var(--blue-500)" },
-    { id:"perinatal", org:lv("Республиканский перинатальный центр","Respublika perinatal markazi","Republican Perinatal Center"), city:lv("Ташкент","Toshkent","Tashkent"), type:lv("госучреждение","davlat muassasasi","public institution"), cat:lv("Акушерство и гинекология","Akusherlik va ginekologiya","Obstetrics & Gynecology"), text:lv("Поставка оборудования для роддома выполнена точно в срок. Всё оборудование прошло метрологическую поверку и введено в эксплуатацию.","Tug'ruqxona uchun uskunalar o'z vaqtida yetkazildi. Barcha uskunalar metrologik tekshiruvdan o'tdi va foydalanishga topshirildi.","Equipment for the maternity unit was delivered on schedule. All equipment passed metrological verification and was commissioned."), color:"var(--accent)" },
-    { id:"dental", org:lv("Стоматологическая клиника «DentaLux»","«DentaLux» stomatologiya klinikasi","DentaLux Dental Clinic"), city:lv("Самарканд","Samarqand","Samarkand"), type:lv("частная клиника","xususiy klinika","private clinic"), cat:lv("Стоматологическое оборудование","Stomatologiya uskunalari","Dental equipment"), text:lv("ИНДУСТРИЯ ЗДОРОВЬЯ помогла оснастить клинику «под ключ» в сжатые сроки. Профессиональный подход к каждому этапу — от выбора оборудования до сервиса.","SOG’LIQ INDUSTRIYASI klinikani qisqa muddatda «kalit ostida» jihozlashga yordam berdi. Uskunani tanlashdan xizmat ko'rsatishgacha bo'lgan har bir bosqichda professional yondashuv.","HEALTH INDUSTRY helped outfit the clinic turnkey on a tight schedule. Professional approach at every stage from equipment selection to service."), color:"var(--blue-500)" },
-  ];
-  const SUPPLIERS_STUB = [
-    { id:"midmark", org:"Midmark Corporation", city:lv("Вершайлз, США","Versayles, AQSh","Versailles, USA"), type:lv("производитель","ishlab chiqaruvchi","manufacturer"), cat:lv("Официальный дистрибьютор в ЦА","Markaziy Osiyo bo'yicha rasmiy distribyutor","Authorized distributor in CA"), text:lv("ИНДУСТРИЯ ЗДОРОВЬЯ является авторизованным дистрибьютором Midmark в Центральной Азии. Высокий стандарт сервиса и компетентность персонала.","SOG’LIQ INDUSTRIYASI — Markaziy Osiyoda Midmarkning vakolatli distribyutori. Xizmat ko'rsatishning yuqori standarti va xodimlarning malakasi.","HEALTH INDUSTRY is the authorized distributor of Midmark in Central Asia. High service standards and staff competence."), color:"var(--blue-500)" },
-    { id:"armed", org:"Armed Medical", city:lv("Москва, Россия","Moskva, Rossiya","Moscow, Russia"), type:lv("производитель","ishlab chiqaruvchi","manufacturer"), cat:lv("Партнёрское соглашение","Hamkorlik shartnomasi","Partnership agreement"), text:lv("Надёжный региональный партнёр по дистрибуции. Ответственный подход к продажам и соблюдению условий авторизованного дистрибьютора.","Ishonchli mintaqaviy distribyutor hamkor. Savdoga mas'uliyatli yondashuv va vakolatli distribyutor shartlariga rioya qilish.","A reliable regional distribution partner. Responsible sales approach and compliance with authorized distributor terms."), color:"var(--blue-500)" },
-    { id:"choicemmed", org:"ChoiceMmed Technology", city:lv("Пекин, Китай","Pekin, Xitoy","Beijing, China"), type:lv("производитель","ishlab chiqaruvchi","manufacturer"), cat:lv("Авторизованный дистрибьютор","Vakolatli distribyutor","Authorized distributor"), text:lv("ИНДУСТРИЯ ЗДОРОВЬЯ — один из ключевых партнёров в Узбекистане. Своевременные поставки и профессиональная техническая служба поддержки.","SOG’LIQ INDUSTRIYASI — O'zbekistondagi asosiy hamkorlarimizdan biri. O'z vaqtida yetkazib berish va professional texnik qo'llab-quvvatlash xizmati.","HEALTH INDUSTRY is one of our key partners in Uzbekistan. Timely deliveries and professional technical support service."), color:"var(--accent)" },
-  ];
-
-  /* prefer CMS; fall back to stub if CMS is empty */
+  /* Только CMS. Раньше при пустой базе подставлялись захардкоженные
+     «отзывы»: названия реальных учреждений — РСНПМЦ Онкологии,
+     Республиканский перинатальный центр, Наманганская областная больница —
+     с приписанными им цитатами, которых те не говорили. Производителям
+     (Midmark, ChoiceMmed, Armed Medical) там же приписывался статус
+     авторизованного дистрибьютора, а это проверяемое деловое утверждение.
+     Всё это показывалось на боевом сайте, пока база пуста.
+     Подстановка убрана: нет настоящих отзывов — нет и блока. */
   const published = cmsAll.filter(r => !r.status || r.status === "published");
   const cmsBuyers = published.filter(r => rtype(r) === "buyer");
   const cmsSuppliers = published.filter(r => rtype(r) === "supplier");
-  const items = tab === "buyers"
-    ? (cmsBuyers.length ? cmsBuyers : BUYERS_STUB)
-    : (cmsSuppliers.length ? cmsSuppliers : SUPPLIERS_STUB);
+  const items = tab === "buyers" ? cmsBuyers : cmsSuppliers;
+
+  /* Ни одного опубликованного отзыва — секции на главной нет вовсе. Пустая
+     карусель с вкладками и стрелками читалась бы как поломка. Так же
+     поступает соседний блок новостей. */
+  if (!published.length) return null;
+
   const perView = 2;
   const maxIdx = Math.max(0, items.length - perView);
 
