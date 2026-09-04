@@ -585,6 +585,17 @@ img{max-width:100%;display:block}
   content:""; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
   width:100%; min-width:44px; height:44px; border-radius:inherit; }
 
+/* Тем же приёмом — остальные мелкие цели, найденные замером на 375×812:
+   плашки брендов в бегущей строке (21px), полоски-переключатели слайдов
+   героя (16px) и заголовки направлений (20px). Здесь только высота: по
+   ширине все они и так шире 44px, а min-width растянул бы плашки в строке
+   до перекрытия соседних — между ними всего 38px. По вертикали соседей
+   нет: бренды и полоски стоят в один ряд, направления разнесены на 370px. */
+.z-corp .sx-mq-item, .z-corp .soi-chero-bar, .z-corp .sx-dir-t { position:relative; }
+.z-corp .sx-mq-item::after, .z-corp .soi-chero-bar::after, .z-corp .sx-dir-t::after {
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:100%; height:44px; border-radius:inherit; }
+
 /* ===== light minimalist footer (corp shell) ===== */
 .z-corp .foot{background:var(--surface);color:var(--slate-600);padding:0;font-size:var(--fs-4)}
 .z-corp .foot .wrap{padding-top:0;padding-bottom:0}
@@ -3549,6 +3560,9 @@ html{scroll-padding-top:72px}
      содержимого и отцентрован. Нажатие мимо этих 17px не открывало клавиатуру,
      хотя визуально палец попадал в поле. Растягиваем input на всю форму. */
   .z-corp .drawer .co-search input{align-self:stretch;height:auto}
+
+  /* Переключатель языка внутри меню оставался 40px — в шапке он уже 44. */
+  .z-corp .drawer .lang-dd-btn{height:44px}
 }
 
 /* --- 2. Бар шапки -------------------------------------------------------- */
@@ -3670,7 +3684,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/ui-atoms.js?v=1787415411"></script>
 <script src="dist/app/header.js?v=1787415411"></script>
 <script src="dist/app/hero-wave.js?v=1787415411"></script>
-<script src="dist/app/home-page.js?v=1788357952"></script>
+<script src="dist/app/home-page.js?v=1788547562"></script>
 <script src="dist/app/catalog.js?v=1787415411"></script>
 <script src="dist/app/product-detail.js?v=1787415411"></script>
 <script src="dist/app/cart.js?v=1787415411"></script>
@@ -3693,7 +3707,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/app-root.js?v=1787415411"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
-<script src="dist/app/certificates.js?v=1788547138"></script>
+<script src="dist/app/certificates.js?v=1788547562"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
 <script src="dist/app/inner-pages.js?v=1787415411"></script>
 <script src="dist/app/testimonials.js?v=1787415411"></script>

@@ -112,7 +112,28 @@ function useCatCounts() {
   return c;
 }
 
-function corpNavItems(lang) {
+/* Пункт навигации, которому нечего показать, ведёт в пустую страницу — это
+   тупик: посетитель нажал «Отзывы и рекомендации» и увидел «ничего не
+   найдено». Пока в CMS нет ни одного опубликованного отзыва, пункт убирается
+   из меню и футера и возвращается сам, как только письма загрузят, — без
+   правки кода и без деплоя. */
+function useHiddenViews() {
+  const scan = () => {
+    if (!window.CMS) return [];
+    const published = (window.CMS.list("reviews") || [])
+      .filter((r) => (r.status || "published") === "published");
+    return published.length ? [] : ["reviews"];
+  };
+  const [hidden, setHidden] = React.useState(scan);
+  React.useEffect(() => {
+    if (!window.CMS) return;
+    setHidden(scan());
+    return window.CMS.on("reviews", () => setHidden(scan()));
+  }, []);
+  return hidden;
+}
+
+function corpNavItems(lang, hidden) {
   const lvh = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   return [
   { id: "company", label: lvh("О компании", "Kompaniya haqida", "About"), children: [
@@ -140,7 +161,17 @@ function corpNavItems(lang) {
        корпоративный go() знает только корп-страницы и на «price» дал бы пустой экран. */
     { catSub: "price", label: lvh("Каталог / прайс-лист", "Katalog / narxlar ro‘yxati", "Catalog / price list") }] },
 
-  { view: "contacts", label: lvh("Контакты", "Kontaktlar", "Contacts") }];
+  { view: "contacts", label: lvh("Контакты", "Kontaktlar", "Contacts") }]
+  /* Скрываем пункты без содержимого и следом — группы, которые из-за этого
+     остались пустыми. Порядок важен: сначала дети, потом родитель. */
+  .map((it) => (it.children
+    ? Object.assign({}, it, { children: it.children.filter((ch) => !isHidden(ch, hidden)) })
+    : it))
+  .filter((it) => !isHidden(it, hidden) && (!it.children || it.children.length));
+}
+
+function isHidden(item, hidden) {
+  return !!(hidden && item.view && hidden.indexOf(item.view) !== -1);
 }
 
 /* Колонки футера. От меню в шапке отличаются тем, что отдельной группы
@@ -152,9 +183,9 @@ function corpNavItems(lang) {
    home-page.jsx, — и раньше такие списки уже расходились между собой. Меню в
    шапке по-прежнему читает corpNavItems напрямую и остаётся с выпадающими
    «Услугами», а «Контакты» там — самостоятельный пункт верхнего уровня. */
-function footerNavCols(lang) {
+function footerNavCols(lang, hidden) {
   const lvh = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
-  return corpNavItems(lang)
+  return corpNavItems(lang, hidden)
   .filter((it) => it.children && it.id !== "services")
   .map((col) => {
     if (col.id !== "company") return col;
@@ -191,7 +222,7 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
   const lvh = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   // Новая структура шапки главной: О компании ▾ · Услуги ▾ · Кейсы · Контакты · Каталог.
   // (Спецификация: главная — режим доверия к компании; каталог — режим поиска.)
-  const corpNav = corpNavItems(lang);
+  const corpNav = corpNavItems(lang, useHiddenViews());
 
   const [openDd, setOpenDd] = useState(null); // null | "company" | "services" | "catalog"
 
@@ -521,6 +552,7 @@ function CoFooter({ t, lang, go, goCat, setLang }) {
   const contacts = useSiteContacts();
   /* 620px — та же граница, на которой мобильные правила перестраивают футер. */
   const narrow = useNarrow(620);
+  const hidden = useHiddenViews();
   return (
     <footer className="foot">
       <div className="wrap">
@@ -579,7 +611,7 @@ function CoFooter({ t, lang, go, goCat, setLang }) {
               потери доступности — клавиатура и скринридер понимают его сами.
               На широком экране группы раскрыты атрибутом open, поэтому вид
               десктопного подвала не меняется. */}
-          {footerNavCols(lang).map((col) => (
+          {footerNavCols(lang, hidden).map((col) => (
             /* На широком экране open стоит всегда; на узком атрибут не задаётся,
                и <details> работает сам — нажатием, клавиатурой, скринридером. */
             <details key={col.id} className="fcol-acc" {...(narrow ? {} : { open: true })}>
