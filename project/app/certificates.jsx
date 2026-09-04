@@ -495,9 +495,32 @@ function CoBreadcrumbs({ lang, go, route }) {
    которого в футере соседствовали две разные почты. */
 const SITE_MAIL = "info@sogliqindustriyasi.uz";
 
+/* Ширина экрана нужна футеру как значение, а не только как медиазапрос: группы
+   ссылок свёрнуты в <details>, и на широком экране их надо держать раскрытыми
+   именно атрибутом open. Через CSS это не решается — у закрытого <details>
+   браузер исключает содержимое из раскладки, и список, которому вернули
+   display, рисуется поверх соседнего блока, не занимая высоты. */
+function useNarrow(bp) {
+  const q = "(max-width:" + bp + "px)";
+  const [narrow, setNarrow] = React.useState(
+    () => typeof window !== "undefined" && window.matchMedia ? window.matchMedia(q).matches : false
+  );
+  React.useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia(q);
+    const on = (e) => setNarrow(e.matches);
+    setNarrow(mq.matches);
+    mq.addEventListener ? mq.addEventListener("change", on) : mq.addListener(on);
+    return () => { mq.removeEventListener ? mq.removeEventListener("change", on) : mq.removeListener(on); };
+  }, [q]);
+  return narrow;
+}
+
 function CoFooter({ t, lang, go, goCat, setLang }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const contacts = useSiteContacts();
+  /* 620px — та же граница, на которой мобильные правила перестраивают футер. */
+  const narrow = useNarrow(620);
   return (
     <footer className="foot">
       <div className="wrap">
@@ -550,9 +573,22 @@ function CoFooter({ t, lang, go, goCat, setLang }) {
               Перестроение локальное: corpNavItems — общий источник для меню в
               шапке, и правка там убрала бы выпадающий список «Услуги» из
               навигации, чего не просили. */}
+          {/* <details> вместо <div>: на телефоне четыре раскрытых списка растягивали
+              подвал на 1199px, и до соцсетей с копирайтом приходилось долистывать.
+              Нативный элемент сворачивает их без единой строки скрипта и без
+              потери доступности — клавиатура и скринридер понимают его сами.
+              На широком экране группы раскрыты атрибутом open, поэтому вид
+              десктопного подвала не меняется. */}
           {footerNavCols(lang).map((col) => (
-            <div key={col.id}>
-              <h5>{col.label}</h5>
+            /* На широком экране open стоит всегда; на узком атрибут не задаётся,
+               и <details> работает сам — нажатием, клавиатурой, скринридером. */
+            <details key={col.id} className="fcol-acc" {...(narrow ? {} : { open: true })}>
+              <summary>
+                <h5>{col.label}</h5>
+                <svg className="fcol-acc-chev" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+                     aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+              </summary>
               <ul>
                 {col.children.map((ch, i) => (
                   <li key={i}>
@@ -571,7 +607,7 @@ function CoFooter({ t, lang, go, goCat, setLang }) {
                   </li>
                 ))}
               </ul>
-            </div>
+            </details>
           ))}
           {/* Последняя колонка образца: соцсети под заголовком «Следите за
               нами». Раньше здесь же, под тонкой линией, стояли и реквизиты —

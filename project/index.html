@@ -3496,6 +3496,132 @@ html{scroll-padding-top:72px}
 /* Выпадающие меню остаются сплошными светлыми в любом состоянии шапки —
    открытая панель — самостоятельный слой над контентом, а не часть
    прозрачного бара, и белый текст на ней потерялся бы. */
+
+/* ============================================================================
+   МОБИЛЬНАЯ ВЕРСИЯ: меню, бар, подвал                          (04.09.2026)
+   ============================================================================
+   Три правки по факту замеров на экране 375×812, а не «на глаз».
+   ------------------------------------------------------------------------- */
+
+/* --- 1. Выдвижное меню --------------------------------------------------- */
+
+/* Главное здесь — прокрутка. Панель фиксирована во всю высоту экрана, но
+   overflow оставался visible: при 19 пунктах содержимое занимает ~1350px, и
+   всё, что ниже 812px, оказывалось за краем экрана без единого способа туда
+   добраться. На телефоне это отрезало раздел «Каталог» целиком и пункт
+   «Контакты» — то есть страницу, ради которой меню чаще всего и открывают.
+   overscroll-behavior не даёт прокрутке «провалиться» на страницу под меню,
+   когда список докручен до конца. */
+.z-corp .drawer{
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
+
+/* Вторая беда оттуда же: .drawer — flex-колонка, а содержимое выше её высоты,
+   поэтому flex сжимал элементы по остаточному принципу. Кнопка «Заказать
+   консультацию» и поле поиска ужимались до 17px — до полоски, в которую
+   невозможно попасть пальцем. Запрет на сжатие возвращает им их же высоту,
+   заданную в базовых правилах. */
+.z-corp .drawer > *{flex:none}
+
+/* Вырез и полоса жеста: без этого верх меню уезжает под чёлку, а нижний
+   пункт списка перекрывается системной полосой. */
+.z-corp .drawer{
+  padding-top:calc(24px + env(safe-area-inset-top,0px));
+  padding-bottom:calc(24px + env(safe-area-inset-bottom,0px));
+}
+
+@media(max-width:620px){
+  /* 300px на экране 375px — панель занимала 80% ширины, но за вычетом полей
+     на текст оставалось 252px, и пункты ломались на две-три строки:
+     «Тендеры и государственные закупки» занимал 98px высоты вместо 50.
+     Шире панель — короче список и меньше промахов по соседнему пункту. */
+  .z-corp .drawer{width:min(92vw,380px);max-width:none}
+
+  /* Рекомендованный минимум тач-цели — 44px (WCAG 2.5.5, Apple HIG).
+     Пункты уже 50px, но одностраничные («Партнёры», «Новости») держались
+     на padding и при мелком шрифте могли просесть. */
+  .z-corp .drawer a{min-height:48px;display:flex;align-items:center}
+
+  /* Поле поиска: рамка формы 44px, но сам <input> внутри неё — 17px по высоте
+     содержимого и отцентрован. Нажатие мимо этих 17px не открывало клавиатуру,
+     хотя визуально палец попадал в поле. Растягиваем input на всю форму. */
+  .z-corp .drawer .co-search input{align-self:stretch;height:auto}
+}
+
+/* --- 2. Бар шапки -------------------------------------------------------- */
+
+@media(max-width:620px){
+  /* Корзина была 36×38, кнопка меню 38×38, переключатель языка 38px по
+     высоте — все три ниже 44px. Это две главные кнопки мобильной шапки:
+     промах по ним стоит дороже, чем сэкономленные 6px ширины. Места в
+     строке хватает: логотип 42 + поиск 40 + три кнопки 44 дают 214px при
+     ширине экрана 375. */
+  .z-corp .co-nav .co-act{width:44px;height:44px}
+  .z-corp .burger{width:44px;height:44px}
+  .z-corp .co-nav .lang-dd-btn{min-width:44px;height:44px}
+  .z-corp .co-cat-search-trigger{width:44px;height:44px}
+
+  /* При прокрутке шапка сжимается — но кнопкам ниже 44px опускаться незачем:
+     на десктопе сжатие заметно, на телефоне лишь портит попадание. */
+  .z-corp .co-nav.scrolled .co-act{width:44px;height:44px}
+}
+
+/* --- 3. Подвал ----------------------------------------------------------- */
+
+@media(max-width:620px){
+  /* Подвал вытягивался на 1199px: четыре блока ссылок, поставленные в одну
+     колонку, приходилось пролистывать целиком, чтобы дойти до соцсетей и
+     копирайта. Группы ссылок свёрнуты в аккордеон на <details> — без
+     скриптов, с клавиатурой и скринридером «из коробки». */
+  .z-corp .foot .fcol-acc > ul{
+    display:flex;flex-direction:column;gap:2px;
+    padding:4px 0 12px;
+  }
+  .z-corp .foot .fcol-acc:not([open]) > ul{display:none}
+  .z-corp .foot .fcol-acc{border-bottom:1px solid rgba(255,255,255,.10)}
+  .z-corp .foot .fcol-acc > summary{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    min-height:52px;cursor:pointer;list-style:none;
+  }
+  .z-corp .foot .fcol-acc > summary::-webkit-details-marker{display:none}
+  .z-corp .foot .fcol-acc > summary h5{margin:0}
+  .z-corp .foot .fcol-acc-chev{
+    flex:none;transition:transform .2s ease;color:var(--slate-400);
+  }
+  .z-corp .foot .fcol-acc[open] .fcol-acc-chev{transform:rotate(180deg)}
+
+  /* Ссылки подвала были 16px высотой — строка текста без всякого запаса.
+     44px делает их такой же целью, как кнопки в шапке. */
+  .z-corp .foot ul a,
+  .z-corp .foot .foot-contact a{
+    min-height:44px;display:flex;align-items:center;
+  }
+  /* Телефоны идут тремя строками внутри одного <span>: flex разорвал бы их
+     раскладку, поэтому здесь высота набирается вертикальными полями. */
+  .z-corp .foot .foot-contact a{display:block;padding:7px 0;min-height:0}
+
+  /* Иконки соцсетей 34×34 — ниже минимума и заметно мельче всего вокруг. */
+  .z-corp .foot-soc{width:44px;height:44px}
+  .z-corp .foot-socials{gap:12px}
+
+  .z-corp .foot .fcols{gap:0}
+  .z-corp .foot .fcol-brand,
+  .z-corp .foot .fcol-follow{padding-bottom:20px}
+}
+
+/* На широком экране группы раскрыты атрибутом open (его ставит CoFooter), а
+   заголовок перестаёт выглядеть кнопкой: ни стрелки, ни курсора-руки. Держать
+   их раскрытыми одним лишь CSS нельзя — у закрытого <details> содержимое
+   исключено из раскладки, и возвращённый ему display рисует список поверх
+   соседей, не занимая высоты. */
+@media(min-width:621px){
+  .z-corp .foot .fcol-acc > summary{display:block;cursor:default;list-style:none}
+  .z-corp .foot .fcol-acc > summary::-webkit-details-marker{display:none}
+  .z-corp .foot .fcol-acc-chev{display:none}
+}
 </style>
 <style>/* latin-ext */
 /* latin */
@@ -3567,7 +3693,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/app-root.js?v=1787415411"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
-<script src="dist/app/certificates.js?v=1787415411"></script>
+<script src="dist/app/certificates.js?v=1788547138"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
 <script src="dist/app/inner-pages.js?v=1787415411"></script>
 <script src="dist/app/testimonials.js?v=1787415411"></script>
