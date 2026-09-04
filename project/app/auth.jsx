@@ -48,6 +48,11 @@ function CookieBanner({ lang, go, goCat }) {
 
   const decide = (choice) => {
     try { localStorage.setItem(COOKIE_KEY, JSON.stringify({ choice, ts: Date.now() })); } catch (e) {}
+    /* Счётчики слушают это событие и подключаются в тот же момент, а не со
+       следующей загрузки страницы. При выборе «Только необходимые» событие
+       тоже уходит, но analytics.js на нём ничего не грузит — решение
+       принимается там, в одном месте. */
+    try { window.dispatchEvent(new CustomEvent("soi:consent", { detail: { choice } })); } catch (e) {}
     setShow(false);
   };
 
