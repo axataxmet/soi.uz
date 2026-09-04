@@ -363,7 +363,7 @@
   };
 
   // ── settings (key-value): content settings routed to the API; internal flags stay local ──
-  var SETTINGS_REMOTE = { site_seo: 1, site_contacts: 1, nav_menu_custom: 1, homepage_impact: 1, homepage_hero: 1, homepage_cta: 1, homepage_ecosystem: 1, service_hero: 1, service_equipment: 1, service_docs: 1 };
+  var SETTINGS_REMOTE = { site_seo: 1, site_analytics: 1, site_contacts: 1, nav_menu_custom: 1, homepage_impact: 1, homepage_hero: 1, homepage_cta: 1, homepage_ecosystem: 1, service_hero: 1, service_equipment: 1, service_docs: 1 };
   var settingsCache = {}, settingsLoaded = false, settingsLoading = false;
   var _getSetting = CMS.getSetting ? CMS.getSetting.bind(CMS) : function (k, d) { return d; };
   var _setSetting = CMS.setSetting ? CMS.setSetting.bind(CMS) : function () {};
