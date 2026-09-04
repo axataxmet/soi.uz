@@ -475,9 +475,17 @@ function Hero({ t, lang, go }) {
                   <p className="soi-chero-badge soi-chero-anim" style={{ transitionDelay: on ? "150ms" : "0ms" }}>
                     {sv(s.badge)}
                   </p>
-                  <h1 className="soi-chero-h1 soi-chero-anim" style={{ transitionDelay: on ? "300ms" : "0ms" }}>
-                    {sv(s.title)}
-                  </h1>
+                  {/* Заголовок первого слайда — единственный <h1> страницы.
+                      Раньше <h1> стоял на каждом из трёх слайдов: карусель держит
+                      их все в DOM одновременно, и страница отдавала три главных
+                      заголовка вместо одного. Остальные слайды — <h2> с тем же
+                      классом, поэтому внешне ничего не меняется. */}
+                  {React.createElement(
+                    i === 0 ? "h1" : "h2",
+                    { className: "soi-chero-h1 soi-chero-anim",
+                      style: { transitionDelay: on ? "300ms" : "0ms" } },
+                    sv(s.title)
+                  )}
                   <p className="soi-chero-sub soi-chero-anim" style={{ transitionDelay: on ? "420ms" : "0ms" }}>
                     {sv(s.subtitle)}
                   </p>
