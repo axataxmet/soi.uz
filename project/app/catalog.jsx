@@ -767,8 +767,24 @@ function CatalogLandingPage({ t, lang, store, go }) {
       {/* Hero */}
       <div className="clp-hero clp-wrap">
         <div className="clp-eyebrow"><Icon name="grid" size={13} />{lv("Электронный каталог", "Elektron katalog", "Electronic catalog")}</div>
-        <h1 className="clp-h1">{(() => { const N = (window.siteFigures ? window.siteFigures().catalog : "2 800") + "+"; return lv(<>{N} единиц&nbsp;<span>медицинского оборудования</span></>, <>{N} birlik <span>tibbiy uskunalar</span></>, <>{N} units of&nbsp;<span>medical equipment</span></>); })()}</h1>
-        <p className="clp-sub">{lv("Медтехника, мебель, инструменты и расходные материалы. Официальные поставки от 120+ мировых производителей.", "Tibbiy texnika, mebel, asboblar. 120+ jahon ishlab chiqaruvchilaridan rasmiy yetkazib berish.", "Equipment, furniture, instruments and consumables. Official supply from 120+ global manufacturers.")}</p>
+        {/* Заголовок с числом — только когда число задано в админке. Пока
+            каталог не наполнен, оно пустое, и остаётся заголовок без цифры:
+            обещать количество, которого посетитель тут же не находит, хуже,
+            чем не называть его вовсе. */}
+        <h1 className="clp-h1">{(() => {
+          const N = (window.siteFigures ? window.siteFigures().catalog : "") || "";
+          if (!N) return lv(<>Каталог <span>медицинского оборудования</span></>, <>Tibbiy uskunalar <span>katalogi</span></>, <>Medical equipment <span>catalog</span></>);
+          return lv(<>{N}+ единиц&nbsp;<span>медицинского оборудования</span></>, <>{N}+ birlik <span>tibbiy uskunalar</span></>, <>{N}+ units of&nbsp;<span>medical equipment</span></>);
+        })()}</h1>
+        {/* «120+» здесь было вписано в текст, мимо общего источника цифр, и
+            пережило бы правку настроек. Теперь подставляется оттуда же. */}
+        <p className="clp-sub">{(() => {
+          const B = (window.siteFigures ? window.siteFigures().brands : "") || "";
+          const n = B ? B + "+ " : "";
+          return lv("Медтехника, мебель, инструменты и расходные материалы. Официальные поставки от " + n + "мировых производителей.",
+                    "Tibbiy texnika, mebel, asboblar. " + n + "jahon ishlab chiqaruvchilaridan rasmiy yetkazib berish.",
+                    "Equipment, furniture, instruments and consumables. Official supply from " + n + "global manufacturers.");
+        })()}</p>
         <form className="clp-search" onSubmit={doSearch}>
           <input value={q} onChange={e => setQ(e.target.value)} placeholder={lv("Поиск по каталогу — аппараты, бренды, модели…", "Katalogdan qidiring…", "Search catalog — devices, brands, models…")} autoFocus />
           <button type="submit"><Icon name="search" size={17} />{lv("Найти", "Topish", "Search")}</button>
@@ -806,11 +822,13 @@ function CatalogLandingPage({ t, lang, store, go }) {
         <div className="clp-stats">
           {/* Цифры — из общего источника (siteFigures в home-page.jsx), а не
               вписаны здесь: раньше витрина и главная расходились. */}
-          {(() => { const F = window.siteFigures ? window.siteFigures() : { catalog: "2 800", brands: "120", regions: "14" }; return [
-            { n: F.catalog + "+", l: lv("позиций оборудования", "uskuna pozitsiyasi", "equipment items") },
-            { n: F.brands + "+",  l: lv("мировых брендов",       "jahon brendlari",    "global brands")   },
-            { n: F.regions,       l: lv("регионов доставки",     "yetkazish hududi",   "delivery regions")},
-          ]; })().map((s,i) => (
+          {(() => { const F = window.siteFigures ? window.siteFigures() : { catalog: "", brands: "", regions: "14" }; return [
+            { v: F.catalog, n: F.catalog + "+", l: lv("позиций оборудования", "uskuna pozitsiyasi", "equipment items") },
+            { v: F.brands,  n: F.brands + "+",  l: lv("мировых брендов",       "jahon brendlari",    "global brands")   },
+            { v: F.regions, n: F.regions,       l: lv("регионов доставки",     "yetkazish hududi",   "delivery regions")},
+          /* Плитка без значения не превращается в «+» без числа — она просто
+             не выводится, и ряд смыкается. */
+          ].filter((s) => s.v); })().map((s,i) => (
             <div key={i} className="clp-stat">
               <div className="clp-stat-n">{s.n}</div>
               <div className="clp-stat-l">{s.l}</div>
