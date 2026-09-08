@@ -78,7 +78,7 @@ function SitemapPage({ t, lang, go }) {
           <Link onClick={() => go("info", { p: "shipping" })}>{lv("Доставка", "Yetkazib berish", "Delivery")}</Link>
           <Link onClick={() => go("info", { p: "service" })}>{lv("Гарантия и сервис", "Kafolat va servis", "Warranty & service")}</Link>
           <Link onClick={() => go("faq", {})}>{lv("Частые вопросы", "Savol-javob", "FAQ")}</Link>
-          <Link onClick={() => go("info", { p: "suppliers" })}>{lv("Поставщикам", "Yetkazib beruvchilarga", "For suppliers")}</Link>
+          <Link onClick={() => { try { (window.parent || window).postMessage({ type: "soi-conav", view: "partners" }, "*"); } catch (e) {} }}>{lv("Поставщикам", "Yetkazib beruvchilarga", "For suppliers")}</Link>
           <Link onClick={() => go("info", { p: "gov" })}>{lv("Для государственных закупок", "Davlat xaridlari uchun", "Government procurement")}</Link>
           <Link onClick={() => go("tracking", {})}>{lv("Отслеживание заказа", "Buyurtmani kuzatish", "Order tracking")}</Link>
           <Link onClick={() => go("price", {})}>{lv("Прайс-лист", "Narxlar ro'yxati", "Price list")}</Link>

@@ -135,13 +135,18 @@ function catHashFromRoute(view, params) {
 }
 /* Снятые страницы каталожной оболочки (22.08.2026). Каждая дублировала
    корпоративную, причём с расходящимся содержимым: «О компании» в каталоге
-   утверждала «работаем с 2014 года», тогда как /about говорит «с 2019».
+   утверждала «работаем с 2014 года», расходясь с /about. Год основания на
+   сайте один — 2021 (см. SITE_FIGURES_DEFAULTS.founded в home-page.jsx).
 
    Адреса не выбрасываются, а перенаправляются: на них могли остаться внешние
    ссылки и закладки, а 404 вместо страницы — худший исход, чем переход на
    актуальный аналог. Ключ — путь целиком, без ведущего слэша. */
 const GONE_PATHS = {
   "catalog/info": "/about",
+  /* «Поставщикам» жила внутри каталожной оболочки — своей страницы, меню и
+     нормального адреса у неё не было. Содержимое перенесено на /partners
+     (см. PartnersPage в inner-pages.jsx), а старый адрес ведёт туда же. */
+  "catalog/info/suppliers": "/partners",
   "catalog/info/about": "/about",
   "catalog/info/contacts": "/contacts",
   "catalog/tenders": "/tenders",
@@ -410,7 +415,13 @@ function App() {
       reviews: lang === "uz" ? "Sharhlar" : lang === "en" ? "Reviews" : "Отзывы и рекомендации"
     };
     const label = v === "home" ? "" : M[v] || "";
-    document.title = v === "home" ? (seo.title || (BRAND + " — " + SUB)) : (label ? label + " — " + BRAND : BRAND + " — " + SUB);
+    /* Заголовок главной берётся из настройки site_seo, а она одна на весь сайт
+       и написана по-русски. На английской и узбекской версии вкладка, превью
+       ссылки в мессенджере и выдача всё равно показывали русский текст —
+       притом что внутренние страницы давно переводятся. Настройку используем
+       только там, где её язык совпадает с языком страницы. */
+    const homeTitle = (lang === "ru" && seo.title) ? seo.title : (BRAND + " — " + SUB);
+    document.title = v === "home" ? homeTitle : (label ? label + " — " + BRAND : BRAND + " — " + SUB);
   }, [route.view, lang, t, seo.title]);
 
   /* ---- site SEO meta tags (admin/seo.jsx → site_seo setting) ---- */
@@ -420,15 +431,24 @@ function App() {
       const el = document.querySelector(selector);
       if (el) el.setAttribute("content", value);
     };
-    setMeta('meta[name="description"]', seo.description);
+    /* Та же причина, что и у заголовка: настройки в админке заполнены
+       по-русски, и на других языках они давали русское описание в превью
+       ссылки. Ключевые слова и robots от языка не зависят — их оставляем. */
+    const BRAND_M = lang === "uz" ? "SOG’LIQ INDUSTRIYASI" : lang === "en" ? "HEALTH INDUSTRY" : "ИНДУСТРИЯ ЗДОРОВЬЯ";
+    const localTitle = lang === "ru" ? seo.title
+      : BRAND_M + (lang === "uz" ? " — Tibbiy uskunalar yetkazib beruvchi" : " — Medical equipment supplier");
+    const localDesc = lang === "ru" ? seo.description : (lang === "uz"
+      ? "O‘zbekistonda tibbiy uskunalar, mebel va sarflanadigan materiallar yetkazib berish: ro‘yxatdan o‘tkazish, montaj, servis va xodimlarni o‘qitish."
+      : "Supplier of medical equipment, furniture and consumables in Uzbekistan: device registration, installation, service and staff training.");
+    setMeta('meta[name="description"]', localDesc);
     setMeta('meta[name="keywords"]', seo.keywords);
     setMeta('meta[name="robots"]', seo.robots);
-    setMeta('meta[property="og:title"]', seo.title);
-    setMeta('meta[property="og:description"]', seo.description);
+    setMeta('meta[property="og:title"]', localTitle);
+    setMeta('meta[property="og:description"]', localDesc);
     setMeta('meta[property="og:image"]', seo.og_image);
-    setMeta('meta[name="twitter:title"]', seo.title);
-    setMeta('meta[name="twitter:description"]', seo.description);
-  }, [seo]);
+    setMeta('meta[name="twitter:title"]', localTitle);
+    setMeta('meta[name="twitter:description"]', localDesc);
+  }, [seo, lang]);
   let page;
   const v = route.view;
   const isCatalog = v === "catalog";

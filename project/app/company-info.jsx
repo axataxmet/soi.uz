@@ -39,20 +39,11 @@ return {
       { head: "Payment methods", list: ["Bank transfer (legal entities under contract)", "UZCARD and HUMO corporate cards", "Online systems Payme and Click", "Government procurement (tender, budget)", "Leasing and instalment plans", "Partial prepayment + balance on delivery"] },
     ]}
   },
-  suppliers: {
-    ru: { title: "Поставщикам", sections: [
-      { head: "Станьте нашим партнёром", body: "ИНДУСТРИЯ ЗДОРОВЬЯ — дистрибьюторская платформа с прямым выходом на 500+ медицинских учреждений Узбекистана. Если вы производитель или официальный дистрибьютор медицинской техники, мы готовы рассмотреть партнёрство." },
-      { head: "Что мы предлагаем партнёрам", list: ["Выход на базу из 500+ постоянных клиентов (больницы, клиники, частные центры)", "Тендерное сопровождение и помощь в госзакупках", "Поддержка в получении регистрационных удостоверений МЗ РУз", "Совместные маркетинговые активности и участие в выставках", "Складская логистика и сервисный центр", "Прозрачная отчётность по продажам"] },
-      { head: "Требования к партнёрам", list: ["Наличие сертификата ISO 13485 или эквивалента", "Регистрационные удостоверения на продукцию (или помощь в их получении)", "Гарантия производителя на всю продукцию минимум 12 месяцев", "Наличие службы технической поддержки (или готовность к обучению наших инженеров)", "Конкурентоспособная ценовая политика"] },
-      { head: "Как стать партнёром", body: `Заполните заявку или позвоните нам по номеру ${contacts.phone}. Менеджер по развитию партнёрской сети свяжется с вами в течение рабочего дня для первичного обсуждения.` },
-    ]},
-    en: { title: "For Suppliers", sections: [
-      { head: "Become our partner", body: "HEALTH INDUSTRY is a distribution platform with direct access to 500+ medical institutions across Uzbekistan. If you are a manufacturer or authorized distributor of medical equipment, we invite you to explore a partnership." },
-      { head: "What we offer partners", list: ["Access to a client base of 500+ hospitals, clinics and private centres", "Tender support and government procurement assistance", "Support in obtaining MoH Uzbekistan registration certificates", "Joint marketing activities and trade show participation", "Warehouse logistics and service centre", "Transparent sales reporting"] },
-      { head: "Partner requirements", list: ["ISO 13485 certification or equivalent", "Product registration certificates (or willingness to obtain them)", "Minimum 12-month manufacturer's warranty on all products", "Technical support capacity or readiness to train our engineers", "Competitive pricing"] },
-      { head: "How to join", body: `Fill out the application form or call us at ${contacts.phone}. Our partner development manager will contact you within one business day.` },
-    ]}
-  },
+  /* Раздел «Поставщикам» отсюда убран (05.09.2026): содержимое перенесено на
+     /partners (общедоступная страница со своим пунктом меню), а этот адрес —
+     /catalog/info/suppliers внутри каталожной оболочки — не имел ни пункта
+     меню, ни собственных крошек. Ссылки на него (header.jsx, order-track.jsx)
+     ведут теперь на go("partners"). */
   privacy: {
     ru: { title: "Политика конфиденциальности", sections: [
       { head: "Общие положения", body: "Настоящая Политика обработки персональных данных разработана в соответствии с Законом Республики Узбекистан «О персональных данных» № ЗРУ-547 от 02.07.2019 и определяет порядок обработки и защиты персональных данных пользователей сайта ИНДУСТРИЯ ЗДОРОВЬЯ." },

@@ -69,9 +69,9 @@ function AboutPage({ t, lang, go }) {
           <div className="grid-2" style={{ alignItems: "center", gap: 48 }}>
             <div className="reveal">
               <span className="eyebrow line">{lv("О нас", "Biz haqimizda", "About us")}</span>
-              <h2 className="h-sec" style={{ marginTop: 14, fontSize: 32 }} data-comment-anchor="b07b739388-h2-31-15">{lv("С 2019 года помогаем оснащать медицинские учреждения Узбекистана", "2019 yildan beri O'zbekiston tibbiy muassasalarini jihozlashga yordam beramiz", "Since 2019 helping equip medical institutions of Uzbekistan")}</h2>
+              <h2 className="h-sec" style={{ marginTop: 14, fontSize: 32 }} data-comment-anchor="b07b739388-h2-31-15">{lv("С 2021 года помогаем оснащать медицинские учреждения Узбекистана", "2021 yildan beri O'zbekiston tibbiy muassasalarini jihozlashga yordam beramiz", "Equipping medical institutions of Uzbekistan since 2021")}</h2>
               <p style={{ fontSize: 15.5, color: "var(--slate-600)", marginTop: 18, lineHeight: 1.7 }} data-comment-anchor="c68368ded3-p-32-15">
-                {lv("«ИНДУСТРИЯ ЗДОРОВЬЯ» — компания, созданная на базе опыта команды, которая с 2019 года занимается поставками, подбором, сопровождением и сервисной поддержкой медицинского оборудования для медицинских учреждений Узбекистана.",
+                {lv("«ИНДУСТРИЯ ЗДОРОВЬЯ» — компания полного цикла: от поставки и монтажа оборудования до сервиса, обучения персонала и регистрации медицинских изделий. Работаем с государственными и частными учреждениями по всему Узбекистану.",
                 "«SOG’LIQ INDUSTRIYASI» — to'liq tsikl kompaniyasi: uskuna yetkazish va montajdan servis, xodimlarni o'qitish va tibbiy buyumlarni ro'yxatdan o'tkazishgacha. Biz butun O'zbekiston bo'ylab davlat va xususiy muassasalar bilan ishlaymiz.",
                 "HEALTH INDUSTRY is a full-cycle company: from equipment supply and installation to service, staff training and medical device registration. We work with public and private institutions across Uzbekistan.")}
               </p>
@@ -314,6 +314,25 @@ function PartnersPage({ t, lang, go, goCat }) {
               </button>
             </div>
           )}
+          {/* Пока в каталоге нет ни одного бренда, сетка выше пуста, и текст про
+              «перечисленных производителей» перечисляет пустоту. Вместо
+              заявления, которое страница сама же опровергает, показываем, что
+              список готовится, и уводим на прямой контакт. Появятся бренды —
+              вернётся и заявление, без правки кода. */}
+          {!brands.length && (
+            <div className="reveal" style={{ marginTop: 8, padding: "30px 34px", background: "var(--bg)", borderRadius: "var(--r-lg)", border: "1px solid var(--line)" }}>
+              <h3 style={{ fontSize: 19, fontWeight: 800, marginBottom: 10 }}>{lv("Список производителей обновляется", "Ishlab chiqaruvchilar ro'yxati yangilanmoqda", "Manufacturer list is being updated")}</h3>
+              <p style={{ fontSize: 15, color: "var(--slate-600)", lineHeight: 1.65, maxWidth: 760 }}>
+                {lv("Мы работаем напрямую с производителями медицинского оборудования и мебели. Чтобы уточнить, представлен ли конкретный бренд, напишите нам — ответим в течение рабочего дня.",
+                "Biz tibbiy uskunalar va mebel ishlab chiqaruvchilari bilan bevosita ishlaymiz. Muayyan brend bo'yicha aniqlik kiritish uchun bizga yozing — ish kuni davomida javob beramiz.",
+                "We work directly with manufacturers of medical equipment and furniture. To check whether a particular brand is represented, get in touch — we reply within one business day.")}
+              </p>
+              <button className="btn btn-pri" style={{ marginTop: 18 }} onClick={() => go("contacts")}>
+                {lv("Связаться с нами", "Biz bilan bog'lanish", "Contact us")}
+              </button>
+            </div>
+          )}
+          {!!brands.length && (
           <div className="reveal" style={{ marginTop: 50, padding: "30px 34px", background: "var(--bg)", borderRadius: "var(--r-lg)", border: "1px solid var(--line)" }}>
             <h3 style={{ fontSize: 19, fontWeight: 800, marginBottom: 10 }}>{lv("Официальное представительство", "Rasmiy vakillik", "Official representation")}</h3>
             <p style={{ fontSize: 15, color: "var(--slate-600)", lineHeight: 1.65, maxWidth: 760 }}>
@@ -321,6 +340,71 @@ function PartnersPage({ t, lang, go, goCat }) {
               "Biz sanab o'tilgan ishlab chiqaruvchilarning O'zbekiston Respublikasidagi rasmiy distribyutorimiz. Bu uskunaning haqiqiyligini, zavod kafolatini, ehtiyot qismlar mavjudligini va ishlab chiqaruvchi texnik yordamini kafolatlaydi.",
               "We are the official distributor of the listed manufacturers in the Republic of Uzbekistan. This guarantees equipment authenticity, factory warranty, spare parts availability and manufacturer technical support.")}
             </p>
+          </div>
+          )}
+          {/* «Поставщикам» из содержимого этой же страницы, но не отдельным
+             маршрутом: раньше жила внутри каталожной оболочки по адресу
+             /catalog/info/suppliers — без пункта меню и с чужими крошками
+             («Главная / Каталог / О компании»), то есть найти её мог только
+             тот, у кого была прямая ссылка. Текст перенесён без изменений —
+             это формулировки заказчика. */}
+          <div className="reveal" style={{ marginTop: 44, paddingTop: 40, borderTop: "1px solid var(--line)" }}>
+            <h2 style={{ fontSize: 25, fontWeight: 800, marginBottom: 8 }}>
+              {lv("Производителям и поставщикам", "Ishlab chiqaruvchilar va yetkazib beruvchilarga", "For manufacturers and suppliers")}
+            </h2>
+            <p style={{ fontSize: 15.5, color: "var(--slate-600)", lineHeight: 1.7, maxWidth: 760, marginBottom: 30 }}>
+              {lv("ИНДУСТРИЯ ЗДОРОВЬЯ — дистрибьюторская платформа с прямым выходом на медицинские учреждения Узбекистана. Если вы производитель или официальный дистрибьютор медицинской техники, мы готовы рассмотреть партнёрство.",
+              "SOG'LIQ INDUSTRIYASI — O'zbekiston tibbiy muassasalariga bevosita chiqishga ega distribyutorlik platformasi. Agar siz tibbiy texnika ishlab chiqaruvchisi yoki rasmiy distribyutori bo'lsangiz, hamkorlikni ko'rib chiqishga tayyormiz.",
+              "HEALTH INDUSTRY is a distribution platform with direct access to medical institutions across Uzbekistan. If you are a manufacturer or authorized distributor of medical equipment, we invite you to explore a partnership.")}
+            </p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 30, maxWidth: 900 }}>
+              <div>
+                <h3 style={{ fontSize: 17, fontWeight: 800, marginBottom: 12 }}>{lv("Что мы предлагаем партнёрам", "Hamkorlarga nima taklif qilamiz", "What we offer partners")}</h3>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                  {[
+                    lv("Выход на базу постоянных клиентов: больницы, клиники, частные центры", "Doimiy mijozlar bazasiga chiqish: kasalxonalar, klinikalar, xususiy markazlar", "Access to a client base of hospitals, clinics and private centres"),
+                    lv("Тендерное сопровождение и помощь в госзакупках", "Tender qo'llab-quvvatlash va davlat xaridlarida yordam", "Tender support and government procurement assistance"),
+                    lv("Поддержка в получении регистрационных удостоверений МЗ РУз", "O'zbekiston SSV ro'yxatga olish guvohnomalarini olishda yordam", "Support in obtaining MoH Uzbekistan registration certificates"),
+                    lv("Совместные маркетинговые активности и участие в выставках", "Qo'shma marketing tadbirlari va ko'rgazmalarda ishtirok", "Joint marketing activities and trade show participation"),
+                    lv("Складская логистика и сервисный центр", "Ombor logistikasi va servis markazi", "Warehouse logistics and service centre"),
+                    lv("Прозрачная отчётность по продажам", "Sotuvlar bo'yicha shaffof hisobot", "Transparent sales reporting"),
+                  ].map((li, j) => (
+                    <li key={j} style={{ display: "flex", gap: 11, alignItems: "flex-start", fontSize: 15, color: "var(--slate-600)", lineHeight: 1.6 }}>
+                      <CoIcon name="check" size={16} style={{ flex: "none", marginTop: 3, color: "var(--blue-600)" }} />
+                      <span>{li}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 style={{ fontSize: 17, fontWeight: 800, marginBottom: 12 }}>{lv("Требования к партнёрам", "Hamkorlarga talablar", "Partner requirements")}</h3>
+                <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+                  {[
+                    lv("Наличие сертификата ISO 13485 или эквивалента", "ISO 13485 sertifikati yoki ekvivalenti", "ISO 13485 certification or equivalent"),
+                    lv("Регистрационные удостоверения на продукцию (или помощь в их получении)", "Mahsulotga ro'yxatga olish guvohnomalari (yoki ularni olishda yordam)", "Product registration certificates (or willingness to obtain them)"),
+                    lv("Гарантия производителя на всю продукцию минимум 12 месяцев", "Barcha mahsulotga kamida 12 oy ishlab chiqaruvchi kafolati", "Minimum 12-month manufacturer's warranty on all products"),
+                    lv("Наличие службы технической поддержки (или готовность к обучению наших инженеров)", "Texnik yordam xizmati (yoki muhandislarimizni o'qitishga tayyorlik)", "Technical support capacity or readiness to train our engineers"),
+                    lv("Конкурентоспособная ценовая политика", "Raqobatbardosh narx siyosati", "Competitive pricing"),
+                  ].map((li, j) => (
+                    <li key={j} style={{ display: "flex", gap: 11, alignItems: "flex-start", fontSize: 15, color: "var(--slate-600)", lineHeight: 1.6 }}>
+                      <CoIcon name="check" size={16} style={{ flex: "none", marginTop: 3, color: "var(--blue-600)" }} />
+                      <span>{li}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div style={{ marginTop: 34, padding: "26px 30px", background: "var(--bg)", borderRadius: "var(--r-lg)", border: "1px solid var(--line)", maxWidth: 900 }}>
+              <h3 style={{ fontSize: 17, fontWeight: 800, marginBottom: 8 }}>{lv("Как стать партнёром", "Qanday hamkor bo'lish", "How to become a partner")}</h3>
+              <p style={{ fontSize: 15, color: "var(--slate-600)", lineHeight: 1.65, marginBottom: 16 }}>
+                {lv("Напишите нам — менеджер по развитию партнёрской сети свяжется в течение рабочего дня для первичного обсуждения.",
+                    "Bizga yozing — hamkorlik tarmog'ini rivojlantirish menejeri ish kuni davomida bog'lanadi.",
+                    "Get in touch — our partner development manager will contact you within one business day.")}
+              </p>
+              <button className="btn btn-pri" onClick={() => go("contacts")}>
+                {lv("Связаться с нами", "Biz bilan bog'lanish", "Contact us")}
+              </button>
+            </div>
           </div>
         </div>
       </section>
