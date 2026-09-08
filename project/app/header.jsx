@@ -131,7 +131,11 @@ function UtilityBar({ t, lang, setLang, go, theme, toggleTheme }) {
             {lang === "uz" ? "Tenderlar" : lang === "en" ? "Tenders" : "Тендеры"}
             <span className="ubar-badge">B2B/G</span>
           </a>
-          <a onClick={() => go("info", { p: "suppliers" })}>{t.for_suppliers}</a>
+          {/* «Поставщикам» переехала на корпоративную /partners (05.09.2026) —
+             своя страница внутри каталога не имела ни пункта меню, ни
+             собственных крошек. go("info") держит переход внутри каталога;
+             сюда нужен тот же переход, что использует «Новости» чуть выше. */}
+          <a onClick={() => { try { (window.parent || window).postMessage({ type: "soi-conav", view: "partners" }, "*"); } catch (e) {} }}>{t.for_suppliers}</a>
           <a onClick={() => go("info", { p: "contacts" })}>{t.contacts}</a>
           <a href="SogliqIndustriyasi.html" style={{ fontWeight: 700, color: "var(--blue-600)" }}>
             {lang === "uz" ? "Kompaniya haqida →" : lang === "en" ? "About the company →" : "О компании →"}
