@@ -240,8 +240,23 @@ function App() {
   const [tw, setTweak] = useTweaks(TWEAK_DEFAULTS);
   const catFrameRef = React.useRef(null);
   const [catNav, setCatNav] = useState(_initHash.cat || { sub: "home", param: "", q: "", from: null });
-  // catalog frame mounts once, then stays alive (no re-start on every open)
-  const [catReady, setCatReady] = React.useState(_initHash.view === "catalog");
+  /* Оболочка каталога монтируется один раз и дальше живёт (без перезапуска
+     на каждое открытие). Стартует всегда с false — даже когда открыли сразу
+     /catalog: её бандлы теперь грузятся по требованию, а <CatalogApp/> — имя
+     из app-root.js, и до его загрузки этой переменной просто не существует.
+     Ставим catReady только после того, как загрузка завершилась. */
+  const [catReady, setCatReady] = React.useState(false);
+  const [catFailed, setCatFailed] = React.useState(false);
+  /* Свой lv: в этом файле его не было — тексты брались из словаря t, а у
+     заглушки каталога своих ключей в словаре нет. */
+  const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
+  const openCatalog = React.useCallback(() => {
+    if (!window.__loadDeferredBundles) { setCatReady(true); return; }
+    window.__loadDeferredBundles().then(
+      () => setCatReady(true),
+      () => setCatFailed(true)
+    );
+  }, []);
   /* Адрес пишем через History API. Unlike location.hash="…", pushState never
      fires popstate on its own — only a real back/forward does — so, unlike the
      old hash-based router, there is no echo to guard against here. A guard flag
@@ -260,14 +275,33 @@ function App() {
     r.setAttribute("data-accent", tw.accent);
   }, [tw.light, tw.headline, tw.accent]);
 
-  // preload catalog in the background shortly after the home shell is ready,
-  // so the first open is instant and there is no second cold start.
+  /* Каталог подгружается фоном — чтобы первое открытие было мгновенным и не
+     начиналось с холодного старта. Но теперь за этим стоит ещё и скачивание
+     90 КБ бандлов, поэтому два ограничения.
+
+     Первое: ждём простоя, а не фиксированных 1.8 секунды. Отсчёт от загрузки
+     мог попасть ровно в момент, когда страница ещё дорисовывается, и отнять
+     у неё канал; requestIdleCallback ждёт паузы, а timeout не даёт ждать
+     бесконечно на постоянно занятой странице.
+
+     Второе: при включённой экономии трафика или на 2G предзагрузки нет
+     вовсе. Человек, пришедший читать «О компании» с мобильного интернета,
+     не должен платить за каталог, который, возможно, не откроет. Откроет —
+     загрузим тогда же, по нажатию. */
   useEffect(() => {
-    if (catReady) return;
-    const id = setTimeout(() => setCatReady(true), 1800);
+    if (catReady || catFailed) return;
+    const conn = navigator.connection || {};
+    if (conn.saveData || /2g/.test(conn.effectiveType || "")) return;
+
+    if (window.requestIdleCallback) {
+      const id = window.requestIdleCallback(openCatalog, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = setTimeout(openCatalog, 1800);
     return () => clearTimeout(id);
-  }, [catReady]);
-  useEffect(() => {if (route.view === "catalog") setCatReady(true);}, [route.view]);
+  }, [catReady, catFailed, openCatalog]);
+  /* Открыли каталог раньше, чем истекла задержка, — не ждём её. */
+  useEffect(() => { if (route.view === "catalog") openCatalog(); }, [route.view, openCatalog]);
 
   useEffect(() => {localStorage.setItem("si_lang", lang);document.documentElement.lang = lang;}, [lang]);
   useEffect(() => {
@@ -421,6 +455,31 @@ function App() {
     <div className="z-corp">
       <ScrollProgress />
       <CoHeader t={t} lang={lang} setLang={setLang} go={go} goCat={goCat} route={route} theme={theme} toggleTheme={toggleTheme} data-comment-anchor="b2aa7d60a7-a-121-13" />
+      {/* Каталог открыт, а его бандлы ещё едут. Раньше этого промежутка не
+          было — файлы приходили вместе со страницей, — и без заглушки под
+          шапкой осталась бы пустота. Плитки повторяют сетку каталога, чтобы
+          подмена на настоящую верстку не дёргала страницу. */}
+      {isCatalog && !catReady && !catFailed && (
+        <div className="cat-boot wrap" role="status" aria-live="polite">
+          <span className="cat-boot-sr">{lv("Загружаем каталог…", "Katalog yuklanmoqda…", "Loading catalog…")}</span>
+          <div className="cat-boot-bar" />
+          <div className="cat-boot-grid">
+            {[0,1,2,3,4,5,6,7].map((i) => <div key={i} className="cat-boot-card" />)}
+          </div>
+        </div>
+      )}
+      {isCatalog && catFailed && (
+        <div className="cat-boot wrap">
+          <p className="cat-boot-err">
+            {lv("Не удалось загрузить каталог. Проверьте соединение и обновите страницу.",
+                "Katalogni yuklab bo'lmadi. Aloqani tekshiring va sahifani yangilang.",
+                "Could not load the catalog. Check your connection and reload the page.")}
+          </p>
+          <button className="btn btn-pri" onClick={() => location.reload()}>
+            {lv("Обновить", "Yangilash", "Reload")}
+          </button>
+        </div>
+      )}
       {catReady && (
         <div className="z-catalog" style={{ display: isCatalog ? "block" : "none" }}>
           <CatalogApp embed={true} active={isCatalog} lang={lang} theme={theme}

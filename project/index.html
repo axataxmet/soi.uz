@@ -60,7 +60,7 @@
 </script>
   <!-- Тема до отрисовки и разрешение путей к ресурсам. Вынесено из inline
        в файл, чтобы CSP мог запретить инлайновые скрипты целиком. -->
-  <script src="lib/boot.js?v=1788370000"></script>
+  <script src="lib/boot.js?v=1788874597"></script>
 <!-- ext-resource dependencies (lifted from JSX string refs so the bundler inlines them) -->
 
 
@@ -3583,6 +3583,23 @@ html{scroll-padding-top:72px}
   .z-corp .co-nav.scrolled .co-act{width:44px;height:44px}
 }
 
+/* Заглушка на время загрузки бандлов каталога. Появляется только при прямом
+   заходе на /catalog: при переходе изнутри сайта файлы уже подгружены фоном. */
+.z-corp .cat-boot{padding:28px 20px 80px}
+.z-corp .cat-boot-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.z-corp .cat-boot-bar{height:26px;width:min(60%,340px);border-radius:var(--r-sm);margin-bottom:26px;background:var(--bg-2);animation:catBootPulse 1.2s ease-in-out infinite}
+.z-corp .cat-boot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.z-corp .cat-boot-card{height:230px;border-radius:var(--r);background:var(--bg-2);animation:catBootPulse 1.2s ease-in-out infinite}
+.z-corp .cat-boot-card:nth-child(2n){animation-delay:.15s}
+.z-corp .cat-boot-card:nth-child(3n){animation-delay:.3s}
+@keyframes catBootPulse{0%,100%{opacity:1}50%{opacity:.55}}
+@media(prefers-reduced-motion:reduce){
+  .z-corp .cat-boot-bar,.z-corp .cat-boot-card{animation:none}
+}
+@media(max-width:900px){.z-corp .cat-boot-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.z-corp .cat-boot-grid{grid-template-columns:1fr}.z-corp .cat-boot-card{height:170px}}
+.z-corp .cat-boot-err{font-size:var(--fs-5);color:var(--slate-600);margin:40px 0 18px;max-width:520px}
+
 /* --- 3. Подвал ----------------------------------------------------------- */
 
 @media(max-width:620px){
@@ -3667,7 +3684,12 @@ html{scroll-padding-top:72px}
 
 <!-- ===== catalog (app) data + components — loaded once, no iframe ===== -->
 <script src="app/cms-store.js?v=1785999916"></script>
-<script src="app/store-overlay.js?v=1788578339"></script>
+<!-- Ниже — магазинная часть: оболочка каталога, корзина, карточка товара.
+     Тип text/soi-deferred браузеру неизвестен, поэтому он эти файлы не
+     скачивает и не выполняет; адрес лежит в data-src. Их подключает
+     __loadDeferredBundles() из lib/boot.js — когда корпоративная оболочка
+     собирается показать каталог. Порядок тегов значим и сохраняется. -->
+<script type="text/soi-deferred" data-src="app/store-overlay.js?v=1788578339"></script>
 <script src="lib/xlsx.js?v=1782416018"></script>
 <!-- CMS store loads AFTER window.DATA exists so admin edits sync to the live site -->
 <script src="admin/i18n.js?v=1782600006"></script>
@@ -3682,32 +3704,32 @@ html{scroll-padding-top:72px}
 <script src="app/catalog-remote.js?v=1785999916"></script>
 <script src="admin/ui.jsx?v=1782416018"></script>
 <script src="dist/app/ui-atoms.js?v=1787415411"></script>
-<script src="dist/app/header.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/header.js?v=1787415411"></script>
 <script src="dist/app/hero-wave.js?v=1787415411"></script>
 <script src="dist/app/home-page.js?v=1788578264"></script>
-<script src="dist/app/catalog.js?v=1788578264"></script>
-<script src="dist/app/product-detail.js?v=1787415411"></script>
-<script src="dist/app/cart.js?v=1787415411"></script>
-<script src="dist/app/brand-profile.js?v=1787415411"></script>
-<script src="dist/app/company-info.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/catalog.js?v=1788578264"></script>
+<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/cart.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/brand-profile.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/company-info.js?v=1787415411"></script>
 <script src="dist/app/floating-widgets.js?v=1787415411"></script>
-<script src="dist/app/account.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/account.js?v=1787415411"></script>
 <script src="dist/app/footer.js?v=1787415411"></script>
-<script src="dist/app/app-entry.js?v=1787415411"></script>
-<script src="dist/app/compare.js?v=1787415411"></script>
-<script src="dist/app/filters.js?v=1787415411"></script>
-<script src="dist/app/catalog-tree.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/app-entry.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/compare.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/filters.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/catalog-tree.js?v=1787415411"></script>
 <script src="dist/app/map.js?v=1787415411"></script>
-<script src="dist/app/quiz.js?v=1787415411"></script>
-<script src="dist/app/reviews.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/quiz.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/reviews.js?v=1787415411"></script>
 <script src="dist/app/auth.js?v=1788545608"></script>
-<script src="dist/app/wishlist.js?v=1787415411"></script>
-<script src="dist/app/order-track.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/wishlist.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/order-track.js?v=1787415411"></script>
 <script src="dist/app/error-boundary.js?v=1787415411"></script>
-<script src="dist/app/app-root.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1787415411"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
-<script src="dist/app/certificates.js?v=1788547562"></script>
+<script src="dist/app/certificates.js?v=1788874597"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
 <script src="dist/app/inner-pages.js?v=1787415411"></script>
 <script src="dist/app/testimonials.js?v=1787415411"></script>
@@ -3715,7 +3737,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/staff-training.js?v=1787415411"></script>
 <script src="dist/app/service-support.js?v=1787415411"></script>
 <script src="dist/app/checkout.js?v=1787415411"></script>
-<script src="dist/app/news.js?v=1787415411"></script>
+<script src="dist/app/news.js?v=1788874685"></script>
 
 
 
