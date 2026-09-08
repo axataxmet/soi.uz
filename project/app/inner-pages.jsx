@@ -261,6 +261,63 @@ function ProjectsPage({ t, lang, go }) {
    витриной #/catalog/brands: window.DATA.BRANDS ← /api/brands ← admin/brands.
    Плитки те же (фото + название, 4×4 + пагинация); клик → каталожный профиль
    бренда со всей его продукцией (goCat). */
+/* Реальные партнёры (05.09.2026) — логотипы и ссылки со своих официальных
+   сайтов, для представления сайта внешнему партнёру (KaWe). Список отдельный
+   от window.DATA.BRANDS: тот приходит из каталога и сейчас пуст (0 записей в
+   базе), а эти компании — фактические партнёры вне зависимости от того,
+   наполнен каталог или нет.
+
+   Логотипы скачаны с официальных сайтов компаний и лежат в assets/partners/ —
+   не хотлинк на чужой домен (тот мог бы пропасть или измениться без
+   предупреждения, и CSP img-src не разрешает произвольные внешние картinки).
+   Для пяти компаний подходящий логотип на сайте не нашёлся (сайт защищён от
+   ботов, JS-рендеринг без статичного пути к файлу, или найденное изображение
+   было 32×32 — для карточки нужно крупнее): у них поле logo пустое, и
+   карточка показывает те же двухбуквенные инициалы, что и .bt-mono ниже для
+   брендов без логотипа из каталога. */
+const PARTNER_LOGOS = [
+  { id: "safe", name: "Промет (HILFE)", url: "https://www.safe.ru/", logo: "assets/partners/safe.png",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "orion", name: "Орион-Си", url: "https://orion-si.ru/", logo: "assets/partners/orion.png",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "dzmo", name: "ДЗМО", url: "https://www.dzmo.ru/", logo: "assets/partners/dzmo.png",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "tves2", name: "ТВЕС", url: "https://tves.com.ru/", logo: "",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "elamed", name: "ЕЛАМЕД", url: "https://elamed.com/", logo: "assets/partners/elamed.svg",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "integral", name: "Интеграл", url: "https://integral.by/", logo: "assets/partners/integral.svg",
+    country_ru: "Беларусь", country_uz: "Belarus", country_en: "Belarus" },
+  { id: "lsystems", name: "Лазерные системы", url: "https://www.lsystems.ru/", logo: "assets/partners/lsystems.svg",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "medin", name: "МЕДИН", url: "https://medin.by/", logo: "",
+    country_ru: "Беларусь", country_uz: "Belarus", country_en: "Belarus" },
+  { id: "sktbspu", name: "Смоленское СКТБ СПУ", url: "https://sktb-spu.ru/", logo: "",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "axion", name: "Концерн «Аксион»", url: "https://axion-med.ru/", logo: "assets/partners/axion.png",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "mirumed", name: "МируМед", url: "https://mirumed.spb.ru/", logo: "assets/partners/mirumed.svg",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "mizvorsma", name: "МИЗ-Ворсма", url: "http://mizvorsma.ru/", logo: "",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "littmann", name: "Littmann", url: "https://www.littmann.com/en-us/home/", logo: "assets/partners/littmann.svg",
+    country_ru: "США", country_uz: "AQSh", country_en: "USA" },
+  { id: "vectorms", name: "Вектор-МС", url: "http://www.vectorms.ru/", logo: "assets/partners/vectorms.png",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "technomed", name: "Техно-МЕД", url: "https://techno-med.pro/", logo: "assets/partners/technomed.png",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "micard", name: "МИКАРД-ЛАНА", url: "https://www.micard.ru/", logo: "assets/partners/micard.svg",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "atesmedica", name: "АТЕС МЕДИКА", url: "https://atesmedica.ru/", logo: "assets/partners/atesmedica.png",
+    country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
+  { id: "schiller", name: "Schiller", url: "https://www.schiller.ch/ru", logo: "assets/partners/schiller.svg",
+    country_ru: "Швейцария", country_uz: "Shveytsariya", country_en: "Switzerland" },
+  { id: "yuwell", name: "Yuwell", url: "https://www.yuwell.com/", logo: "",
+    country_ru: "Китай", country_uz: "Xitoy", country_en: "China" },
+  { id: "cardian", name: "Cardian", url: "https://cardian.by", logo: "",
+    country_ru: "Беларусь", country_uz: "Belarus", country_en: "Belarus" },
+];
+
 function PartnersPage({ t, lang, go, goCat }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const PER = 16; // 4 колонки × 4 ряда
@@ -281,8 +338,43 @@ function PartnersPage({ t, lang, go, goCat }) {
   return (
     <div>
       <PageHero t={t} lang={lang} go={go} title={t.nav_partners} sub={t.br_sub} />
+      <section className="section" style={{ paddingBottom: 0 }}>
+        <div className="wrap">
+          {/* Реальные партнёры — см. PARTNER_LOGOS выше. Показывается всегда,
+              не только когда наполнен каталог: это фактические партнёрские
+              связи, а не витрина товаров. */}
+          <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 22 }}>
+            {lv("Наши партнёры", "Bizning hamkorlarimiz", "Our partners")}
+          </h2>
+          <div className="brands-page-grid reveal">
+            {PARTNER_LOGOS.map((b) => {
+              const country = lv(b.country_ru, b.country_uz, b.country_en);
+              return (
+                <a key={b.id} className="brand-tile" href={b.url} target="_blank" rel="noopener noreferrer">
+                  <div className="bt-logo">
+                    {b.logo
+                      ? <img src={b.logo} alt={b.name} loading="lazy" />
+                      : <div className="bt-mono">{b.name.slice(0, 2).toUpperCase()}</div>}
+                  </div>
+                  <div className="bt-body">
+                    <div className="bt-name">{b.name}</div>
+                    <div className="bt-loc">{country}</div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+      {/* Бренды из каталога — отдельно от списка выше и только когда каталог
+          реально ими наполнен (сейчас 0 записей). Плейсхолдер под curated-
+          сеткой был бы лишним: та уже показывает, что партнёры есть. */}
+      {!!brands.length &&
       <section className="section">
         <div className="wrap">
+          <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 22 }}>
+            {lv("Бренды в каталоге", "Katalogdagi brendlar", "Brands in the catalog")}
+          </h2>
           <div className="brands-page-grid reveal">
             {pageItems.map((b) => {
               const country = (b.country && (b.country[lang] || b.country.ru)) || lv(b.country_ru, b.country_uz, b.country_en) || "";
@@ -314,25 +406,6 @@ function PartnersPage({ t, lang, go, goCat }) {
               </button>
             </div>
           )}
-          {/* Пока в каталоге нет ни одного бренда, сетка выше пуста, и текст про
-              «перечисленных производителей» перечисляет пустоту. Вместо
-              заявления, которое страница сама же опровергает, показываем, что
-              список готовится, и уводим на прямой контакт. Появятся бренды —
-              вернётся и заявление, без правки кода. */}
-          {!brands.length && (
-            <div className="reveal" style={{ marginTop: 8, padding: "30px 34px", background: "var(--bg)", borderRadius: "var(--r-lg)", border: "1px solid var(--line)" }}>
-              <h3 style={{ fontSize: 19, fontWeight: 800, marginBottom: 10 }}>{lv("Список производителей обновляется", "Ishlab chiqaruvchilar ro'yxati yangilanmoqda", "Manufacturer list is being updated")}</h3>
-              <p style={{ fontSize: 15, color: "var(--slate-600)", lineHeight: 1.65, maxWidth: 760 }}>
-                {lv("Мы работаем напрямую с производителями медицинского оборудования и мебели. Чтобы уточнить, представлен ли конкретный бренд, напишите нам — ответим в течение рабочего дня.",
-                "Biz tibbiy uskunalar va mebel ishlab chiqaruvchilari bilan bevosita ishlaymiz. Muayyan brend bo'yicha aniqlik kiritish uchun bizga yozing — ish kuni davomida javob beramiz.",
-                "We work directly with manufacturers of medical equipment and furniture. To check whether a particular brand is represented, get in touch — we reply within one business day.")}
-              </p>
-              <button className="btn btn-pri" style={{ marginTop: 18 }} onClick={() => go("contacts")}>
-                {lv("Связаться с нами", "Biz bilan bog'lanish", "Contact us")}
-              </button>
-            </div>
-          )}
-          {!!brands.length && (
           <div className="reveal" style={{ marginTop: 50, padding: "30px 34px", background: "var(--bg)", borderRadius: "var(--r-lg)", border: "1px solid var(--line)" }}>
             <h3 style={{ fontSize: 19, fontWeight: 800, marginBottom: 10 }}>{lv("Официальное представительство", "Rasmiy vakillik", "Official representation")}</h3>
             <p style={{ fontSize: 15, color: "var(--slate-600)", lineHeight: 1.65, maxWidth: 760 }}>
@@ -341,7 +414,11 @@ function PartnersPage({ t, lang, go, goCat }) {
               "We are the official distributor of the listed manufacturers in the Republic of Uzbekistan. This guarantees equipment authenticity, factory warranty, spare parts availability and manufacturer technical support.")}
             </p>
           </div>
-          )}
+        </div>
+      </section>
+      }
+      <section className="section">
+        <div className="wrap">
           {/* «Поставщикам» из содержимого этой же страницы, но не отдельным
              маршрутом: раньше жила внутри каталожной оболочки по адресу
              /catalog/info/suppliers — без пункта меню и с чужими крошками
