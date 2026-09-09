@@ -114,6 +114,24 @@ function AboutPage({ t, lang, go }) {
 }
 
 function AboutDocsSection({ lang, lv }) {
+  /* Документы читаются в состояние с подпиской на CMS, а не вызовом
+     window.CMS.list() прямо в разметке (тот же баг и то же лечение, что
+     уже применены в LicensesPage и LeadershipSection выше). Разница была
+     не только в реактивности: этот блок не перерисовывался вообще, а
+     список категорий — company/registration/license/certificate/contract/
+     warranty/other — не совпадал с тем, что реально пишет админка
+     (company/clients/service/legal, см. LicensesPage). Ни один из 16
+     загруженных на 09.09.2026 документов не подходил ни под одну
+     категорию, кроме «company», и блок всегда показывал статичную
+     заглушку со ссылками на corp/*.pdf — файлы, которых на сервере нет
+     (проверено: все четыре 404). Приведено к словарю LicensesPage. */
+  const [docs, setDocs] = React.useState(() => (window.CMS ? window.CMS.list("documents") : []));
+  React.useEffect(() => {
+    if (!window.CMS) return;
+    const read = () => setDocs(window.CMS.list("documents"));
+    read();
+    return window.CMS.on ? window.CMS.on("documents", read) : undefined;
+  }, []);
   const openDoc = (href, name) => {
     fetch(href).then((r) => r.blob()).then((b) => {
       const url = URL.createObjectURL(b);
@@ -147,14 +165,17 @@ function AboutDocsSection({ lang, lv }) {
           <div className="acard reveal">
             <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{lv("Документы", "Hujjatlar", "Documents")}</h3>
             {function () {
-              const all = window.CMS && window.CMS.list("documents") || [];
+              const all = docs;
               const vis = all.filter((d) => d.status !== "hidden" && (!d.places || d.places.includes("page") || d.places.includes("side")));
               if (vis.length) {
                 const txx = (o) => o && (o[lang] || o.ru) || "";
-                const CATN = { company: lv("Карточка компании", "Kompaniya kartasi", "Company card"), registration: lv("Регистрационные документы", "Ro'yxatga olish", "Registration"), license: lv("Лицензии", "Litsenziyalar", "Licenses"), certificate: lv("Сертификаты", "Sertifikatlar", "Certificates"), contract: lv("Договоры", "Shartnomalar", "Contracts"), warranty: lv("Гарантия и сервис", "Kafolat", "Warranty"), other: lv("Прочее", "Boshqa", "Other") };
-                const order = ["company", "registration", "license", "certificate", "contract", "warranty", "other"];
+                /* Тот же словарь категорий, что в LicensesPage (страница
+                   «Документы компании») — это реальные значения d.cat из
+                   базы, а не список, который казался правдоподобным. */
+                const CATN = { company: lv("Документы компании", "Kompaniya hujjatlari", "Company documents"), clients: lv("Документы для клиентов", "Mijozlar uchun hujjatlar", "Documents for clients"), service: lv("Документы по сервису", "Servis hujjatlari", "Service documents"), legal: lv("Правовая информация", "Huquqiy ma'lumot", "Legal information"), other: lv("Прочее", "Boshqa", "Other") };
+                const order = ["company", "clients", "service", "legal", "other"];
                 const groups = {};
-                vis.forEach((d) => {const c = d.cat || "other";(groups[c] = groups[c] || []).push(d);});
+                vis.forEach((d) => {const c = order.includes(d.cat) ? d.cat : "other";(groups[c] = groups[c] || []).push(d);});
                 return order.filter((c) => groups[c]).map((c) =>
                 <React.Fragment key={c}>
                     {groups[c].length > 0 && <div className="adoc-row"><svg className="adoc-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /></svg><span className="adoc-name">{CATN[c]}</span></div>}
