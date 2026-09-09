@@ -344,11 +344,6 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
   const docsSetting = useSsSetting("service_docs", null);
   const team = useSsCollection("team");
   const engineers = (team || []).filter((m) => m.service);
-  const allReviews = useSsCollection("reviews");
-  const cmsReviews = (allReviews || [])
-    .filter((r) => (r.status || "published") === "published")
-    .sort((a, b) => (b.date || "").localeCompare(a.date || ""))
-    .slice(0, 3);
   const FLOW = [
     [lv("Получение заявки", "So‘rovni qabul qilish", "Receiving the request"), lv("Принимаем обращение по телефону, email или через форму.", "Murojaatni telefon, email yoki forma orqali qabul qilamiz.", "We accept the request by phone, email or via the form.")],
     [lv("Анализ обращения", "Murojaatni tahlil qilish", "Request analysis"), lv("Уточняем оборудование, характер проблемы и приоритет.", "Uskuna, muammo xarakteri va ustuvorlikni aniqlaymiz.", "We clarify the equipment, nature of the problem and priority.")],
@@ -380,11 +375,6 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
     [lv("Сервисный инженер", "Servis muhandisi", "Service engineer"), lv("Лабораторное оборудование", "Laboratoriya uskunalari", "Laboratory equipment"), lv("Опыт: 6+ лет", "Tajriba: 6+ yil", "Experience: 6+ years"), [lv("Анализаторы", "Analizatorlar", "Analyzers"), lv("Центрифуги", "Sentrifugalar", "Centrifuges")]],
     [lv("Инженер-электроник", "Elektronika muhandisi", "Electronics engineer"), lv("Монтаж и пусконаладка", "Montaj va ishga tushirish", "Installation and commissioning"), lv("Опыт: 10+ лет", "Tajriba: 10+ yil", "Experience: 10+ years"), [lv("КТ / МРТ", "KT / MRT", "CT / MRI"), lv("Мониторинг", "Monitoring", "Monitoring")]],
     [lv("Инженер по ПО", "Dasturiy ta’minot muhandisi", "Software engineer"), lv("Настройка и обновления", "Sozlash va yangilanishlar", "Setup and updates"), lv("Опыт: 5+ лет", "Tajriba: 5+ yil", "Experience: 5+ years"), [lv("Системы", "Tizimlar", "Systems"), lv("Калибровка", "Kalibrlash", "Calibration")]],
-  ];
-  const REVIEWS = [
-    [lv("Медицинское учреждение", "Tibbiyot muassasasi", "Medical institution"), lv("Отзыв клиента появится здесь после публикации в админ-панели.", "Mijoz sharhi admin-panelda chop etilgandan so‘ng shu yerda paydo bo‘ladi.", "A client review will appear here once published in the admin panel.")],
-    [lv("Диагностический центр", "Diagnostika markazi", "Diagnostic center"), lv("Отзыв клиента появится здесь после публикации в админ-панели.", "Mijoz sharhi admin-panelda chop etilgandan so‘ng shu yerda paydo bo‘ladi.", "A client review will appear here once published in the admin panel.")],
-    [lv("Частная клиника", "Xususiy klinika", "Private clinic"), lv("Отзыв клиента появится здесь после публикации в админ-панели.", "Mijoz sharhi admin-panelda chop etilgandan so‘ng shu yerda paydo bo‘ladi.", "A client review will appear here once published in the admin panel.")],
   ];
   const FAQ = [
     [lv("Как оформить сервисную заявку?", "Servis so‘rovini qanday rasmiylashtirish mumkin?", "How do I submit a service request?"), lv("Заполните форму на этой странице, позвоните по сервисному телефону или напишите на email. Укажите оборудование, производителя и характер неисправности.", "Ushbu sahifadagi formani to‘ldiring, servis telefoniga qo‘ng‘iroq qiling yoki emailga yozing. Uskuna, ishlab chiqaruvchi va nosozlik xarakterini ko‘rsating.", "Fill in the form on this page, call the service phone or write to the email. Provide the equipment, manufacturer and the nature of the fault.")],
@@ -585,43 +575,7 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
         </div>
       </section>
 
-      {/* Block 10 — Отзывы клиентов: опубликованные отзывы из админки «Отзывы». */}
-      <section className="section">
-        <div className="wrap">
-          <div className="sec-head reveal"><span className="eyebrow line">{lv("Отзывы", "Sharhlar", "Reviews")}</span><h2 className="h-sec" style={{ marginTop: 14 }}>{lv("Отзывы клиентов", "Mijozlar sharhlari", "Client reviews")}</h2></div>
-          <div className="ss-rev">
-            {cmsReviews.length > 0
-              ? cmsReviews.map((r) => {
-                const pick = (v) => (typeof v === "string" ? v : (v && (v[lang] || v.ru)) || "");
-                const org = pick(r.company);
-                const txt = pick(r.desc);
-                const region = pick(r.region);
-                return (
-                  <div className="ss-rev-c reveal" key={r.id}>
-                    <div className="ss-rev-b" style={{ paddingTop: 20 }}>
-                      {r.logo
-                        ? <img className="ss-rev-logo-img" src={r.logo} alt={org} loading="lazy" />
-                        : <div className="ss-photo ss-rev-logo" data-label=""><span className="ph-ic"><CoIcon name="building" size={16} /></span></div>}
-                      <p>{txt}</p>
-                      <div className="ss-rev-org">{org}{region ? " · " + region : ""}</div>
-                    </div>
-                  </div>
-                );
-              })
-              : REVIEWS.map(([org, txt], i) => (
-                <div className="ss-rev-c reveal" key={i}>
-                  <div className="ss-photo ss-rev-obj" data-label={lv("Фото объекта", "Obyekt fotosi", "Site photo")}><span className="ph-ic">{SsPhotoIcon}</span></div>
-                  <div className="ss-rev-b">
-                    <div className="ss-photo ss-rev-logo" data-label=""><span className="ph-ic"><CoIcon name="building" size={16} /></span></div>
-                    <p>{txt}</p>
-                    <div className="ss-rev-org">{org}</div>
-                  </div>
-                </div>
-              ))}
-          </div>
-          {cmsReviews.length === 0 && <div className="ss-placeholder-note">{lv("Отзывы публикуются через админ-панель «Отзывы» (статус «Опубликовано»).", "Sharhlar «Sharhlar» admin-paneli orqali chop etiladi («Chop etilgan» holati).", "Reviews are published via the “Reviews” admin panel (status “Published”).")}</div>}
-        </div>
-      </section>
+      {/* Block 10 (Отзывы клиентов) снят со страницы 09.09.2026 по прямому запросу. */}
 
       {/* Block 11 — FAQ */}
       <section className="section alt">
