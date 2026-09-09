@@ -270,15 +270,22 @@ function ProjectsPage({ t, lang, go }) {
    Логотипы скачаны с официальных сайтов компаний и лежат в assets/partners/ —
    не хотлинк на чужой домен (тот мог бы пропасть или измениться без
    предупреждения, и CSP img-src не разрешает произвольные внешние картinки).
-   Для пяти компаний подходящий логотип на сайте не нашёлся (сайт защищён от
-   ботов, JS-рендеринг без статичного пути к файлу, или найденное изображение
-   было 32×32 — для карточки нужно крупнее): у них поле logo пустое, и
-   карточка показывает те же двухбуквенные инициалы, что и .bt-mono ниже для
-   брендов без логотипа из каталога. */
+   У части компаний поле logo пустое — карточка показывает те же двухбуквенные
+   инициалы, что и .bt-mono ниже для брендов без логотипа из каталога.
+   Причины разные: сайт защищён от ботов (cardian.by, medin.by), JS-рендеринг
+   без статичного пути к файлу (yuwell.com), на сайте нашёлся только
+   favicon 32×32 (ТВЕС, МИЗ-Ворсма, СКТБ СПУ) — а для трёх подходящее
+   изображение нашлось, но оказалось непригодным при проверке (09.09.2026):
+   у orion.png эмблема была отпечатана бледно-серым по белому и на карточке
+   выглядела пустой; у axion-med.ru og:image вообще указывал на чужой сайт
+   («NextShop» — видимо, старый шаблон витрины, а не логотип завода); у
+   micard.svg получившийся файл — почти невидимый пунктир без узнаваемого
+   текста. Извинение хуже монограммы: monogram честно говорит «логотипа
+   нет», а сломанная картинка выглядит как баг сайта. */
 const PARTNER_LOGOS = [
   { id: "safe", name: "Промет (HILFE)", url: "https://www.safe.ru/", logo: "assets/partners/safe.png",
     country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
-  { id: "orion", name: "Орион-Си", url: "https://orion-si.ru/", logo: "assets/partners/orion.png",
+  { id: "orion", name: "Орион-Си", url: "https://orion-si.ru/", logo: "",
     country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
   { id: "dzmo", name: "ДЗМО", url: "https://www.dzmo.ru/", logo: "assets/partners/dzmo.png",
     country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
@@ -294,7 +301,7 @@ const PARTNER_LOGOS = [
     country_ru: "Беларусь", country_uz: "Belarus", country_en: "Belarus" },
   { id: "sktbspu", name: "Смоленское СКТБ СПУ", url: "https://sktb-spu.ru/", logo: "",
     country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
-  { id: "axion", name: "Концерн «Аксион»", url: "https://axion-med.ru/", logo: "assets/partners/axion.png",
+  { id: "axion", name: "Концерн «Аксион»", url: "https://axion-med.ru/", logo: "",
     country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
   { id: "mirumed", name: "МируМед", url: "https://mirumed.spb.ru/", logo: "assets/partners/mirumed.svg",
     country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
@@ -304,9 +311,9 @@ const PARTNER_LOGOS = [
     country_ru: "США", country_uz: "AQSh", country_en: "USA" },
   { id: "vectorms", name: "Вектор-МС", url: "http://www.vectorms.ru/", logo: "assets/partners/vectorms.png",
     country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
-  { id: "technomed", name: "Техно-МЕД", url: "https://techno-med.pro/", logo: "assets/partners/technomed.png",
+  { id: "technomed", name: "Техно-МЕД", url: "https://techno-med.pro/", logo: "",
     country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
-  { id: "micard", name: "МИКАРД-ЛАНА", url: "https://www.micard.ru/", logo: "assets/partners/micard.svg",
+  { id: "micard", name: "МИКАРД-ЛАНА", url: "https://www.micard.ru/", logo: "",
     country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
   { id: "atesmedica", name: "АТЕС МЕДИКА", url: "https://atesmedica.ru/", logo: "assets/partners/atesmedica.png",
     country_ru: "Россия", country_uz: "Rossiya", country_en: "Russia" },
@@ -335,9 +342,25 @@ function PartnersPage({ t, lang, go, goCat }) {
   const pageItems = brands.slice((pageSafe - 1) * PER, pageSafe * PER);
   const goPage = (n) => { setPage(n); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const openBrand = (b) => { if (goCat) goCat("brand", b.id); };
+  /* Заказчик уже начал вручную загружать настоящие логотипы через админку
+     (09.09.2026) — те самые Промет, Орион-Си, ДЗМО, ТВЕС оказались и в
+     PARTNER_LOGOS, и в window.DATA.BRANDS одновременно, каждый раз со своим
+     логотипом. Загруженный вручную всегда точнее найденного скрейпингом,
+     поэтому статичная карточка скрывается сама, как только компания с тем
+     же названием появляется в каталоге, — без ручной правки списка при
+     каждой новой загрузке в админке. Сравнение нестрогое: имена в базе
+     часто длиннее («Тулиновский приборостроительный завод «ТВЕС»» против
+     «ТВЕС»), поэтому проверяется вхождение подстроки в любую сторону. */
+  const norm = (x) => (x || "").toLowerCase().replace(/[^a-zа-яё0-9]/gi, "");
+  const dbNames = brands.map((b) => norm(b.name));
+  const curatedPartners = PARTNER_LOGOS.filter((b) => {
+    const n = norm(b.name);
+    return !dbNames.some((d) => d && n && (d.includes(n) || n.includes(d)));
+  });
   return (
     <div>
       <PageHero t={t} lang={lang} go={go} title={t.nav_partners} sub={t.br_sub} />
+      {!!curatedPartners.length &&
       <section className="section" style={{ paddingBottom: 0 }}>
         <div className="wrap">
           {/* Реальные партнёры — см. PARTNER_LOGOS выше. Показывается всегда,
@@ -347,7 +370,7 @@ function PartnersPage({ t, lang, go, goCat }) {
             {lv("Наши партнёры", "Bizning hamkorlarimiz", "Our partners")}
           </h2>
           <div className="brands-page-grid reveal">
-            {PARTNER_LOGOS.map((b) => {
+            {curatedPartners.map((b) => {
               const country = lv(b.country_ru, b.country_uz, b.country_en);
               return (
                 <a key={b.id} className="brand-tile" href={b.url} target="_blank" rel="noopener noreferrer">
@@ -366,6 +389,7 @@ function PartnersPage({ t, lang, go, goCat }) {
           </div>
         </div>
       </section>
+      }
       {/* Бренды из каталога — отдельно от списка выше и только когда каталог
           реально ими наполнен (сейчас 0 записей). Плейсхолдер под curated-
           сеткой был бы лишним: та уже показывает, что партнёры есть. */}
