@@ -358,9 +358,6 @@ function PartnersPage({ t, lang, go, goCat }) {
     return () => window.removeEventListener("soi-data-changed", h);
   }, []);
   const brands = (window.DATA && window.DATA.BRANDS) || [];
-  const totalPages = Math.max(1, Math.ceil(brands.length / PER));
-  const pageSafe = Math.min(page, totalPages);
-  const pageItems = brands.slice((pageSafe - 1) * PER, pageSafe * PER);
   const goPage = (n) => { setPage(n); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const openBrand = (b) => { if (goCat) goCat("brand", b.id); };
   /* Заказчик уже начал вручную загружать настоящие логотипы через админку
@@ -378,43 +375,24 @@ function PartnersPage({ t, lang, go, goCat }) {
     const n = norm(b.name);
     return !dbNames.some((d) => d && n && (d.includes(n) || n.includes(d)));
   });
+  /* «Наши партнёры» и «Бренды в каталоге» были двумя разными секциями с
+     разными источниками данных — статичный список реальных партнёров
+     (PARTNER_LOGOS) и window.DATA.BRANDS из каталога. По просьбе заказчика
+     (09.09.2026) объединены в одну сетку с одной пагинацией под общим
+     заголовком «Бренды в каталоге»: посетителю всё равно, откуда взялась
+     плитка, а два одинаковых на вид грида подряд выглядели как повтор.
+     Только способ открытия у плиток остался разный: у карточки из
+     PARTNER_LOGOS есть собственный url — открывается в новой вкладке;
+     у карточки из каталога url нет — открывается профиль бренда внутри
+     каталога через goCat. */
+  const combined = [...brands, ...curatedPartners];
+  const totalPages = Math.max(1, Math.ceil(combined.length / PER));
+  const pageSafe = Math.min(page, totalPages);
+  const pageItems = combined.slice((pageSafe - 1) * PER, pageSafe * PER);
   return (
     <div>
       <PageHero t={t} lang={lang} go={go} title={t.nav_partners} sub={t.br_sub} />
-      {!!curatedPartners.length &&
-      <section className="section" style={{ paddingBottom: 0 }}>
-        <div className="wrap">
-          {/* Реальные партнёры — см. PARTNER_LOGOS выше. Показывается всегда,
-              не только когда наполнен каталог: это фактические партнёрские
-              связи, а не витрина товаров. */}
-          <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 22 }}>
-            {lv("Наши партнёры", "Bizning hamkorlarimiz", "Our partners")}
-          </h2>
-          <div className="brands-page-grid reveal">
-            {curatedPartners.map((b) => {
-              const country = lv(b.country_ru, b.country_uz, b.country_en);
-              return (
-                <a key={b.id} className="brand-tile" href={b.url} target="_blank" rel="noopener noreferrer">
-                  <div className="bt-logo">
-                    {b.logo
-                      ? <img src={b.logo} alt={b.name} loading="lazy" />
-                      : <div className="bt-mono">{b.name.slice(0, 2).toUpperCase()}</div>}
-                  </div>
-                  <div className="bt-body">
-                    <div className="bt-name">{b.name}</div>
-                    <div className="bt-loc">{country}</div>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-      }
-      {/* Бренды из каталога — отдельно от списка выше и только когда каталог
-          реально ими наполнен (сейчас 0 записей). Плейсхолдер под curated-
-          сеткой был бы лишним: та уже показывает, что партнёры есть. */}
-      {!!brands.length &&
+      {!!combined.length &&
       <section className="section">
         <div className="wrap">
           <h2 style={{ fontSize: 22, fontWeight: 800, marginBottom: 22 }}>
@@ -423,8 +401,8 @@ function PartnersPage({ t, lang, go, goCat }) {
           <div className="brands-page-grid reveal">
             {pageItems.map((b) => {
               const country = (b.country && (b.country[lang] || b.country.ru)) || lv(b.country_ru, b.country_uz, b.country_en) || "";
-              return (
-                <div key={b.id} className="brand-tile" onClick={() => openBrand(b)}>
+              const logoBlock = (
+                <React.Fragment>
                   <div className="bt-logo">
                     {b.logo
                       ? <img src={b.logo} alt={b.name} loading="lazy" />
@@ -434,8 +412,11 @@ function PartnersPage({ t, lang, go, goCat }) {
                     <div className="bt-name">{b.name}</div>
                     {country && <div className="bt-loc">{country}</div>}
                   </div>
-                </div>
+                </React.Fragment>
               );
+              return b.url
+                ? <a key={b.id} className="brand-tile" href={b.url} target="_blank" rel="noopener noreferrer">{logoBlock}</a>
+                : <div key={b.id} className="brand-tile" onClick={() => openBrand(b)}>{logoBlock}</div>;
             })}
           </div>
           {totalPages > 1 && (
