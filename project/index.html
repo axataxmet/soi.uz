@@ -360,6 +360,9 @@ img{max-width:100%;display:block}
 .z-corp .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:32px}
 .z-corp .scard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);padding:28px;transition:.18s}
 .z-corp .scard:hover{box-shadow:var(--sh-lg);transform:translateY(-4px);border-color:rgba(23,87,200,.16)}
+/* Карточка услуги без ссылки — hover от .scard иначе поднимает её так же,
+   как кликабельные соседние карточки, обещая переход, которого не будет. */
+.z-corp .scard-static:hover{box-shadow:none;transform:none;border-color:var(--line)}
 .z-corp .scard .ic{width:50px;height:50px;border-radius:var(--r);background:var(--blue-50);color:var(--blue-600);display:flex;align-items:center;justify-content:center;margin-bottom:18px}
 .z-corp .scard h3{font-size:var(--fs-6);font-weight:800;margin-bottom:9px;letter-spacing:-.01em}
 .z-corp .scard p{font-size:var(--fs-4);color:var(--slate-600);line-height:1.6}
@@ -3736,7 +3739,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
 <script src="dist/app/certificates.js?v=1788878786"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
-<script src="dist/app/inner-pages.js?v=1788913012"></script>
+<script src="dist/app/inner-pages.js?v=1788913187"></script>
 <script src="dist/app/testimonials.js?v=1787415411"></script>
 <script src="dist/app/search.js?v=1787415411"></script>
 <script src="dist/app/staff-training.js?v=1787415411"></script>

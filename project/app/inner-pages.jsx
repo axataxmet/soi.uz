@@ -700,9 +700,23 @@ function ServicesPage({ t, lang, go }) {
         <div className="wrap">
           <div className="grid-2" style={{ gap: 22 }}>
             {D.SERVICES.map((s, i) => {
-              const linkView = s.t === "svc5_t" ? "staffTraining" : s.t === "svc4_t" ? "registration" : s.t === "svc6_t" ? "tenders" : null;
+              /* Раньше только 3 из 6 карточек вели куда-либо (svc4/5/6), а
+                 svc1-3 молча ничего не делали. Ни одна карточка не смотрелась
+                 иначе — у всех общий класс .scard, и его :hover в CSS
+                 (подъём + тень) срабатывает вне зависимости от linkView, то
+                 есть наведение обещало клик там, где клика не было.
+                 svc3 «Сервис и гарантия» — это же самое, о чём подробно
+                 рассказывает страница /service-support, только ссылки на
+                 неё не было. svc1 «Поставка оборудования» ведёт в каталог —
+                 это и есть поставка. У svc2 «Оснащение под ключ» отдельной
+                 страницы нет и не должно казаться, что она есть — карточка
+                 остаётся статичной, но с классом, который гасит подъём при
+                 наведении, раз наводить незачем. */
+              const linkView = s.t === "svc5_t" ? "staffTraining" : s.t === "svc4_t" ? "registration"
+                : s.t === "svc6_t" ? "tenders" : s.t === "svc3_t" ? "serviceSupport"
+                : s.t === "svc1_t" ? "catalog" : null;
               return (
-              <div className="scard reveal" key={i} style={{ display: "flex", gap: 20, alignItems: "flex-start", cursor: linkView ? "pointer" : "default" }} onClick={linkView ? () => go(linkView) : undefined}>
+              <div className={"scard reveal" + (linkView ? "" : " scard-static")} key={i} style={{ display: "flex", gap: 20, alignItems: "flex-start", cursor: linkView ? "pointer" : "default" }} onClick={linkView ? () => go(linkView) : undefined}>
                 <div className="ic" style={{ flexShrink: 0, marginBottom: 0 }}><CoIcon name={s.ic} size={24} /></div>
                 <div>
                   <h3>{t[s.t]}</h3>
