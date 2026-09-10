@@ -87,7 +87,7 @@ function BrandPage({ t, lang, store, go, params }) {
             <div className="brand-hero-info">
               <div className="brand-hero-name">{brand.name}</div>
               <div className="brand-hero-meta">
-                <span><Icon name="pin" size={14} style={{verticalAlign:"middle",marginRight:5}} />{country}</span>
+                <span>{country}</span>
                 {info.founded && <span><Icon name="award" size={14} style={{verticalAlign:"middle",marginRight:5}} />{lv("Основана в","Asoslangan","Founded")} {info.founded}</span>}
                 <span><Icon name="grid" size={14} style={{verticalAlign:"middle",marginRight:5}} />{prods.length} {t.items_count}</span>
               </div>
@@ -101,7 +101,6 @@ function BrandPage({ t, lang, store, go, params }) {
             <div className="bhs"><div className="bhs-n">{prods.length}</div><div className="bhs-l">{t.items_count}</div></div>
             <div className="bhs"><div className="bhs-n">{cats.length}</div><div className="bhs-l">{lv("направлений","yo'nalish","directions")}</div></div>
             <div className="bhs"><div className="bhs-n">{prods.filter(p=>p.stock==="in").length}</div><div className="bhs-l">{t.in_stock}</div></div>
-            <div className="bhs"><div className="bhs-n">24</div><div className="bhs-l">{lv("мес. гарантия","oy kafolat","mo. warranty")}</div></div>
           </div>
         </div>
       </div>

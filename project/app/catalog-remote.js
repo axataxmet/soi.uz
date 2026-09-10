@@ -24,7 +24,8 @@
   function fieldsOf(schema) { return (schema && Array.isArray(schema.fields)) ? schema.fields : []; }
 
   var COUNTRY = { RU: "Россия", UZ: "Узбекистан", DE: "Германия", CN: "Китай", US: "США",
-    IT: "Италия", CZ: "Чехия", CH: "Швейцария", JP: "Япония", KR: "Корея", FR: "Франция", GB: "Великобритания" };
+    IT: "Италия", CZ: "Чехия", CH: "Швейцария", JP: "Япония", KR: "Корея", FR: "Франция", GB: "Великобритания",
+    BY: "Беларусь" };
 
   // 3-level tree → legacy CATEGORIES (category→subs) + groupId lookup with merged attr labels.
   function buildTree(tree) {
