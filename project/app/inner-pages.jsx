@@ -66,22 +66,26 @@ function AboutPage({ t, lang, go }) {
       "Official supplier and integrator of medical equipment in Uzbekistan since " + founded + ".")} />
       <section className="section">
         <div className="wrap" style={{ fontFamily: "Montserrat, Helvetica, Arial, sans-serif" }}>
-          <div className="grid-2" style={{ alignItems: "center", gap: 48 }}>
-            <div className="reveal">
-              <span className="eyebrow line">{lv("О нас", "Biz haqimizda", "About us")}</span>
-              <h2 className="h-sec" style={{ marginTop: 14, fontSize: 32 }} data-comment-anchor="b07b739388-h2-31-15">{lv("С 2021 года помогаем оснащать медицинские учреждения Узбекистана", "2021 yildan beri O'zbekiston tibbiy muassasalarini jihozlashga yordam beramiz", "Equipping medical institutions of Uzbekistan since 2021")}</h2>
-              <p style={{ fontSize: 15.5, color: "var(--slate-600)", marginTop: 18, lineHeight: 1.7 }} data-comment-anchor="c68368ded3-p-32-15">
-                {lv("«ИНДУСТРИЯ ЗДОРОВЬЯ» — компания полного цикла: от поставки и монтажа оборудования до сервиса, обучения персонала и регистрации медицинских изделий. Работаем с государственными и частными учреждениями по всему Узбекистану.",
-                "«SOG’LIQ INDUSTRIYASI» — to'liq tsikl kompaniyasi: uskuna yetkazish va montajdan servis, xodimlarni o'qitish va tibbiy buyumlarni ro'yxatdan o'tkazishgacha. Biz butun O'zbekiston bo'ylab davlat va xususiy muassasalar bilan ishlaymiz.",
-                "HEALTH INDUSTRY is a full-cycle company: from equipment supply and installation to service, staff training and medical device registration. We work with public and private institutions across Uzbekistan.")}
-              </p>
-              <p style={{ fontSize: 15.5, color: "var(--slate-600)", marginTop: 14, lineHeight: 1.7 }} data-comment-anchor="b14459ba99-p-40-15">
-                {lv("Мы развиваем направление комплексного оснащения медицинских учреждений, поставки медицинского оборудования, мебели, инструментов и расходных материалов, а также сопровождения документов, сервиса и регистрации медицинских изделий.",
-                "Ishlab chiqaruvchi zavodlar bilan to'g'ridan-to'g'ri shartnomalar va rasmiy diler maqomi uskunaning haqiqiyligini va ishlab chiqaruvchi qo'llab-quvvatlashini kafolatlaydi.",
-                "Direct contracts with manufacturing plants and official dealer status guarantee equipment authenticity and manufacturer support throughout its service life.")}
-              </p>
-            </div>
-            <image-slot id="about-main" shape="rounded" radius="18" placeholder={lv("Фото офиса / команды", "Ofis / jamoa fotosi", "Office / team photo")} style={{ width: "100%", height: 380 }}></image-slot>
+          {/* Фото офиса/команды убрано (10.09.2026, по прямому запросу): тег
+              <image-slot> нигде в бандле не превращается в изображение — ни
+              своего customElements.define, ни подстановки src откуда-либо. На
+              боевом это была прозрачная пустая область 239×380 без картинки
+              и без подписи — не заглушка с иконкой, а буквально дыра в
+              макете. Текстовая колонка была половиной grid-2 ровно из-за
+              этого соседа; без него занимает всю ширину. */}
+          <div className="reveal" style={{ maxWidth: 760 }}>
+            <span className="eyebrow line">{lv("О нас", "Biz haqimizda", "About us")}</span>
+            <h2 className="h-sec" style={{ marginTop: 14, fontSize: 32 }} data-comment-anchor="b07b739388-h2-31-15">{lv("С 2021 года помогаем оснащать медицинские учреждения Узбекистана", "2021 yildan beri O'zbekiston tibbiy muassasalarini jihozlashga yordam beramiz", "Equipping medical institutions of Uzbekistan since 2021")}</h2>
+            <p style={{ fontSize: 15.5, color: "var(--slate-600)", marginTop: 18, lineHeight: 1.7 }} data-comment-anchor="c68368ded3-p-32-15">
+              {lv("«ИНДУСТРИЯ ЗДОРОВЬЯ» — компания полного цикла: от поставки и монтажа оборудования до сервиса, обучения персонала и регистрации медицинских изделий. Работаем с государственными и частными учреждениями по всему Узбекистану.",
+              "«SOG’LIQ INDUSTRIYASI» — to'liq tsikl kompaniyasi: uskuna yetkazish va montajdan servis, xodimlarni o'qitish va tibbiy buyumlarni ro'yxatdan o'tkazishgacha. Biz butun O'zbekiston bo'ylab davlat va xususiy muassasalar bilan ishlaymiz.",
+              "HEALTH INDUSTRY is a full-cycle company: from equipment supply and installation to service, staff training and medical device registration. We work with public and private institutions across Uzbekistan.")}
+            </p>
+            <p style={{ fontSize: 15.5, color: "var(--slate-600)", marginTop: 14, lineHeight: 1.7 }} data-comment-anchor="b14459ba99-p-40-15">
+              {lv("Мы развиваем направление комплексного оснащения медицинских учреждений, поставки медицинского оборудования, мебели, инструментов и расходных материалов, а также сопровождения документов, сервиса и регистрации медицинских изделий.",
+              "Ishlab chiqaruvchi zavodlar bilan to'g'ridan-to'g'ri shartnomalar va rasmiy diler maqomi uskunaning haqiqiyligini va ishlab chiqaruvchi qo'llab-quvvatlashini kafolatlaydi.",
+              "Direct contracts with manufacturing plants and official dealer status guarantee equipment authenticity and manufacturer support throughout its service life.")}
+            </p>
           </div>
         </div>
       </section>
