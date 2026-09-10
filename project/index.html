@@ -465,6 +465,15 @@ img{max-width:100%;display:block}
 .z-corp .val-it .vn{font-family:var(--font);font-size:var(--fs-7);font-weight:600;color:var(--blue-400);flex-shrink:0;width:42px}
 .z-corp .val-it h4{font-size:var(--fs-5);font-weight:800;margin-bottom:5px}
 .z-corp .val-it p{font-size:var(--fs-4);color:var(--slate-600);line-height:1.55}
+/* Применено на /about (10.09.2026): раньше .val-it нигде не рендерился —
+   правила выше лежали неиспользованными. Тонкая граница между пунктами и
+   увеличенный отступ делают список читаемым как раздел, а не как три
+   строки подряд без структуры. */
+.z-corp .val-list{gap:0}
+.z-corp .val-it{padding:26px 0;border-top:1px solid var(--line-soft);align-items:flex-start}
+.z-corp .val-it:first-child{border-top:none;padding-top:0}
+.z-corp .val-it:last-child{padding-bottom:0}
+.z-corp .val-it .vn{font-size:var(--fs-8);font-weight:800}
 
 
 /* ── страница «Контакты» ──────────────────────────────────────────────────
@@ -3739,7 +3748,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
 <script src="dist/app/certificates.js?v=1788878786"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
-<script src="dist/app/inner-pages.js?v=1789061204"></script>
+<script src="dist/app/inner-pages.js?v=1789061656"></script>
 <script src="dist/app/testimonials.js?v=1787415411"></script>
 <script src="dist/app/search.js?v=1787415411"></script>
 <script src="dist/app/staff-training.js?v=1787415411"></script>
