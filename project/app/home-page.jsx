@@ -49,7 +49,7 @@ const SITE_FIGURES_DEFAULTS = {
      категориям, проверено через /api/products), поэтому вернули цифру.
      Значение переопределяется настройкой site_figures из админки — правку
      тут увидят только пока в админке не задано другое число. */
-  catalog: "28",           // позиций в каталоге
+  catalog: "30",           // позиций в каталоге
   brands: "",             // мировых брендов
   trained: "1000",        // обученных специалистов
   service: "50",          // успешно выполненных сервисных работ
@@ -205,7 +205,7 @@ function HeroVideoSlot({ t, lang }) {
           {/* animated stat cards */}
           <div className="hvs-stats">
             {[
-              {n:"28+", l:"наименований", ic:"grid", c:"var(--blue-600)"},
+              {n:"30+", l:"наименований", ic:"grid", c:"var(--blue-600)"},
               {n:"120+",   l:"брендов",       ic:"award", c:"var(--accent)"},
               {n:"14",    l:"регионов",      ic:"pin",   c:"var(--danger)"},
               {n:(new Date().getFullYear() - parseInt(localStorage.getItem("soi_founded_year")||"2021",10))+"+",    l:"лет на рынке",  ic:"star",  c:"#7c5cbf"},
@@ -550,7 +550,7 @@ function HeroSignals({ lang, go }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const sigs = [
     { ic: "grid",  cls: "s1", bg: "var(--blue-50)", c: "var(--blue-600)",
-      t: lv("28+ позиций", "28+ pozitsiya", "28+ items"),
+      t: lv("30+ позиций", "30+ pozitsiya", "30+ items"),
       d: lv("в наличии и под заказ", "mavjud va buyurtmaga", "in stock & to order"),
       act: () => go("catalog", {}) },
     { ic: "check", cls: "s2", bg: "var(--line-2)", c: "var(--accent)",
@@ -3173,7 +3173,7 @@ function SoiCatalogPortal({ lang, go }) {
 
             <div>
               <span className="sx-cp-eyebrow">{lv("Электронный каталог", "Elektron katalog", "Electronic catalog")}</span>
-              <h2 className="sx-cp-h2">{lv("28+ единиц оборудования для медицины", "Tibbiyot uchun 28+ birlik uskunalar", "28+ units of medical equipment")}</h2>
+              <h2 className="sx-cp-h2">{lv("30+ единиц оборудования для медицины", "Tibbiyot uchun 30+ birlik uskunalar", "30+ units of medical equipment")}</h2>
               <p className="sx-cp-sub">{lv(
                 "Медтехника, мебель, инструменты и расходные материалы. Поиск по бренду, направлению и наличию на складе.",
                 "Tibbiy texnika, mebel, asboblar va sarf materiallari. Brend va yo'nalish bo'yicha qidiruv.",
