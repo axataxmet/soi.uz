@@ -52,12 +52,49 @@ function LeadershipSection({ lang, lv }) {
 }
 
 /* ===== ABOUT + LEADERSHIP ===== */
+/* Живой счётчик из CMS-коллекции — teamCount и docsCount на /about читают
+   ту же таблицу, что и сами блоки «Руководство»/«Документы» ниже, только
+   отдельным вызовом: поднимать общее состояние выше означало бы менять
+   API LeadershipSection и AboutDocsSection, а их логику чинили только что
+   (реактивность и словарь категорий) и трогать лишний раз незачем. Дважды
+   прочитать один и тот же CMS.list — дешевле, чем плодить риск регрессии
+   в уже проверенном коде. */
+function useCmsCount(name, filter) {
+  const read = () => {
+    const all = window.CMS ? window.CMS.list(name) : [];
+    return filter ? all.filter(filter).length : all.length;
+  };
+  const [n, setN] = React.useState(read);
+  React.useEffect(() => {
+    if (!window.CMS) return;
+    const upd = () => setN(read());
+    upd();
+    return window.CMS.on ? window.CMS.on(name, upd) : undefined;
+  }, []);
+  return n;
+}
+
 function AboutPage({ t, lang, go }) {
   const D = window.SI;
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const founded = window.SOI_CORE ? window.SOI_CORE.foundedYear() : 2021;
   const yrs = window.SOI_CORE ? window.SOI_CORE.yearsOnMarket() : new Date().getFullYear() - 2021;
-  const ruY = (n) => {const a = n % 10,b = n % 100;if (a === 1 && b !== 11) return "год";if (a >= 2 && a <= 4 && (b < 10 || b >= 20)) return "года";return "лет";};
+  /* Ни одной цифры не выдумано: три из четырёх плиток пересчитывают то, что
+     показано на этой же странице ниже (сколько человек в «Руководстве»,
+     сколько файлов в «Документах»), четвёртая — «регионов доставки» —
+     то же значение site_figures.regions, что уже везде на сайте (главная,
+     каталог), не новое число. Раньше на странице была ровно одна такая
+     плитка не по делу — «2 800+ единиц» рядом с пустым каталогом, — и её
+     сняли по этой же причине в отдельном коммите 05.09.2026. */
+  const figures = window.siteFigures ? window.siteFigures() : { regions: "14" };
+  const teamCount = useCmsCount("team");
+  const docsCount = useCmsCount("documents", (d) => d.status !== "hidden");
+  const stats = [
+    { n: yrs + "+", l: lv("лет на рынке Узбекистана", "O'zbekiston bozorida yil", "years in the Uzbekistan market") },
+    teamCount > 0 && { n: String(teamCount), l: lv("человек в команде", "jamoada xodim", "people on the team") },
+    docsCount > 0 && { n: String(docsCount), l: lv("документов в открытом доступе", "ochiq hujjat", "public documents") },
+    figures.regions && { n: figures.regions, l: lv("регионов доставки", "yetkazib berish hududi", "delivery regions") },
+  ].filter(Boolean);
   return (
     <div>
       <PageHero t={t} lang={lang} go={go} title={t.nav_about}
@@ -65,14 +102,13 @@ function AboutPage({ t, lang, go }) {
       founded + " yildan O'zbekistonda tibbiy uskunalarni rasmiy yetkazib beruvchi va integrator.",
       "Official supplier and integrator of medical equipment in Uzbekistan since " + founded + ".")} />
       <section className="section">
-        <div className="wrap" style={{ fontFamily: "Montserrat, Helvetica, Arial, sans-serif" }}>
+        <div className="wrap">
           {/* Фото офиса/команды убрано (10.09.2026, по прямому запросу): тег
-              <image-slot> нигде в бандле не превращается в изображение — ни
-              своего customElements.define, ни подстановки src откуда-либо. На
-              боевом это была прозрачная пустая область 239×380 без картинки
-              и без подписи — не заглушка с иконкой, а буквально дыра в
-              макете. Текстовая колонка была половиной grid-2 ровно из-за
-              этого соседа; без него занимает всю ширину. */}
+              <image-slot> нигде в бандле не превращается в изображение. На
+              боевом это была прозрачная пустая область без картинки и
+              подписи. Освободившееся место занял не текст пошире, а ряд
+              реальных цифр (ниже) — так исчезновение фото не читается как
+              дыра в вёрстке. */}
           <div className="reveal" style={{ maxWidth: 760 }}>
             <span className="eyebrow line">{lv("О нас", "Biz haqimizda", "About us")}</span>
             <h2 className="h-sec" style={{ marginTop: 14, fontSize: 32 }} data-comment-anchor="b07b739388-h2-31-15">{lv("С 2021 года помогаем оснащать медицинские учреждения Узбекистана", "2021 yildan beri O'zbekiston tibbiy muassasalarini jihozlashga yordam beramiz", "Equipping medical institutions of Uzbekistan since 2021")}</h2>
@@ -87,19 +123,33 @@ function AboutPage({ t, lang, go }) {
               "Direct contracts with manufacturing plants and official dealer status guarantee equipment authenticity and manufacturer support throughout its service life.")}
             </p>
           </div>
+          {!!stats.length &&
+          <div className="hero-stats reveal" style={{ marginTop: 40 }}>
+            {stats.map((s, i) => (
+              <div className="hstat" key={i}><b>{s.n}</b><span>{s.l}</span></div>
+            ))}
+          </div>
+          }
         </div>
       </section>
 
-      {/* VALUES */}
+      {/* VALUES — редизайн 10.09.2026: вместо трёх одинаковых карточек в сетке
+          (типовой корпоративный блок, неотличимый от десятка соседних
+          .scard-гридов на сайте) — вертикальный список с крупным номером,
+          как в макете читают манифест, а не карточки товара. Класс .val-it
+          уже был в CSS (готовился для другого места и не использовался) —
+          переиспользован, а не придуман заново. */}
       <section className="section alt">
-        <div className="wrap">
+        <div className="wrap" style={{ maxWidth: 760 }}>
           <div className="sec-head reveal"><h2 className="h-sec">{lv("Наши ценности", "Bizning qadriyatlarimiz", "Our values")}</h2></div>
-          <div className="grid-3">
+          <div className="val-list">
             {D.VALUES.map((v, i) =>
-            <div className="scard reveal" key={i}>
-                <div style={{ fontFamily: "var(--font)", fontSize: 30, fontWeight: 600, color: "var(--blue-400)" }}>{v.n}</div>
-                <h3 style={{ marginTop: 10 }}>{tr(lang, v.t)}</h3>
-                <p>{tr(lang, v.d)}</p>
+            <div className="val-it reveal" key={i}>
+                <div className="vn">{v.n}</div>
+                <div>
+                  <h4>{tr(lang, v.t)}</h4>
+                  <p>{tr(lang, v.d)}</p>
+                </div>
               </div>
             )}
           </div>
