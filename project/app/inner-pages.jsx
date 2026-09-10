@@ -74,24 +74,26 @@ function useCmsCount(name, filter) {
   return n;
 }
 
+/* Номер ценности → иконка. Смысловая привязка, не декоративный выбор:
+   надёжность — щит, экспертиза — награда/опыт, ответственность — галочка
+   выполненного обязательства. Если в D.VALUES появится четвёртый пункт,
+   он получит запасной вариант "check", а не сломает вёрстку. */
+const VALUE_ICONS = ["shield", "award", "check"];
+
 function AboutPage({ t, lang, go }) {
   const D = window.SI;
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const founded = window.SOI_CORE ? window.SOI_CORE.foundedYear() : 2021;
   const yrs = window.SOI_CORE ? window.SOI_CORE.yearsOnMarket() : new Date().getFullYear() - 2021;
-  /* Ни одной цифры не выдумано: три из четырёх плиток пересчитывают то, что
-     показано на этой же странице ниже (сколько человек в «Руководстве»,
-     сколько файлов в «Документах»), четвёртая — «регионов доставки» —
-     то же значение site_figures.regions, что уже везде на сайте (главная,
-     каталог), не новое число. Раньше на странице была ровно одна такая
-     плитка не по делу — «2 800+ единиц» рядом с пустым каталогом, — и её
-     сняли по этой же причине в отдельном коммите 05.09.2026. */
+  /* Ни одной цифры не выдумано: плитка «документов в открытом доступе»
+     пересчитывает то, что показано на этой же странице ниже, «регионов
+     доставки» — то же значение site_figures.regions, что уже везде на
+     сайте (главная, каталог). «Человек в команде» была здесь же, но
+     снята по прямому запросу (10.09.2026) вместе с самим числом 7. */
   const figures = window.siteFigures ? window.siteFigures() : { regions: "14" };
-  const teamCount = useCmsCount("team");
   const docsCount = useCmsCount("documents", (d) => d.status !== "hidden");
   const stats = [
     { n: yrs + "+", l: lv("лет на рынке Узбекистана", "O'zbekiston bozorida yil", "years in the Uzbekistan market") },
-    teamCount > 0 && { n: String(teamCount), l: lv("человек в команде", "jamoada xodim", "people on the team") },
     docsCount > 0 && { n: String(docsCount), l: lv("документов в открытом доступе", "ochiq hujjat", "public documents") },
     figures.regions && { n: figures.regions, l: lv("регионов доставки", "yetkazib berish hududi", "delivery regions") },
   ].filter(Boolean);
@@ -101,52 +103,69 @@ function AboutPage({ t, lang, go }) {
       sub={lv("«ИНДУСТРИЯ ЗДОРОВЬЯ» — поставщик и интегратор медицинского оборудования для государственных и частных медицинских учреждений Узбекистана.",
       founded + " yildan O'zbekistonda tibbiy uskunalarni rasmiy yetkazib beruvchi va integrator.",
       "Official supplier and integrator of medical equipment in Uzbekistan since " + founded + ".")} />
-      <section className="section">
+      <section className="section" style={{ paddingBottom: 0 }}>
         <div className="wrap">
-          {/* Фото офиса/команды убрано (10.09.2026, по прямому запросу): тег
-              <image-slot> нигде в бандле не превращается в изображение. На
-              боевом это была прозрачная пустая область без картинки и
-              подписи. Освободившееся место занял не текст пошире, а ряд
-              реальных цифр (ниже) — так исчезновение фото не читается как
-              дыра в вёрстке. */}
-          <div className="reveal" style={{ maxWidth: 760 }}>
-            <span className="eyebrow line">{lv("О нас", "Biz haqimizda", "About us")}</span>
-            <h2 className="h-sec" style={{ marginTop: 14, fontSize: 32 }} data-comment-anchor="b07b739388-h2-31-15">{lv("С 2021 года помогаем оснащать медицинские учреждения Узбекистана", "2021 yildan beri O'zbekiston tibbiy muassasalarini jihozlashga yordam beramiz", "Equipping medical institutions of Uzbekistan since 2021")}</h2>
-            <p style={{ fontSize: 15.5, color: "var(--slate-600)", marginTop: 18, lineHeight: 1.7 }} data-comment-anchor="c68368ded3-p-32-15">
-              {lv("«ИНДУСТРИЯ ЗДОРОВЬЯ» — компания полного цикла: от поставки и монтажа оборудования до сервиса, обучения персонала и регистрации медицинских изделий. Работаем с государственными и частными учреждениями по всему Узбекистану.",
-              "«SOG’LIQ INDUSTRIYASI» — to'liq tsikl kompaniyasi: uskuna yetkazish va montajdan servis, xodimlarni o'qitish va tibbiy buyumlarni ro'yxatdan o'tkazishgacha. Biz butun O'zbekiston bo'ylab davlat va xususiy muassasalar bilan ishlaymiz.",
-              "HEALTH INDUSTRY is a full-cycle company: from equipment supply and installation to service, staff training and medical device registration. We work with public and private institutions across Uzbekistan.")}
-            </p>
-            <p style={{ fontSize: 15.5, color: "var(--slate-600)", marginTop: 14, lineHeight: 1.7 }} data-comment-anchor="b14459ba99-p-40-15">
-              {lv("Мы развиваем направление комплексного оснащения медицинских учреждений, поставки медицинского оборудования, мебели, инструментов и расходных материалов, а также сопровождения документов, сервиса и регистрации медицинских изделий.",
-              "Ishlab chiqaruvchi zavodlar bilan to'g'ridan-to'g'ri shartnomalar va rasmiy diler maqomi uskunaning haqiqiyligini va ishlab chiqaruvchi qo'llab-quvvatlashini kafolatlaydi.",
-              "Direct contracts with manufacturing plants and official dealer status guarantee equipment authenticity and manufacturer support throughout its service life.")}
-            </p>
+          {/* Второй заход на дизайн (10.09.2026): первая правка убрала мёртвый
+              <image-slot> и поставила текст в одну колонку на всю ширину —
+              по отзыву получилось «слишком просто/пусто», без ощущения
+              современности. Вернул вторую колонку, но не под фото (фото
+              нет и не будет — заказчик подтвердил), а под фирменную
+              графику: тот же приём, каким на странице «Проекты» уже закрыт
+              недостаток фотографий — градиентная синяя плашка вместо
+              снимка, а не пустое место вместо снимка. */}
+          <div className="grid-2" style={{ alignItems: "center", gap: 48 }}>
+            <div className="reveal">
+              <span className="eyebrow line">{lv("О нас", "Biz haqimizda", "About us")}</span>
+              <h2 className="h-sec" style={{ marginTop: 14, fontSize: 34 }} data-comment-anchor="b07b739388-h2-31-15">{lv("С 2021 года помогаем оснащать медицинские учреждения Узбекистана", "2021 yildan beri O'zbekiston tibbiy muassasalarini jihozlashga yordam beramiz", "Equipping medical institutions of Uzbekistan since 2021")}</h2>
+              <p style={{ fontSize: 15.5, color: "var(--slate-600)", marginTop: 18, lineHeight: 1.7 }} data-comment-anchor="c68368ded3-p-32-15">
+                {lv("«ИНДУСТРИЯ ЗДОРОВЬЯ» — компания полного цикла: от поставки и монтажа оборудования до сервиса, обучения персонала и регистрации медицинских изделий. Работаем с государственными и частными учреждениями по всему Узбекистану.",
+                "«SOG’LIQ INDUSTRIYASI» — to'liq tsikl kompaniyasi: uskuna yetkazish va montajdan servis, xodimlarni o'qitish va tibbiy buyumlarni ro'yxatdan o'tkazishgacha. Biz butun O'zbekiston bo'ylab davlat va xususiy muassasalar bilan ishlaymiz.",
+                "HEALTH INDUSTRY is a full-cycle company: from equipment supply and installation to service, staff training and medical device registration. We work with public and private institutions across Uzbekistan.")}
+              </p>
+              <p style={{ fontSize: 15.5, color: "var(--slate-600)", marginTop: 14, lineHeight: 1.7 }} data-comment-anchor="b14459ba99-p-40-15">
+                {lv("Мы развиваем направление комплексного оснащения медицинских учреждений, поставки медицинского оборудования, мебели, инструментов и расходных материалов, а также сопровождения документов, сервиса и регистрации медицинских изделий.",
+                "Ishlab chiqaruvchi zavodlar bilan to'g'ridan-to'g'ri shartnomalar va rasmiy diler maqomi uskunaning haqiqiyligini va ishlab chiqaruvchi qo'llab-quvvatlashini kafolatlaydi.",
+                "Direct contracts with manufacturing plants and official dealer status guarantee equipment authenticity and manufacturer support throughout its service life.")}
+              </p>
+            </div>
+            <div className="about-mark reveal">
+              <img src={window.__asset("assets/soi-mark-white.svg")} alt="" />
+            </div>
           </div>
-          {!!stats.length &&
-          <div className="hero-stats reveal" style={{ marginTop: 40 }}>
-            {stats.map((s, i) => (
-              <div className="hstat" key={i}><b>{s.n}</b><span>{s.l}</span></div>
-            ))}
-          </div>
-          }
         </div>
       </section>
 
-      {/* VALUES — редизайн 10.09.2026: вместо трёх одинаковых карточек в сетке
-          (типовой корпоративный блок, неотличимый от десятка соседних
-          .scard-гридов на сайте) — вертикальный список с крупным номером,
-          как в макете читают манифест, а не карточки товара. Класс .val-it
-          уже был в CSS (готовился для другого места и не использовался) —
-          переиспользован, а не придуман заново. */}
+      {/* Стат-плитки вынесены из белой секции в собственную синюю полосу
+          (тот же градиент navy→blue, что у .xband — не новый цвет, а уже
+          принятый на сайте акцент). На белом фоне мелкие подписи терялись
+          в пустоте; на плашке они держат страницу как самостоятельный
+          акцентный блок между вступлением и списком ценностей. */}
+      {!!stats.length &&
+      <section className="section">
+        <div className="wrap">
+          <div className="about-stats-band reveal">
+            {stats.map((s, i) => (
+              <div className="asb-it" key={i}><b>{s.n}</b><span>{s.l}</span></div>
+            ))}
+          </div>
+        </div>
+      </section>
+      }
+
+      {/* VALUES — вертикальный список остался (по отзыву конкретно к нему
+          претензий не было), но получил иконку вместо голого номера: у
+          «слишком просто» было две причины, и одна из них — недостаток
+          визуального веса, который номер-текст не даёт, а предметная
+          иконка даёт. */}
       <section className="section alt">
         <div className="wrap" style={{ maxWidth: 760 }}>
           <div className="sec-head reveal"><h2 className="h-sec">{lv("Наши ценности", "Bizning qadriyatlarimiz", "Our values")}</h2></div>
           <div className="val-list">
             {D.VALUES.map((v, i) =>
             <div className="val-it reveal" key={i}>
-                <div className="vn">{v.n}</div>
+                <div className="val-ic"><CoIcon name={VALUE_ICONS[i] || "check"} size={22} /></div>
                 <div>
+                  <span className="val-no">{v.n}</span>
                   <h4>{tr(lang, v.t)}</h4>
                   <p>{tr(lang, v.d)}</p>
                 </div>
@@ -160,14 +179,14 @@ function AboutPage({ t, lang, go }) {
           Если сотрудников нет — блок скрыт. Никаких плейсхолдеров-заглушек. */}
       <LeadershipSection lang={lang} lv={lv} />
 
-      <AboutDocsSection lang={lang} lv={lv} />
+      <AboutDocsSection lang={lang} lv={lv} go={go} />
 
       <XBand t={t} go={go} />
     </div>);
 
 }
 
-function AboutDocsSection({ lang, lv }) {
+function AboutDocsSection({ lang, lv, go }) {
   /* Документы читаются в состояние с подпиской на CMS, а не вызовом
      window.CMS.list() прямо в разметке (тот же баг и то же лечение, что
      уже применены в LicensesPage и LeadershipSection выше). Разница была
@@ -193,16 +212,20 @@ function AboutDocsSection({ lang, lv }) {
       setTimeout(() => URL.revokeObjectURL(url), 60000);
     }).catch(() => {window.open(href, "_blank");});
   };
-  const Doc = ({ name, href, sub, arrow }) =>
-  <div className={"adoc-row" + (sub ? " sub" : "")}
-  onClick={href ? () => openDoc(href, name) : undefined}
-  style={{ cursor: href ? "pointer" : "default" }}>
-      {!sub && <svg className="adoc-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /></svg>}
-      <span className="adoc-name">{name}</span>
-      {href ?
-    <svg className="adoc-dl" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12M7 11l5 4 5-4M5 21h14" /></svg> :
-    arrow ? <span className="adoc-arr">›</span> : null}
-    </div>;
+  /* Список документов на /about пересмотрен (10.09.2026, по прямому
+     запросу): раньше здесь дублировался весь список с /documents — все
+     16 файлов, сгруппированные по 4 категориям, с реквизитами и формой
+     сервисной заявки в том числе. Для страницы «О компании» оставлена
+     только категория "company" — то, чем компания подтверждает себя как
+     юрлицо (карточка компании, регистрация, выписка), а не операционные
+     документы вроде оплаты или сервисной заявки. Полный список — по
+     ссылке, не задублирован. Категория читается из тех же docs, что и
+     раньше, — если админка когда-то переименует "company", список просто
+     опустеет, а не покажет неверные документы под неверным заголовком. */
+  const txx = (o) => o && (o[lang] || o.ru) || "";
+  const visible = docs.filter((d) => d.status !== "hidden" && (!d.places || d.places.includes("page") || d.places.includes("side")));
+  const companyDocs = visible.filter((d) => d.cat === "company");
+  const totalCount = visible.length;
 
   return (
     <section className="section alt">
@@ -217,46 +240,24 @@ function AboutDocsSection({ lang, lv }) {
             </a>
           </div>
           <div className="acard reveal">
-            <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{lv("Документы", "Hujjatlar", "Documents")}</h3>
-            {function () {
-              const all = docs;
-              const vis = all.filter((d) => d.status !== "hidden" && (!d.places || d.places.includes("page") || d.places.includes("side")));
-              if (vis.length) {
-                const txx = (o) => o && (o[lang] || o.ru) || "";
-                /* Тот же словарь категорий, что в LicensesPage (страница
-                   «Документы компании») — это реальные значения d.cat из
-                   базы, а не список, который казался правдоподобным. */
-                const CATN = { company: lv("Документы компании", "Kompaniya hujjatlari", "Company documents"), clients: lv("Документы для клиентов", "Mijozlar uchun hujjatlar", "Documents for clients"), service: lv("Документы по сервису", "Servis hujjatlari", "Service documents"), legal: lv("Правовая информация", "Huquqiy ma'lumot", "Legal information"), other: lv("Прочее", "Boshqa", "Other") };
-                const order = ["company", "clients", "service", "legal", "other"];
-                const groups = {};
-                vis.forEach((d) => {const c = order.includes(d.cat) ? d.cat : "other";(groups[c] = groups[c] || []).push(d);});
-                return order.filter((c) => groups[c]).map((c) =>
-                <React.Fragment key={c}>
-                    {groups[c].length > 0 && <div className="adoc-row"><svg className="adoc-ic" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" /><path d="M14 3v6h6" /></svg><span className="adoc-name">{CATN[c]}</span></div>}
-                    {groups[c].map((d) => {
-                    const href = d.file ? d.file.data : d.href;
-                    const draft = d.status === "draft";
-                    return (
-                      <div className="adoc-row sub" key={d.id} onClick={!draft && href ? () => openDoc(href, txx(d.title)) : undefined} style={{ cursor: !draft && href ? "pointer" : "default", opacity: draft ? .6 : 1 }}>
-                          <span className="adoc-name">{txx(d.title)}{draft && <em style={{ fontStyle: "normal", fontSize: 11, color: "var(--slate-500)", marginLeft: 6 }}>· {lv("в подготовке", "tayyorlanmoqda", "in preparation")}</em>}</span>
-                          {!draft && href && <svg className="adoc-dl" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12M7 11l5 4 5-4M5 21h14" /></svg>}
-                          {draft && <a href={"mailto:info@sogliqindustriyasi.uz?subject=" + encodeURIComponent(lv("Запрос документа", "Hujjat so'rovi", "Document request") + ": " + txx(d.title))} onClick={(e) => e.stopPropagation()} style={{ fontSize: 12, fontWeight: 700, color: "var(--blue-600)", whiteSpace: "nowrap" }}>{lv("Запросить →", "So'rash →", "Request →")}</a>}
-                        </div>);
-
-                  })}
-                  </React.Fragment>
-                );
-              }
-              return <React.Fragment>
-                <Doc name={lv("Карточка компании", "Kompaniya kartasi", "Company card")} href="corp/company-card.pdf" />
-                <Doc name={lv("Регистрационные документы", "Ro'yxatdan o'tish hujjatlari", "Registration documents")} />
-                <Doc sub name={lv("Свидетельство о регистрации", "Ro'yxatdan o'tish guvohnomasi", "Registration certificate")} href="corp/registration.pdf" />
-                <Doc sub name={lv("Сведения о юридическом лице", "Yuridik shaxs to'g'risidagi ma'lumotlar", "Legal entity information")} href="corp/egrul.pdf" />
-                <Doc name={lv("Договор-оферта поставки", "Yetkazib berish oferta-shartnomasi", "Supply offer agreement")} href="corp/supply-contract.pdf" />
-                <Doc name={lv("Гарантийные условия", "Kafolat shartlari", "Warranty terms")} arrow />
-                <Doc name={lv("Условия сервисного обслуживания", "Servis xizmati shartlari", "Service terms")} arrow />
-              </React.Fragment>;
-            }()}
+            <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 8 }}>{lv("Документы компании", "Kompaniya hujjatlari", "Company documents")}</h3>
+            {companyDocs.length
+              ? companyDocs.map((d) => {
+                  const href = d.file ? d.file.data : d.href;
+                  const draft = d.status === "draft";
+                  return (
+                    <div className="adoc-row sub" key={d.id} onClick={!draft && href ? () => openDoc(href, txx(d.title)) : undefined} style={{ cursor: !draft && href ? "pointer" : "default", opacity: draft ? .6 : 1 }}>
+                      <span className="adoc-name">{txx(d.title)}{draft && <em style={{ fontStyle: "normal", fontSize: 11, color: "var(--slate-500)", marginLeft: 6 }}>· {lv("в подготовке", "tayyorlanmoqda", "in preparation")}</em>}</span>
+                      {!draft && href && <svg className="adoc-dl" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3v12M7 11l5 4 5-4M5 21h14" /></svg>}
+                      {draft && <a href={"mailto:info@sogliqindustriyasi.uz?subject=" + encodeURIComponent(lv("Запрос документа", "Hujjat so'rovi", "Document request") + ": " + txx(d.title))} onClick={(e) => e.stopPropagation()} style={{ fontSize: 12, fontWeight: 700, color: "var(--blue-600)", whiteSpace: "nowrap" }}>{lv("Запросить →", "So'rash →", "Request →")}</a>}
+                    </div>
+                  );
+                })
+              : <p style={{ fontSize: 14, color: "var(--slate-500)" }}>{lv("Документы скоро появятся.", "Hujjatlar tez orada qo'shiladi.", "Documents will appear here soon.")}</p>}
+            {totalCount > companyDocs.length &&
+              <a className="adoc-all" onClick={() => go("documents")} style={{ cursor: "pointer" }}>
+                {lv("Все документы", "Barcha hujjatlar", "All documents") + " (" + totalCount + ") →"}
+              </a>}
           </div>
         </div>
       </div>
