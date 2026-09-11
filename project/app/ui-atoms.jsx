@@ -99,6 +99,17 @@ function tri(lang, ru, uz, en) {
   return lang === "uz" ? (uz != null ? uz : ru) : lang === "en" ? (en != null ? en : ru) : ru;
 }
 
+// Отдаёт уменьшенный вариант фото товара через nginx image_filter
+// (/soi-media-thumb/WxH/...) вместо оригинала 800x600 — миниатюры 56-140px
+// весят на два порядка меньше. size — целевой размер отображения в CSS px;
+// умножаем на 2 под retina. Только для наших /soi-media/ фото; сторонние
+// или демо-плейсхолдеры отдаются как есть.
+function thumbUrl(src, size) {
+  if (!src || typeof src !== "string" || src.indexOf("/soi-media/") !== 0) return src;
+  const px = Math.round(size * 2);
+  return "/soi-media-thumb/" + px + "x" + px + src.slice("/soi-media".length);
+}
+
 // hue per category for placeholder tint
 /* Оттенки заглушек — в синей гамме фирменного стиля: разделы различимы между
    собой, но не выпадают из палитры. */
@@ -376,6 +387,6 @@ function ProductRow({ product, t, lang, store, onOpen }) {
 }
 
 Object.assign(window, {
-  Icon, ICONS, fmtPrice, tri, ProductPlaceholder, brandName,
+  Icon, ICONS, fmtPrice, tri, thumbUrl, ProductPlaceholder, brandName,
   StockTag, Badge, QtyStepper, Price, ProductCard, ProductRow, ProductTile, CAT_HUE,
 });
