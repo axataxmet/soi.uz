@@ -1909,9 +1909,6 @@ function SoiEcosystem({ lang, go }) {
       sum: rest.reduce((a, c) => a + (c.sum || 0), 0),
     }];
   })();
-  /* The live counters are only shown once they stop contradicting the headline
-     claim — an empty catalog reporting «6» beside «2 800+» reads as a bug. */
-  const liveProducts = pulse.products != null && pulse.products >= 100 ? pulse.products : null;
   const brandWall = pulse.brands.filter((b) => b && b.name).slice(0, 5);
   const showWall = brandWall.length >= 3;
 
@@ -1928,14 +1925,11 @@ function SoiEcosystem({ lang, go }) {
 
           {/* ── catalog ── */}
           <article className="eco-t catalog sx-rv">
+            {/* Бейдж «N товаров» в углу убран по просьбе заказчика — дублировал
+                крупную цифру ниже (она теперь тоже живая, см. liveCatalogNum
+                выше), после починки оба числа совпадали один в один. */}
             <div className="eco-head">
               <div className="eco-ic"><Icon name="grid" size={22} /></div>
-              {liveProducts && (
-                <div className="eco-badge">
-                  <b>{liveProducts.toLocaleString("ru-RU")}</b>
-                  {_lv(lang, "товаров", "mahsulot", "items")}
-                </div>
-              )}
             </div>
             <div className="eco-num"><EcoCount value={liveCatalogNum} /><span>{val("catalog_unit")}</span></div>
             <h3>{_lv(lang, "Электронный каталог оборудования", "Elektron uskunalar katalogi", "Electronic equipment catalog")}</h3>
