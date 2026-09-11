@@ -7,11 +7,28 @@ function AdminProducts({ go }) {
   const [confirm, setConfirm] = useState(null);
   const toast = useToast();
 
+  /* Сервер отдаёт максимум 100 записей за запрос (жёсткий лимит DTO,
+     @Max(100)) — при limit:100 и одном запросе список молча обрезался на
+     первой сотне товаров, и всё, что шло после (34 штуки при 134 в базе),
+     в админке просто не появлялось. Дозапрашиваем страницы, пока сервер не
+     вернёт меньше limit штук — так список остаётся полным при любом росте
+     каталога, а не только пока товаров меньше 100. */
   const load = () => {
     setLoading(true);
-    window.CatalogAPI.listProducts({ limit: 100 })
-      .then(res => { setItems((res && res.data) || res || []); setLoading(false); })
-      .catch(e => { toast(e.message || "Ошибка загрузки", "error"); setLoading(false); });
+    const LIMIT = 100;
+    const all = [];
+    const nextPage = (page) => {
+      window.CatalogAPI.listProducts({ limit: LIMIT, page })
+        .then(res => {
+          const chunk = (res && res.data) || res || [];
+          all.push(...chunk);
+          if (chunk.length === LIMIT) { nextPage(page + 1); return; }
+          setItems(all);
+          setLoading(false);
+        })
+        .catch(e => { toast(e.message || "Ошибка загрузки", "error"); setLoading(false); });
+    };
+    nextPage(1);
   };
   useEffect(() => { load(); }, []);
 
