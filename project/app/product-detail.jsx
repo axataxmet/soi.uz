@@ -250,7 +250,7 @@ function ProductPage({ t, lang, store, go, params }) {
                     onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setThumb(i); } }}>
                     {m.type === "video"
                       ? <div className="pdp-thumb-vid"><Icon name="play" size={22} /></div>
-                      : <img src={m.src} alt={name + " — " + (i + 1)} loading="lazy" />}
+                      : <img src={thumbUrl(m.src, 56)} alt={name + " — " + (i + 1)} loading="lazy" />}
                   </div>
                 ))}
               </div>
@@ -324,7 +324,7 @@ function ProductPage({ t, lang, store, go, params }) {
                   <div key={rp.id} className="pdp-side-card" onClick={() => go("product", { id: rp.id })}>
                     <div className="psc-top">
                       <div className="psc-img">
-                        {rp.img ? <img src={rp.img} alt="" loading="lazy" /> : <ProductPlaceholder product={rp} t={t} lang={lang} />}
+                        {rp.img ? <img src={thumbUrl(rp.img, 72)} alt="" loading="lazy" /> : <ProductPlaceholder product={rp} t={t} lang={lang} />}
                       </div>
                       <div className="psc-info">
                         <div className="psc-name">{rname}</div>
