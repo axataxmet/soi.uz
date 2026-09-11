@@ -1340,8 +1340,12 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
   background:rgba(14,74,198,.10); color:var(--sx-accent); }
 .sx-dir h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.25; }
 .sx-dir-links { margin-top:14px; display:flex; flex-direction:column; gap:2px; }
-.sx-dir-links a { display:block; font-size:var(--fs-3); color:var(--sx-mute); text-decoration:none; padding:5px 0; transition:color .18s, padding-left .18s; }
+.sx-dir-links a { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:var(--fs-3); color:var(--sx-mute); text-decoration:none; padding:5px 0; transition:color .18s, padding-left .18s; }
 .sx-dir-links a:hover { color:var(--sx-blue); padding-left:5px; }
+/* Счётчик реальных товаров по направлению — раньше блок показывал все 22
+   направления вне зависимости от того, есть ли под ними товары; теперь
+   пустые скрыты выше (dirCards), а здесь просто видно, сколько нашлось. */
+.sx-dir-cnt { flex:0 0 auto; font-size:var(--fs-1); color:var(--sx-mute); opacity:.7; font-variant-numeric:tabular-nums; }
 
 /* ── impact band (dark interlude) ───────────────────── */
 /* Three navy slabs — impact, catalog portal, closing CTA — were the page's
@@ -2519,13 +2523,30 @@ function SoiCatalogCards({ lang, go }) {
 function SoiDirections({ lang, go }) {
   const DD = window.DIRECTIONS_DATA;
   if (!DD) return null;
-  const { DIRECTION_GROUPS, getDirsForGroup } = DD;
+  const { DIRECTION_GROUPS, getDirsForGroup, getProductsForDir } = DD;
+  const P = (window.DATA && window.DATA.PRODUCTS) || [];
   /* Блок пересобран на разметке и классах каталожного блока (.sxc-*): у него
      та же двухколоночная шапка и те же карточки с номером, заголовком и
      стрелкой. Отличие одно — вместо фотографии в медиа-области глиф
      направления: снимков под группы у нас нет.
      Прежние цвета групп (g.color) не используются: это была радуга из шести
-     произвольных оттенков мимо палитры. */
+     произвольных оттенков мимо палитры.
+
+     С учётом реальных товаров (не старого демо-набора p001-p049): раньше
+     каждое направление показывалось независимо от того, есть ли под ним
+     хоть один товар — переход открывал пустой каталог. Теперь считаем
+     количество товаров по каждому направлению (через GROUP_DIR_MAP —
+     привязка по товарной группе, см. admin/ui.jsx) и показываем только
+     направления, где товары реально есть; группа целиком скрывается, если
+     ни одно её направление не набрало ни одного товара. */
+  const dirCards = DIRECTION_GROUPS.map((g) => {
+    const dirsAll = getDirsForGroup(g.id);
+    const dirsWithCounts = dirsAll
+      .map((d) => ({ d, cnt: getProductsForDir(d.id, P).length }))
+      .filter((x) => x.cnt > 0);
+    return { g, dirs: dirsWithCounts.slice(0, 4) };
+  }).filter((x) => x.dirs.length > 0);
+  if (dirCards.length === 0) return null;
   return (
     <section className="sxc">
       <div className="sxc-inner">
@@ -2545,8 +2566,7 @@ function SoiDirections({ lang, go }) {
         {/* Карточки прежние — глиф, название и список направлений. Шапка блока
             осталась в оформлении каталожного блока (.sxc-head). */}
         <div className="sx-dir-grid">
-          {DIRECTION_GROUPS.map((g, i) => {
-            const dirs = getDirsForGroup(g.id).slice(0, 4);
+          {dirCards.map(({ g, dirs }, i) => {
             return (
               /* Карточка перестала быть div с onClick: без tabindex и role она
                  не бралась ни клавиатурой, ни скринридером — мышью работала, для
@@ -2572,12 +2592,12 @@ function SoiDirections({ lang, go }) {
                     onClick={(e) => {
                       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
                       e.preventDefault();
-                      go("catalog", { dir: dirs[0] && dirs[0].id });
+                      go("catalog", { dir: dirs[0] && dirs[0].d.id });
                     }}
                   >{_lv(lang, g.ru, g.uz, g.en)}</a>
                 </h3>
                 <div className="sx-dir-links">
-                  {dirs.map((d) => (
+                  {dirs.map(({ d, cnt }) => (
                     <a
                       key={d.id}
                       href="/catalog"
@@ -2586,7 +2606,7 @@ function SoiDirections({ lang, go }) {
                         e.preventDefault();
                         go("catalog", { dir: d.id });
                       }}
-                    >{_lv(lang, d.ru, d.uz, d.en)}</a>
+                    >{_lv(lang, d.ru, d.uz, d.en)} <span className="sx-dir-cnt">{cnt}</span></a>
                   ))}
                 </div>
               </div>

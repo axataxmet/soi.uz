@@ -295,8 +295,19 @@ function CatalogPage({ t, lang, store, go, params }) {
       if (!inPrimary && !inExtra) return false;
     }
     if (params.dir) {
-      // A3: направление = spec-category; товар несёт specIds (из catalog-remote)
-      if (!(p.specIds || []).includes(params.dir)) return false;
+      /* p.specIds — реальная DB-связь товар↔направление (A3), но её ни разу
+         не заполнили ни для одного из 134 товаров, поэтому переход по
+         направлению всегда показывал пустую выдачу. window.DIRECTIONS_DATA
+         теперь привязывает направления к товарным группам (GROUP_DIR_MAP,
+         31 группа вместо 134 товаров) — используем её, пока specIds не
+         заполнены по-настоящему. specIds остаётся первым источником: если
+         когда-нибудь его начнут заполнять в админке, он снова заработает
+         без правки этого кода. */
+      const hasSpecIds = (p.specIds || []).length > 0;
+      const matches = hasSpecIds
+        ? (p.specIds || []).includes(params.dir)
+        : !!(window.DIRECTIONS_DATA && window.DIRECTIONS_DATA.isProductInDir(p, params.dir));
+      if (!matches) return false;
     }
     if (params.badge && p.badge !== params.badge) return false;
     if (params.q) {

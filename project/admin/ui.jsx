@@ -54,68 +54,58 @@
     D("sterilization_dir",  "shield-cross","Стерилизация и дезинфекция",       "Sterilizatsiya va dezinfeksiya",     "Sterilization & disinfection",     "rehab_group"),
   ];
 
-  /* ─── Маппинг товаров → направления ─── */
-  const PRODUCT_DIR_MAP = {
-    p001:["diagnostics_medical","functional_diag","obstetrics","pediatrics","neonatology"],
-    p002:["diagnostics_medical","functional_diag","obstetrics","pediatrics"],
-    p003:["diagnostics_medical","functional_diag","anesthesia_icu"],
-    p004:["diagnostics_medical","functional_diag"],
-    p005:["anesthesia_icu","surgery_dir","emergency_dir","neonatology","pediatrics"],
-    p006:["diagnostics_medical","pediatrics","neonatology"],
-    p007:["diagnostics_medical","pediatrics","neonatology","emergency_dir"],
-    p008:["anesthesia_icu","surgery_dir","emergency_dir"],
-    p009:["anesthesia_icu","surgery_dir"],
-    p010:["surgery_dir","dentistry"],
-    p011:["surgery_dir","obstetrics","traumatology"],
-    p012:["surgery_dir","obstetrics","dentistry"],
-    p013:["surgery_dir","dentistry","anesthesia_icu","sterilization_dir"],
-    p014:["surgery_dir","dentistry","sterilization_dir"],
-    p015:["surgery_dir","dentistry","sterilization_dir"],
-    p016:["diagnostics_medical","surgery_dir","sterilization_dir"],
-    p017:["diagnostics_medical","surgery_dir","sterilization_dir"],
-    p018:["surgery_dir","dentistry","sterilization_dir"],
-    p019:["physio_dir","traumatology"],
-    p020:["physio_dir","traumatology"],
-    p021:["physio_dir","ent"],
-    p022:["pediatrics","physio_dir","ent","neonatology"],
-    p023:["physio_dir","traumatology"],
-    p024:["emergency_dir","anesthesia_icu","surgery_dir"],
-    p025:["emergency_dir","anesthesia_icu"],
-    p026:["emergency_dir","traumatology"],
-    p027:["emergency_dir","anesthesia_icu"],
-    p028:["emergency_dir"],
-    p029:["anesthesia_icu","traumatology","pediatrics","neonatology"],
-    p030:["diagnostics_medical","surgery_dir","obstetrics"],
-    p031:["diagnostics_medical","surgery_dir","dentistry"],
-    p032:["surgery_dir","anesthesia_icu"],
-    p033:["obstetrics","diagnostics_medical","dentistry"],
-    p034:["radiology","traumatology"],
-    p035:["anesthesia_icu","surgery_dir"],
-    p036:["lab_diag"],
-    p037:["physio_dir"],
-    p038:["anesthesia_icu","surgery_dir","neonatology","pediatrics"],
-    p039:["surgery_dir","obstetrics"],
-    p040:["dentistry"],
-    p041:["diagnostics_medical","pediatrics","neonatology"],
-    p042:["ophthalmology"],
-    p043:["anesthesia_icu","ent","emergency_dir"],
-    p044:["surgery_dir","dentistry","diagnostics_medical","anesthesia_icu","sterilization_dir"],
-    p045:["anesthesia_icu","surgery_dir","emergency_dir","pediatrics"],
-    p046:["surgery_dir","anesthesia_icu","emergency_dir","sterilization_dir"],
-    p047:["anesthesia_icu","surgery_dir"],
-    p048:["surgery_dir","traumatology","emergency_dir"],
-    p049:["surgery_dir","traumatology","emergency_dir"],
+  /* ─── Маппинг товаров → направления ───
+     Раньше здесь стоял PRODUCT_DIR_MAP, привязанный к id тестовых товаров
+     (p001-p049) из старого демо-каталога — эти id не совпадают ни с одним
+     из 134 реальных товаров (TRIAL-*), поэтому «Навигация по направлениям»
+     на главной всегда показывала счётчики "0 товаров" и вела в пустую
+     выдачу. Товаров 134, а товарных групп всего 31 — держать привязку на
+     уровне группы (эта таблица) на порядок меньше работы, чем расписывать
+     каждый товар по отдельности, и она не «протухает» при добавлении новых
+     товаров в уже классифицированную группу. Ключ — id товарной группы
+     (Category.subs[].groups[]._id), значение — список направлений. */
+  const GROUP_DIR_MAP = {
+    cmt36i0bo000qwpynkyv666ul: ["diagnostics_medical","functional_diag"],      // ЭКГ-аппараты
+    cmt36i0bt000swpyn5415v49p: ["diagnostics_medical","functional_diag"],      // УЗИ-сканеры
+    cmtvymgtp0005wum3vgtrbuf5: ["diagnostics_medical","pediatrics","neonatology"], // Весы и ростомеры медицинские
+    cmtvymgu60009wum3h8kxoj3h: ["lab_diag"],                                    // Анализаторы паров и газов
+    cmtvymguo000fwum32g210j5k: ["radiology"],                                   // Рентген-аппараты
+    cmtw03owm0001zfinh5nk5qiw: ["functional_diag","anesthesia_icu"],            // Системы мониторирования ЭКГ и АД
+    cmtw03owt0003zfin7363am2m: ["functional_diag"],                            // Кресла для вестибулярной диагностики
+    cmtwmr0to00032modnkvy32yi: ["functional_diag"],                            // Приборы функциональной диагностики
+    cmtwmv89y000368mq35scbjmr: ["ent"],                                        // Оборудование для оториноларингологии
+    cmtvymgtx0007wum3z7b0406n: ["physio_dir"],                                 // Физиотерапевтические аппараты
+    cmtvymgv1000jwum3eba47dye: ["anesthesia_icu","emergency_dir"],             // Кардиостимуляторы
+    cmtvymgvc000nwum31w8ic0q8: ["sterilization_dir"],                          // Стерилизаторы и озонаторы
+    cmtvymgvh000pwum3xxqse5ci: ["emergency_dir","anesthesia_icu"],             // Дефибрилляторы
+    cmtwmr0tr00052modtckvj0pv: ["surgery_dir"],                                // Светильники медицинские
+    cmtwnjaxf00011433gqxkp1vw: ["physio_dir","sterilization_dir"],             // Насадки и камеры для озонотерапии
+    cmtvymguc000bwum362rorhgk: ["lab_diag","neonatology"],                     // Термостаты и инкубаторы
+    cmtwmr0tg00012modbz3akyky: ["sterilization_dir"],                          // Шкафы сушильные
+    cmtvymgti0003wum3onc6sglv: ["obstetrics"],                                 // Кресла гинекологические
+    cmtw03owy0005zfineputcog4: ["neonatology"],                                // Оборудование для новорождённых
+    cmtw03ox30007zfingh0aljf8: ["traumatology","immobilization"],              // Подъёмники и устройства для перемещения пациентов
+    cmtwmav7m000184z5mkwwp3rs: ["traumatology","anesthesia_icu"],              // Кровати медицинские
+    cmtwmav7u000384z5mo0rzrvh: ["diagnostics_medical"],                        // Кушетки и банкетки медицинские
+    cmtvymgut000hwum3fepycfsl: ["surgery_dir","obstetrics"],                   // Операционные столы
+    cmtvymgv6000lwum3d7znbv1u: ["surgery_dir"],                                // Ножи и скальпели
+    cmtw0t3ww0001pqeyooenzzi5: ["surgery_dir"],                                // Инструменты общего назначения
+    cmtwm27160001e9pb5qh5dnri: ["surgery_dir","blood_service"],                // Иглы медицинские
+    cmtwm271j0003e9pbmhpo10ss: ["surgery_dir"],                                // Наборы инструментов
+    cmtvymgui000dwum3squpxmr4: ["diagnostics_medical"],                        // Стетоскопы
+    cmtw0t3x80003pqey4i094ad6: ["physio_dir"],                                 // Озонированные масла
   };
 
   function getDirById(id)          { return DIRECTIONS.find(d => d.id === id) || null; }
   function getGroupById(id)        { return DIRECTION_GROUPS.find(g => g.id === id) || null; }
   function getDirsForGroup(gid)    { return DIRECTIONS.filter(d => d.group === gid); }
+  function isProductInDir(p, did)  { return (GROUP_DIR_MAP[p && p.group] || []).includes(did); }
   function getProductsForDir(did, products) {
-    return (products || []).filter(p => (PRODUCT_DIR_MAP[p.id] || []).includes(did));
+    return (products || []).filter(p => isProductInDir(p, did));
   }
 
   window.DIRECTIONS_DATA = {
-    DIRECTION_GROUPS, DIRECTIONS, PRODUCT_DIR_MAP,
-    getDirById, getGroupById, getDirsForGroup, getProductsForDir,
+    DIRECTION_GROUPS, DIRECTIONS, GROUP_DIR_MAP,
+    getDirById, getGroupById, getDirsForGroup, getProductsForDir, isProductInDir,
   };
 })();
