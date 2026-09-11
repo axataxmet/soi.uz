@@ -83,7 +83,8 @@ function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
         </button>
       </div>
       <div className="pdp-buy-links">
-        <a onClick={() => window.__openQuote && window.__openQuote(p)}>{lang === "uz" ? "To'lov va yetkazib berish shartlari" : lang === "en" ? "Payment & delivery terms" : "Условия оплаты и доставки"}</a>
+        <a onClick={() => window.__openQuote && window.__openQuote(p)}>{lang === "uz" ? "To'lov usuli" : lang === "en" ? "Payment method" : "Способ оплаты"}</a>
+        <a onClick={() => window.__openQuote && window.__openQuote(p)}>{lang === "uz" ? "Yetkazib berish usuli" : lang === "en" ? "Delivery method" : "Способ доставки"}</a>
       </div>
       <NotifyAvailable t={t} lang={lang} product={p} />
     </div>
