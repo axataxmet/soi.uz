@@ -2006,19 +2006,25 @@ body{background:var(--surface)}
 .sc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;padding:4px 0 clamp(28px,3.5vw,44px);align-items:stretch}
 .sc-card{display:flex;flex-direction:column;min-height:234px;padding:0 19px 13px;
   background:var(--surface);border:1px solid var(--surface);border-radius:2px;
-  box-shadow:var(--sh);cursor:pointer;text-align:left;transition:box-shadow .3s ease,border-color .3s ease}
+  box-shadow:var(--sh);cursor:pointer;text-align:left;
+  transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease}
 .sc-media{height:150px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
   color:var(--slate-400);transition:color .3s ease}
 .sc-name{min-height:41px;margin:0 0 8px;font-size:var(--fs-4);font-weight:600;line-height:20px;color:var(--ink);
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .3s ease}
 .sc-cnt{margin-top:auto;font-size:var(--fs-3);line-height:20px;color:var(--slate-500)}
 
-.sc-card:hover{border-color:var(--line);box-shadow:var(--sh)}
+/* Раньше при наведении менялся только цвет текста — рамка (var(--line),
+   почти неотличима от фона) и тень (та же var(--sh), что и в покое) визуально
+   не менялись, выделение было незаметно. Явная синяя рамка + заметно более
+   плотная тень + лёгкий подъём делают наведение однозначно видимым. */
+.sc-card:hover{border-color:var(--blue-500);box-shadow:var(--sh-lg);transform:translateY(-3px)}
 .sc-card:hover .sc-name,.sc-card:hover .sc-media{color:var(--blue-600)}
 /* Клавиатурный фокус — та же подсветка, что и наведение, плюс явная рамка:
    без неё карточка при табуляции ничем не выделяется. */
-.sc-card:focus-visible{outline:none;border-color:var(--blue-600);box-shadow:var(--sh)}
+.sc-card:focus-visible{outline:none;border-color:var(--blue-600);box-shadow:var(--sh-lg);transform:translateY(-3px)}
 .sc-card:focus-visible .sc-name,.sc-card:focus-visible .sc-media{color:var(--blue-600)}
+@media(prefers-reduced-motion:reduce){.sc-card{transition:box-shadow .2s ease,border-color .2s ease}.sc-card:hover,.sc-card:focus-visible{transform:none}}
 /* У товарных групп своих глифов нет — в медиа-слоте стоит снимок первого
    товара группы. Вписываем его в ту же коробку, что и иконку раздела, чтобы
    два яруса витрины совпадали по сетке до пикселя. */
@@ -2046,8 +2052,11 @@ body{background:var(--surface)}
    на ховере. */
 .ptile{display:flex;flex-direction:column;height:100%;padding:10px;font-size:var(--fs-2);line-height:20px;
   background:var(--surface);border:1px solid var(--surface);border-radius:2px;
-  box-shadow:var(--sh);transition:box-shadow .3s ease,border-color .3s ease}
-.ptile:hover{box-shadow:var(--sh);border-color:var(--line)}
+  box-shadow:var(--sh);transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease}
+/* Тот же более заметный ховер, что и у .sc-card — раньше тень на наведении
+   совпадала с тенью в покое, и рамка (var(--line)) была едва отличима от фона. */
+.ptile:hover{box-shadow:var(--sh-lg);border-color:var(--blue-500);transform:translateY(-3px)}
+@media(prefers-reduced-motion:reduce){.ptile{transition:box-shadow .2s ease,border-color .2s ease}.ptile:hover{transform:none}}
 .ptile-top{display:flex;align-items:center;justify-content:space-between;gap:8px;height:20px}
 .ptile-sku{font-size:var(--fs-2);line-height:20px;color:var(--slate-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ptile-cmp{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:24px;height:20px;
