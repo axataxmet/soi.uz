@@ -89,11 +89,15 @@
       var primary = groups.length ? groupMap[groups[0].groupId] : null;
       var name = tx(p.name);
       var priceRow = (p.prices && p.prices[0]) || null;
-      var main = (p.media && p.media[0]) ? p.media[0].url : null;
+      var sortedMedia = (p.media || []).slice().sort(function (a, b) { return (a.order || 0) - (b.order || 0); });
+      var allImages = sortedMedia.map(function (m) { return m.url; });
+      var main = allImages[0] || null;
 
       var attrs = p.attrs || {};
       var labels = primary ? primary.labels : {};
-      var specs = Object.keys(attrs).map(function (k) {
+      /* Ключи с ведущим "_" — служебные (комплектация, транспортировка),
+         в таблицу характеристик не идут, разбираются отдельно ниже. */
+      var specs = Object.keys(attrs).filter(function (k) { return k.charAt(0) !== "_"; }).map(function (k) {
         var v = attrs[k];
         if (v == null || v === "") return null;
         var lab = labels[k] || { ru: k, uz: k, en: k, unit: "" };
@@ -101,6 +105,8 @@
         if (lab.unit) val += " " + lab.unit;
         return { kr: lab.ru, ku: lab.uz, ke: lab.en, v: val, ve: "" };
       }).filter(Boolean);
+      var kit = Array.isArray(attrs._kit) ? attrs._kit : [];
+      var shipping = attrs._shipping || null;
 
       var extraCats = groups.slice(1).map(function (gi) {
         var m = groupMap[gi.groupId];
@@ -122,9 +128,10 @@
         badge: p.badge || null,
         pop: p.popularity || 60,
         isNew: !!p.isNew,
-        img: main, images: main ? [main] : [], gallery: main ? [{ src: main, alt: name.ru }] : [],
+        img: main, images: allImages, gallery: allImages.map(function (src) { return { src: src, alt: name.ru }; }),
         specs: specs,
         attrs: attrs, // сырые значения — по ним фасеты уровня 5 фильтруют товары
+        kit: kit, shipping: shipping,
         related: p.related || [], accessories: [], consumables: [],
         glyph: "pulse", _remote: true,
       };
