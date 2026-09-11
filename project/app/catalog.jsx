@@ -553,22 +553,22 @@ function CatalogPage({ t, lang, store, go, params }) {
                   у подкатегории — товарные группы. Разметка и классы общие,
                   различаются только источник карточек и картинка. Пустые
                   разделы отфильтрованы выше — решение заказчика. */}
-              {browseSubs && subCards.length > 0 && (
-                <>
-                  {allCatGroupCards.length > 0 && (
-                    <h2 className="sc-tier-h">{lvf("Подкатегории", "Quyi bo'limlar", "Subcategories")}</h2>
-                  )}
-                  <div className="sc-grid">
-                    {subCards.map(({ s, idx, cnt }) => (
-                      <button key={s._id} className="sc-card" onClick={() => goSub(idx)}
-                        title={tri(lang, s.ru, s.uz, s.en)}>
-                        <span className="sc-media"><Icon name={SUBCAT_ICON[s.slug] || "grid"} size={64} sw={1.25} /></span>
-                        <span className="sc-name">{tri(lang, s.ru, s.uz, s.en)}</span>
-                        <span className="sc-cnt">{itemsLabel(cnt, lang)}</span>
-                      </button>
-                    ))}
-                  </div>
-                </>
+              {/* Плитки подкатегорий на корне категории убраны по просьбе
+                  заказчика — остаётся только ярус товарных групп (он уже
+                  покрывает все подкатегории разом). Подкатегории остаются
+                  единственной витриной только если у категории вовсе нет
+                  товарных групп — иначе в неё было бы не попасть. */}
+              {browseSubs && subCards.length > 0 && allCatGroupCards.length === 0 && (
+                <div className="sc-grid">
+                  {subCards.map(({ s, idx, cnt }) => (
+                    <button key={s._id} className="sc-card" onClick={() => goSub(idx)}
+                      title={tri(lang, s.ru, s.uz, s.en)}>
+                      <span className="sc-media"><Icon name={SUBCAT_ICON[s.slug] || "grid"} size={64} sw={1.25} /></span>
+                      <span className="sc-name">{tri(lang, s.ru, s.uz, s.en)}</span>
+                      <span className="sc-cnt">{itemsLabel(cnt, lang)}</span>
+                    </button>
+                  ))}
+                </div>
               )}
 
               {browseSubs && allCatGroupCards.length > 0 && (
