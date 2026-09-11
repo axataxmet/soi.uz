@@ -244,6 +244,16 @@ function CatalogPage({ t, lang, store, go, params }) {
   const groupCards = subGroups
     .map((g) => ({ g, cnt: groupCount(g._id) }))
     .filter((x) => x.cnt > 0);
+  /* На корне категории по просьбе заказчика показываем не только подкатегории,
+     но и все их товарные группы сразу — одной страницей, без захода в каждую
+     подкатегорию по отдельности. Те же карточки, что и на уровне подраздела,
+     просто собранные со всех подкатегорий сразу; переход всё равно ведёт
+     в правильную подкатегорию (subIdx группы у неё свой, не текущий). */
+  const allCatGroupCards = ((cat && cat.subs) || [])
+    .flatMap((s, idx) => (s.groups || []).map((g) => ({ g, subIdx: idx })))
+    .map(({ g, subIdx }) => ({ g, subIdx, cnt: groupCount(g._id) }))
+    .filter((x) => x.cnt > 0);
+  const goGroupTileIn = (g, subIdx) => go("catalog", { cat: catId, sub: subIdx, group: g.slug || g._id });
   // На странице подраздела витрина групп заменяет список товаров — так же,
   // как витрина подкатегорий на странице категории.
   const atSubRoot = subIdx != null && !groupId && !params.q && !params.badge && !params.dir;
@@ -544,16 +554,41 @@ function CatalogPage({ t, lang, store, go, params }) {
                   различаются только источник карточек и картинка. Пустые
                   разделы отфильтрованы выше — решение заказчика. */}
               {browseSubs && subCards.length > 0 && (
-                <div className="sc-grid">
-                  {subCards.map(({ s, idx, cnt }) => (
-                    <button key={s._id} className="sc-card" onClick={() => goSub(idx)}
-                      title={tri(lang, s.ru, s.uz, s.en)}>
-                      <span className="sc-media"><Icon name={SUBCAT_ICON[s.slug] || "grid"} size={64} sw={1.25} /></span>
-                      <span className="sc-name">{tri(lang, s.ru, s.uz, s.en)}</span>
-                      <span className="sc-cnt">{itemsLabel(cnt, lang)}</span>
-                    </button>
-                  ))}
-                </div>
+                <>
+                  {allCatGroupCards.length > 0 && (
+                    <h2 className="sc-tier-h">{lvf("Подкатегории", "Quyi bo'limlar", "Subcategories")}</h2>
+                  )}
+                  <div className="sc-grid">
+                    {subCards.map(({ s, idx, cnt }) => (
+                      <button key={s._id} className="sc-card" onClick={() => goSub(idx)}
+                        title={tri(lang, s.ru, s.uz, s.en)}>
+                        <span className="sc-media"><Icon name={SUBCAT_ICON[s.slug] || "grid"} size={64} sw={1.25} /></span>
+                        <span className="sc-name">{tri(lang, s.ru, s.uz, s.en)}</span>
+                        <span className="sc-cnt">{itemsLabel(cnt, lang)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {browseSubs && allCatGroupCards.length > 0 && (
+                <>
+                  <h2 className="sc-tier-h">{lvf("Товарные группы", "Tovar guruhlari", "Product groups")}</h2>
+                  <div className="sc-grid">
+                    {allCatGroupCards.map(({ g, subIdx, cnt }) => (
+                      <button key={g._id} className="sc-card" onClick={() => goGroupTileIn(g, subIdx)}
+                        title={tri(lang, g.ru, g.uz, g.en)}>
+                        <span className="sc-media">
+                          {g.img
+                            ? <img src={g.img} alt="" loading="lazy" />
+                            : <Icon name="grid" size={64} sw={1.25} />}
+                        </span>
+                        <span className="sc-name">{tri(lang, g.ru, g.uz, g.en)}</span>
+                        <span className="sc-cnt">{itemsLabel(cnt, lang)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
 
               {browseGroupTiles && (
