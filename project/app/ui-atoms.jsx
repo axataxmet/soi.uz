@@ -298,12 +298,13 @@ function ProductCard({ product, t, lang, store, onOpen }) {
    (чипы поверх фото, артикул с наличием одной строкой под фото, блок сроков и
    документов, две кнопки в подвале), и переставлять его CSS-ом пришлось бы
    через order — а он живёт на главной, в корзине, у брендов и в сравнении. */
-function ProductTile({ product, t, lang, store, onOpen, buyLabel }) {
+function ProductTile({ product, t, lang, store, onOpen, buyLabel, hideStock, hidePriceOnRequest }) {
   const p = product;
   const inCart = store.cart.some((c) => c.id === p.id);
   const inCmp = store.compare.includes(p.id);
   const name = tri(lang, p.ru, p.uz, p.en);
   const stockTxt = p.stock === "order" ? t.on_order : p.stock === "preorder" ? t.preorder : t.in_stock;
+  const onRequest = p.price == null || isNaN(p.price);
   return (
     <article className="ptile">
       <div className="ptile-top">
@@ -316,9 +317,11 @@ function ProductTile({ product, t, lang, store, onOpen, buyLabel }) {
       <div className="ptile-media" onClick={() => onOpen(p)}>
         <ProductPlaceholder product={p} t={t} lang={lang} />
       </div>
-      <div className={"ptile-stock stk-" + (p.stock || "in")}>{stockTxt}</div>
+      {!hideStock && <div className={"ptile-stock stk-" + (p.stock || "in")}>{stockTxt}</div>}
       <h3 className="ptile-name" onClick={() => onOpen(p)}>{name}</h3>
-      <div className="ptile-price"><Price value={p.price} old={p.old} t={t} size="sm" /></div>
+      {!(hidePriceOnRequest && onRequest) && (
+        <div className="ptile-price"><Price value={p.price} old={p.old} t={t} size="sm" /></div>
+      )}
       <button className={"ptile-buy " + (inCart ? "added" : "")}
         onClick={(e) => { e.stopPropagation(); store.addToCart(p.id, 1); }}>
         {inCart ? t.in_cart : (buyLabel || t.buy)}
