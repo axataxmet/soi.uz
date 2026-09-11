@@ -208,6 +208,7 @@ function ProductPage({ t, lang, store, go, params }) {
     : `${name} — профессиональное медицинское оборудование категории «${sub.ru}» производства ${brand.name} (${brand.country_ru}). ${t.desc_lead} Подходит для оснащения государственных и частных медицинских учреждений.`;
 
   return (
+    <>
     <div className="wrap">
       <div className="crumb">
         <a onClick={() => go("home")}>{t.breadcrumb_home}</a>
@@ -492,8 +493,11 @@ function ProductPage({ t, lang, store, go, params }) {
           <img src={cur.src} alt={name} onClick={(e) => e.stopPropagation()} />
         </div>
       )}
+      </div>
 
-      {/* accessories */}
+      {/* accessories — секции ниже сами оборачивают контент в .wrap, поэтому
+          не должны быть вложены в общий .wrap выше (иначе двойной паддинг
+          сдвигает их заголовки на 32px правее остального контента страницы). */}
       {accs.length > 0 && (
         <section className="section" style={{ paddingTop: 8 }}>
           <div className="wrap">
@@ -536,7 +540,7 @@ function ProductPage({ t, lang, store, go, params }) {
           </div>
         </section>
       )}
-    </div>
+    </>
   );
 }
 
