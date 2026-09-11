@@ -900,7 +900,9 @@ function CatalogLandingPage({ t, lang, store, go }) {
                   <span className="clp-cat-ic"><Icon name={tile.ic} size={24} /></span>
                   <div>
                     <div className="clp-cat-name">{lv(tile.ru, tile.uz, tile.en)}</div>
-                    {cnt > 0 && <div className="clp-cat-cnt">{cnt} {lv("позиций", "pozitsiya", "items")}</div>}
+                    {/* itemsLabel склоняет по числу — раньше тут было жёстко
+                        «позиций» и для «1 позиций» выходило неправильно. */}
+                    {cnt > 0 && <div className="clp-cat-cnt">{itemsLabel(cnt, lang)}</div>}
                   </div>
                   <div className="clp-cat-arr">{lv("Перейти", "O'tish", "Browse")}<Icon name="arrowRight" size={15} /></div>
                 </button>
