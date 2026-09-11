@@ -317,17 +317,24 @@ function ProductPage({ t, lang, store, go, params }) {
             <div className="pdp-side-cards">
               {(showAllRelated ? related : related.slice(0, 4)).map((rp) => {
                 const rname = tri(lang, rp.ru, rp.uz, rp.en);
+                const rpInCart = store.cart.some((c) => c.id === rp.id);
                 return (
                   <div key={rp.id} className="pdp-side-card" onClick={() => go("product", { id: rp.id })}>
-                    <div className="psc-img">
-                      {rp.img ? <img src={rp.img} alt="" loading="lazy" /> : <ProductPlaceholder product={rp} t={t} lang={lang} />}
-                    </div>
-                    <div className="psc-info">
-                      <div className="psc-name">{rname}</div>
-                      <div className="psc-foot">
-                        <StockTag stock={rp.stock} t={t} />
-                        {rp.price ? <Price value={rp.price} t={t} /> : <span className="psc-onreq">{t.price_on_request}</span>}
+                    <div className="psc-top">
+                      <div className="psc-img">
+                        {rp.img ? <img src={rp.img} alt="" loading="lazy" /> : <ProductPlaceholder product={rp} t={t} lang={lang} />}
                       </div>
+                      <div className="psc-info">
+                        <div className="psc-name">{rname}</div>
+                        <StockTag stock={rp.stock} t={t} />
+                      </div>
+                    </div>
+                    <div className="psc-foot">
+                      {rp.price ? <Price value={rp.price} t={t} /> : <span className="psc-onreq">{t.price_on_request}</span>}
+                      <button type="button" className={"psc-cart " + (rpInCart ? "added" : "")} title={t.add_to_cart}
+                        onClick={(e) => { e.stopPropagation(); store.addToCart(rp.id, 1); }}>
+                        <Icon name={rpInCart ? "check" : "cart"} size={18} />
+                      </button>
                     </div>
                   </div>
                 );
