@@ -59,7 +59,7 @@ const PALETTE_OPTS = [
 
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "palette": ["#0E4AC6","#2b72e3","#F4F7FD","#0b1f3a"],
-  "cards": "elevated",
+  "cards": "flat",
   "density": "normal"
 }/*EDITMODE-END*/;
 
