@@ -2086,7 +2086,7 @@ body{background:var(--surface)}
 /* ===== product page (стиль карточки — по образцу medcomp.ru) ===== */
 .pdp-h1{font-size:var(--fs-8);font-weight:800;line-height:1.2;margin:14px 0 8px;letter-spacing:-.01em;text-wrap:pretty}
 .pdp-topline{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
-.pdp-topline-actions{display:flex;align-items:center;gap:18px}
+.pdp-topline-actions{display:flex;align-items:center;justify-content:flex-end;gap:18px;margin-bottom:10px}
 .pdp-cmp-link,.pdp-wish-link{display:flex;align-items:center;gap:6px;font-size:var(--fs-3);color:var(--slate-500);font-weight:600}
 .pdp-cmp-link:hover,.pdp-cmp-link.on,.pdp-wish-link:hover{color:var(--blue-600)}
 .pdp-wish-link.on{color:var(--red-500,#ef4444)}
@@ -2104,13 +2104,13 @@ body{background:var(--surface)}
 .pdp-thumbs-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;flex-shrink:0}
 .pdp-thumb-nav{width:32px;height:22px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface,#fff);color:var(--slate-500);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .15s,color .15s}
 .pdp-thumb-nav:hover{background:var(--bg-2);color:var(--blue-600)}
-.pdp-thumbs{display:flex;flex-direction:column;gap:10px;flex-shrink:0;max-height:320px;overflow-y:auto;scrollbar-width:none}
+.pdp-thumbs{display:flex;flex-direction:column;gap:10px;flex-shrink:0;max-height:254px;overflow-y:auto;scrollbar-width:none}
 .pdp-thumbs::-webkit-scrollbar{display:none}
 .pdp-thumb{width:56px;height:56px;border-radius:var(--r-sm);overflow:hidden;border:2px solid var(--line);cursor:pointer;flex-shrink:0}
 .pdp-thumb.on{border-color:var(--blue-600)}
 .pdp-thumb .ph{aspect-ratio:1/1;border-radius:0}
-.pdp-main-img .pdp-photo{display:block;width:100%;max-width:420px;aspect-ratio:3/2;object-fit:contain;background:#fff;margin:0 auto}
-.pdp-main-img .pdp-video{display:block;width:100%;max-width:420px;aspect-ratio:3/2;border:0;background:#000;margin:0 auto}
+.pdp-main-img .pdp-photo{display:block;width:100%;max-width:420px;height:230px;object-fit:contain;background:#fff;margin:0 auto}
+.pdp-main-img .pdp-video{display:block;width:100%;max-width:420px;height:230px;border:0;background:#000;margin:0 auto}
 .pdp-thumb img{display:block;width:100%;height:100%;object-fit:cover}
 .pdp-thumb-vid{display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:var(--navy-900);color:#fff}
 /* просмотр фото поверх страницы по клику на главное изображение */
@@ -2145,7 +2145,7 @@ body{background:var(--surface)}
 .pdp-sku{font-family:var(--mono);font-size:var(--fs-3);color:var(--slate-400)}
 
 /* краткие характеристики буллетами рядом с фото — средняя колонка */
-.pdp-brief-specs{list-style:none;margin:0;padding:0 0 0 32px;display:flex;flex-direction:column;gap:7px}
+.pdp-brief-specs{list-style:none;margin:0;padding:0 0 0 8px;display:flex;flex-direction:column;gap:7px}
 .pdp-brief-specs li{position:relative;padding-left:16px;font-size:var(--fs-3);line-height:1.3;color:var(--slate-700)}
 .pdp-brief-specs li::before{content:"";position:absolute;left:0;top:6px;width:6px;height:6px;border-radius:50%;background:var(--blue-600)}
 .pdp-brief-reg{color:var(--blue-600)!important;font-weight:700}
@@ -2167,12 +2167,17 @@ body{background:var(--surface)}
 /* tabs + «Похожие товары» выровнены в один ряд, как у референса */
 .pdp-side-h{font-size:var(--fs-4);font-weight:800;margin-bottom:12px;padding-top:12px;padding-bottom:10px;border-bottom:2px solid var(--blue-600)}
 .pdp-lower-side{padding-top:0}
-.pdp-side-card{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);cursor:pointer}
-.pdp-side-card:last-child{border-bottom:0}
-.pdp-side-card img{width:56px;height:56px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);flex-shrink:0}
-.pdp-side-card .psc-info{min-width:0}
-.pdp-side-card .psc-name{font-size:var(--fs-3);font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.pdp-side-card .psc-onreq{font-size:var(--fs-2);color:var(--slate-400)}
+.pdp-side-cards{display:flex;flex-direction:column;gap:14px}
+
+/* «Вам может быть интересно» — горизонтальная карусель со стрелками вместо
+   статичной сетки на 4 карточки, чтобы вместить весь релевантный пул. */
+.pdp-mlk-carousel{position:relative;display:flex;align-items:center;gap:8px}
+.pdp-mlk-track{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px 2px}
+.pdp-mlk-track::-webkit-scrollbar{display:none}
+.pdp-mlk-item{flex:0 0 260px;scroll-snap-align:start}
+.pdp-mlk-nav{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface,#fff);color:var(--slate-600);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh-sm);transition:background .15s,color .15s,border-color .15s}
+.pdp-mlk-nav:hover{background:var(--blue-600);color:#fff;border-color:transparent}
+@media(max-width:680px){.pdp-mlk-nav{display:none}.pdp-mlk-item{flex:0 0 200px}}
 /* tabs */
 .tabs{display:flex;gap:0;margin:0;overflow-x:auto;-webkit-overflow-scrolling:touch;border-bottom:1px solid var(--line-soft)}
 .tab{padding:12px 16px;font-size:var(--fs-3);font-weight:700;color:var(--slate-500);margin-bottom:-1px;white-space:nowrap;border-bottom:2px solid transparent;border-right:1px solid var(--line-soft);transition:color .15s,border-color .15s}
@@ -3821,7 +3826,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/hero-wave.js?v=1787415411"></script>
 <script src="dist/app/home-page.js?v=1789112763"></script>
 <script type="text/soi-deferred" data-src="dist/app/catalog.js?v=1788578264"></script>
-<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789141181816422000"></script>
+<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789143920099786000"></script>
 <script type="text/soi-deferred" data-src="dist/app/cart.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/brand-profile.js?v=1789067132"></script>
 <script type="text/soi-deferred" data-src="dist/app/company-info.js?v=1788878786"></script>
