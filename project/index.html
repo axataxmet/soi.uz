@@ -2095,15 +2095,20 @@ body{background:var(--surface)}
 .pdp-tabs-wrap{grid-area:tabs}
 .pdp-lower-side{grid-area:side}
 .pdp-gallery{position:sticky;top:160px;display:flex;gap:12px}
-.pdp-main-img{flex:1;min-width:0;border-radius:var(--r-lg);overflow:hidden;cursor:zoom-in}
+.pdp-main-img{flex:1;min-width:0;border-radius:var(--r-lg);overflow:hidden;cursor:zoom-in;display:flex;align-items:center;justify-content:center;background:#fff}
 .pdp-main-img .ph{aspect-ratio:1/1}
-/* вертикальная полоса миниатюр слева от фото — как у референса */
-.pdp-thumbs{display:flex;flex-direction:column;gap:10px;flex-shrink:0;max-height:420px;overflow-y:auto}
+/* вертикальная полоса миниатюр слева от фото — как у референса, показывает
+   ровно 4 штуки, остальные листаются кнопками вверх/вниз */
+.pdp-thumbs-col{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0}
+.pdp-thumb-nav{width:32px;height:22px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface,#fff);color:var(--slate-500);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:background .15s,color .15s}
+.pdp-thumb-nav:hover{background:var(--bg-2);color:var(--blue-600)}
+.pdp-thumbs{display:flex;flex-direction:column;gap:10px;flex-shrink:0;max-height:254px;overflow-y:auto;scrollbar-width:none}
+.pdp-thumbs::-webkit-scrollbar{display:none}
 .pdp-thumb{width:56px;height:56px;border-radius:var(--r-sm);overflow:hidden;border:2px solid var(--line);cursor:pointer;flex-shrink:0}
 .pdp-thumb.on{border-color:var(--blue-600)}
 .pdp-thumb .ph{aspect-ratio:1/1;border-radius:0}
-.pdp-main-img .pdp-photo{display:block;width:100%;aspect-ratio:1/1;object-fit:contain;background:#fff}
-.pdp-main-img .pdp-video{display:block;width:100%;aspect-ratio:1/1;border:0;background:#000}
+.pdp-main-img .pdp-photo{display:block;width:100%;max-width:440px;aspect-ratio:1/1;object-fit:contain;background:#fff;margin:0 auto}
+.pdp-main-img .pdp-video{display:block;width:100%;max-width:440px;aspect-ratio:1/1;border:0;background:#000;margin:0 auto}
 .pdp-thumb img{display:block;width:100%;height:100%;object-fit:cover}
 .pdp-thumb-vid{display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:var(--navy-900);color:#fff}
 /* просмотр фото поверх страницы по клику на главное изображение */
@@ -3810,7 +3815,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/hero-wave.js?v=1787415411"></script>
 <script src="dist/app/home-page.js?v=1789112763"></script>
 <script type="text/soi-deferred" data-src="dist/app/catalog.js?v=1788578264"></script>
-<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789137024019238000"></script>
+<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789138502583920000"></script>
 <script type="text/soi-deferred" data-src="dist/app/cart.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/brand-profile.js?v=1789067132"></script>
 <script type="text/soi-deferred" data-src="dist/app/company-info.js?v=1788878786"></script>
