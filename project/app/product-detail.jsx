@@ -32,7 +32,7 @@ function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
     <div className="pdp-buy">
       <div className="pdp-buy-status">
         <span className="pdp-instock">{t.in_stock || "В наличии"}</span>
-        <span className="pdp-vat-static">{t.vat_excl}</span>
+        <span className="pdp-vat-static">{t.vat_incl_12 || t.vat_note}</span>
       </div>
       <div className="pdp-price-lg"><Price value={basePrice} t={t} size="lg" /></div>
       <div className="pdp-buy-row">
@@ -227,12 +227,6 @@ function ProductPage({ t, lang, store, go, params }) {
             </div>
           )}
           <B2BPriceBlock p={p} t={t} lang={lang} basePrice={effectivePrice} qty={qty} setQty={setQty} store={store} />
-          {brand.name && (
-            <div className="pdp-mfr-link">
-              <span>{brand.name}{brand.country_ru ? ", " + tri(lang, brand.country_ru, brand.country_uz, brand.country_en) : ""}</span>
-              <a onClick={() => go("partners")}>{lang === "uz" ? "Ishlab chiqaruvchining boshqa mahsulotlari" : lang === "en" ? "Other products by this manufacturer" : "Другие товары производителя"}</a>
-            </div>
-          )}
         </div>
 
         {/* «Похожие товары» — по вертикали продолжает карточку цены (тот же
