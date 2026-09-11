@@ -2167,17 +2167,22 @@ body{background:var(--surface)}
 /* tabs + «Похожие товары» выровнены в один ряд, как у референса */
 .pdp-side-h{font-size:var(--fs-4);font-weight:800;margin-bottom:12px;padding-top:12px;padding-bottom:10px;border-bottom:2px solid var(--blue-600)}
 .pdp-lower-side{padding-top:0}
-.pdp-side-cards{display:flex;flex-direction:column;gap:10px}
-/* «Похожие товары» — прямоугольные карточки-строки (фото слева, инфо справа),
-   а не квадратные плитки каталога — компактнее в узкой боковой колонке. */
-.pdp-side-card{display:flex;gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:var(--r);cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.pdp-side-cards{display:flex;flex-direction:column;gap:14px}
+/* «Похожие товары» — карточки-строки по образцу medcomp.ru: фото+название+
+   наличие сверху, цена и кнопка «в корзину» отдельной строкой снизу. */
+.pdp-side-card{display:flex;flex-direction:column;gap:14px;padding:18px;border:1px solid var(--line-soft);border-radius:var(--r-lg);cursor:pointer;transition:border-color .15s,box-shadow .15s;background:var(--surface,#fff)}
 .pdp-side-card:hover{border-color:var(--blue-400);box-shadow:var(--sh-sm)}
-.pdp-side-card .psc-img{width:64px;height:64px;flex-shrink:0;border-radius:var(--r-sm);overflow:hidden;background:#fff;border:1px solid var(--line-soft)}
+.pdp-side-card .psc-top{display:flex;gap:14px;align-items:flex-start}
+.pdp-side-card .psc-img{width:72px;height:72px;flex-shrink:0;border-radius:var(--r-sm);overflow:hidden;background:#fff;border:1px solid var(--line-soft)}
 .pdp-side-card .psc-img img{display:block;width:100%;height:100%;object-fit:contain}
-.pdp-side-card .psc-info{min-width:0;flex:1}
-.pdp-side-card .psc-name{font-size:var(--fs-3);font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.pdp-side-card .psc-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
-.pdp-side-card .psc-onreq{font-size:var(--fs-2);color:var(--slate-400)}
+.pdp-side-card .psc-info{min-width:0;flex:1;display:flex;flex-direction:column;gap:8px}
+.pdp-side-card .psc-name{font-size:var(--fs-4);font-weight:700;color:var(--ink);line-height:1.35;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pdp-side-card .psc-foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pdp-side-card .psc-foot .price{font-size:var(--fs-6);font-weight:800}
+.pdp-side-card .psc-onreq{font-size:var(--fs-3);color:var(--slate-400)}
+.pdp-side-card .psc-cart{flex-shrink:0;width:40px;height:40px;border-radius:var(--r-sm);border:none;background:var(--bg-2);color:var(--slate-600);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,color .15s}
+.pdp-side-card .psc-cart:hover{background:var(--blue-600);color:#fff}
+.pdp-side-card .psc-cart.added{background:var(--success-bg);color:var(--success)}
 .pdp-side-more{width:100%;margin-top:4px;padding:10px;border-radius:var(--r-sm);border:1px solid var(--line);background:none;color:var(--blue-600);font-weight:600;font-size:var(--fs-3);cursor:pointer;transition:background .15s}
 .pdp-side-more:hover{background:var(--bg-2)}
 
@@ -3839,7 +3844,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/hero-wave.js?v=1787415411"></script>
 <script src="dist/app/home-page.js?v=1789112763"></script>
 <script type="text/soi-deferred" data-src="dist/app/catalog.js?v=1788578264"></script>
-<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789155890750356000"></script>
+<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789156044557069000"></script>
 <script type="text/soi-deferred" data-src="dist/app/cart.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/brand-profile.js?v=1789067132"></script>
 <script type="text/soi-deferred" data-src="dist/app/company-info.js?v=1788878786"></script>
