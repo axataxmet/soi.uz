@@ -124,7 +124,13 @@ function ProductPage({ t, lang, store, go, params }) {
   const scrollThumbs = (dir) => {
     const el = thumbsRef.current;
     if (!el) return;
-    el.scrollBy({ top: dir * (66 * 5), behavior: "smooth" });
+    el.scrollBy({ top: dir * (66 * 4), behavior: "smooth" });
+  };
+  const mayLikeRef = React.useRef(null);
+  const scrollMayLike = (dir) => {
+    const el = mayLikeRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * (el.clientWidth * 0.9), behavior: "smooth" });
   };
   const [variantIdx, setVariantIdx] = useState(0);
   const [fullImages, setFullImages] = useState(null);
@@ -179,7 +185,7 @@ function ProductPage({ t, lang, store, go, params }) {
       score: (x.sub === p.sub && x.cat === p.cat ? 3 : x.cat === p.cat ? 2 : x.brand === p.brand ? 1 : 0),
     }))
     .sort((a, b) => b.score - a.score || (b.x.pop || 0) - (a.x.pop || 0))
-    .slice(0, 4)
+    .slice(0, 10)
     .map(e => e.x);
 
   // gallery media: real images + optional YouTube video, else placeholders
@@ -224,21 +230,13 @@ function ProductPage({ t, lang, store, go, params }) {
       <h1 className="pdp-h1">{name}</h1>
       <div className="pdp-topline">
         <span className="pdp-sku">{t.sku} {p.sku}</span>
-        <div className="pdp-topline-actions">
-          <button className={"pdp-wish-link " + (inWish ? "on" : "")} onClick={() => store.toggleWish(p.id)}>
-            <Icon name={inWish ? "heartFill" : "heart"} size={15} />{t.wishlist}
-          </button>
-          <button className={"pdp-cmp-link " + (inCmp ? "on" : "")} onClick={() => store.toggleCompare(p.id)}>
-            <Icon name="compare" size={15} />{t.add_compare}
-          </button>
-        </div>
       </div>
 
       <div className="pdp">
         <div className="pdp-gallery">
           {media.length > 1 && (
             <div className="pdp-thumbs-col">
-              {media.length > 5 && (
+              {media.length > 4 && (
                 <button type="button" className="pdp-thumb-nav" onClick={() => scrollThumbs(-1)} aria-label={lang === "uz" ? "Yuqoriga" : lang === "en" ? "Up" : "Вверх"}>
                   <Icon name="chevronRight" size={16} style={{ transform: "rotate(-90deg)" }} />
                 </button>
@@ -254,7 +252,7 @@ function ProductPage({ t, lang, store, go, params }) {
                   </div>
                 ))}
               </div>
-              {media.length > 5 && (
+              {media.length > 4 && (
                 <button type="button" className="pdp-thumb-nav" onClick={() => scrollThumbs(1)} aria-label={lang === "uz" ? "Pastga" : lang === "en" ? "Down" : "Вниз"}>
                   <Icon name="chevronRight" size={16} style={{ transform: "rotate(90deg)" }} />
                 </button>
@@ -282,6 +280,14 @@ function ProductPage({ t, lang, store, go, params }) {
         </ul>
 
         <div className="pdp-buy-col">
+          <div className="pdp-topline-actions">
+            <button className={"pdp-wish-link " + (inWish ? "on" : "")} onClick={() => store.toggleWish(p.id)}>
+              <Icon name={inWish ? "heartFill" : "heart"} size={15} />{t.wishlist}
+            </button>
+            <button className={"pdp-cmp-link " + (inCmp ? "on" : "")} onClick={() => store.toggleCompare(p.id)}>
+              <Icon name="compare" size={15} />{t.add_compare}
+            </button>
+          </div>
           {p.variants && p.variants.length > 0 && (
             <div className="pdp-variants">
               <div className="pv-label">{t.variants}</div>
@@ -308,19 +314,11 @@ function ProductPage({ t, lang, store, go, params }) {
         {related.length > 0 && (
           <div className="pdp-lower-side">
             <div className="pdp-side-h">{lang === "uz" ? "O'xshash mahsulotlar" : lang === "en" ? "Similar products" : "Похожие товары"}</div>
-            {related.slice(0, 3).map((rp) => {
-              const rname = tri(lang, rp.ru, rp.uz, rp.en);
-              return (
-                <div key={rp.id} className="pdp-side-card" onClick={() => go("product", { id: rp.id })}>
-                  <img src={rp.img} alt="" />
-                  <div className="psc-info">
-                    <div className="psc-name">{rname}</div>
-                    <StockTag stock={rp.stock} t={t} />
-                    {rp.price ? <Price value={rp.price} t={t} /> : <span className="psc-onreq">{t.price_on_request}</span>}
-                  </div>
-                </div>
-              );
-            })}
+            <div className="pdp-side-cards">
+              {related.slice(0, 3).map((rp) => (
+                <ProductCard key={rp.id} product={rp} t={t} lang={lang} store={store} onOpen={(pr) => go("product", { id: pr.id })} />
+              ))}
+            </div>
           </div>
         )}
 
@@ -488,10 +486,20 @@ function ProductPage({ t, lang, store, go, params }) {
         <section className="section" style={{ paddingTop: 8 }}>
           <div className="wrap">
             <div className="sec-head"><h2 style={{ fontSize: 22 }}>{lang === "uz" ? "Sizga qiziqarli bo'lishi mumkin" : lang === "en" ? "You may also like" : "Вам может быть интересно"}</h2></div>
-            <div className="grid-4">
-              {mayLike.map(bp => (
-                <ProductCard key={bp.id} product={bp} t={t} lang={lang} store={store} onOpen={pr => go("product", { id: pr.id })} />
-              ))}
+            <div className="pdp-mlk-carousel">
+              <button type="button" className="pdp-mlk-nav pdp-mlk-nav-l" onClick={() => scrollMayLike(-1)} aria-label={lang === "uz" ? "Chapga" : lang === "en" ? "Previous" : "Назад"}>
+                <Icon name="chevronRight" size={18} style={{ transform: "rotate(180deg)" }} />
+              </button>
+              <div className="pdp-mlk-track" ref={mayLikeRef}>
+                {mayLike.map(bp => (
+                  <div className="pdp-mlk-item" key={bp.id}>
+                    <ProductCard product={bp} t={t} lang={lang} store={store} onOpen={pr => go("product", { id: pr.id })} />
+                  </div>
+                ))}
+              </div>
+              <button type="button" className="pdp-mlk-nav pdp-mlk-nav-r" onClick={() => scrollMayLike(1)} aria-label={lang === "uz" ? "O'ngga" : lang === "en" ? "Next" : "Вперёд"}>
+                <Icon name="chevronRight" size={18} />
+              </button>
             </div>
           </div>
         </section>
