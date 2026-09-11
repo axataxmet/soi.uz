@@ -13,12 +13,6 @@ const ON_REQUEST_THRESHOLD = 90000000; // дорогое капитальное 
 function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
   const onRequest = p.priceOnRequest || p.showPrice === false || !(basePrice > 0) || basePrice >= ON_REQUEST_THRESHOLD;
   const inCart = store.cart.some((c) => c.id === p.id);
-  const inWish = store.wishlist.includes(p.id);
-  const wishBtn = (
-    <button className={"pdp-wish-btn " + (inWish ? "on" : "")} title={t.wishlist} onClick={() => store.toggleWish(p.id)}>
-      <Icon name={inWish ? "heartFill" : "heart"} size={20} />
-    </button>
-  );
 
   if (onRequest) {
     return (
@@ -27,12 +21,9 @@ function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
           <div className="por-label"><Icon name="spark" size={16} />{t.price_on_request}</div>
           <div className="por-note">{t.price_on_request_note}</div>
         </div>
-        <div className="pdp-buy-row">
-          <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => window.__openQuote && window.__openQuote(p)}>
-            <Icon name="doc" size={20} />{t.request_quote}
-          </button>
-          {wishBtn}
-        </div>
+        <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => window.__openQuote && window.__openQuote(p)}>
+          <Icon name="doc" size={20} />{t.request_quote}
+        </button>
       </div>
     );
   }
@@ -49,7 +40,6 @@ function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
         <button className={"btn btn-buy " + (inCart ? "btn-dark" : "btn-primary")} onClick={() => store.addToCart(p.id, qty)}>
           {inCart ? t.in_cart : (t.buy_now || t.add_to_cart)}
         </button>
-        {wishBtn}
       </div>
       <div className="pdp-buy-links">
         <a onClick={() => window.__openQuote && window.__openQuote(p)}>{lang === "uz" ? "To'lov usuli" : lang === "en" ? "Payment method" : "Способ оплаты"}</a>
@@ -88,10 +78,11 @@ function ProductPage({ t, lang, store, go, params }) {
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState("specs");
   const [thumb, setThumb] = useState(0);
+  const [lightbox, setLightbox] = useState(false);
   const [variantIdx, setVariantIdx] = useState(0);
   const [fullImages, setFullImages] = useState(null);
 
-  useEffect(() => { setQty(1); setThumb(0); setTab("specs"); setVariantIdx(0); window.scrollTo({ top: 0, behavior: "instant" }); rvPush(params.id); }, [params.id]);
+  useEffect(() => { setQty(1); setThumb(0); setTab("specs"); setVariantIdx(0); setLightbox(false); window.scrollTo({ top: 0, behavior: "instant" }); rvPush(params.id); }, [params.id]);
 
   /* Список товаров грузит только главное фото (media: isMain, take 1) —
      иначе payload каталога распухает на каждую картинку каждого товара.
@@ -123,9 +114,11 @@ function ProductPage({ t, lang, store, go, params }) {
     : P.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 4);
   const accs = P.filter(x => (p.accessories||[]).includes(x.id));
   const cons = P.filter(x => (p.consumables||[]).includes(x.id));
-  // «С этим товаром покупают» — внизу страницы: сначала реальные аксессуары/расходники,
-  // если для товара они не заданы — остаток из «Похожие товары», не попавший в сайдбар.
-  const boughtTogether = (accs.length || cons.length) ? accs.concat(cons) : related.slice(3, 7);
+  // «Вам может быть интересно» — внизу страницы: общая подборка популярных
+  // товаров, не входящих в сайдбар «Похожие товары» (в отличие от него,
+  // не привязана к категории — так же устроено у референса).
+  const shownIds = new Set([p.id, ...related.slice(0, 3).map(r => r.id)]);
+  const mayLike = P.filter(x => !shownIds.has(x.id)).sort((a, b) => (b.pop || 0) - (a.pop || 0)).slice(0, 4);
 
   // gallery media: real images + optional YouTube video, else placeholders
   const ytId = (() => {
@@ -169,23 +162,18 @@ function ProductPage({ t, lang, store, go, params }) {
       <h1 className="pdp-h1">{name}</h1>
       <div className="pdp-topline">
         <span className="pdp-sku">{t.sku} {p.sku}</span>
-        <button className={"pdp-cmp-link " + (inCmp ? "on" : "")} onClick={() => store.toggleCompare(p.id)}>
-          <Icon name="compare" size={15} />{t.add_compare}
-        </button>
+        <div className="pdp-topline-actions">
+          <button className={"pdp-wish-link " + (inWish ? "on" : "")} onClick={() => store.toggleWish(p.id)}>
+            <Icon name={inWish ? "heartFill" : "heart"} size={15} />{t.wishlist}
+          </button>
+          <button className={"pdp-cmp-link " + (inCmp ? "on" : "")} onClick={() => store.toggleCompare(p.id)}>
+            <Icon name="compare" size={15} />{t.add_compare}
+          </button>
+        </div>
       </div>
 
       <div className="pdp">
         <div className="pdp-gallery">
-          <div className="pdp-main-img">
-            {!hasMedia ? (
-              <ProductPlaceholder product={p} t={t} lang={lang} big />
-            ) : cur.type === "video" ? (
-              <iframe className="pdp-video" src={"https://www.youtube.com/embed/" + cur.id} title={name}
-                frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
-            ) : (
-              <img className="pdp-photo" src={cur.src} alt={name} />
-            )}
-          </div>
           {media.length > 1 && (
             <div className="pdp-thumbs">
               {media.map((m, i) => (
@@ -197,6 +185,16 @@ function ProductPage({ t, lang, store, go, params }) {
               ))}
             </div>
           )}
+          <div className="pdp-main-img" onClick={() => hasMedia && cur.type !== "video" && setLightbox(true)}>
+            {!hasMedia ? (
+              <ProductPlaceholder product={p} t={t} lang={lang} big />
+            ) : cur.type === "video" ? (
+              <iframe className="pdp-video" src={"https://www.youtube.com/embed/" + cur.id} title={name}
+                frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+            ) : (
+              <img className="pdp-photo" src={cur.src} alt={name} />
+            )}
+          </div>
         </div>
 
         {/* краткие характеристики буллетами — как на референсе, рядом с фото */}
@@ -224,38 +222,28 @@ function ProductPage({ t, lang, store, go, params }) {
           {brand.name && (
             <div className="pdp-mfr-link">
               <span>{brand.name}{brand.country_ru ? ", " + tri(lang, brand.country_ru, brand.country_uz, brand.country_en) : ""}</span>
-              <a onClick={() => go("catalog", { brand: p.brand })}>{lang === "uz" ? "Ishlab chiqaruvchining boshqa mahsulotlari" : lang === "en" ? "Other products by this manufacturer" : "Другие товары производителя"}</a>
-            </div>
-          )}
-
-          {related.length > 0 && (
-            <div className="pdp-side-related">
-              <div className="pdp-side-h">{lang === "uz" ? "O'xshash mahsulotlar" : lang === "en" ? "Similar products" : "Похожие товары"}</div>
-              {related.slice(0, 3).map((rp) => {
-                const rname = tri(lang, rp.ru, rp.uz, rp.en);
-                return (
-                  <div key={rp.id} className="pdp-side-card" onClick={() => go("product", { id: rp.id })}>
-                    <img src={rp.img} alt="" />
-                    <div className="psc-info">
-                      <div className="psc-name">{rname}</div>
-                      <StockTag stock={rp.stock} t={t} />
-                      {rp.price ? <Price value={rp.price} t={t} /> : <span className="psc-onreq">{t.price_on_request}</span>}
-                    </div>
-                  </div>
-                );
-              })}
+              <a onClick={() => go("partners")}>{lang === "uz" ? "Ishlab chiqaruvchining boshqa mahsulotlari" : lang === "en" ? "Other products by this manufacturer" : "Другие товары производителя"}</a>
             </div>
           )}
         </div>
       </div>
 
-      {/* tabs */}
-      <div className="tabs">
-        {[["desc", t.tab_desc], ["specs", t.tab_specs]].concat(p.kit && p.kit.length > 0 ? [["kit", t.tab_kit]] : []).concat([["delivery", t.tab_delivery], ["docs", t.tab_docs]]).map(([id, label]) => (
-          <button key={id} className={"tab " + (tab === id ? "on" : "")} onClick={() => setTab(id)}>{label}</button>
-        ))}
-      </div>
-      <div className="tab-body">
+      {hasMedia && cur.type !== "video" && lightbox && (
+        <div className="pdp-lightbox" onClick={() => setLightbox(false)}>
+          <button className="pdp-lightbox-close" onClick={() => setLightbox(false)}><Icon name="x" size={26} /></button>
+          <img src={cur.src} alt={name} onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
+
+      {/* tabs + «Похожие товары» — единый ряд, как на референсе */}
+      <div className="pdp-lower">
+        <div className="pdp-lower-main">
+          <div className="tabs">
+            {[["desc", t.tab_desc], ["specs", t.tab_specs]].concat(p.kit && p.kit.length > 0 ? [["kit", t.tab_kit]] : []).concat([["delivery", t.tab_delivery], ["docs", t.tab_docs]]).map(([id, label]) => (
+              <button key={id} className={"tab " + (tab === id ? "on" : "")} onClick={() => setTab(id)}>{label}</button>
+            ))}
+          </div>
+          <div className="tab-body">
         {tab === "desc" && (() => {
           // API-товары везут descFull отдельно по языкам (descFull_ru/uz/en);
           // старые demo-товары из localStorage — одной строкой в p.descFull.
@@ -363,47 +351,50 @@ function ProductPage({ t, lang, store, go, params }) {
                 </div>
               );
             }
-            const hasDocs = false;
-            if (!hasDocs) {
-              return (
-                <div className="docs-onreq">
-                  <span className="dor-ic"><Icon name="doc" size={30} /></span>
-                  <div className="dor-tx">
-                    <div className="dor-t">{dl("Документы предоставляются по запросу", "Hujjatlar so'rov bo'yicha taqdim etiladi", "Documents are provided on request")}</div>
-                    <div className="dor-d">{dl("Регистрационное удостоверение, сертификаты и паспорт изделия вышлем по вашему запросу.", "Ro'yxat guvohnomasi, sertifikatlar va buyum pasportini so'rovingiz bo'yicha yuboramiz.", "We will send the registration certificate, certificates and device passport upon your request.")}</div>
-                  </div>
-                  <button className="btn btn-primary" onClick={() => window.__openQuote && window.__openQuote(p)}>
-                    <Icon name="doc" size={18} />{dl("Запросить документы", "Hujjatlarni so'rash", "Request documents")}
-                  </button>
-                </div>
-              );
-            }
+            // Реальных файлов пока нет ни у одного товара — показываем список
+            // документов, актуальных для этого типа оборудования (как у
+            // референса: Паспорт / Сертификат соответствия / Регистрационное
+            // удостоверение), с кнопкой запроса по каждому.
+            const docNames = [
+              dl("Паспорт", "Pasport", "Passport"),
+              dl("Сертификат соответствия", "Muvofiqlik sertifikati", "Certificate of conformity"),
+              dl("Регистрационное удостоверение", "Roʻyxatdan oʻtkazish guvohnomasi", "Registration certificate"),
+            ];
             return (
               <div>
-                {[
-                  { n: dl("Регистрационное удостоверение", "Roʻyxatdan oʻtkazish guvohnomasi", "Registration certificate"), s: "PDF · 1.2 MB" },
-                  { n: dl("Сертификат соответствия", "Muvofiqlik sertifikati", "Certificate of conformity"), s: "PDF · 0.8 MB" },
-                  { n: dl("Руководство по эксплуатации", "Foydalanish boʻyicha qoʻllanma", "User manual"), s: "PDF · 4.6 MB" },
-                  { n: dl("Паспорт изделия", "Buyum pasporti", "Device passport"), s: "PDF · 0.6 MB" },
-                ].map((d, i) => (
+                {docNames.map((n, i) => (
                   <div key={i} className="doc-row">
                     <span className="dr-ic"><Icon name="doc" size={26} /></span>
-                    <div>
-                      <div style={{ fontWeight: 600 }}>{d.n}</div>
-                      <div className="dr-meta">{d.s}</div>
-                    </div>
+                    <div style={{ fontWeight: 600 }}>{n}</div>
                     <button className="btn btn-ghost" onClick={() => window.__openQuote && window.__openQuote(p)}>
-                      <Icon name="download" size={16} />{dl("Скачать", "Yuklab olish", "Download")}
+                      {dl("Запросить", "So'rash", "Request")}
                     </button>
                   </div>
                 ))}
-                <div className="docs-foot-note">
-                  <Icon name="shield" size={16} />
-                  {dl("Полный комплект документов для закупки и тендера предоставляется по запросу.", "Xarid va tender uchun to'liq hujjatlar to'plami so'rov bo'yicha beriladi.", "The full document package for procurement and tenders is available on request.")}
-                </div>
               </div>
             );
           })()
+        )}
+          </div>
+        </div>
+
+        {related.length > 0 && (
+          <div className="pdp-lower-side">
+            <div className="pdp-side-h">{lang === "uz" ? "O'xshash mahsulotlar" : lang === "en" ? "Similar products" : "Похожие товары"}</div>
+            {related.slice(0, 3).map((rp) => {
+              const rname = tri(lang, rp.ru, rp.uz, rp.en);
+              return (
+                <div key={rp.id} className="pdp-side-card" onClick={() => go("product", { id: rp.id })}>
+                  <img src={rp.img} alt="" />
+                  <div className="psc-info">
+                    <div className="psc-name">{rname}</div>
+                    <StockTag stock={rp.stock} t={t} />
+                    {rp.price ? <Price value={rp.price} t={t} /> : <span className="psc-onreq">{t.price_on_request}</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </div>
 
@@ -427,13 +418,13 @@ function ProductPage({ t, lang, store, go, params }) {
         </section>
       )}
 
-      {/* «С этим товаром покупают» — сопутствующие товары, опущено вниз страницы */}
-      {boughtTogether.length > 0 && (
+      {/* «Вам может быть интересно» — общая подборка, опущено вниз страницы */}
+      {mayLike.length > 0 && (
         <section className="section" style={{ paddingTop: 8 }}>
           <div className="wrap">
-            <div className="sec-head"><h2 style={{ fontSize: 22 }}>{t.related}</h2></div>
+            <div className="sec-head"><h2 style={{ fontSize: 22 }}>{lang === "uz" ? "Sizga qiziqarli bo'lishi mumkin" : lang === "en" ? "You may also like" : "Вам может быть интересно"}</h2></div>
             <div className="grid-4">
-              {boughtTogether.map(bp => (
+              {mayLike.map(bp => (
                 <ProductCard key={bp.id} product={bp} t={t} lang={lang} store={store} onOpen={pr => go("product", { id: pr.id })} />
               ))}
             </div>
