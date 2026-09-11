@@ -2189,7 +2189,9 @@ body{background:var(--surface)}
 
 /* «Вам может быть интересно» — горизонтальная карусель со стрелками вместо
    статичной сетки на 4 карточки, чтобы вместить весь релевантный пул. */
-.pdp-mlk-carousel{position:relative;display:flex;align-items:center;gap:8px}
+/* стрелки лежат поверх карусели (absolute), а не в общем flex-ряду — иначе
+   левая стрелка сдвигала первую карточку вправо от заголовка блока. */
+.pdp-mlk-carousel{position:relative}
 .pdp-mlk-track{display:flex;gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px 2px}
 .pdp-mlk-track::-webkit-scrollbar{display:none}
 .pdp-mlk-item{flex:0 0 200px;scroll-snap-align:start;display:flex}
@@ -2197,7 +2199,9 @@ body{background:var(--surface)}
 .pdp-mlk-item .ptile-buy{background:none;border:1.5px solid var(--blue-600);color:var(--blue-600)}
 .pdp-mlk-item .ptile-buy:hover{background:var(--blue-600);color:#fff;filter:none}
 .pdp-mlk-item .ptile-buy.added{background:none;border-color:var(--success);color:var(--success)}
-.pdp-mlk-nav{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface,#fff);color:var(--slate-600);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh-sm);transition:background .15s,color .15s,border-color .15s}
+.pdp-mlk-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:2;flex-shrink:0;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface,#fff);color:var(--slate-600);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh-sm);transition:background .15s,color .15s,border-color .15s}
+.pdp-mlk-nav-l{left:-20px}
+.pdp-mlk-nav-r{right:-20px}
 .pdp-mlk-nav:hover{background:var(--blue-600);color:#fff;border-color:transparent}
 @media(max-width:680px){.pdp-mlk-nav{display:none}.pdp-mlk-item{flex:0 0 200px}}
 /* tabs */
