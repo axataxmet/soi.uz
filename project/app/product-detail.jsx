@@ -124,7 +124,7 @@ function ProductPage({ t, lang, store, go, params }) {
   const scrollThumbs = (dir) => {
     const el = thumbsRef.current;
     if (!el) return;
-    el.scrollBy({ top: dir * (66 * 4), behavior: "smooth" });
+    el.scrollBy({ top: dir * (66 * 5), behavior: "smooth" });
   };
   const [variantIdx, setVariantIdx] = useState(0);
   const [fullImages, setFullImages] = useState(null);
@@ -238,7 +238,7 @@ function ProductPage({ t, lang, store, go, params }) {
         <div className="pdp-gallery">
           {media.length > 1 && (
             <div className="pdp-thumbs-col">
-              {media.length > 4 && (
+              {media.length > 5 && (
                 <button type="button" className="pdp-thumb-nav" onClick={() => scrollThumbs(-1)} aria-label={lang === "uz" ? "Yuqoriga" : lang === "en" ? "Up" : "Вверх"}>
                   <Icon name="chevronRight" size={16} style={{ transform: "rotate(-90deg)" }} />
                 </button>
@@ -254,7 +254,7 @@ function ProductPage({ t, lang, store, go, params }) {
                   </div>
                 ))}
               </div>
-              {media.length > 4 && (
+              {media.length > 5 && (
                 <button type="button" className="pdp-thumb-nav" onClick={() => scrollThumbs(1)} aria-label={lang === "uz" ? "Pastga" : lang === "en" ? "Down" : "Вниз"}>
                   <Icon name="chevronRight" size={16} style={{ transform: "rotate(90deg)" }} />
                 </button>
