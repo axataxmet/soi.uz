@@ -2098,7 +2098,9 @@ body{background:var(--surface)}
    мобильной сетке. Возвращаем ей ширину по содержимому. */
 /* Синюю обводку убрали по просьбе заказчика — заливка вместо контура, как
    у статуса «В корзине» в карусели «Вам может быть интересно». */
-.ptile-stock.stk-in{color:var(--cta);background:var(--success-bg);border:none;display:inline-flex;align-items:center;width:fit-content;padding:2px 9px;border-radius:var(--r-pill)}
+/* Заливку тоже убрали по просьбе заказчика — просто цветной текст,
+   без плашки, как в строчном виде (.prow-buybox .stk-in). */
+.ptile-stock.stk-in{color:var(--cta);background:none;border:none;display:inline-flex;align-items:center;width:fit-content;padding:0}
 .ptile-name{margin:8px 0;font-size:var(--fs-3);font-weight:600;line-height:20px;height:40px;color:var(--ink);cursor:pointer;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .3s}
 .ptile-name:hover{color:var(--blue-600)}
