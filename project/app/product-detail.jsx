@@ -142,8 +142,24 @@ function ProductPage({ t, lang, store, go, params }) {
   const [tab, setTab] = useState("specs");
   const [thumb, setThumb] = useState(0);
   const [variantIdx, setVariantIdx] = useState(0);
+  const [fullImages, setFullImages] = useState(null);
 
   useEffect(() => { setQty(1); setThumb(0); setTab("specs"); setVariantIdx(0); window.scrollTo({ top: 0, behavior: "instant" }); rvPush(params.id); }, [params.id]);
+
+  /* Список товаров грузит только главное фото (media: isMain, take 1) —
+     иначе payload каталога распухает на каждую картинку каждого товара.
+     Остальные фото галереи подгружаем отдельным запросом уже на карточке. */
+  useEffect(() => {
+    setFullImages(null);
+    if (!p._remote || !window.api) return;
+    let cancelled = false;
+    window.api.getOne("products", p.id).then((full) => {
+      if (cancelled || !full || !Array.isArray(full.media)) return;
+      const urls = full.media.slice().sort((a, b) => (a.order || 0) - (b.order || 0)).map((m) => m.url);
+      if (urls.length > 1) setFullImages(urls);
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [p.id]);
 
   const effectivePrice = (p.variants && p.variants.length > 0) ? p.variants[variantIdx].price : p.price;
   const effectiveOld   = (p.variants && p.variants.length > 0) ? null : p.old;
@@ -167,7 +183,7 @@ function ProductPage({ t, lang, store, go, params }) {
     const m = u.match(/(?:youtu\.be\/|v=|embed\/|shorts\/)([\w-]{11})/);
     return m ? m[1] : null;
   })();
-  const imgs = (p.images && p.images.length) ? p.images : (p.img ? [p.img] : []);
+  const imgs = fullImages || ((p.images && p.images.length) ? p.images : (p.img ? [p.img] : []));
   const media = imgs.map((src) => ({ type: "img", src }));
   if (ytId) media.push({ type: "video", id: ytId });
   const hasMedia = media.length > 0;
