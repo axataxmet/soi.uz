@@ -1861,6 +1861,13 @@ function SoiEcosystem({ lang, go }) {
      the admin is how you hide it. Only a key that was never configured at all
      falls back to the default, so a fresh install still shows a full block. */
   const val = (f) => (eco && Object.prototype.hasOwnProperty.call(eco, f) ? eco[f] : ECO_DEFAULTS[f]);
+  /* «2 800+» и «120+» держались в редакторской настройке (homepage_ecosystem)
+     и разъехались с реальными данными — каталог и бренды это две цифры,
+     которые сайт и так знает точно (window.DATA), поэтому считаем их
+     напрямую и больше не даём редактору держать здесь устаревшее число.
+     Единица измерения («+», пусто и т.п.) остаётся редакторской. */
+  const liveCatalogNum = window.DATA && window.DATA.PRODUCTS ? String(window.DATA.PRODUCTS.length) : val("catalog_num");
+  const liveBrandsNum = window.DATA && window.DATA.BRANDS ? String(window.DATA.BRANDS.length) : val("brands_num");
 
   const st = pulse.stats;
 
@@ -1930,7 +1937,7 @@ function SoiEcosystem({ lang, go }) {
                 </div>
               )}
             </div>
-            <div className="eco-num"><EcoCount value={val("catalog_num")} /><span>{val("catalog_unit")}</span></div>
+            <div className="eco-num"><EcoCount value={liveCatalogNum} /><span>{val("catalog_unit")}</span></div>
             <h3>{_lv(lang, "Электронный каталог оборудования", "Elektron uskunalar katalogi", "Electronic equipment catalog")}</h3>
             <p>{_lv(lang,
               "Медтехника, мебель, инструменты и расходные материалы от ведущих мировых производителей.",
@@ -2077,7 +2084,7 @@ function SoiEcosystem({ lang, go }) {
           {/* ── brands ── */}
           <article className="eco-t brands sx-rv">
             <div className="eco-head"><div className="eco-ic"><Icon name="award" size={22} /></div></div>
-            <div className="eco-num"><EcoCount value={val("brands_num")} /><span>{val("brands_unit")}</span></div>
+            <div className="eco-num"><EcoCount value={liveBrandsNum} /><span>{val("brands_unit")}</span></div>
             <h3>{_lv(lang, "Мировые бренды", "Jahon brendlari", "Global brands")}</h3>
             <p>{_lv(lang, "Официальные поставки от производителей из 5 стран.", "5 mamlakat ishlab chiqaruvchilaridan rasmiy yetkazib berish.", "Official supply from manufacturers across 5 countries.")}</p>
             {showWall && (
