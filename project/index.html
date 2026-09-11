@@ -2014,13 +2014,14 @@ body{background:var(--surface)}
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .3s ease}
 .sc-cnt{margin-top:auto;font-size:var(--fs-3);line-height:20px;color:var(--slate-500)}
 
-/* Раньше при наведении менялся только цвет текста — рамка (var(--line),
-   почти неотличима от фона) и тень (та же var(--sh), что и в покое) визуально
-   не менялись, выделение было незаметно. Явная синяя рамка + заметно более
-   плотная тень + лёгкий подъём делают наведение однозначно видимым. */
-.sc-card:hover{border-color:var(--blue-500);box-shadow:var(--sh-lg);transform:translateY(-3px)}
+/* Раньше при наведении менялся только цвет текста — тень (та же var(--sh),
+   что и в покое) визуально не менялась, выделение было незаметно. Синюю
+   рамку убрали по просьбе заказчика — заметная тень + лёгкий подъём и без
+   неё достаточно выделяют карточку. Рамка остаётся невидимой (цвет фона),
+   как и в состоянии покоя. */
+.sc-card:hover{box-shadow:var(--sh-lg);transform:translateY(-3px)}
 .sc-card:hover .sc-name,.sc-card:hover .sc-media{color:var(--blue-600)}
-/* Клавиатурный фокус — та же подсветка, что и наведение, плюс явная рамка:
+/* Клавиатурный фокус — та же подсветка, что и наведение; рамка тут нужна —
    без неё карточка при табуляции ничем не выделяется. */
 .sc-card:focus-visible{outline:none;border-color:var(--blue-600);box-shadow:var(--sh-lg);transform:translateY(-3px)}
 .sc-card:focus-visible .sc-name,.sc-card:focus-visible .sc-media{color:var(--blue-600)}
@@ -2055,7 +2056,7 @@ body{background:var(--surface)}
   box-shadow:var(--sh);transition:box-shadow .2s ease,border-color .2s ease,transform .2s ease}
 /* Тот же более заметный ховер, что и у .sc-card — раньше тень на наведении
    совпадала с тенью в покое, и рамка (var(--line)) была едва отличима от фона. */
-.ptile:hover{box-shadow:var(--sh-lg);border-color:var(--blue-500);transform:translateY(-3px)}
+.ptile:hover{box-shadow:var(--sh-lg);transform:translateY(-3px)}
 @media(prefers-reduced-motion:reduce){.ptile{transition:box-shadow .2s ease,border-color .2s ease}.ptile:hover{transform:none}}
 .ptile-top{display:flex;align-items:center;justify-content:space-between;gap:8px;height:20px}
 .ptile-sku{font-size:var(--fs-2);line-height:20px;color:var(--slate-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
