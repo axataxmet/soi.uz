@@ -1879,7 +1879,10 @@ body{background:var(--surface)}
 .cat-layout .filters{order:2}
 .cat-layout .cat-main{order:1}
 .cat-layout-full{grid-template-columns:1fr}
-.filters{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);position:sticky;top:156px}
+/* Тот же корпус, что у карточки товара/товарной группы (.ptile/.sc-card):
+   невидимая рамка цвета фона, острые углы 2px, мягкая тень вместо явной
+   линии — единый язык карточек по всему каталогу. */
+.filters{background:var(--surface);border:1px solid var(--surface);border-radius:2px;box-shadow:var(--sh);position:sticky;top:156px}
 .flt-close{display:none}
 .flt-apply{display:none}
 .filters-backdrop{display:none}
@@ -1950,11 +1953,15 @@ body{background:var(--surface)}
    на полтора километра пустоты между названием и ценой. Ограничиваем список
    шириной, на которой он читается. */
 .cat-layout-full .cat-rows{max-width:1040px}
+/* Тот же корпус, что у карточки товара (.ptile) и товарной группы (.sc-card):
+   невидимая рамка цвета фона, острые углы 2px, мягкая тень var(--sh) —
+   на hover тень плотнее (--sh-lg) и лёгкий подъём, без цветной рамки. */
 .prow{align-items:flex-start;padding:18px;flex-wrap:wrap;gap:18px;
-  border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--sh-sm);
-  transition:box-shadow .18s,border-color .18s}
+  border:1px solid var(--surface);border-radius:2px;box-shadow:var(--sh);
+  transition:box-shadow .2s ease,transform .2s ease}
 .prow+.prow{}
-.prow:hover{background:var(--surface);border-color:var(--blue-400);box-shadow:var(--sh)}
+.prow:hover{background:var(--surface);box-shadow:var(--sh-lg);transform:translateY(-3px)}
+@media(prefers-reduced-motion:reduce){.prow:hover{transform:none}}
 .prow-left{flex:0 0 150px;display:flex;flex-direction:column;gap:8px}
 .prow-sku{color:var(--slate-400);font-size:var(--fs-2)}
 .prow-media{width:150px;height:132px;display:flex;align-items:center;justify-content:center;
