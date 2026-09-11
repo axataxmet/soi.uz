@@ -57,14 +57,24 @@ const PALETTE_OPTS = [
   ["var(--accent)","var(--blue-500)","var(--bg-2)","var(--navy-900)"],  // Wellness Green
 ];
 
-const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+/* Своё имя, не TWEAK_DEFAULTS: и здесь, и в news.jsx объявлен `const
+   TWEAK_DEFAULTS` — файлы собираются как обычные <script>, не модули, и
+   делят один глобальный scope. Babel понижает const до var, так что оба
+   объявления пишут в один и тот же window.TWEAK_DEFAULTS; чей скрипт
+   выполнился последним (news.js после map.js), тот и остаётся — из-за
+   этого useTweaks() ниже читал chужой объект без ключа "cards", и
+   document.documentElement.setAttribute("data-cards", tw.cards) на живом
+   сайте всегда писал буквально строку "undefined", а её не ловит ни один
+   [data-cards=...] селектор — переключатель карточек товара молча не
+   работал ни на elevated, ни на flat. */
+const UZ_TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "palette": ["#0E4AC6","#2b72e3","#F4F7FD","#0b1f3a"],
   "cards": "flat",
   "density": "normal"
 }/*EDITMODE-END*/;
 
 function UzTweaks({ lang }) {
-  const [tw, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [tw, setTweak] = useTweaks(UZ_TWEAK_DEFAULTS);
 
   // apply palette on change
   _ue(() => { _applyPalette(tw.palette); }, [JSON.stringify(tw.palette)]);
