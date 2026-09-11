@@ -81,20 +81,28 @@ function ProductPage({ t, lang, store, go, params }) {
   const [lightbox, setLightbox] = useState(false);
   const [variantIdx, setVariantIdx] = useState(0);
   const [fullImages, setFullImages] = useState(null);
+  const [regDocs, setRegDocs] = useState(null);
 
   useEffect(() => { setQty(1); setThumb(0); setTab("specs"); setVariantIdx(0); setLightbox(false); window.scrollTo({ top: 0, behavior: "instant" }); rvPush(params.id); }, [params.id]);
 
-  /* Список товаров грузит только главное фото (media: isMain, take 1) —
-     иначе payload каталога распухает на каждую картинку каждого товара.
-     Остальные фото галереи подгружаем отдельным запросом уже на карточке. */
+  /* Список товаров грузит только главное фото (media: isMain, take 1) и без
+     regDocuments — иначе payload каталога распухает на каждую картинку и
+     документ каждого товара. Полную галерею и реальные документы (когда
+     они загружены в админке) подгружаем отдельным запросом на карточке. */
   useEffect(() => {
     setFullImages(null);
+    setRegDocs(null);
     if (!p._remote || !window.api) return;
     let cancelled = false;
     window.api.getOne("products", p.id).then((full) => {
-      if (cancelled || !full || !Array.isArray(full.media)) return;
-      const urls = full.media.slice().sort((a, b) => (a.order || 0) - (b.order || 0)).map((m) => m.url);
-      if (urls.length > 1) setFullImages(urls);
+      if (cancelled || !full) return;
+      if (Array.isArray(full.media)) {
+        const urls = full.media.slice().sort((a, b) => (a.order || 0) - (b.order || 0)).map((m) => m.url);
+        if (urls.length > 1) setFullImages(urls);
+      }
+      if (Array.isArray(full.regDocuments) && full.regDocuments.length > 0) {
+        setRegDocs(full.regDocuments.filter((d) => d.fileUrl && d.status === "PRESENT"));
+      }
     }).catch(() => {});
     return () => { cancelled = true; };
   }, [p.id]);
@@ -205,7 +213,7 @@ function ProductPage({ t, lang, store, go, params }) {
           {p.regNum && <li className="pdp-brief-reg">{t.spec_reg}</li>}
         </ul>
 
-        <div className="pdp-info">
+        <div className="pdp-buy-col">
           {p.variants && p.variants.length > 0 && (
             <div className="pdp-variants">
               <div className="pv-label">{t.variants}</div>
@@ -226,18 +234,29 @@ function ProductPage({ t, lang, store, go, params }) {
             </div>
           )}
         </div>
-      </div>
 
-      {hasMedia && cur.type !== "video" && lightbox && (
-        <div className="pdp-lightbox" onClick={() => setLightbox(false)}>
-          <button className="pdp-lightbox-close" onClick={() => setLightbox(false)}><Icon name="x" size={26} /></button>
-          <img src={cur.src} alt={name} onClick={(e) => e.stopPropagation()} />
-        </div>
-      )}
+        {/* «Похожие товары» — по вертикали продолжает карточку цены (тот же
+            столбец сетки), по горизонтали начинается на уровне вкладок. */}
+        {related.length > 0 && (
+          <div className="pdp-lower-side">
+            <div className="pdp-side-h">{lang === "uz" ? "O'xshash mahsulotlar" : lang === "en" ? "Similar products" : "Похожие товары"}</div>
+            {related.slice(0, 3).map((rp) => {
+              const rname = tri(lang, rp.ru, rp.uz, rp.en);
+              return (
+                <div key={rp.id} className="pdp-side-card" onClick={() => go("product", { id: rp.id })}>
+                  <img src={rp.img} alt="" />
+                  <div className="psc-info">
+                    <div className="psc-name">{rname}</div>
+                    <StockTag stock={rp.stock} t={t} />
+                    {rp.price ? <Price value={rp.price} t={t} /> : <span className="psc-onreq">{t.price_on_request}</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
 
-      {/* tabs + «Похожие товары» — единый ряд, как на референсе */}
-      <div className="pdp-lower">
-        <div className="pdp-lower-main">
+        <div className="pdp-tabs-wrap">
           <div className="tabs">
             {[["desc", t.tab_desc], ["specs", t.tab_specs]].concat(p.kit && p.kit.length > 0 ? [["kit", t.tab_kit]] : []).concat([["delivery", t.tab_delivery], ["docs", t.tab_docs]]).map(([id, label]) => (
               <button key={id} className={"tab " + (tab === id ? "on" : "")} onClick={() => setTab(id)}>{label}</button>
@@ -323,27 +342,22 @@ function ProductPage({ t, lang, store, go, params }) {
         {tab === "docs" && (
           (() => {
             const dl = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
-            // real documents uploaded in the admin take priority
-            if (p.docFiles && p.docFiles.length > 0) {
+            // реальные документы, загруженные в админку (RegDocument.fileUrl) — приоритет
+            if (regDocs && regDocs.length > 0) {
               const typeLabel = {
-                reg: dl("Регистрационное удостоверение", "Roʻyxat guvohnomasi", "Registration certificate"),
-                cert: dl("Сертификат", "Sertifikat", "Certificate"),
-                manual: dl("Инструкция / руководство", "Qoʻllanma", "Manual"),
-                passport: dl("Паспорт изделия", "Buyum pasporti", "Device passport"),
-                warranty: dl("Гарантия", "Kafolat", "Warranty"),
-                other: dl("Документ", "Hujjat", "Document"),
+                RU: dl("Регистрационное удостоверение", "Roʻyxat guvohnomasi", "Registration certificate"),
+                CERTIFICATE: dl("Сертификат соответствия", "Muvofiqlik sertifikati", "Certificate of conformity"),
+                DECLARATION: dl("Декларация соответствия", "Muvofiqlik deklaratsiyasi", "Declaration of conformity"),
+                CE: dl("Сертификат CE", "CE sertifikati", "CE certificate"),
+                ISO: dl("Сертификат ISO", "ISO sertifikati", "ISO certificate"),
               };
-              const fmtSize = (b) => !b ? "" : b > 1e6 ? (b / 1e6).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1e3)) + " KB";
               return (
                 <div>
-                  {p.docFiles.map((d, i) => (
-                    <div key={i} className="doc-row">
-                      <span className="dr-ic"><Icon name={(d.mime || "").startsWith("image") ? "image" : "doc"} size={26} /></span>
-                      <div>
-                        <div style={{ fontWeight: 600 }}>{d.title}</div>
-                        <div className="dr-meta">{typeLabel[d.docType] || typeLabel.other}{d.size ? " · " + fmtSize(d.size) : ""}</div>
-                      </div>
-                      <a className="btn btn-ghost" href={d.src} download={d.title} target="_blank" rel="noopener">
+                  {regDocs.map((d, i) => (
+                    <div key={d.id || i} className="doc-row">
+                      <span className="dr-ic"><Icon name="doc" size={26} /></span>
+                      <div style={{ fontWeight: 600 }}>{typeLabel[d.type] || dl("Паспорт", "Pasport", "Passport")}</div>
+                      <a className="btn btn-ghost" href={d.fileUrl} target="_blank" rel="noopener">
                         <Icon name="download" size={16} />{dl("Скачать", "Yuklab olish", "Download")}
                       </a>
                     </div>
@@ -377,26 +391,14 @@ function ProductPage({ t, lang, store, go, params }) {
         )}
           </div>
         </div>
-
-        {related.length > 0 && (
-          <div className="pdp-lower-side">
-            <div className="pdp-side-h">{lang === "uz" ? "O'xshash mahsulotlar" : lang === "en" ? "Similar products" : "Похожие товары"}</div>
-            {related.slice(0, 3).map((rp) => {
-              const rname = tri(lang, rp.ru, rp.uz, rp.en);
-              return (
-                <div key={rp.id} className="pdp-side-card" onClick={() => go("product", { id: rp.id })}>
-                  <img src={rp.img} alt="" />
-                  <div className="psc-info">
-                    <div className="psc-name">{rname}</div>
-                    <StockTag stock={rp.stock} t={t} />
-                    {rp.price ? <Price value={rp.price} t={t} /> : <span className="psc-onreq">{t.price_on_request}</span>}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
+
+      {hasMedia && cur.type !== "video" && lightbox && (
+        <div className="pdp-lightbox" onClick={() => setLightbox(false)}>
+          <button className="pdp-lightbox-close" onClick={() => setLightbox(false)}><Icon name="x" size={26} /></button>
+          <img src={cur.src} alt={name} onClick={(e) => e.stopPropagation()} />
+        </div>
+      )}
 
       {/* accessories */}
       {accs.length > 0 && (
