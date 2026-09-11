@@ -13,6 +13,12 @@ const ON_REQUEST_THRESHOLD = 90000000; // дорогое капитальное 
 function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
   const onRequest = p.priceOnRequest || p.showPrice === false || !(basePrice > 0) || basePrice >= ON_REQUEST_THRESHOLD;
   const inCart = store.cart.some((c) => c.id === p.id);
+  const inWish = store.wishlist.includes(p.id);
+  const wishBtn = (
+    <button className={"pdp-wish-btn " + (inWish ? "on" : "")} title={t.wishlist} onClick={() => store.toggleWish(p.id)}>
+      <Icon name={inWish ? "heartFill" : "heart"} size={20} />
+    </button>
+  );
 
   if (onRequest) {
     return (
@@ -21,9 +27,12 @@ function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
           <div className="por-label"><Icon name="spark" size={16} />{t.price_on_request}</div>
           <div className="por-note">{t.price_on_request_note}</div>
         </div>
-        <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => window.__openQuote && window.__openQuote(p)}>
-          <Icon name="doc" size={20} />{t.request_quote}
-        </button>
+        <div className="pdp-buy-row">
+          <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => window.__openQuote && window.__openQuote(p)}>
+            <Icon name="doc" size={20} />{t.request_quote}
+          </button>
+          {wishBtn}
+        </div>
       </div>
     );
   }
@@ -40,6 +49,7 @@ function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
         <button className={"btn btn-buy " + (inCart ? "btn-dark" : "btn-primary")} onClick={() => store.addToCart(p.id, qty)}>
           {inCart ? t.in_cart : (t.buy_now || t.add_to_cart)}
         </button>
+        {wishBtn}
       </div>
       <NotifyAvailable t={t} lang={lang} product={p} />
     </div>
@@ -109,6 +119,9 @@ function ProductPage({ t, lang, store, go, params }) {
     : P.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 4);
   const accs = P.filter(x => (p.accessories||[]).includes(x.id));
   const cons = P.filter(x => (p.consumables||[]).includes(x.id));
+  // «С этим товаром покупают» — внизу страницы: сначала реальные аксессуары/расходники,
+  // если для товара они не заданы — остаток из «Похожие товары», не попавший в сайдбар.
+  const boughtTogether = (accs.length || cons.length) ? accs.concat(cons) : related.slice(3, 7);
 
   // gallery media: real images + optional YouTube video, else placeholders
   const ytId = (() => {
@@ -213,7 +226,7 @@ function ProductPage({ t, lang, store, go, params }) {
 
           {related.length > 0 && (
             <div className="pdp-side-related">
-              <div className="pdp-side-h">{t.related}</div>
+              <div className="pdp-side-h">{lang === "uz" ? "O'xshash mahsulotlar" : lang === "en" ? "Similar products" : "Похожие товары"}</div>
               {related.slice(0, 3).map((rp) => {
                 const rname = tri(lang, rp.ru, rp.uz, rp.en);
                 return (
@@ -410,6 +423,19 @@ function ProductPage({ t, lang, store, go, params }) {
         </section>
       )}
 
+      {/* «С этим товаром покупают» — сопутствующие товары, опущено вниз страницы */}
+      {boughtTogether.length > 0 && (
+        <section className="section" style={{ paddingTop: 8 }}>
+          <div className="wrap">
+            <div className="sec-head"><h2 style={{ fontSize: 22 }}>{t.related}</h2></div>
+            <div className="grid-4">
+              {boughtTogether.map(bp => (
+                <ProductCard key={bp.id} product={bp} t={t} lang={lang} store={store} onOpen={pr => go("product", { id: pr.id })} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
