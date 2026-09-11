@@ -2172,16 +2172,16 @@ body{background:var(--surface)}
 /* «Похожие товары» — карточки-строки по образцу medcomp.ru: фото+название+
    наличие сверху, цена и кнопка «в корзину» отдельной строкой снизу.
    Ниже, чем стандартная карточка каталога — это компактный сайдбар-виджет. */
-.pdp-side-card{display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--line-soft);border-radius:var(--r);cursor:pointer;transition:border-color .15s,box-shadow .15s;background:var(--surface,#fff)}
+.pdp-side-card{display:flex;flex-direction:column;gap:4px;padding:8px;border:1px solid var(--line-soft);border-radius:var(--r-sm);cursor:pointer;transition:border-color .15s,box-shadow .15s;background:var(--surface,#fff)}
 .pdp-side-card:hover{border-color:var(--blue-400);box-shadow:var(--sh-sm)}
-.pdp-side-card .psc-top{display:flex;gap:10px;align-items:flex-start}
-.pdp-side-card .psc-img{width:52px;height:52px;flex-shrink:0;border-radius:var(--r-sm);overflow:hidden;background:#fff;border:1px solid var(--line-soft)}
+.pdp-side-card .psc-top{display:flex;gap:8px;align-items:center}
+.pdp-side-card .psc-img{width:40px;height:40px;flex-shrink:0;border-radius:var(--r-sm);overflow:hidden;background:#fff;border:1px solid var(--line-soft)}
 .pdp-side-card .psc-img img{display:block;width:100%;height:100%;object-fit:contain}
-.pdp-side-card .psc-info{min-width:0;flex:1;display:flex;flex-direction:column;gap:4px;justify-content:center}
-.pdp-side-card .stk-in{background:none;border:none;padding:0;color:var(--success);font-size:var(--fs-1)}
-.pdp-side-card .psc-name{font-size:var(--fs-3);font-weight:700;color:var(--ink);line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
+.pdp-side-card .psc-info{min-width:0;flex:1;display:flex;flex-direction:column;gap:2px;justify-content:center}
+.pdp-side-card .stk-in{background:none;border:none;padding:0;color:var(--success);font-size:var(--fs-1);line-height:1}
+.pdp-side-card .psc-name{font-size:var(--fs-2);font-weight:700;color:var(--ink);line-height:1.25;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical}
 .pdp-side-card .psc-foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.pdp-side-card .psc-foot .price{font-size:var(--fs-4);font-weight:800}
+.pdp-side-card .psc-foot .price{font-size:var(--fs-3);font-weight:800}
 .pdp-side-card .psc-onreq{font-size:var(--fs-3);color:var(--slate-400)}
 .pdp-side-card .psc-cart{flex-shrink:0;width:40px;height:40px;border-radius:var(--r-sm);border:none;background:var(--bg-2);color:var(--slate-600);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,color .15s}
 .pdp-side-card .psc-cart:hover{background:var(--blue-600);color:#fff}
@@ -3856,7 +3856,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/hero-wave.js?v=1787415411"></script>
 <script src="dist/app/home-page.js?v=1789112763"></script>
 <script type="text/soi-deferred" data-src="dist/app/catalog.js?v=1788578264"></script>
-<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789158700009457000"></script>
+<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789158899554053000"></script>
 <script type="text/soi-deferred" data-src="dist/app/cart.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/brand-profile.js?v=1789067132"></script>
 <script type="text/soi-deferred" data-src="dist/app/company-info.js?v=1788878786"></script>
