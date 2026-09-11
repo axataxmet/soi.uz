@@ -7,6 +7,41 @@ function rtIsHtmlSite(s) { return /<(p|h[1-6]|ul|ol|li|strong|em|b|i|br|div)\b/i
 const VAT_RATE = 0.12;
 const ON_REQUEST_THRESHOLD = 90000000; // дорогое капитальное оборудование — цена по запросу
 
+/* обложка-заглушка для документа без превью (та же схема, что в LicensesPage) */
+function PdpDocFallback() {
+  return (
+    <svg viewBox="0 0 160 212" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="160" height="212" rx="6" fill="var(--surface,#fff)" stroke="var(--line)" />
+      <rect x="20" y="24" width="120" height="10" rx="3" fill="var(--bg-2)" />
+      <rect x="20" y="48" width="120" height="5" rx="2.5" fill="var(--bg-2)" />
+      <rect x="20" y="60" width="120" height="5" rx="2.5" fill="var(--bg-2)" />
+      <rect x="20" y="72" width="104" height="5" rx="2.5" fill="var(--bg-2)" />
+      <rect x="20" y="92" width="120" height="5" rx="2.5" fill="var(--bg-2)" />
+      <rect x="20" y="104" width="112" height="5" rx="2.5" fill="var(--bg-2)" />
+      <circle cx="40" cy="170" r="15" stroke="var(--blue-600)" strokeWidth="1.5" opacity=".7" />
+      <rect x="66" y="164" width="54" height="5" rx="2.5" fill="var(--line-soft)" />
+      <rect x="66" y="174" width="40" height="5" rx="2.5" fill="var(--line-soft)" />
+    </svg>
+  );
+}
+
+/* миниатюра первой страницы PDF — тот же общий рендер window.rvpRenderPdfPage,
+   что и на /documents и /reviews, просто без ленивого IntersectionObserver:
+   на карточке товара документов всегда мало (2-3), рендерить их все сразу не проблема. */
+function PdpDocThumb({ url }) {
+  const [src, setSrc] = React.useState(null);
+  const [err, setErr] = React.useState(false);
+  React.useEffect(() => {
+    let on = true; setSrc(null); setErr(false);
+    if (!url || !window.rvpRenderPdfPage) { setErr(true); return; }
+    window.rvpRenderPdfPage(url, 240).then((d) => { if (on) setSrc(d.src); }).catch(() => on && setErr(true));
+    return () => { on = false; };
+  }, [url]);
+  if (src && !err) return <img src={src} alt="" loading="lazy" />;
+  if (!err) return <div className="pdp-doc-skel" aria-hidden="true" />;
+  return <PdpDocFallback />;
+}
+
 /* Карточка товара сделана по образцу medcomp.ru: минимальный блок покупки
    без опта, переключателя НДС и второстепенных кнопок (wishlist/compare/КП) —
    только статус НДС, цена, количество и «Купить». */
@@ -227,6 +262,12 @@ function ProductPage({ t, lang, store, go, params }) {
             </div>
           )}
           <B2BPriceBlock p={p} t={t} lang={lang} basePrice={effectivePrice} qty={qty} setQty={setQty} store={store} />
+          {brand.name && (
+            <div className="pdp-mfr-link">
+              <span>{brand.name}{brand.country_ru ? ", " + tri(lang, brand.country_ru, brand.country_uz, brand.country_en) : ""}</span>
+              <a onClick={() => go("partners")}>{lang === "uz" ? "Ishlab chiqaruvchining boshqa mahsulotlari" : lang === "en" ? "Other products by this manufacturer" : "Другие товары производителя"}</a>
+            </div>
+          )}
         </div>
 
         {/* «Похожие товары» — по вертикали продолжает карточку цены (тот же
@@ -346,15 +387,12 @@ function ProductPage({ t, lang, store, go, params }) {
                 ISO: dl("Сертификат ISO", "ISO sertifikati", "ISO certificate"),
               };
               return (
-                <div>
+                <div className="pdp-doc-grid">
                   {regDocs.map((d, i) => (
-                    <div key={d.id || i} className="doc-row">
-                      <span className="dr-ic"><Icon name="doc" size={26} /></span>
-                      <div style={{ fontWeight: 600 }}>{typeLabel[d.type] || dl("Паспорт", "Pasport", "Passport")}</div>
-                      <a className="btn btn-ghost" href={d.fileUrl} target="_blank" rel="noopener">
-                        <Icon name="download" size={16} />{dl("Скачать", "Yuklab olish", "Download")}
-                      </a>
-                    </div>
+                    <a key={d.id || i} className="pdp-doc-card" href={d.fileUrl} target="_blank" rel="noopener">
+                      <div className="pdp-doc-thumb"><PdpDocThumb url={d.fileUrl} /></div>
+                      <div className="pdp-doc-name">{typeLabel[d.type] || dl("Паспорт", "Pasport", "Passport")}</div>
+                    </a>
                   ))}
                 </div>
               );
@@ -369,14 +407,12 @@ function ProductPage({ t, lang, store, go, params }) {
               dl("Регистрационное удостоверение", "Roʻyxatdan oʻtkazish guvohnomasi", "Registration certificate"),
             ];
             return (
-              <div>
+              <div className="pdp-doc-grid">
                 {docNames.map((n, i) => (
-                  <div key={i} className="doc-row">
-                    <span className="dr-ic"><Icon name="doc" size={26} /></span>
-                    <div style={{ fontWeight: 600 }}>{n}</div>
-                    <button className="btn btn-ghost" onClick={() => window.__openQuote && window.__openQuote(p)}>
-                      {dl("Запросить", "So'rash", "Request")}
-                    </button>
+                  <div key={i} className="pdp-doc-card pdp-doc-card--request" onClick={() => window.__openQuote && window.__openQuote(p)}>
+                    <div className="pdp-doc-thumb"><PdpDocFallback /></div>
+                    <div className="pdp-doc-name">{n}</div>
+                    <div className="pdp-doc-req">{dl("Запросить", "So'rash", "Request")}</div>
                   </div>
                 ))}
               </div>
