@@ -600,7 +600,7 @@ function CatalogPage({ t, lang, store, go, params }) {
                   ) : (
                     <div className="cat-prod-grid">
                       {catProducts.map((p) => (
-                        <ProductTile key={p.id} product={p} t={t} lang={lang} store={store}
+                        <ProductTile key={p.id} product={p} t={t} lang={lang} store={store} buyLabel={t.buy_now}
                           onOpen={(pr) => go("product", { id: pr.id })} />
                       ))}
                     </div>
@@ -640,7 +640,7 @@ function CatalogPage({ t, lang, store, go, params }) {
               {view === "grid" && group ? (
                 <div className="cat-prod-grid">
                   {shown.map((p) => (
-                    <ProductTile key={p.id} product={p} t={t} lang={lang} store={store}
+                    <ProductTile key={p.id} product={p} t={t} lang={lang} store={store} buyLabel={t.buy_now}
                       onOpen={(pr) => go("product", { id: pr.id, fromDir: params.dir })} />
                   ))}
                 </div>
