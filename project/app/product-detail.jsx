@@ -517,7 +517,7 @@ function ProductPage({ t, lang, store, go, params }) {
               <div className="pdp-mlk-track" ref={mayLikeRef}>
                 {mayLike.map(bp => (
                   <div className="pdp-mlk-item" key={bp.id}>
-                    <ProductCard product={bp} t={t} lang={lang} store={store} onOpen={pr => go("product", { id: pr.id })} />
+                    <ProductTile product={bp} t={t} lang={lang} store={store} onOpen={pr => go("product", { id: pr.id })} buyLabel={t.buy_now} />
                   </div>
                 ))}
               </div>

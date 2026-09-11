@@ -298,7 +298,7 @@ function ProductCard({ product, t, lang, store, onOpen }) {
    (чипы поверх фото, артикул с наличием одной строкой под фото, блок сроков и
    документов, две кнопки в подвале), и переставлять его CSS-ом пришлось бы
    через order — а он живёт на главной, в корзине, у брендов и в сравнении. */
-function ProductTile({ product, t, lang, store, onOpen }) {
+function ProductTile({ product, t, lang, store, onOpen, buyLabel }) {
   const p = product;
   const inCart = store.cart.some((c) => c.id === p.id);
   const inCmp = store.compare.includes(p.id);
@@ -321,7 +321,7 @@ function ProductTile({ product, t, lang, store, onOpen }) {
       <div className="ptile-price"><Price value={p.price} old={p.old} t={t} size="sm" /></div>
       <button className={"ptile-buy " + (inCart ? "added" : "")}
         onClick={(e) => { e.stopPropagation(); store.addToCart(p.id, 1); }}>
-        {inCart ? t.in_cart : t.buy}
+        {inCart ? t.in_cart : (buyLabel || t.buy)}
       </button>
     </article>
   );
