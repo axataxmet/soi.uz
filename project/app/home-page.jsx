@@ -29,7 +29,7 @@ const HERO_DEFAULTS = {
   ctaPrimary: { ru: "О компании", uz: "Kompaniya haqida", en: "About us" },
   ctaSecondary: { ru: "Электронный каталог", uz: "Elektron katalog", en: "E-catalog" },
   trust1: { ru: "5+ лет опыта", uz: "5+ yil tajriba", en: "5+ years" },
-  trust2: { ru: "120+ мировых брендов", uz: "120+ jahon brendi", en: "120+ global brands" },
+  trust2: { ru: "22+ мировых брендов", uz: "22+ jahon brendi", en: "22+ global brands" },
   trust3: { ru: "14 регионов Узбекистана", uz: "O'zbekistonning 14 hududi", en: "14 regions" },
 };
 
@@ -50,7 +50,9 @@ const SITE_FIGURES_DEFAULTS = {
      Значение переопределяется настройкой site_figures из админки — правку
      тут увидят только пока в админке не задано другое число. */
   catalog: "112",           // позиций в каталоге
-  brands: "",             // мировых брендов
+  /* «120+ брендов» было фикцией того же рода — было пусто ("") до 11.09.2026.
+     Реальных Manufacturer-записей в базе 22 (проверено через /api/manufacturers). */
+  brands: "22",           // мировых брендов
   trained: "1000",        // обученных специалистов
   service: "50",          // успешно выполненных сервисных работ
   regions: "14",          // регионов доставки
@@ -206,7 +208,7 @@ function HeroVideoSlot({ t, lang }) {
           <div className="hvs-stats">
             {[
               {n:"112+", l:"наименований", ic:"grid", c:"var(--blue-600)"},
-              {n:"120+",   l:"брендов",       ic:"award", c:"var(--accent)"},
+              {n:"22+",   l:"брендов",       ic:"award", c:"var(--accent)"},
               {n:"14",    l:"регионов",      ic:"pin",   c:"var(--danger)"},
               {n:(new Date().getFullYear() - parseInt(localStorage.getItem("soi_founded_year")||"2021",10))+"+",    l:"лет на рынке",  ic:"star",  c:"#7c5cbf"},
             ].map((s,i) => (
@@ -554,7 +556,7 @@ function HeroSignals({ lang, go }) {
       d: lv("в наличии и под заказ", "mavjud va buyurtmaga", "in stock & to order"),
       act: () => go("catalog", {}) },
     { ic: "check", cls: "s2", bg: "var(--line-2)", c: "var(--accent)",
-      t: lv("120+ брендов", "120+ brend", "120+ brands"),
+      t: lv("22+ брендов", "22+ brend", "22+ brands"),
       d: lv("официальные поставки", "rasmiy yetkazib berish", "official supply"),
       act: () => go("brands", {}) },
     { ic: "truck", cls: "s3", bg: "var(--bg-2)", c: "var(--blue-600)",
@@ -2077,7 +2079,7 @@ function SoiEcosystem({ lang, go }) {
             <div className="eco-head"><div className="eco-ic"><Icon name="award" size={22} /></div></div>
             <div className="eco-num"><EcoCount value={val("brands_num")} /><span>{val("brands_unit")}</span></div>
             <h3>{_lv(lang, "Мировые бренды", "Jahon brendlari", "Global brands")}</h3>
-            <p>{_lv(lang, "Официальные поставки от производителей из 12 стран.", "12 mamlakat ishlab chiqaruvchilaridan rasmiy yetkazib berish.", "Official supply from manufacturers across 12 countries.")}</p>
+            <p>{_lv(lang, "Официальные поставки от производителей из 5 стран.", "5 mamlakat ishlab chiqaruvchilaridan rasmiy yetkazib berish.", "Official supply from manufacturers across 5 countries.")}</p>
             {showWall && (
               <div className="eco-brands">
                 {brandWall.map((b) => (
