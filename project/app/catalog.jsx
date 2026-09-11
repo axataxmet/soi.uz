@@ -268,8 +268,11 @@ function CatalogPage({ t, lang, store, go, params }) {
      фильтров, без плашки уровня и счётчика позиций — решение заказчика
      привести уровень подраздела к виду уровня категории. */
   const browseTiles = browseSubs || browseGroupTiles;
-  // Уровень 5 идёт без сайдбара — как витрины разделов, во всю ширину.
-  const noSidebar = browseTiles || !!group;
+  // Витрины разделов (тайлы подкатегорий/групп) — без сайдбара, во всю ширину.
+  // Страница товарной группы (уровень 5) сайдбар, наоборот, теперь получает —
+  // по просьбе заказчика, как на referen-странице medcomp (фильтр по бренду,
+  // наличию, цене прямо на уровне товаров конкретной группы).
+  const noSidebar = browseTiles;
   const goGroupTile = (g) => go("catalog", { cat: catId, sub: subIdx, group: g.slug || g._id });
   // navigate from a group tile to its category + subcategory listing
   const goGroup = (g) => {
@@ -509,11 +512,13 @@ function CatalogPage({ t, lang, store, go, params }) {
             </div>
             {!browseTiles && <div className={"cat-bar-controls" + (group ? " plain" : "")}>
               {group && <ViewSwitch value={view} onChange={(v) => go("catalog", Object.assign({}, params, { view: v }))} />}
-              {!group && <button className="flt-trigger" onClick={() => setFiltersOpen(true)}>
+              {/* Кнопка фильтров на мобильном — теперь и на странице товарной
+                  группы, раз сайдбар там снова есть (см. noSidebar выше). */}
+              <button className="flt-trigger" onClick={() => setFiltersOpen(true)}>
                 <Icon name="filter" size={17} />
                 {t.cat_filters}
                 {hasFilters ? <span className="flt-trigger-dot" /> : null}
-              </button>}
+              </button>
               <div className="sort-sel">
                 <label>{t.cat_sort}:</label>
                 <select value={sort} onChange={(e) => setSort(e.target.value)}>
