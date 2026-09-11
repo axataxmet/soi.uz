@@ -138,9 +138,13 @@ function BrandPage({ t, lang, store, go, params }) {
             <div className="sub">{cats.map(c => catName(c)).join(" · ")}</div>
           </div>
         </div>
-        <div className="grid-4">
+        {/* ProductTile — тот же корпус карточки (.ptile), что и в каталоге
+            (сетка товарной группы, «Похожие товары» и т.д.). Раньше здесь
+            стоял старый ProductCard (.card) — другая разметка и стиль,
+            карточки бренда визуально не совпадали с остальным каталогом. */}
+        <div className="cat-prod-grid">
           {prods.map(p => (
-            <ProductCard key={p.id} product={p} t={t} lang={lang} store={store} onOpen={pr => go("product", { id: pr.id })} />
+            <ProductTile key={p.id} product={p} t={t} lang={lang} store={store} buyLabel={t.buy_now} onOpen={pr => go("product", { id: pr.id })} />
           ))}
         </div>
 
