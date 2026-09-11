@@ -2145,7 +2145,7 @@ body{background:var(--surface)}
 .pdp-sku{font-family:var(--mono);font-size:var(--fs-3);color:var(--slate-400)}
 
 /* краткие характеристики буллетами рядом с фото — средняя колонка */
-.pdp-brief-specs{list-style:none;margin:0;padding:0 0 0 8px;display:flex;flex-direction:column;gap:7px}
+.pdp-brief-specs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
 .pdp-brief-specs li{position:relative;padding-left:16px;font-size:var(--fs-3);line-height:1.3;color:var(--slate-700)}
 .pdp-brief-specs li::before{content:"";position:absolute;left:0;top:6px;width:6px;height:6px;border-radius:50%;background:var(--blue-600)}
 .pdp-brief-reg{color:var(--blue-600)!important;font-weight:700}
@@ -2154,7 +2154,7 @@ body{background:var(--surface)}
 .pdp-buy-status{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;font-size:var(--fs-3)}
 .pdp-instock{color:var(--slate-500);font-size:var(--fs-3)}
 .pdp-vat-static{color:var(--slate-400);font-size:var(--fs-3)}
-.pdp-buy-links{display:flex;gap:18px;margin-top:14px}
+.pdp-buy-links{display:flex;justify-content:space-between;gap:18px;margin-top:14px}
 .pdp-buy-links a{font-size:var(--fs-3);color:var(--blue-600);text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer}
 .pdp-price-lg{font-size:var(--fs-9,32px);font-weight:800;color:var(--ink);margin-bottom:16px}
 .pdp-buy-row{display:flex;align-items:stretch;gap:12px}
@@ -2196,9 +2196,11 @@ body{background:var(--surface)}
 .pdp-mlk-track::-webkit-scrollbar{display:none}
 .pdp-mlk-item{flex:0 0 200px;scroll-snap-align:start;display:flex}
 .pdp-mlk-item .ptile{width:100%}
-.pdp-mlk-item .ptile-buy{background:none;border:1.5px solid var(--blue-600);color:var(--blue-600)}
-.pdp-mlk-item .ptile-buy:hover{background:var(--blue-600);color:#fff;filter:none}
-.pdp-mlk-item .ptile-buy.added{background:none;border-color:var(--success);color:var(--success)}
+/* та же заливка/цвета, что у кнопки «Купить» в блоке цены (.btn-buy) */
+.pdp-mlk-item .ptile-buy{background:var(--surface);color:var(--blue-700);border:1.5px solid var(--line);border-radius:var(--r-sm);height:40px;font-weight:700;filter:none}
+.pdp-mlk-item .ptile-buy:hover{background:var(--blue-600);color:#fff;border-color:transparent;filter:none}
+.pdp-mlk-item .ptile-buy.added{background:var(--success-bg);color:var(--success);border-color:transparent}
+[data-theme="dark"] .pdp-mlk-item .ptile-buy{background:var(--bg-2);border-color:var(--line)}
 .pdp-mlk-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:2;flex-shrink:0;width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:var(--surface,#fff);color:var(--slate-600);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:var(--sh-sm);transition:background .15s,color .15s,border-color .15s}
 .pdp-mlk-nav-l{left:-20px}
 .pdp-mlk-nav-r{right:-20px}
