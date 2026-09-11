@@ -120,6 +120,12 @@ function ProductPage({ t, lang, store, go, params }) {
   const [tab, setTab] = useState("specs");
   const [thumb, setThumb] = useState(0);
   const [lightbox, setLightbox] = useState(false);
+  const thumbsRef = React.useRef(null);
+  const scrollThumbs = (dir) => {
+    const el = thumbsRef.current;
+    if (!el) return;
+    el.scrollBy({ top: dir * (66 * 4), behavior: "smooth" });
+  };
   const [variantIdx, setVariantIdx] = useState(0);
   const [fullImages, setFullImages] = useState(null);
   const [regDocs, setRegDocs] = useState(null);
@@ -231,14 +237,26 @@ function ProductPage({ t, lang, store, go, params }) {
       <div className="pdp">
         <div className="pdp-gallery">
           {media.length > 1 && (
-            <div className="pdp-thumbs">
-              {media.map((m, i) => (
-                <div key={i} className={"pdp-thumb " + (thumb === i ? "on" : "")} onClick={() => setThumb(i)}>
-                  {m.type === "video"
-                    ? <div className="pdp-thumb-vid"><Icon name="play" size={22} /></div>
-                    : <img src={m.src} alt="" />}
-                </div>
-              ))}
+            <div className="pdp-thumbs-col">
+              {media.length > 4 && (
+                <button type="button" className="pdp-thumb-nav" onClick={() => scrollThumbs(-1)} aria-label={lang === "uz" ? "Yuqoriga" : lang === "en" ? "Up" : "Вверх"}>
+                  <Icon name="chevronRight" size={16} style={{ transform: "rotate(-90deg)" }} />
+                </button>
+              )}
+              <div className="pdp-thumbs" ref={thumbsRef}>
+                {media.map((m, i) => (
+                  <div key={i} className={"pdp-thumb " + (thumb === i ? "on" : "")} onClick={() => setThumb(i)}>
+                    {m.type === "video"
+                      ? <div className="pdp-thumb-vid"><Icon name="play" size={22} /></div>
+                      : <img src={m.src} alt="" />}
+                  </div>
+                ))}
+              </div>
+              {media.length > 4 && (
+                <button type="button" className="pdp-thumb-nav" onClick={() => scrollThumbs(1)} aria-label={lang === "uz" ? "Pastga" : lang === "en" ? "Down" : "Вниз"}>
+                  <Icon name="chevronRight" size={16} style={{ transform: "rotate(90deg)" }} />
+                </button>
+              )}
             </div>
           )}
           <div className="pdp-main-img" onClick={() => hasMedia && cur.type !== "video" && setLightbox(true)}>
