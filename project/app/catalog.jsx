@@ -88,6 +88,10 @@ function CatalogPage({ t, lang, store, go, params }) {
   const [brandSel, setBrandSel] = useState(params.brand ? [params.brand] : []);
   const [stockSel, setStockSel] = useState(params.stock ? [params.stock] : []);
   const [featSel, setFeatSel] = useState([]);
+  // Фильтры по характеристикам — свои для каждой товарной группы (весы
+  // фильтруются по пределу взвешивания, ЛОР-комбайны — по комплектации и
+  // т.д.), а не один общий набор на весь каталог. { attrsKey: [value, ...] }
+  const [attrSel, setAttrSel] = useState({});
   const lvf = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const featOpts = [
     { id: "fast", label: lvf("Быстрая доставка", "Tez yetkazish", "Fast delivery"), test: (p) => p.stock === "in" },
@@ -111,13 +115,14 @@ function CatalogPage({ t, lang, store, go, params }) {
     setBrandSel(params.brand ? [params.brand] : []);
     setStockSel(params.stock ? [params.stock] : []);
     setFeatSel([]);
+    setAttrSel({});
     setMinP(""); setMaxP("");
   }, [params.cat, params.sub, params.group, params.brand, params.stock, params.badge, params.q, params.dir]);
   // Вид списка живёт в адресе (?view=list|grid) — ссылка на страницу воспроизводится целиком.
   useEffect(() => { setView(params.view === "grid" ? "grid" : "list"); }, [params.view]);
 
   // reset visible count when filters/sort/route change
-  useEffect(() => { setVisible(PAGE); }, [params.cat, params.sub, params.brand, params.stock, params.badge, params.q, params.dir, sort, brandSel, stockSel, featSel, minP, maxP]);
+  useEffect(() => { setVisible(PAGE); }, [params.cat, params.sub, params.brand, params.stock, params.badge, params.q, params.dir, sort, brandSel, stockSel, featSel, attrSel, minP, maxP]);
 
   /* В адресе категория стоит по slug (#/catalog/furniture), а товары и группы
      ссылаются на её id. Приводим к id один раз — дальше по коду только catId. */
@@ -304,6 +309,41 @@ function CatalogPage({ t, lang, store, go, params }) {
   // brands available in base for the filter list
   const brandsInBase = brands.filter((b) => base.some((p) => p.brand === b.id));
 
+  /* Фильтры по характеристикам — не общий набор на весь каталог, а свои
+     для каждой товарной группы: считаем facets только из attrs товаров,
+     реально попавших в base (эта группа/подраздел/категория), и только
+     на странице конкретной товарной группы, где attrs однородны (весы —
+     по пределу взвешивания, ЛОР-комбайны — по комплектации и т.п.). На
+     более широких срезах (вся категория) характеристики разных типов
+     оборудования вперемешку не складываются в осмысленный список —
+     там фильтр остаётся общим (бренд/наличие/цена). Raw-ключ — он же и
+     готовая подпись (см. buildProducts в catalog-remote.js: ярлык берётся
+     из attrSchema, а без него — сырой ключ, который поэтому и пишется
+     человекочитаемым текстом при заполнении данных). */
+  const attrFacets = groupId ? (() => {
+    const values = {};
+    base.forEach((p) => {
+      const a = p.attrs || {};
+      Object.keys(a).forEach((k) => {
+        if (k.charAt(0) === "_") return;
+        const v = a[k];
+        if (v == null || v === "") return;
+        const val = Array.isArray(v) ? v.join(", ") : String(v);
+        (values[k] || (values[k] = new Set())).add(val);
+      });
+    });
+    return Object.keys(values)
+      .map((k) => ({ key: k, values: [...values[k]].sort((a, b) => a.localeCompare(b, lang)) }))
+      // Ключ с одним и тем же значением у всех товаров группы — не фильтр,
+      // а общая характеристика группы; ключ с кучей уникальных значений
+      // (серийники, точные размеры) — тоже не facet, а шум.
+      .filter((f) => f.values.length > 1 && f.values.length <= 8);
+  })() : [];
+  const toggleAttr = (key, val) => setAttrSel((prev) => {
+    const cur = prev[key] || [];
+    const next = cur.includes(val) ? cur.filter((x) => x !== val) : [...cur, val];
+    return Object.assign({}, prev, { [key]: next });
+  });
 
   // apply sidebar filters
   let list = base.filter((p) => {
@@ -314,6 +354,13 @@ function CatalogPage({ t, lang, store, go, params }) {
         const opt = featOpts.find((o) => o.id === f);
         if (opt && !opt.test(p)) return false;
       }
+    }
+    for (const key of Object.keys(attrSel)) {
+      const sel = attrSel[key];
+      if (!sel || !sel.length) continue;
+      const raw = p.attrs ? p.attrs[key] : undefined;
+      const val = Array.isArray(raw) ? raw.join(", ") : String(raw);
+      if (!sel.includes(val)) return false;
     }
     if (minP && p.price < parseInt(minP, 10)) return false;
     if (maxP && p.price > parseInt(maxP, 10)) return false;
@@ -373,8 +420,9 @@ function CatalogPage({ t, lang, store, go, params }) {
     { id: "preorder", label: t.preorder },
   ];
 
-  const hasFilters = brandSel.length || stockSel.length || featSel.length || minP || maxP;
-  const resetAll = () => { setBrandSel([]); setStockSel([]); setFeatSel([]); setMinP(""); setMaxP(""); };
+  const attrSelCount = Object.values(attrSel).reduce((n, arr) => n + (arr ? arr.length : 0), 0);
+  const hasFilters = brandSel.length || stockSel.length || featSel.length || attrSelCount || minP || maxP;
+  const resetAll = () => { setBrandSel([]); setStockSel([]); setFeatSel([]); setAttrSel({}); setMinP(""); setMaxP(""); };
 
   return (
     <div className="wrap">
@@ -446,6 +494,24 @@ function CatalogPage({ t, lang, store, go, params }) {
                 onClick={() => toggle(brandSel, setBrandSel, b.id)} />
             ))}
           </div>
+
+          {/* Фильтры по характеристикам — свои для каждой товарной группы
+              (см. attrFacets выше), поэтому рендерятся только здесь и
+              только когда есть что показать. */}
+          {attrFacets.map((f) => (
+            <div className="flt-grp" key={f.key}>
+              <h4>{f.key}</h4>
+              {f.values.map((v) => (
+                <Checkbox key={v} label={v}
+                  count={base.filter((p) => {
+                    const raw = p.attrs ? p.attrs[f.key] : undefined;
+                    return (Array.isArray(raw) ? raw.join(", ") : String(raw)) === v;
+                  }).length}
+                  on={(attrSel[f.key] || []).includes(v)}
+                  onClick={() => toggleAttr(f.key, v)} />
+              ))}
+            </div>
+          ))}
 
           <div className="flt-grp">
             <h4>{t.cat_availability}</h4>
@@ -539,6 +605,9 @@ function CatalogPage({ t, lang, store, go, params }) {
               {featSel.map((id) => (
                 <span key={id} className="chip">{featOpts.find((f) => f.id === id).label}<button onClick={() => toggle(featSel, setFeatSel, id)}><Icon name="x" size={13} /></button></span>
               ))}
+              {Object.keys(attrSel).flatMap((key) => (attrSel[key] || []).map((v) => (
+                <span key={key + ":" + v} className="chip">{v}<button onClick={() => toggleAttr(key, v)}><Icon name="x" size={13} /></button></span>
+              )))}
               {(minP || maxP) && (
                 <span className="chip">{t.cat_price}: {minP || 0}—{maxP || "∞"}<button onClick={() => { setMinP(""); setMaxP(""); }}><Icon name="x" size={13} /></button></span>
               )}
