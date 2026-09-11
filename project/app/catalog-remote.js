@@ -107,6 +107,7 @@
       }).filter(Boolean);
       var kit = Array.isArray(attrs._kit) ? attrs._kit : [];
       var shipping = attrs._shipping || null;
+      var desc = tx(p.description); // { ru, uz, en } — вкладка «Описание» на карточке товара
 
       var extraCats = groups.slice(1).map(function (gi) {
         var m = groupMap[gi.groupId];
@@ -132,6 +133,7 @@
         specs: specs,
         attrs: attrs, // сырые значения — по ним фасеты уровня 5 фильтруют товары
         kit: kit, shipping: shipping,
+        descFull_ru: desc.ru, descFull_uz: desc.uz, descFull_en: desc.en,
         related: p.related || [], accessories: [], consumables: [],
         glyph: "pulse", _remote: true,
       };

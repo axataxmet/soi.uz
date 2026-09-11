@@ -308,18 +308,21 @@ function ProductPage({ t, lang, store, go, params }) {
         ))}
       </div>
       <div className="tab-body">
-        {tab === "desc" && (
-          (p.descFull || p.descShort)
+        {tab === "desc" && (() => {
+          // API-товары везут descFull отдельно по языкам (descFull_ru/uz/en);
+          // старые demo-товары из localStorage — одной строкой в p.descFull.
+          const descFull = p.descFull || tri(lang, p.descFull_ru, p.descFull_uz, p.descFull_en);
+          return (descFull || p.descShort)
             ? <div className="pdp-desc-rich">
                 {p.descShort && <p className="pdp-desc-lead">{p.descShort}</p>}
-                {p.descFull && (
-                  rtIsHtmlSite(p.descFull)
-                    ? <div className="pdp-desc-html" dangerouslySetInnerHTML={{ __html: p.descFull }} />
-                    : p.descFull.split(/\n{2,}/).map((para, i) => <p key={i}>{para}</p>)
+                {descFull && (
+                  rtIsHtmlSite(descFull)
+                    ? <div className="pdp-desc-html" dangerouslySetInnerHTML={{ __html: descFull }} />
+                    : descFull.split(/\n{2,}/).map((para, i) => <p key={i}>{para}</p>)
                 )}
               </div>
-            : null
-        )}
+            : null;
+        })()}
         {tab === "specs" && (
           <>
           <table className="spec-table">
