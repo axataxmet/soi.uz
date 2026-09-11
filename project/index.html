@@ -2089,9 +2089,9 @@ body{background:var(--surface)}
 .pdp-cmp-link:hover,.pdp-cmp-link.on,.pdp-wish-link:hover{color:var(--blue-600)}
 .pdp-wish-link.on{color:var(--red-500,#ef4444)}
 .pdp{display:grid;grid-template-columns:minmax(280px,.95fr) minmax(220px,.95fr) minmax(260px,.85fr);grid-template-rows:auto auto;grid-template-areas:"gallery specs buy" "tabs tabs side";gap:36px 36px;padding:0 0 28px;align-items:start}
-.pdp-gallery{grid-area:gallery}
-.pdp-brief-specs{grid-area:specs}
-.pdp-buy-col{grid-area:buy}
+.pdp-gallery{grid-area:gallery;align-self:center}
+.pdp-brief-specs{grid-area:specs;align-self:center}
+.pdp-buy-col{grid-area:buy;align-self:center}
 .pdp-tabs-wrap{grid-area:tabs}
 .pdp-lower-side{grid-area:side}
 .pdp-gallery{position:sticky;top:160px;display:flex;gap:12px}
