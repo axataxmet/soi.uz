@@ -227,12 +227,6 @@ function ProductPage({ t, lang, store, go, params }) {
             </div>
           )}
           <B2BPriceBlock p={p} t={t} lang={lang} basePrice={effectivePrice} qty={qty} setQty={setQty} store={store} />
-          {brand.name && (
-            <div className="pdp-mfr-link">
-              <span>{brand.name}{brand.country_ru ? ", " + tri(lang, brand.country_ru, brand.country_uz, brand.country_en) : ""}</span>
-              <a onClick={() => go("partners")}>{lang === "uz" ? "Ishlab chiqaruvchining boshqa mahsulotlari" : lang === "en" ? "Other products by this manufacturer" : "Другие товары производителя"}</a>
-            </div>
-          )}
         </div>
 
         {/* «Похожие товары» — по вертикали продолжает карточку цены (тот же
