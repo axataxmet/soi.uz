@@ -52,10 +52,29 @@ const BRAND_DATA = {
 };
 
 function BrandPage({ t, lang, store, go, params }) {
+  /* window.DATA.BRANDS приходит из API асинхронно (как и window.DATA.PRODUCTS
+     в PartnersPage) — на самом первом рендере, ещё до ответа сервера, список
+     пуст. Раньше это читалось как «бренда не существует», и прямой заход по
+     ссылке (/catalog/brand/<id>) мгновенно редиректил на /catalog ещё до
+     прихода данных — открыть страницу бренда напрямую было невозможно вообще,
+     редирект срабатывал детерминированно на каждый hard-load. Теперь ждём
+     первую загрузку данных и перерисовываемся по "soi-data-changed"; на
+     редирект уходим только если бренды уже загружены и среди них
+     действительно нет такого id. */
+  const [, force] = React.useState(0);
+  React.useEffect(() => {
+    const h = () => force((n) => n + 1);
+    window.addEventListener("soi-data-changed", h);
+    return () => window.removeEventListener("soi-data-changed", h);
+  }, []);
+  const brandsLoaded = !!(window.DATA && window.DATA.BRANDS && window.DATA.BRANDS.length > 0);
   const brand  = (window.DATA?.BRANDS || []).find(b => b.id === params.id);
   const prods  = (window.DATA?.PRODUCTS || []).filter(p => p.brand === params.id);
   const info   = BRAND_DATA[params.id] || {};
-  if (!brand) { go("catalog", {}); return null; }
+  if (!brand) {
+    if (brandsLoaded) { go("catalog", {}); return null; }
+    return null; // данные ещё грузятся — ничего не решаем, ждём soi-data-changed
+  }
 
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const country = lv(brand.country_ru, brand.country_uz, brand.country_en);
