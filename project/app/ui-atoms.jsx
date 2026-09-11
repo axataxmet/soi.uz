@@ -355,8 +355,15 @@ function ProductRow({ product, t, lang, store, onOpen }) {
   // раскладывают хуки в глобальные имена, и своей деструктуризации не имеет.
   const [qty, setQty] = React.useState(1);
   const inCart = store.cart.some((c) => c.id === p.id);
+  const inCmp = store.compare.includes(p.id);
   const name = tri(lang, p.ru, p.uz, p.en);
   const stop = (e) => e.stopPropagation();
+  /* Строка характеристик под названием — «Длина: 456 мм, диаметр: 26 мм, …»,
+     раскладка референса (medcomp): та же таблица «Характеристики», собранная
+     в одну строку, без похода на карточку товара. */
+  const specLine = (p.specs || [])
+    .map((s) => `${tri(lang, s.kr, s.ku, s.ke)}: ${s.v}`)
+    .join(", ");
   return (
     <article className="prow" onClick={() => onOpen(p)}>
       {/* Левая колонка: артикул над снимком — так в референсе, и так он не
@@ -370,16 +377,20 @@ function ProductRow({ product, t, lang, store, onOpen }) {
       </div>
       <div className="prow-main">
         <h3 className="prow-name">{name}</h3>
+        {specLine && <p className="prow-specs">{specLine}</p>}
+        <button className={"prow-cmp " + (inCmp ? "on" : "")} onClick={(e) => { stop(e); store.toggleCompare(p.id); }}>
+          <Icon name="compare" size={16} /> {t.add_compare}
+        </button>
       </div>
       {/* Правая колонка сверху вниз: наличие, количество, цена, «Купить». */}
       <div className="prow-buybox" onClick={stop}>
-        <StockTag stock={p.stock} t={t} />
+        <StockTag stock={p.stock} t={t} dot={false} />
         <QtyStepper value={qty} onChange={setQty} size="sm" />
         <div className="prow-price"><Price value={p.price} old={p.old} t={t} size="sm" /></div>
         <button className={"prow-buy " + (inCart ? "added" : "")}
           onClick={() => store.addToCart(p.id, qty)}>
           <Icon name={inCart ? "check" : "cart"} size={16} />
-          <span>{inCart ? t.in_cart : t.buy}</span>
+          <span>{inCart ? t.in_cart : t.buy_now}</span>
         </button>
       </div>
     </article>

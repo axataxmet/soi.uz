@@ -1957,6 +1957,17 @@ body{background:var(--surface)}
 .prow-main{padding-top:2px;flex:1 1 240px;min-width:0}
 .prow-name{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.35;font-size:var(--fs-4)}
 .prow:hover .prow-name{color:var(--blue-600)}
+/* Строка характеристик и ссылка «Сравнить» под названием — по референсу
+   (medcomp): краткая сводка «Длина: … мм, диаметр: … мм», затем сравнение
+   отдельной строкой, а не только цена/кнопка справа. */
+.prow-specs{margin:8px 0 0;font-size:var(--fs-3);line-height:1.5;color:var(--slate-600)}
+.prow-cmp{margin-top:10px;display:inline-flex;align-items:center;gap:6px;border:none;background:none;
+  padding:0;font-size:var(--fs-2);color:var(--slate-400);cursor:pointer;transition:color .2s}
+.prow-cmp:hover,.prow-cmp.on{color:var(--blue-600)}
+/* Статус наличия в строке списка — по референсу это цветной текст без
+   заливки-плашки (плашка из .stk-in уместна в плотных сетках карточек, а
+   не в просторной строке с уже читаемым правым столбцом). */
+.prow-buybox .stk-in{background:none;color:var(--success);padding:0;font-weight:700}
 /* Блок покупки: наличие, количество, цена, кнопка — сверху вниз, по правому
    краю, кнопка во всю ширину колонки. */
 .prow-buybox{flex:0 0 200px;margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
@@ -3893,7 +3904,7 @@ html{scroll-padding-top:72px}
 <!-- A3 catalog feed: populates window.DATA.{CATEGORIES,BRANDS,PRODUCTS} from the REST API -->
 <script src="app/catalog-remote.js?v=1789130027"></script>
 <script src="admin/ui.jsx?v=1782416018"></script>
-<script src="dist/app/ui-atoms.js?v=1789158379748052000"></script>
+<script src="dist/app/ui-atoms.js?v=1789167424"></script>
 <script type="text/soi-deferred" data-src="dist/app/header.js?v=1788878786"></script>
 <script src="dist/app/hero-wave.js?v=1787415411"></script>
 <script src="dist/app/home-page.js?v=1789112763"></script>
