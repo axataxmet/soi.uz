@@ -2066,9 +2066,12 @@ body{background:var(--surface)}
 @media(max-width:1199px){.sc-grid,.cat-prod-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:991px){.sc-grid,.cat-prod-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:767px){.sc-grid,.cat-prod-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-/* На узком экране — одна колонка, как и у medcomp: в две карточка сжимается
-   до ~170px, и пара кнопок «КП / В корзину» перестаёт помещаться в строку. */
-@media(max-width:575px){.sc-grid{grid-template-columns:1fr;gap:16px}.sc-card{min-height:0}.sc-media{height:120px}
+/* На узком экране товарные карточки (с парой кнопок «КП / В корзину») идут
+   в одну колонку — в две карточка сжимается до ~170px и кнопки перестают
+   помещаться в строку. У карточек раздела (.sc-card) кнопок нет — это просто
+   иконка/фото + название + счётчик, поэтому они остаются в 2 колонки: в одну
+   колонку такая карточка превращалась в почти пустой блок на весь экран. */
+@media(max-width:575px){.sc-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.sc-card{min-height:0;padding:0 12px 12px}.sc-media{height:76px}.sc-name{font-size:var(--fs-3);min-height:34px}
   .cat-prod-grid{grid-template-columns:1fr;gap:14px}
   /* Заголовок и «Сортировать» в столбец: в строку селект ужимался до «По в…». */
   .cat-prod-head{flex-direction:column;align-items:stretch;gap:10px}
