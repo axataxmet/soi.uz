@@ -452,28 +452,10 @@ function CatalogPage({ t, lang, store, go, params }) {
             <button className="flt-close" onClick={() => setFiltersOpen(false)}><Icon name="x" size={20} /></button>
           </div>
 
-          {!params.cat && !params.dir && (
-            <div className="flt-grp">
-              <h4>{t.all_categories}</h4>
-              {cats.map((c) => (
-                <Checkbox key={c.id} label={tri(lang, c.ru, c.uz, c.en)}
-                  count={ALL.filter((p) => p.cat === c.id || (p.extraCats||[]).some(ec=>ec.cat===c.id)).length}
-                  on={false} onClick={() => go("catalog", { cat: c.id })} />
-              ))}
-            </div>
-          )}
-
-          {cat && (
-            <div className="flt-grp">
-              <h4>{tri(lang, cat.ru, cat.uz, cat.en)}</h4>
-              {cat.subs.map((s, i) => (
-                <Checkbox key={i} label={tri(lang, s.ru, s.uz, s.en)}
-                  count={ALL.filter(p=>(p.cat===cat.id&&p.sub===i)||(p.extraCats||[]).some(ec=>ec.cat===cat.id&&ec.sub===i)).length}
-                  on={subIdx === i}
-                  onClick={() => go("catalog", subIdx === i ? { cat: cat.id } : { cat: cat.id, sub: i })} />
-              ))}
-            </div>
-          )}
+          {/* Фильтры по категории/подкатегории убраны из сайдбара по просьбе
+             заказчика — навигация по разделам и так есть в хлебных крошках
+             и на витринах разделов; здесь остаются только фильтры товара:
+             характеристики, бренд, наличие, цена. */}
 
           {groupDirs.length > 0 && (
             <div className="flt-grp">
