@@ -2081,8 +2081,12 @@ body{background:var(--surface)}
 .chip button{width:20px;height:20px;border-radius:var(--r-pill);background:var(--bg-2);color:var(--slate-500);display:flex;align-items:center;justify-content:center}
 .chip button:hover{background:var(--danger);color:#fff}
 
-/* ===== product page ===== */
-.pdp{display:grid;grid-template-columns:1.05fr .95fr;gap:44px;padding:8px 0 28px}
+/* ===== product page (стиль карточки — по образцу medcomp.ru) ===== */
+.pdp-h1{font-size:var(--fs-8);font-weight:800;line-height:1.2;margin:14px 0 8px;letter-spacing:-.01em;text-wrap:pretty}
+.pdp-topline{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}
+.pdp-cmp-link{display:flex;align-items:center;gap:6px;font-size:var(--fs-3);color:var(--slate-500);font-weight:600}
+.pdp-cmp-link:hover,.pdp-cmp-link.on{color:var(--blue-600)}
+.pdp{display:grid;grid-template-columns:.9fr 1fr .85fr;gap:36px;padding:0 0 28px;align-items:start}
 .pdp-gallery{position:sticky;top:160px}
 .pdp-main-img{border-radius:var(--r-lg);overflow:hidden;border:1px solid var(--line)}
 .pdp-main-img .ph{aspect-ratio:1/1}
@@ -2117,24 +2121,32 @@ body{background:var(--surface)}
 .pdp-kit-qty{color:var(--slate-500);font-family:var(--mono);font-weight:600;flex-shrink:0}
 .pdp-ship-flag{display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 13px;border-radius:var(--r-sm);background:var(--amber-50,var(--bg-2));color:var(--amber-700,#b45309);font-size:var(--fs-3);font-weight:600}
 .pdp-ship-flag svg{flex-shrink:0}
-.pdp-info h1{font-size:var(--fs-8);font-weight:800;line-height:1.2;margin:6px 0 14px;letter-spacing:-.01em;text-wrap:pretty}
-.pdp-tags{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .pdp-sku{font-family:var(--mono);font-size:var(--fs-3);color:var(--slate-400)}
-.pdp-rating{display:flex;align-items:center;gap:5px;color:var(--amber);font-size:var(--fs-3);font-weight:700}
-.pdp-buy{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:24px;margin:24px 0;box-shadow:var(--sh-sm)}
-.pdp-buy-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px}
-.pdp-buy .perunit{font-size:var(--fs-3);color:var(--slate-400);font-weight:600;margin-top:6px}
-.pdp-actions{display:flex;gap:12px;align-items:center}
-.pdp-actions .btn{flex:1}
-.pdp-icact{width:52px;height:52px;border-radius:var(--r);border:1.5px solid var(--line);background:#fff;color:var(--slate-600);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.pdp-icact:hover{border-color:var(--blue-500);color:var(--blue-600)}
-.pdp-icact.on{background:var(--blue-600);color:#fff;border-color:transparent}
-.pdp-guarantees{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:22px}
-.pdp-g{display:flex;align-items:center;gap:11px;font-size:var(--fs-3);font-weight:600;color:var(--slate-700)}
-.pdp-g .pg-ic{width:38px;height:38px;border-radius:var(--r-sm);background:var(--bg-2);color:var(--blue-600);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.pdp-quick{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-.pdp-quick .pq{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 14px;font-size:var(--fs-3);color:var(--slate-600)}
-.pdp-quick .pq b{color:var(--ink)}
+
+/* краткие характеристики буллетами рядом с фото — средняя колонка */
+.pdp-brief-specs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.pdp-brief-specs li{position:relative;padding-left:20px;font-size:var(--fs-4);line-height:1.5;color:var(--slate-700)}
+.pdp-brief-specs li::before{content:"";position:absolute;left:0;top:8px;width:7px;height:7px;border-radius:50%;background:var(--blue-600)}
+.pdp-brief-reg{color:var(--blue-600)!important;font-weight:700}
+
+.pdp-buy{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);padding:22px;box-shadow:var(--sh-sm)}
+.pdp-buy-status{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;font-size:var(--fs-3)}
+.pdp-instock{display:flex;align-items:center;gap:6px;color:var(--green-600,#16a34a);font-weight:700}
+.pdp-vat-static{color:var(--slate-400)}
+.pdp-price-lg{font-size:var(--fs-9,32px);font-weight:800;color:var(--ink);margin-bottom:16px}
+.pdp-buy-row{display:flex;align-items:center;gap:12px}
+.pdp-buy-row .btn-buy{flex:1}
+.pdp-mfr-link{margin-top:16px;padding-top:16px;border-top:1px solid var(--line-soft);font-size:var(--fs-3);text-align:center}
+.pdp-mfr-link span{display:block;color:var(--slate-600);margin-bottom:4px}
+.pdp-mfr-link a{color:var(--blue-600);font-weight:600}
+.pdp-side-related{margin-top:20px}
+.pdp-side-h{font-size:var(--fs-4);font-weight:800;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--blue-600)}
+.pdp-side-card{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft);cursor:pointer}
+.pdp-side-card:last-child{border-bottom:0}
+.pdp-side-card img{width:56px;height:56px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:var(--r-sm);flex-shrink:0}
+.pdp-side-card .psc-info{min-width:0}
+.pdp-side-card .psc-name{font-size:var(--fs-3);font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pdp-side-card .psc-onreq{font-size:var(--fs-2);color:var(--slate-400)}
 /* tabs */
 .tabs{display:flex;gap:6px;margin:24px 0 0}
 .tab{padding:14px 18px;font-size:var(--fs-4);font-weight:700;color:var(--slate-500);margin-bottom:-1px}
@@ -2143,10 +2155,10 @@ body{background:var(--surface)}
 .tab-body{padding:28px 0;max-width:760px}
 .tab-body p{font-size:var(--fs-4);line-height:1.7;color:var(--slate-700)}
 .spec-table{width:100%;border-collapse:collapse}
-.spec-table tr{border-bottom:1px solid var(--line-soft)}
-.spec-table td{padding:13px 6px;font-size:var(--fs-4);vertical-align:top}
-.spec-table td:first-child{color:var(--slate-500);width:42%}
-.spec-table td:last-child{font-weight:600}
+.spec-table tr{border-bottom:1px dotted var(--line)}
+.spec-table td{padding:11px 0;font-size:var(--fs-4);vertical-align:baseline}
+.spec-table td:first-child{color:var(--slate-500)}
+.spec-table td:last-child{font-weight:600;text-align:right;white-space:nowrap;padding-left:16px}
 .doc-row{display:flex;align-items:center;gap:13px;padding:14px;border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px}
 .doc-row .dr-ic{color:var(--blue-600)}
 .doc-row .dr-meta{font-size:var(--fs-2);color:var(--slate-400);font-family:var(--mono)}
@@ -3764,7 +3776,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/hero-wave.js?v=1787415411"></script>
 <script src="dist/app/home-page.js?v=1789112763"></script>
 <script type="text/soi-deferred" data-src="dist/app/catalog.js?v=1788578264"></script>
-<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789130027"></script>
+<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789130684"></script>
 <script type="text/soi-deferred" data-src="dist/app/cart.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/brand-profile.js?v=1789067132"></script>
 <script type="text/soi-deferred" data-src="dist/app/company-info.js?v=1788878786"></script>
