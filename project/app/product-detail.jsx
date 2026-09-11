@@ -135,6 +135,7 @@ function ProductPage({ t, lang, store, go, params }) {
   const [variantIdx, setVariantIdx] = useState(0);
   const [fullImages, setFullImages] = useState(null);
   const [regDocs, setRegDocs] = useState(null);
+  const [showAllRelated, setShowAllRelated] = useState(false);
 
   useEffect(() => { setQty(1); setThumb(0); setTab("specs"); setVariantIdx(0); setLightbox(false); window.scrollTo({ top: 0, behavior: "instant" }); rvPush(params.id); }, [params.id]);
 
@@ -172,7 +173,7 @@ function ProductPage({ t, lang, store, go, params }) {
 
   const related = (p.related && p.related.length > 0)
     ? P.filter(x => p.related.includes(x.id))
-    : P.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 4);
+    : P.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 12);
   const accs = P.filter(x => (p.accessories||[]).includes(x.id));
   const cons = P.filter(x => (p.consumables||[]).includes(x.id));
   // «Вам может быть интересно» — внизу страницы: не просто популярное, а
@@ -315,10 +316,31 @@ function ProductPage({ t, lang, store, go, params }) {
           <div className="pdp-lower-side">
             <div className="pdp-side-h">{lang === "uz" ? "O'xshash mahsulotlar" : lang === "en" ? "Similar products" : "Похожие товары"}</div>
             <div className="pdp-side-cards">
-              {related.slice(0, 3).map((rp) => (
-                <ProductCard key={rp.id} product={rp} t={t} lang={lang} store={store} onOpen={(pr) => go("product", { id: pr.id })} />
-              ))}
+              {(showAllRelated ? related : related.slice(0, 4)).map((rp) => {
+                const rname = tri(lang, rp.ru, rp.uz, rp.en);
+                return (
+                  <div key={rp.id} className="pdp-side-card" onClick={() => go("product", { id: rp.id })}>
+                    <div className="psc-img">
+                      {rp.img ? <img src={rp.img} alt="" loading="lazy" /> : <ProductPlaceholder product={rp} t={t} lang={lang} />}
+                    </div>
+                    <div className="psc-info">
+                      <div className="psc-name">{rname}</div>
+                      <div className="psc-foot">
+                        <StockTag stock={rp.stock} t={t} />
+                        {rp.price ? <Price value={rp.price} t={t} /> : <span className="psc-onreq">{t.price_on_request}</span>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
+            {related.length > 4 && (
+              <button type="button" className="pdp-side-more" onClick={() => setShowAllRelated((v) => !v)}>
+                {showAllRelated
+                  ? (lang === "uz" ? "Yashirish" : lang === "en" ? "Show less" : "Скрыть")
+                  : (lang === "uz" ? "Ko'proq ko'rsatish" : lang === "en" ? "Show more" : "Показать ещё") + ` (${related.length - 4})`}
+              </button>
+            )}
           </div>
         )}
 
@@ -348,7 +370,6 @@ function ProductPage({ t, lang, store, go, params }) {
           <>
           <table className="spec-table">
             <tbody>
-              <tr><td>{t.spec_brand}</td><td>{brand.name}</td></tr>
               {(() => { const c = p.country || tri(lang, brand.country_ru, brand.country_uz, brand.country_en); return c ? <tr><td>{t.spec_country}</td><td>{c}</td></tr> : null; })()}
               {p.model && <tr><td>{lang === "uz" ? "Model" : lang === "en" ? "Model" : "Модель"}</td><td>{p.model}</td></tr>}
               {p.specs.map((s, i) => (
@@ -384,6 +405,10 @@ function ProductPage({ t, lang, store, go, params }) {
                 [lvd("Количество мест", "Joylar soni", "Number of packages"), sh.places],
                 [lvd("Тип упаковки", "Qadoq turi", "Packaging type"), sh.packType],
               ].filter((r) => r[1]);
+              // «Объём, м.куб.» показывается для всех товаров всегда (стандарт
+              // каталога) — если не заведён в attrs._shipping.volume, строка
+              // всё равно есть, с плейсхолдером вместо значения.
+              rows.push([lvd("Объём, м.куб.", "Hajmi, m.kub.", "Volume, m³"), sh.volume ? sh.volume + " м³" : lvd("уточняется", "aniqlanmoqda", "on request")]);
               const flags = [
                 sh.fragile && lvd("Хрупкий товар — требует осторожной транспортировки", "Moʻrt mahsulot — ehtiyotkorlik bilan tashish", "Fragile — handle with care"),
                 sh.special && lvd("Требуется спецдоставка", "Maxsus yetkazib berish talab qilinadi", "Special delivery required"),
