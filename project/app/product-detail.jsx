@@ -83,8 +83,7 @@ function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
         </button>
       </div>
       <div className="pdp-buy-links">
-        <a onClick={() => window.__openQuote && window.__openQuote(p)}>{lang === "uz" ? "To'lov usuli" : lang === "en" ? "Payment method" : "Способ оплаты"}</a>
-        <a onClick={() => window.__openQuote && window.__openQuote(p)}>{lang === "uz" ? "Yetkazib berish usuli" : lang === "en" ? "Delivery method" : "Способ доставки"}</a>
+        <a onClick={() => window.__openQuote && window.__openQuote(p)}>{lang === "uz" ? "To'lov va yetkazib berish shartlari" : lang === "en" ? "Payment & delivery terms" : "Условия оплаты и доставки"}</a>
       </div>
       <NotifyAvailable t={t} lang={lang} product={p} />
     </div>
@@ -305,7 +304,7 @@ function ProductPage({ t, lang, store, go, params }) {
           {brand.name && (
             <div className="pdp-mfr-link">
               <span>{brand.name}{brand.country_ru ? ", " + tri(lang, brand.country_ru, brand.country_uz, brand.country_en) : ""}</span>
-              <a onClick={() => go("partners")}>{lang === "uz" ? "Ishlab chiqaruvchining boshqa mahsulotlari" : lang === "en" ? "Other products by this manufacturer" : "Другие товары производителя"}</a>
+              <a onClick={() => go("catalog", { brand: p.brand })}>{lang === "uz" ? "Ishlab chiqaruvchining boshqa mahsulotlari" : lang === "en" ? "Other products by this manufacturer" : "Другие товары производителя"}</a>
             </div>
           )}
         </div>
