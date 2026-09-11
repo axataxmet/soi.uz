@@ -32,7 +32,7 @@ function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
     <div className="pdp-buy">
       <div className="pdp-buy-status">
         <span className="pdp-instock">{t.in_stock || "В наличии"}</span>
-        <span className="pdp-vat-static">{t.vat_excl}</span>
+        <span className="pdp-vat-static">{t.vat_incl_12 || t.vat_note}</span>
       </div>
       <div className="pdp-price-lg"><Price value={basePrice} t={t} size="lg" /></div>
       <div className="pdp-buy-row">
