@@ -243,12 +243,14 @@ function ProductPage({ t, lang, store, go, params }) {
                   <Icon name="chevronRight" size={16} style={{ transform: "rotate(-90deg)" }} />
                 </button>
               )}
-              <div className="pdp-thumbs" ref={thumbsRef}>
+              <div className="pdp-thumbs" ref={thumbsRef} role="tablist" aria-label={lang === "uz" ? "Mahsulot fotolari" : lang === "en" ? "Product photos" : "Фото товара"}>
                 {media.map((m, i) => (
-                  <div key={i} className={"pdp-thumb " + (thumb === i ? "on" : "")} onClick={() => setThumb(i)}>
+                  <div key={i} className={"pdp-thumb " + (thumb === i ? "on" : "")} onClick={() => setThumb(i)}
+                    role="tab" tabIndex={0} aria-selected={thumb === i}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setThumb(i); } }}>
                     {m.type === "video"
                       ? <div className="pdp-thumb-vid"><Icon name="play" size={22} /></div>
-                      : <img src={m.src} alt="" />}
+                      : <img src={m.src} alt={name + " — " + (i + 1)} loading="lazy" />}
                   </div>
                 ))}
               </div>
