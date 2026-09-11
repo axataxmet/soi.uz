@@ -2050,7 +2050,10 @@ body{background:var(--surface)}
    .stk-in выше): без этого переопределения .ptile-stock задаёт тексту тот же
    синий, что и фон пилюли (--success совпадает с --cta), и надпись «В наличии»
    становится нечитаемой — синим по синему. */
-.ptile-stock.stk-in{color:var(--cta-ink)}
+/* .ptile-stock не подключает базовый класс .stk (inline-flex) — как block-div
+   пилюля растягивалась на всю ширину карточки, особенно заметно в 1-колоночной
+   мобильной сетке. Возвращаем ей ширину по содержимому. */
+.ptile-stock.stk-in{color:var(--cta-ink);display:inline-flex;align-items:center;width:fit-content}
 .ptile-name{margin:8px 0;font-size:var(--fs-3);font-weight:600;line-height:20px;height:40px;color:var(--ink);cursor:pointer;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .3s}
 .ptile-name:hover{color:var(--blue-600)}
