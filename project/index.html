@@ -1767,6 +1767,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .z-corp h1, .z-corp h2, .z-corp h3,
 .z-catalog h1, .z-catalog h2, .z-catalog h3{color:var(--ink)}
 
+/* Фон страниц каталога — чистый белый, а не серо-голубой тон панели
+   настроек оформления (--bg/--bg-2 переопределены инлайн-стилем на <html>
+   через тюнер тем, «balanced light» — это влияет на весь сайт, но заказчик
+   просит именно каталог белым). Переопределяем переменные внутри .z-catalog:
+   всё, что внутри читает var(--bg)/var(--bg-2), получает белый, независимо
+   от общесайтовой настройки. */
+.z-catalog{--bg:#FFFFFF;--bg-2:#FFFFFF;background:#FFFFFF}
+
 .z-corp .soi-chero-stage h1, .z-corp .soi-chero-stage h2, .z-corp .soi-chero-stage h3,
 .z-corp .eco-t h1, .z-corp .eco-t h2, .z-corp .eco-t h3,
 .z-corp .tnd-hero h1, .z-corp .tnd-hero h2, .z-corp .tnd-hero h3,
