@@ -2088,7 +2088,7 @@ body{background:var(--surface)}
 .pdp-cmp-link,.pdp-wish-link{display:flex;align-items:center;gap:6px;font-size:var(--fs-3);color:var(--slate-500);font-weight:600}
 .pdp-cmp-link:hover,.pdp-cmp-link.on,.pdp-wish-link:hover{color:var(--blue-600)}
 .pdp-wish-link.on{color:var(--red-500,#ef4444)}
-.pdp{display:grid;grid-template-columns:.68fr 1.12fr .85fr;grid-template-rows:auto auto;grid-template-areas:"gallery specs buy" "tabs tabs side";gap:36px 36px;padding:0 0 28px;align-items:start}
+.pdp{display:grid;grid-template-columns:minmax(200px,.68fr) minmax(240px,1.12fr) minmax(260px,.85fr);grid-template-rows:auto auto;grid-template-areas:"gallery specs buy" "tabs tabs side";gap:36px 36px;padding:0 0 28px;align-items:start}
 .pdp-gallery{grid-area:gallery}
 .pdp-brief-specs{grid-area:specs}
 .pdp-buy-col{grid-area:buy}
@@ -3775,7 +3775,7 @@ html{scroll-padding-top:72px}
      скачивает и не выполняет; адрес лежит в data-src. Их подключает
      __loadDeferredBundles() из lib/boot.js — когда корпоративная оболочка
      собирается показать каталог. Порядок тегов значим и сохраняется. -->
-<script type="text/soi-deferred" data-src="app/store-overlay.js?v=1788578339"></script>
+<script type="text/soi-deferred" data-src="app/store-overlay.js?v=1789134444"></script>
 <script src="lib/xlsx.js?v=1782416018"></script>
 <!-- CMS store loads AFTER window.DATA exists so admin edits sync to the live site -->
 <script src="admin/i18n.js?v=1782600006"></script>
@@ -3794,7 +3794,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/hero-wave.js?v=1787415411"></script>
 <script src="dist/app/home-page.js?v=1789112763"></script>
 <script type="text/soi-deferred" data-src="dist/app/catalog.js?v=1788578264"></script>
-<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789134282"></script>
+<script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789134444"></script>
 <script type="text/soi-deferred" data-src="dist/app/cart.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/brand-profile.js?v=1789067132"></script>
 <script type="text/soi-deferred" data-src="dist/app/company-info.js?v=1788878786"></script>
