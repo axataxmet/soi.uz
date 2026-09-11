@@ -241,9 +241,14 @@ function CatalogPage({ t, lang, store, go, params }) {
      сервера, чтобы число на карточке совпадало со списком, который откроется. */
   const groupCount = (gid) => ALL.filter((p) =>
     p.group === gid || (p.extraCats || []).some((ec) => ec.group === gid)).length;
+  // По алфавиту названия на текущем языке — по просьбе заказчика; раньше
+  // порядок шёл как в CMS (g.order), что для длинного списка групп на корне
+  // категории выглядело случайным.
+  const byGroupName = (a, b) => tri(lang, a.g.ru, a.g.uz, a.g.en).localeCompare(tri(lang, b.g.ru, b.g.uz, b.g.en), lang);
   const groupCards = subGroups
     .map((g) => ({ g, cnt: groupCount(g._id) }))
-    .filter((x) => x.cnt > 0);
+    .filter((x) => x.cnt > 0)
+    .sort(byGroupName);
   /* На корне категории по просьбе заказчика показываем не только подкатегории,
      но и все их товарные группы сразу — одной страницей, без захода в каждую
      подкатегорию по отдельности. Те же карточки, что и на уровне подраздела,
@@ -252,7 +257,8 @@ function CatalogPage({ t, lang, store, go, params }) {
   const allCatGroupCards = ((cat && cat.subs) || [])
     .flatMap((s, idx) => (s.groups || []).map((g) => ({ g, subIdx: idx })))
     .map(({ g, subIdx }) => ({ g, subIdx, cnt: groupCount(g._id) }))
-    .filter((x) => x.cnt > 0);
+    .filter((x) => x.cnt > 0)
+    .sort(byGroupName);
   const goGroupTileIn = (g, subIdx) => go("catalog", { cat: catId, sub: subIdx, group: g.slug || g._id });
   // На странице подраздела витрина групп заменяет список товаров — так же,
   // как витрина подкатегорий на странице категории.
