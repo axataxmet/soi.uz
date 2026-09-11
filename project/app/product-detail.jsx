@@ -34,8 +34,14 @@ function PdpDocThumb({ url }) {
   React.useEffect(() => {
     let on = true; setSrc(null); setErr(false);
     if (!url || !window.rvpRenderPdfPage) { setErr(true); return; }
-    window.rvpRenderPdfPage(url, 240).then((d) => { if (on) setSrc(d.src); }).catch(() => on && setErr(true));
-    return () => { on = false; };
+    // pdf.js изредка зависает без ошибки и без результата (замечено и на
+    // /documents) — не даём миниатюре висеть скелетоном вечно, через 7с
+    // считаем рендер неудавшимся и показываем статичную обложку.
+    const timeout = setTimeout(() => on && setErr(true), 7000);
+    window.rvpRenderPdfPage(url, 240)
+      .then((d) => { if (on) { clearTimeout(timeout); setSrc(d.src); } })
+      .catch(() => { if (on) { clearTimeout(timeout); setErr(true); } });
+    return () => { on = false; clearTimeout(timeout); };
   }, [url]);
   if (src && !err) return <img src={src} alt="" loading="lazy" />;
   if (!err) return <div className="pdp-doc-skel" aria-hidden="true" />;
@@ -157,11 +163,18 @@ function ProductPage({ t, lang, store, go, params }) {
     : P.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 4);
   const accs = P.filter(x => (p.accessories||[]).includes(x.id));
   const cons = P.filter(x => (p.consumables||[]).includes(x.id));
-  // «Вам может быть интересно» — внизу страницы: общая подборка популярных
-  // товаров, не входящих в сайдбар «Похожие товары» (в отличие от него,
-  // не привязана к категории — так же устроено у референса).
+  // «Вам может быть интересно» — внизу страницы: не просто популярное, а
+  // близкое к просматриваемому товару (та же подкатегория > категория > бренд),
+  // и только при прочих равных — по популярности. Не пересекается с сайдбаром.
   const shownIds = new Set([p.id, ...related.slice(0, 3).map(r => r.id)]);
-  const mayLike = P.filter(x => !shownIds.has(x.id)).sort((a, b) => (b.pop || 0) - (a.pop || 0)).slice(0, 4);
+  const mayLike = P.filter(x => !shownIds.has(x.id))
+    .map(x => ({
+      x,
+      score: (x.sub === p.sub && x.cat === p.cat ? 3 : x.cat === p.cat ? 2 : x.brand === p.brand ? 1 : 0),
+    }))
+    .sort((a, b) => b.score - a.score || (b.x.pop || 0) - (a.x.pop || 0))
+    .slice(0, 4)
+    .map(e => e.x);
 
   // gallery media: real images + optional YouTube video, else placeholders
   const ytId = (() => {
