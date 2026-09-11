@@ -324,7 +324,7 @@ function ProductPage({ t, lang, store, go, params }) {
                   <div key={rp.id} className="pdp-side-card" onClick={() => go("product", { id: rp.id })}>
                     <div className="psc-top">
                       <div className="psc-img">
-                        {rp.img ? <img src={thumbUrl(rp.img, 32)} alt="" loading="lazy" /> : <ProductPlaceholder product={rp} t={t} lang={lang} />}
+                        {rp.img ? <img src={thumbUrl(rp.img, 48)} alt="" loading="lazy" /> : <ProductPlaceholder product={rp} t={t} lang={lang} />}
                       </div>
                       <div className="psc-info">
                         <div className="psc-name">{rname}</div>
