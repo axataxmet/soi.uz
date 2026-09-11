@@ -171,20 +171,35 @@ function ProductPage({ t, lang, store, go, params }) {
   const fromDir = (params.fromDir && window.DIRECTIONS_DATA)
     ? window.DIRECTIONS_DATA.getDirById(params.fromDir) : null;
 
+  /* Близость товара считаем по самому мелкому совпавшему уровню таксономии:
+     товарная группа (тот же тип оборудования) > подкатегория > категория >
+     бренд. Раньше «Похожие товары» без явного p.related считались только по
+     верхней категории (x.cat === p.cat) — категория «Медицинское
+     оборудование» одна на 69 разнородных товаров, так что ЭКГ-аппарат
+     оказывался «похож» на стерилизатор просто потому, что оба медицинское
+     оборудование. Группа — самый узкий и самый значимый признак похожести. */
+  const closeness = (x) => x.group && x.group === p.group ? 4
+    : (x.sub === p.sub && x.cat === p.cat) ? 3
+    : x.cat === p.cat ? 2
+    : x.brand === p.brand ? 1
+    : 0;
   const related = (p.related && p.related.length > 0)
     ? P.filter(x => p.related.includes(x.id))
-    : P.filter(x => x.cat === p.cat && x.id !== p.id).slice(0, 12);
+    : P.filter(x => x.id !== p.id)
+        .map(x => ({ x, score: closeness(x) }))
+        .filter(e => e.score > 0)
+        .sort((a, b) => b.score - a.score || (b.x.pop || 0) - (a.x.pop || 0))
+        .slice(0, 12)
+        .map(e => e.x);
   const accs = P.filter(x => (p.accessories||[]).includes(x.id));
   const cons = P.filter(x => (p.consumables||[]).includes(x.id));
   // «Вам может быть интересно» — внизу страницы: не просто популярное, а
-  // близкое к просматриваемому товару (та же подкатегория > категория > бренд),
-  // и только при прочих равных — по популярности. Не пересекается с сайдбаром.
+  // близкое к просматриваемому товару (та же товарная группа > подкатегория >
+  // категория > бренд), и только при прочих равных — по популярности.
+  // Не пересекается с сайдбаром.
   const shownIds = new Set([p.id, ...related.slice(0, 3).map(r => r.id)]);
   const mayLike = P.filter(x => !shownIds.has(x.id))
-    .map(x => ({
-      x,
-      score: (x.sub === p.sub && x.cat === p.cat ? 3 : x.cat === p.cat ? 2 : x.brand === p.brand ? 1 : 0),
-    }))
+    .map(x => ({ x, score: closeness(x) }))
     .sort((a, b) => b.score - a.score || (b.x.pop || 0) - (a.x.pop || 0))
     .slice(0, 10)
     .map(e => e.x);
