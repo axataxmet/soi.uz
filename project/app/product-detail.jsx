@@ -40,7 +40,7 @@ function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
   return (
     <div className="pdp-buy">
       <div className="pdp-buy-status">
-        <span className="pdp-instock"><Icon name="check" size={14} />{t.in_stock || "В наличии"}</span>
+        <span className="pdp-instock">{t.in_stock || "В наличии"}</span>
         <span className="pdp-vat-static">{t.vat_excl}</span>
       </div>
       <div className="pdp-price-lg"><Price value={basePrice} t={t} size="lg" /></div>
@@ -50,6 +50,10 @@ function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
           {inCart ? t.in_cart : (t.buy_now || t.add_to_cart)}
         </button>
         {wishBtn}
+      </div>
+      <div className="pdp-buy-links">
+        <a onClick={() => window.__openQuote && window.__openQuote(p)}>{lang === "uz" ? "To'lov usuli" : lang === "en" ? "Payment method" : "Способ оплаты"}</a>
+        <a onClick={() => window.__openQuote && window.__openQuote(p)}>{lang === "uz" ? "Yetkazib berish usuli" : lang === "en" ? "Delivery method" : "Способ доставки"}</a>
       </div>
       <NotifyAvailable t={t} lang={lang} product={p} />
     </div>
