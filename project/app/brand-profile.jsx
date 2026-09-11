@@ -67,12 +67,17 @@ function BrandPage({ t, lang, store, go, params }) {
     window.addEventListener("soi-data-changed", h);
     return () => window.removeEventListener("soi-data-changed", h);
   }, []);
-  const brandsLoaded = !!(window.DATA && window.DATA.BRANDS && window.DATA.BRANDS.length > 0);
+  /* window.DATA.BRANDS до ответа API уже не пуст — там временный локальный
+     сид (меньше и без свежих брендов вроде ЗЕРЦ), который catalog-remote.js
+     подменяет на полный список только после reload(). Простой length>0
+     считал этот сид «данные загружены» и редиректил в том самом окне между
+     сидом и настоящим ответом API — SOI_CATALOG_SOURCE выставляется в "api"
+     только когда реальные данные действительно пришли. */
+  const brandsLoaded = window.SOI_CATALOG_SOURCE === "api";
   const brand  = (window.DATA?.BRANDS || []).find(b => b.id === params.id);
   const prods  = (window.DATA?.PRODUCTS || []).filter(p => p.brand === params.id);
   const info   = BRAND_DATA[params.id] || {};
   if (!brand) {
-    console.log("[soi-debug BrandPage]", { paramsId: params.id, brandsLoaded, brandIds: (window.DATA && window.DATA.BRANDS || []).map(b => b.id) });
     if (brandsLoaded) { go("catalog", {}); return null; }
     return null; // данные ещё грузятся — ничего не решаем, ждём soi-data-changed
   }
