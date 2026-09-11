@@ -72,6 +72,7 @@ function BrandPage({ t, lang, store, go, params }) {
   const prods  = (window.DATA?.PRODUCTS || []).filter(p => p.brand === params.id);
   const info   = BRAND_DATA[params.id] || {};
   if (!brand) {
+    console.log("[soi-debug BrandPage]", { paramsId: params.id, brandsLoaded, brandIds: (window.DATA && window.DATA.BRANDS || []).map(b => b.id) });
     if (brandsLoaded) { go("catalog", {}); return null; }
     return null; // данные ещё грузятся — ничего не решаем, ждём soi-data-changed
   }
