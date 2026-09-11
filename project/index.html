@@ -2040,10 +2040,14 @@ body{background:var(--surface)}
 /* Базовый кегль обязателен: без него карточка наследовала 32px от секции, а
    «Цена по запросу» задана в компоненте как 0.9em — и выводилась огромной,
    разваливая последнюю карточку в ряду. */
+/* Тот же корпус карточки, что и у .sc-card (подкатегории/товарные группы) —
+   решение заказчика привести карточку товара к тому же виду: невидимая
+   рамка цвета фона, острые углы 2px, мягкая тень вместо явной синей рамки
+   на ховере. */
 .ptile{display:flex;flex-direction:column;height:100%;padding:10px;font-size:var(--fs-2);line-height:20px;
-  background:var(--surface);border:1.5px solid var(--line);border-radius:var(--r);
-  box-shadow:var(--sh-sm);transition:box-shadow .18s ease,border-color .18s ease}
-.ptile:hover{box-shadow:var(--sh-sm);border-color:var(--blue-500)}
+  background:var(--surface);border:1px solid var(--surface);border-radius:2px;
+  box-shadow:var(--sh);transition:box-shadow .3s ease,border-color .3s ease}
+.ptile:hover{box-shadow:var(--sh);border-color:var(--line)}
 .ptile-top{display:flex;align-items:center;justify-content:space-between;gap:8px;height:20px}
 .ptile-sku{font-size:var(--fs-2);line-height:20px;color:var(--slate-400);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ptile-cmp{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:24px;height:20px;
