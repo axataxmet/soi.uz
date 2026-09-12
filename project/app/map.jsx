@@ -49,12 +49,17 @@ function _applyPalette(pal) {
   }
 }
 
+/* Раньше page-bg у всех 4 пресетов был var(--bg-2) — светло-голубой оттенок
+   (#F4F7FD), а не чистый белый. По прямому запросу («фон всех страниц
+   должен быть белым») фон страницы у всех пресетов теперь var(--surface)
+   (#FFFFFF); карточки/блоки внутри страницы по-прежнему используют --bg-2
+   для отделения от фона — тронут только сам фон страницы. */
 // 4 curated palettes: [primary, accent, page-bg, dark-bg]
 const PALETTE_OPTS = [
-  ["var(--blue-600)","var(--blue-500)","var(--bg-2)","var(--navy-850)"],  // Medical Blue  (default)
-  ["var(--accent)","var(--blue-400)","var(--bg-2)","var(--navy-900)"],  // Clinical Teal
-  ["#5246d5","#7c70f0","var(--bg-2)","var(--navy-850)"],  // Trust Indigo
-  ["var(--accent)","var(--blue-500)","var(--bg-2)","var(--navy-900)"],  // Wellness Green
+  ["var(--blue-600)","var(--blue-500)","var(--surface)","var(--navy-850)"],  // Medical Blue  (default)
+  ["var(--accent)","var(--blue-400)","var(--surface)","var(--navy-900)"],  // Clinical Teal
+  ["#5246d5","#7c70f0","var(--surface)","var(--navy-850)"],  // Trust Indigo
+  ["var(--accent)","var(--blue-500)","var(--surface)","var(--navy-900)"],  // Wellness Green
 ];
 
 /* Своё имя, не TWEAK_DEFAULTS: и здесь, и в news.jsx объявлен `const
@@ -68,7 +73,7 @@ const PALETTE_OPTS = [
    [data-cards=...] селектор — переключатель карточек товара молча не
    работал ни на elevated, ни на flat. */
 const UZ_TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-  "palette": ["#0E4AC6","#2b72e3","#F4F7FD","#0b1f3a"],
+  "palette": ["#0E4AC6","#2b72e3","#FFFFFF","#0b1f3a"],
   "cards": "flat",
   "density": "normal"
 }/*EDITMODE-END*/;
