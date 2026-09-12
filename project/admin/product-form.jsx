@@ -96,6 +96,50 @@ function AttrField({ field, value, onChange }) {
   return <Field label={lab}><input className="adm-input" value={value || ""} onChange={e => onChange(e.target.value)} /></Field>;
 }
 
+/* Товары, заведённые в обход этой формы (одноразовыми скриптами при
+   наполнении каталога — так у многих реальных товаров), несут в attrs
+   ключи, которых нет в схеме выбранной товарной группы: например
+   «Комплектация» у ЛОР-комбайна ЗЕРЦ EXPERT Plus. Блок «Характеристики»
+   выше рендерит только schema.fields — такие ключи были в БД и на витрине,
+   но их некуда было ни увидеть, ни отредактировать в самой форме. Этот блок
+   показывает и даёт редактировать всё, что осталось в attrs сверх схемы (и
+   сверх служебных _kit/_shipping/_video/_stock — у них своя форма ниже),
+   плюс позволяет добавить новую произвольную характеристику. */
+function ExtraAttrsEditor({ attrs, schemaKeys, onChange, onRemove, onRename }) {
+  const [newKey, setNewKey] = useState("");
+  const [newVal, setNewVal] = useState("");
+  const extraKeys = Object.keys(attrs || {}).filter(k => k.charAt(0) !== "_" && !schemaKeys.includes(k));
+  const addNew = () => {
+    const k = newKey.trim();
+    if (!k || Object.prototype.hasOwnProperty.call(attrs, k)) return;
+    onChange(k, newVal);
+    setNewKey(""); setNewVal("");
+  };
+  return (
+    <div style={{ marginTop: extraKeys.length ? 16 : 0 }}>
+      {extraKeys.length > 0 && (
+        <div className="adm-text-muted" style={{ fontSize: 12, marginBottom: 8 }}>
+          Характеристики вне схемы группы (заведены напрямую) — можно отредактировать или удалить.
+        </div>
+      )}
+      {extraKeys.map(k => (
+        <div key={k} className="adm-form-row" style={{ alignItems: "flex-end", gap: 8 }}>
+          <Field label="Название"><input className="adm-input" defaultValue={k} onBlur={e => onRename(k, e.target.value.trim())} /></Field>
+          <Field label="Значение"><input className="adm-input" value={attrs[k] || ""} onChange={e => onChange(k, e.target.value)} /></Field>
+          <button type="button" className="btn btn-secondary btn-sm" title="Удалить характеристику" onClick={() => onRemove(k)} style={{ marginBottom: 10 }}>
+            <AdminIcon name="x" size={12} />
+          </button>
+        </div>
+      ))}
+      <div className="adm-form-row" style={{ alignItems: "flex-end", gap: 8, marginTop: extraKeys.length ? 4 : 0 }}>
+        <Field label="Новая характеристика — название"><input className="adm-input" value={newKey} onChange={e => setNewKey(e.target.value)} placeholder="например, Комплектация" /></Field>
+        <Field label="Значение"><input className="adm-input" value={newVal} onChange={e => setNewVal(e.target.value)} /></Field>
+        <button type="button" className="btn btn-secondary btn-sm" onClick={addNew} style={{ marginBottom: 10 }}>Добавить</button>
+      </div>
+    </div>
+  );
+}
+
 function AdminProductForm({ go, editId }) {
   const { useState, useEffect, useRef } = React;
   const toast = useToast();
@@ -141,6 +185,14 @@ function AdminProductForm({ go, editId }) {
   const setName = (lang, v) => setForm(f => ({ ...f, name: { ...f.name, [lang]: v } }));
   const setDesc = (lang, v) => setForm(f => ({ ...f, description: { ...f.description, [lang]: v } }));
   const setAttr = (key, v) => setForm(f => ({ ...f, attrs: { ...f.attrs, [key]: v } }));
+  const removeAttr = (key) => setForm(f => { const a = { ...f.attrs }; delete a[key]; return { ...f, attrs: a }; });
+  const renameAttr = (oldKey, newKey) => setForm(f => {
+    if (!newKey || newKey === oldKey || Object.prototype.hasOwnProperty.call(f.attrs, newKey)) return f;
+    const a = { ...f.attrs };
+    a[newKey] = a[oldKey];
+    delete a[oldKey];
+    return { ...f, attrs: a };
+  });
 
   // reference data
   useEffect(() => {
@@ -428,6 +480,8 @@ function AdminProductForm({ go, editId }) {
                       ))}
                     </div>
               }
+              <ExtraAttrsEditor attrs={form.attrs} schemaKeys={schema.fields.map(f => f.key)}
+                onChange={setAttr} onRemove={removeAttr} onRename={renameAttr} />
             </div>
           </PfAcc>
 
