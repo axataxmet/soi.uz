@@ -961,7 +961,7 @@ function CatalogLandingPage({ t, lang, store, go }) {
             </div>
             <div className="clp-popular-grid">
               {popular.map(p => (
-                <ProductTile key={p.id} product={p} t={t} lang={lang} store={store} onOpen={pr => go("product", { id: pr.id })} />
+                <ProductTile key={p.id} product={p} t={t} lang={lang} store={store} buyLabel={t.buy_now} onOpen={pr => go("product", { id: pr.id })} />
               ))}
             </div>
           </div>
