@@ -91,6 +91,16 @@ function BrandPage({ t, lang, store, go, params }) {
     const c = (window.DATA?.CATEGORIES || []).find(x => x.id === id);
     return c ? lv(c.ru, c.uz, c.en) : id;
   };
+  /* Разбивка товаров бренда по направлениям (категориям) — как в примере
+     medcomp.ru/proizvoditeli/promet: слева список направлений-якорей,
+     справа — товары, сгруппированные по направлению отдельными секциями,
+     а не одной сплошной плиткой вперемешку. */
+  const catSlug = id => "brand-cat-" + String(id).replace(/[^a-zA-Z0-9_-]/g, "");
+  const prodsByCat = cats.map(id => ({ id, name: catName(id), items: prods.filter(p => p.cat === id) }));
+  const scrollToCat = id => {
+    const el = document.getElementById(catSlug(id));
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div style={{ paddingBottom: 64 }}>
@@ -138,14 +148,43 @@ function BrandPage({ t, lang, store, go, params }) {
             <div className="sub">{cats.map(c => catName(c)).join(" · ")}</div>
           </div>
         </div>
-        {/* ProductTile — тот же корпус карточки (.ptile), что и в каталоге
-            (сетка товарной группы, «Похожие товары» и т.д.). Раньше здесь
-            стоял старый ProductCard (.card) — другая разметка и стиль,
-            карточки бренда визуально не совпадали с остальным каталогом. */}
-        <div className="cat-prod-grid">
-          {prods.map(p => (
-            <ProductTile key={p.id} product={p} t={t} lang={lang} store={store} buyLabel={t.buy_now} onOpen={pr => go("product", { id: pr.id })} />
-          ))}
+
+        {/* Направления слева (якоря на секции), товары справа по разделам —
+            структура как на medcomp.ru/proizvoditeli/promet, вместо одной
+            общей плитки все товары бренда сразу видно по направлениям. */}
+        <div className="cat-layout">
+          {cats.length > 1 && (
+            <aside className="filters" style={{ position: "sticky", top: 88 }}>
+              <div className="flt-head"><h3>{lv("Направления","Yo'nalishlar","Directions")}</h3></div>
+              <div className="flt-grp" style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                {prodsByCat.map(c => (
+                  <a key={c.id} className="brand-cat-link" onClick={() => scrollToCat(c.id)}>
+                    <span>{c.name}</span>
+                    <span className="brand-cat-count">{c.items.length}</span>
+                  </a>
+                ))}
+              </div>
+            </aside>
+          )}
+
+          <div className="cat-main">
+            {prodsByCat.map(c => (
+              <section key={c.id} id={catSlug(c.id)} className="cat-prod" style={{ marginBottom: 40 }}>
+                {cats.length > 1 && (
+                  <div className="cat-prod-head"><h3 style={{ margin: 0 }}>{c.name}</h3></div>
+                )}
+                {/* ProductTile — тот же корпус карточки (.ptile), что и в каталоге
+                    (сетка товарной группы, «Похожие товары» и т.д.). Раньше здесь
+                    стоял старый ProductCard (.card) — другая разметка и стиль,
+                    карточки бренда визуально не совпадали с остальным каталогом. */}
+                <div className="cat-prod-grid">
+                  {c.items.map(p => (
+                    <ProductTile key={p.id} product={p} t={t} lang={lang} store={store} buyLabel={t.buy_now} onOpen={pr => go("product", { id: pr.id })} />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
         </div>
 
         {/* partnership CTA */}
