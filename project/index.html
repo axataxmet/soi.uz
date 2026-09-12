@@ -3184,6 +3184,14 @@ body:has(.cmpbar.show){--btt-bottom:96px}
 .qm-svc.on{border-color:var(--blue-600);background:var(--blue-600);color:#fff}
 .qm-svc-ic{width:16px;height:16px;border:1.5px solid currentColor;border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:.5;transition:.13s}
 .qm-svc.on .qm-svc-ic{opacity:1;border-color:rgba(255,255,255,.6)}
+/* display:none на самом чекбоксе убирает его из accessibility-дерева
+   целиком — скринридер видел только <label> без единого элемента
+   управления, а Tab пропускал «Дополнительные услуги» насквозь: клавиатурой
+   отметить их было невозможно. Стандартный приём «визуально скрыт, но
+   доступен»: сам input остаётся в потоке, фокусируем и озвучиваем его,
+   просто не показываем — оформление рисуют соседние .qm-svc/.qm-svc-ic. */
+.qm-svc-input{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.qm-svc-input:focus-visible ~ .qm-svc-ic{outline:2px solid var(--blue-400);outline-offset:2px}
 
 /* ===== HERO FALLBACK (no video) ===== */
 .hvs-fallback{width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:28px 24px;background:linear-gradient(145deg,var(--bg-2) 0%,var(--line-2) 100%)}
@@ -3931,11 +3939,11 @@ html{scroll-padding-top:72px}
 <script src="dist/app/home-page.js?v=1789171146"></script>
 <script type="text/soi-deferred" data-src="dist/app/catalog.js?v=1789171146"></script>
 <script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789169898"></script>
-<script type="text/soi-deferred" data-src="dist/app/cart.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/cart.js?v=1789173178"></script>
 <script type="text/soi-deferred" data-src="dist/app/brand-profile.js?v=1789170867"></script>
 <script type="text/soi-deferred" data-src="dist/app/company-info.js?v=1788878786"></script>
 <script src="dist/app/floating-widgets.js?v=1787415411"></script>
-<script type="text/soi-deferred" data-src="dist/app/account.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/account.js?v=1789173088"></script>
 <script src="dist/app/footer.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/app-entry.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/compare.js?v=1787415411"></script>
