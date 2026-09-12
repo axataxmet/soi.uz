@@ -310,10 +310,7 @@ function CatalogPage({ t, lang, store, go, params }) {
       if (!matches) return false;
     }
     if (params.badge && p.badge !== params.badge) return false;
-    if (params.q) {
-      const hay = (p.ru + " " + p.uz + " " + p.en + " " + brandName(p.brand) + " " + (p.sku || "")).toLowerCase();
-      if (!hay.includes(params.q.toLowerCase())) return false;
-    }
+    if (params.q && !smartSearchMatch(p, params.q, brandName)) return false;
     return true;
   });
 

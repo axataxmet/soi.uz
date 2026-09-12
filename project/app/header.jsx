@@ -7,6 +7,39 @@ const POPULAR_QUERIES = {
   en: ["Ventilator", "Defibrillator", "Steam autoclave", "Ultrasound scanner", "Patient monitor", "Operating table"]
 };
 
+/* Общий поиск по каталогу — используется и в подсказках хедера (SearchBar),
+   и в фильтре результатов /catalog?q=. Раньше оба места сравнивали строку
+   запроса как ОДНУ целую подстроку — запрос из нескольких слов типа
+   «дефибриллятор аксион» не находил «Дефибриллятор автоматический ДА-Н-01
+   Аксион», потому что между словами есть лишний текст, а includes() требует
+   точного соседства. Разбиваем запрос на слова и требуем совпадения КАЖДОГО
+   (AND), а не всей фразы целиком — так порядок и «шум» между словами не
+   мешают находить товар. Заодно нормализуем ё→е (частая опечатка) и убираем
+   лишние пробелы, чтобы двойной пробел не создавал пустое обязательное слово. */
+function smartSearchNorm(s) {
+  return (s || "").toString().toLowerCase().replace(/ё/g, "е").trim();
+}
+function smartSearchHay(p, brandNameFn) {
+  return smartSearchNorm([p.ru, p.uz, p.en, brandNameFn ? brandNameFn(p.brand) : "", p.sku || ""].join(" "));
+}
+function smartSearchMatch(p, qRaw, brandNameFn) {
+  const q = smartSearchNorm(qRaw);
+  if (!q) return true;
+  const words = q.split(/\s+/).filter(Boolean);
+  const hay = smartSearchHay(p, brandNameFn);
+  return words.every((w) => hay.includes(w));
+}
+/* Ранжирование подсказок: точное совпадение начала названия — выше, чем
+   товар, где искомое слово нашлось только в артикуле или названии бренда. */
+function smartSearchScore(p, qRaw, brandNameFn) {
+  const q = smartSearchNorm(qRaw);
+  const name = smartSearchNorm(p.ru);
+  if (name.startsWith(q)) return 3;
+  if (name.includes(q)) return 2;
+  if (smartSearchHay(p, brandNameFn).includes(q)) return 1;
+  return 0;
+}
+
 function SearchBar({ t, lang, query, setQuery, go }) {
   const [open, setOpen] = useState(false);
   const [history, setHistory] = useState([]);
@@ -35,7 +68,10 @@ function SearchBar({ t, lang, query, setQuery, go }) {
   };
 
   const suggestions = query.length >= 2 ?
-  (window.DATA?.PRODUCTS || []).filter((p) => (p.ru + " " + p.uz + " " + p.en + " " + p.sku).toLowerCase().includes(query.toLowerCase())).slice(0, 5) :
+  (window.DATA?.PRODUCTS || [])
+    .filter((p) => smartSearchMatch(p, query, brandName))
+    .sort((a, b) => smartSearchScore(b, query, brandName) - smartSearchScore(a, query, brandName) || (b.pop || 0) - (a.pop || 0))
+    .slice(0, 5) :
   [];
 
   const doSearch = (q) => {
