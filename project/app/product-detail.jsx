@@ -355,11 +355,11 @@ function ProductPage({ t, lang, store, go, params }) {
                       </div>
                     </div>
                     <div className="psc-foot">
-                      {rp.price ? <Price value={rp.price} t={t} /> : <span className="psc-onreq">{t.price_on_request}</span>}
                       <button type="button" className={"psc-cart " + (rpInCart ? "added" : "")} title={t.add_to_cart}
                         onClick={(e) => { e.stopPropagation(); store.addToCart(rp.id, 1); }}>
                         <Icon name={rpInCart ? "check" : "cart"} size={18} />
                       </button>
+                      {rp.price ? <Price value={rp.price} t={t} /> : <span className="psc-onreq">{t.price_on_request}</span>}
                     </div>
                   </div>
                 );
