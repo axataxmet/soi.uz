@@ -94,8 +94,6 @@ function BrandPage({ t, lang, store, go, params }) {
   }
 
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
-  const country = lv(brand.country_ru, brand.country_uz, brand.country_en);
-  const desc    = lv(info.desc_ru, info.desc_uz, info.desc_en) || "";
 
   const cats = [...new Set(prods.map(p => p.cat))];
   const catName = id => {
@@ -161,35 +159,6 @@ function BrandPage({ t, lang, store, go, params }) {
           <a onClick={() => go("catalog", {})}>{t.catalog}</a>
           <Icon name="chevronRight" size={14} />
           <span className="cur">{brand.name}</span>
-        </div>
-      </div>
-
-      {/* brand hero */}
-      <div className="brand-hero">
-        <div className="wrap">
-          <div className="brand-hero-inner">
-            <div className="brand-logo-big">{brand.name.slice(0,2).toUpperCase()}</div>
-            <div className="brand-hero-info">
-              <div className="brand-hero-name">{brand.name}</div>
-              <div className="brand-hero-meta">
-                <span>{country}</span>
-                {info.founded && <span><Icon name="award" size={14} style={{verticalAlign:"middle",marginRight:5}} />{lv("Основана в","Asoslangan","Founded")} {info.founded}</span>}
-                <span><Icon name="grid" size={14} style={{verticalAlign:"middle",marginRight:5}} />{prods.length} {t.items_count}</span>
-              </div>
-              {/* Когда для бренда есть отдельный блок «История производителя»
-                  внизу страницы, не дублируем историю ещё и в шапке —
-                  верхний блок остаётся коротким, подробности только внизу. */}
-              {desc && !info.history_ru && !info.history_en && <p className="brand-hero-desc">{desc}</p>}
-            </div>
-            <button className="btn btn-primary" onClick={() => window.__openQuote && window.__openQuote()}>
-              <Icon name="phone" size={18} />{lv("Связаться с менеджером","Menejer bilan bog'lanish","Contact manager")}
-            </button>
-          </div>
-          <div className="brand-hero-stats">
-            <div className="bhs"><div className="bhs-n">{prods.length}</div><div className="bhs-l">{t.items_count}</div></div>
-            <div className="bhs"><div className="bhs-n">{prodsByCat.length}</div><div className="bhs-l">{lv("направлений","yo'nalish","directions")}</div></div>
-            <div className="bhs"><div className="bhs-n">{prods.filter(p=>p.stock==="in").length}</div><div className="bhs-l">{t.in_stock}</div></div>
-          </div>
         </div>
       </div>
 
