@@ -2119,7 +2119,14 @@ body{background:var(--surface)}
   background:url(/assets/product-watermark.png) center/contain no-repeat;
   pointer-events:none;z-index:2;
 }
-.ptile-media{height:160px;margin:16px 0 8px;cursor:pointer}
+/* Раньше высота была фиксированной (160px) при переменной ширине колонки —
+   от 1.375:1 в 5-колоночной сетке до ~4.4:1 в один столбец на мобильном.
+   Реальные фото товаров квадратные (1000×1000), поэтому при такой рамке
+   часть карточек (где кадр шире — например, у фото с телефоном рядом со
+   стетоскопом) выглядела мельче и с непропорциональными полями, чем соседние.
+   aspect-ratio:1/1 держит рамку квадратной на любой ширине колонки — кадр
+   растёт и уменьшается вместе с карточкой, вместо рассинхронизации сторон. */
+.ptile-media{aspect-ratio:1/1;margin:16px 0 8px;cursor:pointer}
 .ptile-media .ph{width:100%;height:100%;border-radius:0}
 .ptile-media img{width:100%;height:100%;object-fit:contain}
 /* У medcomp область фото чистая — прячем чипы бренда и типа, которые заглушка
