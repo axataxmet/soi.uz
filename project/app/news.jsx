@@ -45,7 +45,17 @@ function parseSegments(seg) {
   if (seg[0] === "product") return { view: "catalog", cat: { sub: "product", param: seg[1] || "" } };
   if (seg[0] === "catalog") {
     const s1 = seg[1];
-    if (!s1) return { view: "catalog", cat: { sub: "home", param: "" } };
+    if (!s1) {
+      /* Голый "/catalog" — но в строке запроса может быть направление/поиск/
+         бейдж/бренд, записанные туда catHashFromRoute(). Раньше эта ветка
+         всегда возвращала пустой param, и такая ссылка (или обновление уже
+         открытой страницы с фильтром) теряла фильтр — открывалась обычная
+         витрина каталога. Кладём query-строку как есть в param; распаковывает
+         её embedRouteFrom (app-root.jsx). */
+      let qsStr = "";
+      try { qsStr = location.search.replace(/^\?/, ""); } catch (e) {}
+      return { view: "catalog", cat: { sub: "home", param: qsStr } };
+    }
     if (CAT_SUBS.indexOf(s1) >= 0) return { view: "catalog", cat: { sub: s1, param: seg[2] || "" } };
     // category slug → listing; the optional third and fourth segments are the
     // subcategory and the product group (/catalog/equipment/obstetrics/obstetrics-kolposkopy)
@@ -125,7 +135,22 @@ function catHashFromRoute(view, params) {
   if (!view || view === "home") return "/catalog";
   if (view === "product") return "/catalog/product/" + (params.id || "");
   if (view === "catalog") {
-    if (!params.cat) return "/catalog";
+    if (!params.cat) {
+      /* Без категории раньше здесь всегда был голый "/catalog" — фильтр по
+         направлению (dir), поиску (q) или бейджу (badge) терялся из адреса
+         молча. Это не только ломало ссылку/закладку: эффект, который
+         перечитывает маршрут из URL при его изменении, следом видел «просто
+         /catalog» и откатывал состояние приложения обратно на витрину
+         каталога — клик по направлению на главной секунду показывал нужный
+         список и тут же возвращался на лендинг. */
+      const qs = new URLSearchParams();
+      if (params.dir) qs.set("dir", params.dir);
+      if (params.q) qs.set("q", params.q);
+      if (params.badge) qs.set("badge", params.badge);
+      if (params.brand) qs.set("brand", params.brand);
+      const s = qs.toString();
+      return s ? "/catalog?" + s : "/catalog";
+    }
     const catPart = catSlugOf(params.cat);
     return "/catalog/" + catPart + catPathTail(params) + catQuery(params);
   }
@@ -329,8 +354,24 @@ function App() {
          стоял sub «home», и любая ссылка на раздел — плитки на главной, пункты
          меню — открывала корень каталога, потеряв выбранную категорию. */
       const cat = opts && opts.cat;
-      setCatNav({ sub: cat ? "listing" : "home", param: cat || "", q: "", from: null });
-      setHashSafe(cat ? "/catalog/" + catSlugOf(cat) : "/catalog");
+      /* dir/q/badge/brand игнорировались точно так же — ссылка «Навигация по
+         направлениям» на главной вызывала go("catalog",{dir}), но dir нигде
+         не сохранялся: ни в catNav, ни в адресе. Каталог на долю секунды
+         показывал отфильтрованный список (react-состояние route ещё несло
+         opts), а следующий цикл событий перечитывал catNav/URL, где dir уже
+         потерян, и откатывался на витрину. Без cat используем ту же query-
+         строку, что и catHashFromRoute для адреса — так оба места
+         (catNav.param и сам URL) остаются источником одной и той же правды. */
+      if (cat) {
+        setCatNav({ sub: "listing", param: cat, q: "", from: null });
+        setHashSafe("/catalog/" + catSlugOf(cat));
+      } else {
+        const qs = new URLSearchParams();
+        ["dir", "q", "badge", "brand"].forEach((k) => { if (opts && opts[k]) qs.set(k, opts[k]); });
+        const qsStr = qs.toString();
+        setCatNav({ sub: "home", param: qsStr, q: "", from: null });
+        setHashSafe(qsStr ? "/catalog?" + qsStr : "/catalog");
+      }
     } else
     setHashSafe(corpHash(view));
     window.scrollTo({ top: 0, behavior: "instant" });

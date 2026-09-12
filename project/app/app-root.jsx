@@ -190,7 +190,17 @@ function Breadcrumbs({ t, lang, go, route, embed, active }) {
 
 function embedRouteFrom(sub, param, q) {
   if (q) return { view: "catalog", params: { q } };
-  if (!sub || sub === "home") return { view: "catalog", params: {} };
+  if (!sub || sub === "home") {
+    /* param может быть query-строкой (dir/q/badge/brand), которую
+       catHashFromRoute записал в адрес для бескатегорийного /catalog —
+       раньше этот случай не распаковывался вовсе, и фильтр терялся сразу
+       после того, как URL был сформирован правильно. */
+    if (!param) return { view: "catalog", params: {} };
+    const qp = new URLSearchParams(param);
+    const params = {};
+    ["dir", "q", "badge", "brand"].forEach((k) => { const v = qp.get(k); if (v) params[k] = v; });
+    return { view: "catalog", params };
+  }
   if (sub === "product") return { view: "product", params: { id: param } };
   if (sub === "listing") {
     if (!param) return { view: "catalog", params: {} };
