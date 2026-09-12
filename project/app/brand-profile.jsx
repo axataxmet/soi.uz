@@ -176,7 +176,12 @@ function BrandPage({ t, lang, store, go, params }) {
             общей плитки все товары бренда сразу видно по направлениям. */}
         <div className="cat-layout">
           {prodsByCat.length > 1 && (
-            <aside className="filters" style={{ position: "sticky", top: 88 }}>
+            /* marginTop сдвигает верх карточки «Направления» вниз ровно на
+               высоту заголовка первой секции («Наборы инструментов» + отступ
+               под ним, 64px) — без этого сдвига верх сайдбара совпадал с
+               верхом заголовка секции, а не с верхом карточек товара под ним,
+               и выглядело так, будто сайдбар «выше» списка. */
+            <aside className="filters" style={{ position: "sticky", top: 88, marginTop: 64 }}>
               <div className="flt-head"><h3>{lv("Направления","Yo'nalishlar","Directions")}</h3></div>
               <div className="flt-grp" style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {prodsByCat.map(c => (
