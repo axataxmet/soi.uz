@@ -99,8 +99,12 @@ function BrandPage({ t, lang, store, go, params }) {
      медицинский» и т.п.), а не по верхней категории (мебель/оборудование) —
      той было всего 2, и разные типы товаров одного бренда лежали вперемешку
      в одной секции; так гранулярность как у примера-эталона. */
-  const allGroups = window.CMS ? window.CMS.list("cat_groups") : [];
-  const groupMeta = gid => allGroups.find(g => g.id === gid || g._id === gid);
+  /* Товарные группы лежат в дереве window.DATA.CATEGORIES[].subs[].groups[]
+     (то же дерево, что использует каталог для навигации) — отдельного
+     плоского списка групп на этой странице нет, поэтому раскрываем дерево
+     один раз и ищем группу по id. */
+  const allGroups = (window.DATA?.CATEGORIES || []).flatMap(c => (c.subs || []).flatMap(s => s.groups || []));
+  const groupMeta = gid => allGroups.find(g => g._id === gid || g.id === gid);
   const groupOrder = gid => { const g = groupMeta(gid); return g && typeof g.order === "number" ? g.order : 999; };
   const groupIds = [...new Set(prods.map(p => p.group).filter(Boolean))].sort((a, b) => groupOrder(a) - groupOrder(b));
   const groupName = gid => {
