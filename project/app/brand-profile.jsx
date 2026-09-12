@@ -49,6 +49,17 @@ const BRAND_DATA = {
     desc_ru:"ChoiceMMed — производитель портативных диагностических устройств, включая пульсоксиметры, термометры и аппараты для измерения давления. Продукция представлена в 80+ странах.",
     desc_uz:"ChoiceMMed — portativ diagnostika qurilmalari ishlab chiqaruvchisi. Pulsoksimetrlar va tonometrlar 80+ mamlakatda sotiladi.",
     desc_en:"ChoiceMMed produces portable diagnostic devices including pulse oximeters and blood pressure monitors, sold in 80+ countries." },
+  /* МИЗ-Ворсма зарегистрирован в БД под cuid, а не человекочитаемым слагом —
+     остальные бренды выше используют слаг вида "ates"/"tves" просто потому,
+     что так исторически завели их id при первом импорте; для новых брендов
+     через админку id всегда cuid, ключ здесь обязан совпадать с ним. */
+  cmtvw04x90007xb1k6ybk5bhj: { founded:1820, hq:"Ворсма, Россия", hq_uz:"Vorsma, Rossiya", hq_en:"Vorsma, Russia",
+    desc_ru:"МИЗ-Ворсма (Медико-инструментальный завод им. В. И. Ленина) — крупнейший в России производитель медицинских инструментов и расходных материалов, с историей почти 200 лет. Выпускает свыше 1000 наименований изделий для хирургии, стоматологии, урологии, травматологии, акушерства и других направлений медицины, сертифицированных по стандарту CE.",
+    desc_uz:"МИЗ-Ворсма — Rossiyadagi eng yirik tibbiy asboblar va sarflanadigan materiallar ishlab chiqaruvchisi, deyarli 200 yillik tarixga ega. Jarrohlik, stomatologiya, urologiya va boshqa yo'nalishlar uchun 1000 dan ortiq CE sertifikatlangan mahsulot chiqaradi.",
+    desc_en:"MIZ-Vorsma (V.I. Lenin Medical Instrument Plant) is Russia's largest manufacturer of medical instruments and consumables, with nearly 200 years of history. It produces 1,000+ CE-certified items for surgery, dentistry, urology, traumatology, obstetrics and other medical fields.",
+    history_ru:"История завода начинается в 1820 году, когда мастер Иван Завьялов основал в посёлке Ворсма фабрику стальных изделий — ножей и слесарного инструмента. Первые медицинские инструменты предприятие выпустило в 1914 году, а в советское время получило имя В. И. Ленина. Сегодня продукцию МИЗ-Ворсма используют ведущие клиники и институты России — от НИИ им. Н. В. Склифосовского до Центра им. В. А. Алмазова.",
+    history_uz:"Zavod tarixi 1820 yilda boshlangan — usta Ivan Zavyalov Vorsma qishlog'ida po'lat buyumlar (pichoqlar va chilangar asboblari) fabrikasini asos solgan. Birinchi tibbiy asboblar 1914 yilda chiqarilgan. Bugungi kunda mahsulotlaridan Rossiyaning yetakchi klinika va institutlari foydalanadi.",
+    history_en:"The plant's history began in 1820, when craftsman Ivan Zavyalov founded a steel-goods factory in the village of Vorsma, making knives and locksmith tools. Its first medical instruments were produced in 1914. Today its products are used by Russia's leading clinics and research institutes." },
 };
 
 function BrandPage({ t, lang, store, go, params }) {
@@ -123,6 +134,24 @@ function BrandPage({ t, lang, store, go, params }) {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  /* Активный пункт в «Направлениях» подсвечиваем по секции, видимой в
+     верхней части экрана — иначе после клика или прокрутки колёсиком
+     непонятно, где сейчас находишься в длинном списке направлений
+     (правило «Active State» из UX-гайдлайна: текущий раздел нав. должен
+     быть видимо выделен). */
+  const [activeGroup, setActiveGroup] = React.useState(null);
+  React.useEffect(() => {
+    if (prodsByCat.length < 2) return;
+    const els = prodsByCat.map(c => document.getElementById(catSlug(c.id))).filter(Boolean);
+    if (!els.length) return;
+    const io = new IntersectionObserver((entries) => {
+      const visible = entries.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (visible.length) setActiveGroup(visible[0].target.id);
+    }, { rootMargin: "-96px 0px -70% 0px", threshold: 0 });
+    els.forEach(el => io.observe(el));
+    return () => io.disconnect();
+  }, [prods.length]);
+
   return (
     <div style={{ paddingBottom: 64 }}>
       <div className="wrap">
@@ -179,7 +208,7 @@ function BrandPage({ t, lang, store, go, params }) {
               <div className="flt-head"><h3>{lv("Направления","Yo'nalishlar","Directions")}</h3></div>
               <div className="flt-grp" style={{ display: "flex", flexDirection: "column", gap: 2 }}>
                 {prodsByCat.map(c => (
-                  <a key={c.id} className="brand-cat-link" onClick={() => scrollToCat(c.id)}>
+                  <a key={c.id} className={"brand-cat-link" + (activeGroup === catSlug(c.id) ? " active" : "")} onClick={() => scrollToCat(c.id)}>
                     <span>{c.name}</span>
                     <span className="brand-cat-count">{c.items.length}</span>
                   </a>
@@ -207,6 +236,16 @@ function BrandPage({ t, lang, store, go, params }) {
             ))}
           </div>
         </div>
+
+        {/* Краткая история производителя — только когда для бренда она задана
+            в BRAND_DATA (history_ru/uz/en); для остальных брендов блок не
+            рендерится, регрессии для них нет. */}
+        {(info.history_ru || info.history_en) && (
+          <div className="brand-history" style={{ marginTop: 48 }}>
+            <h2>{lv("История производителя", "Ishlab chiqaruvchi tarixi", "Manufacturer history")}</h2>
+            <p>{lv(info.history_ru, info.history_uz, info.history_en)}</p>
+          </div>
+        )}
 
         {/* partnership CTA */}
         <div className="ctaband" style={{ marginTop: 48 }}>
