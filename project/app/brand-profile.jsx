@@ -91,12 +91,29 @@ function BrandPage({ t, lang, store, go, params }) {
     const c = (window.DATA?.CATEGORIES || []).find(x => x.id === id);
     return c ? lv(c.ru, c.uz, c.en) : id;
   };
-  /* Разбивка товаров бренда по направлениям (категориям) — как в примере
+  /* Разбивка товаров бренда по направлениям — как в примере
      medcomp.ru/proizvoditeli/promet: слева список направлений-якорей,
      справа — товары, сгруппированные по направлению отдельными секциями,
-     а не одной сплошной плиткой вперемешку. */
+     а не одной сплошной плиткой вперемешку.
+     Группируем по товарной группе (p.group — «Сейф-термостат...», «Матрац
+     медицинский» и т.п.), а не по верхней категории (мебель/оборудование) —
+     той было всего 2, и разные типы товаров одного бренда лежали вперемешку
+     в одной секции; так гранулярность как у примера-эталона. */
+  const allGroups = window.CMS ? window.CMS.list("cat_groups") : [];
+  const groupMeta = gid => allGroups.find(g => g.id === gid || g._id === gid);
+  const groupOrder = gid => { const g = groupMeta(gid); return g && typeof g.order === "number" ? g.order : 999; };
+  const groupIds = [...new Set(prods.map(p => p.group).filter(Boolean))].sort((a, b) => groupOrder(a) - groupOrder(b));
+  const groupName = gid => {
+    const g = groupMeta(gid);
+    return g ? tri(lang, g.ru, g.uz, g.en) : catName((prods.find(p => p.group === gid) || {}).cat);
+  };
   const catSlug = id => "brand-cat-" + String(id).replace(/[^a-zA-Z0-9_-]/g, "");
-  const prodsByCat = cats.map(id => ({ id, name: catName(id), items: prods.filter(p => p.cat === id) }));
+  // товары без товарной группы (не должно быть в норме, но на всякий случай не теряем) — сводим в секции по категории
+  const ungrouped = prods.filter(p => !p.group);
+  const prodsByCat = [
+    ...groupIds.map(id => ({ id, name: groupName(id), items: prods.filter(p => p.group === id) })),
+    ...(ungrouped.length ? [...new Set(ungrouped.map(p => p.cat))].map(id => ({ id, name: catName(id), items: ungrouped.filter(p => p.cat === id) })) : []),
+  ];
   const scrollToCat = id => {
     const el = document.getElementById(catSlug(id));
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -134,7 +151,7 @@ function BrandPage({ t, lang, store, go, params }) {
           </div>
           <div className="brand-hero-stats">
             <div className="bhs"><div className="bhs-n">{prods.length}</div><div className="bhs-l">{t.items_count}</div></div>
-            <div className="bhs"><div className="bhs-n">{cats.length}</div><div className="bhs-l">{lv("направлений","yo'nalish","directions")}</div></div>
+            <div className="bhs"><div className="bhs-n">{prodsByCat.length}</div><div className="bhs-l">{lv("направлений","yo'nalish","directions")}</div></div>
             <div className="bhs"><div className="bhs-n">{prods.filter(p=>p.stock==="in").length}</div><div className="bhs-l">{t.in_stock}</div></div>
           </div>
         </div>
@@ -153,7 +170,7 @@ function BrandPage({ t, lang, store, go, params }) {
             структура как на medcomp.ru/proizvoditeli/promet, вместо одной
             общей плитки все товары бренда сразу видно по направлениям. */}
         <div className="cat-layout">
-          {cats.length > 1 && (
+          {prodsByCat.length > 1 && (
             <aside className="filters" style={{ position: "sticky", top: 88 }}>
               <div className="flt-head"><h3>{lv("Направления","Yo'nalishlar","Directions")}</h3></div>
               <div className="flt-grp" style={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -170,7 +187,7 @@ function BrandPage({ t, lang, store, go, params }) {
           <div className="cat-main">
             {prodsByCat.map(c => (
               <section key={c.id} id={catSlug(c.id)} className="cat-prod" style={{ marginBottom: 40 }}>
-                {cats.length > 1 && (
+                {prodsByCat.length > 1 && (
                   <div className="cat-prod-head"><h3 style={{ margin: 0 }}>{c.name}</h3></div>
                 )}
                 {/* ProductTile — тот же корпус карточки (.ptile), что и в каталоге
