@@ -345,6 +345,21 @@ function ProjectsPage({ t, lang, go }) {
    заменены на файлы, присланные заказчиком. Источник теперь один —
    window.DATA.BRANDS, без второго списка и без дедупликации по имени
    между двумя источниками. */
+/* Своя (упрощённая) версия itemsLabel из catalog.jsx — не переиспользуем ту
+   напрямую: catalog.js грузится отложенным бандлом (type="text/soi-deferred")
+   только при входе в каталог, а PartnersPage — корпоративная страница,
+   которая может открыться первой (прямой заход на /partners), когда
+   itemsLabel ещё не существует в window. */
+function partnerItemsLabel(n, lang) {
+  if (lang === "uz") return n + " ta mahsulot";
+  if (lang === "en") return n + (n === 1 ? " product" : " products");
+  const d10 = n % 10, d100 = n % 100;
+  const w = d10 === 1 && d100 !== 11 ? "товар"
+    : d10 >= 2 && d10 <= 4 && (d100 < 12 || d100 > 14) ? "товара"
+    : "товаров";
+  return n + " " + w;
+}
+
 function PartnersPage({ t, lang, go, goCat }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const PER = 16; // 4 колонки × 4 ряда
@@ -357,6 +372,13 @@ function PartnersPage({ t, lang, go, goCat }) {
     return () => window.removeEventListener("soi-data-changed", h);
   }, []);
   const brands = (window.DATA && window.DATA.BRANDS) || [];
+  // Карточка была голой — только лого и название. Считаем число товаров бренда
+  // прямо из уже загруженного каталога, чтобы карточка показывала не только
+  // логотип, но и что реально стоит за партнёрством.
+  const productCounts = {};
+  ((window.DATA && window.DATA.PRODUCTS) || []).forEach((p) => {
+    if (p.brand) productCounts[p.brand] = (productCounts[p.brand] || 0) + 1;
+  });
   const goPage = (n) => { setPage(n); window.scrollTo({ top: 0, behavior: "smooth" }); };
   const openBrand = (b) => { if (goCat) goCat("brand", b.id); };
   const totalPages = Math.max(1, Math.ceil(brands.length / PER));
@@ -373,8 +395,11 @@ function PartnersPage({ t, lang, go, goCat }) {
           <div className="brands-page-grid reveal">
             {pageItems.map((b) => {
               const country = (b.country && (b.country[lang] || b.country.ru)) || lv(b.country_ru, b.country_uz, b.country_en) || "";
-              const logoBlock = (
-                <React.Fragment>
+              const count = productCounts[b.id] || 0;
+              return (
+                <div key={b.id} className="brand-tile" onClick={() => openBrand(b)}
+                     role="button" tabIndex={0}
+                     onKeyDown={(e) => { if (e.key === "Enter") openBrand(b); }}>
                   <div className="bt-logo">
                     {b.logo
                       ? <img src={b.logo} alt={b.name} loading="lazy" />
@@ -382,13 +407,21 @@ function PartnersPage({ t, lang, go, goCat }) {
                   </div>
                   <div className="bt-body">
                     <div className="bt-name">{b.name}</div>
-                    {country && <div className="bt-loc">{country}</div>}
+                    <div className="bt-meta">
+                      {country && <span className="bt-loc">{country}</span>}
+                      {count > 0 && <span className="bt-cnt">{partnerItemsLabel(count, lang)}</span>}
+                    </div>
+                    <div className="bt-actions">
+                      <span className="bt-view">{lv("Товары бренда", "Brend mahsulotlari", "Brand products")}<CoIcon name="arrow" size={13} /></span>
+                      {b.url && (
+                        <a className="bt-site" href={b.url} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()}>
+                          {lv("Сайт производителя", "Ishlab chiqaruvchi sayti", "Manufacturer site")}
+                        </a>
+                      )}
+                    </div>
                   </div>
-                </React.Fragment>
+                </div>
               );
-              return b.url
-                ? <a key={b.id} className="brand-tile" href={b.url} target="_blank" rel="noopener noreferrer">{logoBlock}</a>
-                : <div key={b.id} className="brand-tile" onClick={() => openBrand(b)}>{logoBlock}</div>;
             })}
           </div>
           {totalPages > 1 && (

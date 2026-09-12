@@ -2478,9 +2478,26 @@ body{background:var(--surface)}
    с полями по краям — обрезка бренда хуже, чем свободное поле. */
 .bt-logo img{max-width:100%;max-height:100%;object-fit:contain;padding:14px;box-sizing:border-box}
 .bt-mono{font-size:var(--fs-9);font-weight:900;letter-spacing:-.02em;color:var(--blue-600)}
-.bt-body{padding:14px 16px}
+.bt-body{padding:14px 16px 16px}
 .bt-name{font-size:var(--fs-4);font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bt-loc{margin-top:3px;font-size:var(--fs-2);color:var(--slate-500);font-weight:600}
+/* Карточка партнёра раньше заканчивалась на названии и стране — только
+   логотип, без единой зацепки, что реально стоит за партнёрством. Добавлены:
+   число товаров бренда в нашем каталоге (bt-cnt), явная ссылка «Товары
+   бренда» (переход остаётся кликом по всей карточке — bt-view лишь
+   подсказывает это визуально) и, когда известен сайт производителя из БД
+   (Manufacturer.website — раньше не доходил до фронта, см. buildBrands),
+   отдельная ссылка на него в новой вкладке, не конфликтующая с переходом
+   внутрь каталога (stopPropagation в PartnersPage). */
+.bt-meta{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap}
+.bt-loc{font-size:var(--fs-2);color:var(--slate-500);font-weight:600}
+.bt-cnt{font-size:var(--fs-2);color:var(--blue-600);font-weight:700;padding:1px 8px;background:var(--blue-50);border-radius:999px}
+[data-theme="dark"] .bt-cnt{background:#16273f}
+.bt-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft,var(--line))}
+.bt-view{display:inline-flex;align-items:center;gap:5px;font-size:var(--fs-2);font-weight:700;color:var(--blue-600)}
+.bt-view svg{transition:transform .16s}
+.brand-tile:hover .bt-view svg{transform:translateX(2px)}
+.bt-site{font-size:var(--fs-1);color:var(--slate-500);font-weight:600;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
+.bt-site:hover{color:var(--blue-600);text-decoration:underline}
 [data-theme="dark"] .bt-logo{background:#16273f}
 .brands-pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:36px;flex-wrap:wrap}
 .bp-btn{min-width:36px;height:36px;padding:0 6px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);color:var(--slate-600);font-size:var(--fs-3);font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:.14s}
@@ -3957,7 +3974,7 @@ html{scroll-padding-top:72px}
      согласии «Принять все» в cookie-баннере. -->
 <script src="lib/analytics.js?v=1788370000" defer></script>
 <!-- A3 catalog feed: populates window.DATA.{CATEGORIES,BRANDS,PRODUCTS} from the REST API -->
-<script src="app/catalog-remote.js?v=1789192075"></script>
+<script src="app/catalog-remote.js?v=1789216395"></script>
 <script src="admin/ui.jsx?v=1789171151"></script>
 <script src="dist/app/ui-atoms.js?v=1789167424"></script>
 <script type="text/soi-deferred" data-src="dist/app/header.js?v=1788878786"></script>
@@ -3987,7 +4004,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
 <script src="dist/app/certificates.js?v=1788878786"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
-<script src="dist/app/inner-pages.js?v=1789066924"></script>
+<script src="dist/app/inner-pages.js?v=1789216395"></script>
 <script src="dist/app/testimonials.js?v=1787415411"></script>
 <script src="dist/app/search.js?v=1787415411"></script>
 <script src="dist/app/staff-training.js?v=1787415411"></script>
