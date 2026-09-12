@@ -239,6 +239,22 @@ function CatalogNewsRedirect({ embed }) {
   return null;
 }
 
+/* Каталог — не единственное приложение на странице: часть разделов (О компании,
+   Партнёры, Тендеры, Контакты и т.п.) живёт в корпоративной оболочке (news.jsx),
+   а не в маршрутах этого роутера. Раньше go("partners")/go("tenders") из
+   каталожных компонентов (кнопка «Все бренды», шапка) просто не находили
+   совпадения в диспетчере ниже и откатывались на CatalogLandingPage — ссылка
+   визуально ничего не делала. Как и CatalogNewsRedirect, отправляем то же
+   сообщение "soi-conav" в оболочку (себе же, если каталог не встроен в iframe —
+   там его слушает тот же window) вместо молчаливого отката. */
+const CORP_ONLY_VIEWS = ["about", "partners", "contacts", "directions", "documents", "projects", "reviews", "serviceSupport", "staffTraining", "tenders", "brands"];
+function CatalogCorpRedirect({ view }) {
+  useEffect(() => {
+    try { (window.parent || window).postMessage({ type: "soi-conav", view, from: "catalog" }, "*"); } catch (e) {}
+  }, [view]);
+  return null;
+}
+
 function App(props) {
   props = props || {};
   const EMBED_ON = props.embed != null ? props.embed : EMBED;
@@ -411,6 +427,7 @@ function App(props) {
      на неё (см. REDIRECTS в news.jsx), сама TendersPage больше не вызывается. */
   else if (v === "faq")     page = <FaqPage t={t} lang={lang} go={go} />;
   else if (v === "sitemap") page = <SitemapPage t={t} lang={lang} go={go} />;
+  else if (CORP_ONLY_VIEWS.indexOf(v) >= 0) page = <CatalogCorpRedirect view={v} />;
   /* Неизвестный раздел — открываем корень каталога. Иначе старая ссылка или
      закладка на удалённые «Комплекты», «Калькулятор» и витрину брендов давала
      пустой белый экран. */
