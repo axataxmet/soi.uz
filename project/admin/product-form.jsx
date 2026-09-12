@@ -172,6 +172,16 @@ function AdminProductForm({ go, editId }) {
   const [brands, setBrands] = useState([]);
   const [specs, setSpecs] = useState([]);
   const [schema, setSchema] = useState({ fields: [] });
+  /* Документы (Паспорт/РУ/CE/…) — вкладка «Документы» на витрине товара
+     (product-detail.jsx) их показывает, API (listRegDocs/addRegDoc/removeRegDoc
+     в catalog-admin-api.js) и серверные эндпоинты давно готовы, но в самой
+     форме редактирования раздела не было вовсе: все документы этой сессии
+     приходилось грузить в обход формы, напрямую в БД скриптами. */
+  const [docs, setDocs] = useState([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [newDocFile, setNewDocFile] = useState(null);
+  const [newDocType, setNewDocType] = useState("");
+  const docFileRef = useRef();
   const [open, setOpen] = useState({ basic: true, cats: true, attrs: true });
   const [active, setActive] = useState("basic");
   const [saving, setSaving] = useState(false);
@@ -243,9 +253,41 @@ function AdminProductForm({ go, editId }) {
         videoUrl: (p.attrs && p.attrs._video) || "",
       });
       originalImagesRef.current = images;
+      setDocs(p.regDocuments || []);
       setLoading(false);
     }).catch(e => { toast(e.message || "Ошибка загрузки товара", "error"); setLoading(false); });
   }, [editId]);
+
+  const REG_DOC_TYPES = [
+    { value: "", label: "Паспорт (без типа — техническая документация)" },
+    { value: "RU", label: "РУ — регистрационное удостоверение" },
+    { value: "CE", label: "CE" },
+    { value: "ISO", label: "ISO" },
+    { value: "DECLARATION", label: "Декларация о соответствии" },
+    { value: "CERTIFICATE", label: "Сертификат" },
+  ];
+
+  const uploadDoc = async () => {
+    if (!newDocFile || !isEdit) return;
+    setDocsLoading(true);
+    try {
+      const up = await window.api.uploadBlob(newDocFile, newDocFile.name);
+      const body = { fileUrl: up.url, status: "PRESENT" };
+      if (newDocType) body.type = newDocType;
+      const created = await window.CatalogAPI.addRegDoc(editId, body);
+      setDocs(d => [...d, created]);
+      setNewDocFile(null); setNewDocType("");
+      if (docFileRef.current) docFileRef.current.value = "";
+      toast("Документ добавлен");
+    } catch (e) { toast(e.message || "Ошибка загрузки документа", "error"); }
+    finally { setDocsLoading(false); }
+  };
+  const removeDoc = async (id) => {
+    setDocsLoading(true);
+    try { await window.CatalogAPI.removeRegDoc(id); setDocs(d => d.filter(x => x.id !== id)); }
+    catch (e) { toast(e.message || "Ошибка удаления документа", "error"); }
+    finally { setDocsLoading(false); }
+  };
 
   // merged effective attribute schema for the selected groups
   const gids = form.groupIds.join(",");
@@ -343,6 +385,7 @@ function AdminProductForm({ go, editId }) {
     cats: form.groupIds.length + form.specCategoryIds.length,
     attrs: schema.fields.length,
     media: form.images.length + (form.videoUrl.trim() ? 1 : 0),
+    docs: docs.length,
   };
   const NAV = [
     { key: "basic", label: "Основная информация" },
@@ -350,6 +393,7 @@ function AdminProductForm({ go, editId }) {
     { key: "attrs", label: "Характеристики" },
     { key: "price", label: "Цена и наличие" },
     { key: "media", label: "Фото и видео" },
+    { key: "docs", label: "Документы" },
   ];
 
   if (loading) return <div style={{ padding: 40 }} className="adm-text-muted">Загрузка товара…</div>;
@@ -561,6 +605,46 @@ function AdminProductForm({ go, editId }) {
                   placeholder="https://youtube.com/watch?v=..." />
                 <div className="adm-hint">Необязательно. Ролик появится в галерее товара последним кадром.</div>
               </Field>
+            </div>
+          </PfAcc>
+
+          {/* 6. Документы — вкладка «Документы» на витрине товара их уже умеет
+              показывать, backend и API-клиент готовы (listRegDocs/addRegDoc/
+              removeRegDoc), но раздела в самой форме не было. Доступен только
+              для уже сохранённого товара — regDocument привязывается к id. */}
+          <PfAcc id="docs" title="Документы" badge={badges.docs} isOpen={!!open.docs} onToggle={toggleSection}>
+            <div className="adm-form">
+              {!isEdit
+                ? <div className="adm-text-muted" style={{ fontSize: 13 }}>Сохраните товар — документы можно прикрепить после этого.</div>
+                : <React.Fragment>
+                    {docs.length > 0 && (
+                      <div className="pf-gallery" style={{ marginBottom: 12 }}>
+                        {docs.map(d => (
+                          <div className="pf-gallery-item" key={d.id} style={{ alignItems: "flex-start", padding: 10 }}>
+                            <a href={d.fileUrl} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 700, fontSize: 13 }}>
+                              {REG_DOC_TYPES.find(t => t.value === (d.type || ""))?.label.split(" — ")[0] || d.type || "Паспорт"}
+                            </a>
+                            <div className="adm-text-muted" style={{ fontSize: 12, margin: "4px 0 8px" }}>{d.number || d.fileUrl.split("/").pop()}</div>
+                            <button type="button" className="btn btn-secondary btn-sm" onClick={() => removeDoc(d.id)} disabled={docsLoading}>
+                              <AdminIcon name="x" size={12} /> Удалить
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <Field label="Тип документа">
+                      <select className="adm-select" value={newDocType} onChange={e => setNewDocType(e.target.value)}>
+                        {REG_DOC_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                      </select>
+                    </Field>
+                    <Field label="Файл (PDF)">
+                      <input ref={docFileRef} type="file" accept="application/pdf" onChange={e => setNewDocFile(e.target.files[0] || null)} />
+                    </Field>
+                    <button type="button" className="btn btn-primary btn-sm" onClick={uploadDoc} disabled={!newDocFile || docsLoading}>
+                      {docsLoading ? "Загрузка…" : "Добавить документ"}
+                    </button>
+                  </React.Fragment>
+              }
             </div>
           </PfAcc>
 
