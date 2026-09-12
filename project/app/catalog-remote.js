@@ -79,7 +79,7 @@
     return (list || []).map(function (b) {
       var countryRu = b.country ? (COUNTRY[b.country] || b.country) : "";
       return { id: b.id, name: b.name, logo: b.logoUrl || null,
-        country: tx(countryRu), flag: "", cat: tx("") };
+        country: tx(countryRu), flag: "", cat: tx(""), url: b.website || null };
     });
   }
 
