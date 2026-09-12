@@ -190,8 +190,13 @@ function BrandPage({ t, lang, store, go, params }) {
           )}
 
           <div className="cat-main">
-            {prodsByCat.map(c => (
-              <section key={c.id} id={catSlug(c.id)} className="cat-prod" style={{ marginBottom: 40 }}>
+            {prodsByCat.map((c, idx) => (
+              /* .cat-prod несёт свой responsive padding-top (используется и на
+                 странице категории) — на первой секции он был заметно больше,
+                 чем padding-top заголовка «Направления» в сайдбаре (18px), из-за
+                 чего заголовки первого ряда «съезжали» друг относительно друга.
+                 Выравниваем только первую секцию по той же базовой линии. */
+              <section key={c.id} id={catSlug(c.id)} className="cat-prod" style={{ marginBottom: 40, paddingTop: idx === 0 ? 18 : undefined }}>
                 {prodsByCat.length > 1 && (
                   <div className="cat-prod-head"><h3 style={{ margin: 0 }}>{c.name}</h3></div>
                 )}
