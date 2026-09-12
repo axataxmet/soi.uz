@@ -191,7 +191,15 @@ function catNavFromRoute(view, params) {
   if (!view || view === "home") return { sub: "home", param: "" };
   if (view === "product") return { sub: "product", param: params.id || "" };
   if (view === "catalog") {
-    if (!params.cat) return { sub: "home", param: "" };
+    if (!params.cat) {
+      /* Тот же провал, что чинили в catHashFromRoute: когда сам каталог
+         (его внутренний поиск/фильтр по направлению) анонсирует переход без
+         cat, dir/q/badge/brand раньше терялись здесь и адрес откатывался на
+         голый /catalog. */
+      const qs = new URLSearchParams();
+      ["dir", "q", "badge", "brand"].forEach((k) => { if (params[k]) qs.set(k, params[k]); });
+      return { sub: "home", param: qs.toString() };
+    }
     const catPart = catSlugOf(params.cat);
     return { sub: "listing", param: catPart + catPathTail(params) + catQuery(params) };
   }
