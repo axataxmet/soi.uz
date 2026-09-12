@@ -2082,6 +2082,15 @@ body{background:var(--surface)}
    (артикул, чип бренда), их min-content шире доли колонки — на голом 1fr сетка
    распирала контейнер и пятая карточка уезжала за правый край экрана. */
 .cat-prod-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:18px;align-items:stretch}
+/* Страница товарной группы с фильтрами (.cat-layout, сайдбар 280px) отдаёт
+   карточкам заметно меньше ширины, чем витрина без фильтров
+   (.cat-layout-full, вся ширина страницы) — при одинаковых 5 колонках
+   карточка получалась примерно на треть уже и мельче, хотя разметка та же
+   самая (.ptile). Уводим сайдбарную раскладку на 4 колонки, чтобы карточка
+   была сопоставимого размера с полноширинной страницей. Только на
+   брейкпоинте, где по умолчанию ещё 5 колонок (⩾1200px) — ниже все сетки
+   и так уже сведены к 4/3/2/1 колонкам ниже по файлу, трогать их не нужно. */
+@media(min-width:1200px){.cat-layout:not(.cat-layout-full) .cat-prod-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 
 /* .ptile — карточка товара в раскладке medcomp (.product-item-card): артикул и
    «сравнить» строкой сверху, фото 160px по центру, наличие, название ровно в
@@ -3987,7 +3996,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/header.js?v=1788878786"></script>
 <script src="dist/app/hero-wave.js?v=1787415411"></script>
 <script src="dist/app/home-page.js?v=1789171146"></script>
-<script type="text/soi-deferred" data-src="dist/app/catalog.js?v=1789205711"></script>
+<script type="text/soi-deferred" data-src="dist/app/catalog.js?v=1789219261"></script>
 <script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789169898"></script>
 <script type="text/soi-deferred" data-src="dist/app/cart.js?v=1789173178"></script>
 <script type="text/soi-deferred" data-src="dist/app/brand-profile.js?v=1789170867"></script>
