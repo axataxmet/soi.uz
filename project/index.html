@@ -1772,8 +1772,21 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
    через тюнер тем, «balanced light» — это влияет на весь сайт, но заказчик
    просит именно каталог белым). Переопределяем переменные внутри .z-catalog:
    всё, что внутри читает var(--bg)/var(--bg-2), получает белый, независимо
-   от общесайтовой настройки. */
-.z-catalog{--bg:#FFFFFF;--bg-2:#FFFFFF;background:#FFFFFF}
+   от общесайтовой настройки.
+
+   В тёмной теме сайта [data-theme="dark"] переопределяет --ink и соседние
+   текстовые токены на почти-белый (см. правило ниже, ~строка 3180) — из-за
+   этого заголовок каталога («133+ единиц…») оставался почти-белым текстом
+   поверх принудительно белого фона выше: контраст около 1:1, надпись
+   читалась как смазанное пятно. Каталог всегда светлый, поэтому фиксируем
+   здесь и текстовые/окантовочные токены светлыми значениями — те же
+   константы, что в :root, — а не только фон. */
+.z-catalog{
+  --bg:#FFFFFF; --bg-2:#FFFFFF; background:#FFFFFF;
+  --ink:#16233B; --ink-2:#33445E;
+  --slate-700:#47576F; --slate-600:#55647C; --slate-500:#63718A; --slate-400:#6A7790; --slate-300:#B6BFCC;
+  --surface:#FFFFFF; --line:#CAD6E4; --line-soft:#dfe6ef;
+}
 
 .z-corp .soi-chero-stage h1, .z-corp .soi-chero-stage h2, .z-corp .soi-chero-stage h3,
 .z-corp .eco-t h1, .z-corp .eco-t h2, .z-corp .eco-t h3,
