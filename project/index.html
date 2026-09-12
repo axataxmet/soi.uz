@@ -2115,19 +2115,15 @@ body{background:var(--surface)}
 .ptile-cmp{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;width:24px;height:20px;
   padding:0;border:none;background:none;color:var(--slate-400);cursor:pointer;transition:color .2s}
 .ptile-cmp:hover,.ptile-cmp.on{color:var(--blue-600)}
-/* Фирменный водяной знак — стандарт для всех фото товаров на сайте
-   (решение заказчика): накладывается через CSS поверх контейнера снимка
-   одним ::after, а не встраивается в сам файл — работает сразу для всех
-   уже загруженных фото и для любых будущих без повторной обработки
-   каждой картинки. В правом верхнем углу, ~14% ширины контейнера,
-   прозрачность уже заложена в саму PNG (30%), поверх картинки CSS-ом
-   больше не занижаем — иначе на белом фоне знак стал бы почти невидим. */
+/* Фирменный водяной знак раньше накладывался только через CSS ::after поверх
+   контейнера — на сайте выглядел нормально, но при скачивании самого файла
+   фото (или его прямом открытии по URL) знака не было вовсе, CSS в файл не
+   встраивается. По прямому запросу знак теперь запекается в сам файл при
+   загрузке (админка, логотип soi.uz.svg → PNG 15% прозрачности, тот же угол
+   и размер) — и для всех фото, загруженных ранее, тоже (одноразовый прогон
+   поверх S3). Правило ниже снято, чтобы не накладывать знак дважды.
+   history: .ptile-media::after{ background:url(/assets/product-watermark.png) ... } */
 .ptile-media, .card-media, .prow-media, .pdp-main-img{position:relative}
-.ptile-media::after, .card-media::after, .prow-media::after, .pdp-main-img::after{
-  content:"";position:absolute;top:4%;right:4%;width:16%;aspect-ratio:1/1;
-  background:url(/assets/product-watermark.png) center/contain no-repeat;
-  pointer-events:none;z-index:2;
-}
 /* Раньше высота была фиксированной (160px) при переменной ширине колонки —
    от 1.375:1 в 5-колоночной сетке до ~4.4:1 в один столбец на мобильном.
    Реальные фото товаров квадратные (1000×1000), поэтому при такой рамке

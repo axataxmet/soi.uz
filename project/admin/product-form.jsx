@@ -2,6 +2,47 @@
    built from the group's effective schema (/product-groups/:id/schema), price + stock + main image.
    Uses window.CatalogAPI + window.api. */
 
+/* Фирменный водяной знак раньше накладывался только CSS-ом поверх готовой
+   страницы — на сайте выглядел нормально, но сам файл фото (скачанный или
+   открытый напрямую по URL) знака не содержал вовсе. Теперь запекаем его в
+   файл на этапе загрузки: рисуем оригинал на канвасе, поверх — тот же PNG
+   (15% прозрачности уже заложено в сам файл), тем же углом/размером, что
+   раньше задавал CSS (top 4%, right 4%, width 16%, квадрат). */
+let _pfWatermarkImg = null;
+function pfLoadWatermark() {
+  if (_pfWatermarkImg) return _pfWatermarkImg;
+  _pfWatermarkImg = new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = "/assets/product-watermark.png";
+  });
+  return _pfWatermarkImg;
+}
+function pfCompositeWatermark(dataUrl) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = async () => {
+      const wm = await pfLoadWatermark();
+      const canvas = document.createElement("canvas");
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0);
+      if (wm) {
+        const size = canvas.width * 0.16;
+        const x = canvas.width * (1 - 0.04) - size;
+        const y = canvas.height * 0.04;
+        ctx.drawImage(wm, x, y, size, size);
+      }
+      resolve(canvas.toDataURL("image/jpeg", 0.92));
+    };
+    img.onerror = () => resolve(dataUrl);
+    img.src = dataUrl;
+  });
+}
+
 function PfToggle({ checked, onChange, label }) {
   return (
     <label className="adm-toggle">
@@ -453,7 +494,10 @@ function AdminProductForm({ go, editId }) {
                      последний. */
                   files.forEach(f => {
                     const r = new FileReader();
-                    r.onload = ev => setForm(cur => ({ ...cur, images: [...cur.images, { url: ev.target.result, isMain: cur.images.length === 0 }] }));
+                    r.onload = async ev => {
+                      const watermarked = await pfCompositeWatermark(ev.target.result);
+                      setForm(cur => ({ ...cur, images: [...cur.images, { url: watermarked, isMain: cur.images.length === 0 }] }));
+                    };
                     r.readAsDataURL(f);
                   });
                 }} />
