@@ -421,9 +421,8 @@ ${formData.comment ? `<table>
                   <div className="qm-services">
                     {SERVICE_OPTS.map(s => (
                       <label key={s.key} className={"qm-svc " + (services[s.key] ? "on" : "")}>
-                        <input type="checkbox" checked={services[s.key]}
-                          onChange={() => setServices(prev => ({...prev, [s.key]: !prev[s.key]}))}
-                          style={{ display:"none" }} />
+                        <input type="checkbox" className="qm-svc-input" checked={services[s.key]}
+                          onChange={() => setServices(prev => ({...prev, [s.key]: !prev[s.key]}))} />
                         <span className="qm-svc-ic"><Icon name="check" size={12} sw={2.5} /></span>
                         {s.label}
                       </label>
