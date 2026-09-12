@@ -29,6 +29,7 @@
     setPrice: function (id, b) { return api.reqJson("/products/" + id + "/price", "PUT", b); },
     setStock: function (id, b) { return api.reqJson("/products/" + id + "/stock", "PUT", b); },
     addMedia: function (id, b) { return api.reqJson("/products/" + id + "/media", "POST", b); },
+    updateMedia: function (mid, b) { return api.reqJson("/products/media/" + mid, "PATCH", b); },
     removeMedia: function (mid) { return del("/products/media/" + mid); },
     listRegDocs: function (id) { return api.req("/products/" + id + "/reg-documents", { noAuth: true }); },
     addRegDoc: function (id, b) { return api.reqJson("/products/" + id + "/reg-documents", "POST", b); },
