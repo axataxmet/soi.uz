@@ -250,8 +250,12 @@ function CoTendersPage({ t, lang, go, initialCat }) {
       <section className="page-hero">
         <div className="pw"></div>
         <div className="wrap">
-          <h1>{lv("Тендеры и государственные закупки", "Tender va davlat xaridlari", "Tenders & public procurement")}</h1>
-          <p style={{ maxWidth: 660 }}>{lv("Готовим коммерческие предложения, спецификации и документы для участия в тендерах и закупках медицинских учреждений.", "Tibbiy muassasalar tenderlari va xaridlari uchun tijorat takliflari, spetsifikatsiyalar va hujjatlar tayyorlaymiz.", "We prepare commercial offers, specifications and documents for tenders and procurement by medical institutions.")}</p>
+          <div className="hero-badges reveal"><span className="hero-badge"><CoIcon name="check" size={14} />{lv("B2B и госзакупки", "B2B va davlat xaridlari", "B2B and public procurement")}</span></div>
+          <h1 style={{ maxWidth: 760 }}>{lv("Тендеры и государственные закупки", "Tender va davlat xaridlari", "Tenders & public procurement")}</h1>
+          <p style={{ maxWidth: 720, marginTop: 16 }}>{lv("Готовим коммерческие предложения, спецификации и документы для участия в тендерах и закупках медицинских учреждений.", "Tibbiy muassasalar tenderlari va xaridlari uchun tijorat takliflari, spetsifikatsiyalar va hujjatlar tayyorlaymiz.", "We prepare commercial offers, specifications and documents for tenders and procurement by medical institutions.")}</p>
+          <div className="hero-actions" style={{ marginTop: 26 }}>
+            <button className="btn btn-pri btn-lg" onClick={() => window.__openQuote && window.__openQuote()}>{lv("Отправить ТЗ", "TT yuborish", "Send a spec")}</button>
+          </div>
         </div>
       </section>
 
@@ -400,8 +404,12 @@ function CoNewsPage({ t, lang, go, fromCatalog, goCatalog }) {
       <section className="page-hero">
         <div className="pw"></div>
         <div className="wrap">
-          <h1>{lv("Новости и статьи", "Yangiliklar va maqolalar", "News & articles")}</h1>
-          <p style={{ maxWidth: 620 }}>{lv("Поставки, проекты, изменения в регистрации медицинских изделий и обзоры оборудования.", "Yetkazib berish, loyihalar, ro'yxat o'zgarishlari va uskuna sharhlari.", "Supplies, projects, changes in device registration and equipment reviews.")}</p>
+          <div className="hero-badges reveal"><span className="hero-badge"><CoIcon name="check" size={14} />{lv("Блог компании", "Kompaniya blogi", "Company blog")}</span></div>
+          <h1 style={{ maxWidth: 760 }}>{lv("Новости и статьи", "Yangiliklar va maqolalar", "News & articles")}</h1>
+          <p style={{ maxWidth: 720, marginTop: 16 }}>{lv("Поставки, проекты, изменения в регистрации медицинских изделий и обзоры оборудования.", "Yetkazib berish, loyihalar, ro'yxat o'zgarishlari va uskuna sharhlari.", "Supplies, projects, changes in device registration and equipment reviews.")}</p>
+          <div className="hero-actions" style={{ marginTop: 26 }}>
+            <button className="btn btn-pri btn-lg" onClick={() => window.__openQuote && window.__openQuote()}>{lv("Получить консультацию", "Konsultatsiya olish", "Get a consultation")}</button>
+          </div>
         </div>
       </section>
       <section className="section">

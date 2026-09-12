@@ -350,6 +350,12 @@ img{max-width:100%;display:block}
 .z-corp .hero h1 em{font-style:normal;color:var(--blue-600)}
 .z-corp .hero p.lead{font-size:var(--fs-6);color:var(--slate-600);margin-top:24px;line-height:1.62;max-width:580px}
 .z-corp .hero-actions{display:flex;gap:14px;margin-top:34px;flex-wrap:wrap}
+/* Бейдж над заголовком в .page-hero — раньше был только локальной вёрсткой
+   .sft-badge (/staff-training) и .ss-badge (/service-support), теперь общий
+   класс: PageHero (inner-pages.jsx) применяет его на всех разделах
+   «О компании»/«Услуги», чтобы Hero выглядели единым лендингом. */
+.z-corp .page-hero .hero-badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.z-corp .page-hero .hero-badge{display:inline-flex;align-items:center;gap:7px;font-size:var(--fs-3);font-weight:600;color:var(--blue-700);background:var(--blue-50);border:1px solid var(--line-soft);border-radius:var(--r-sm);padding:7px 13px}
 .z-corp .hero-stats{display:flex;gap:44px;margin-top:56px;flex-wrap:wrap}
 .z-corp .hstat b{font-family:var(--font);font-size:var(--fs-9);font-weight:600;color:var(--navy-900);display:block;letter-spacing:-.01em}
 .z-corp .hstat span{font-size:var(--fs-3);color:var(--slate-500);margin-top:2px;display:block}
@@ -4036,12 +4042,12 @@ html{scroll-padding-top:72px}
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
 <script src="dist/app/certificates.js?v=1788878786"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
-<script src="dist/app/inner-pages.js?v=1789216395"></script>
-<script src="dist/app/testimonials.js?v=1787415411"></script>
+<script src="dist/app/inner-pages.js?v=1789250101"></script>
+<script src="dist/app/testimonials.js?v=1789250101"></script>
 <script src="dist/app/search.js?v=1787415411"></script>
 <script src="dist/app/staff-training.js?v=1787415411"></script>
-<script src="dist/app/service-support.js?v=1788936302"></script>
-<script src="dist/app/checkout.js?v=1787415411"></script>
+<script src="dist/app/service-support.js?v=1789250101"></script>
+<script src="dist/app/checkout.js?v=1789250101"></script>
 <script src="dist/app/news.js?v=1789173324"></script>
 
 

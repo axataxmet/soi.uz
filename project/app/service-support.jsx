@@ -616,7 +616,6 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
             {contacts.telegram && <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="globe" size={18} /></div><div><h4>Telegram</h4><a href={contacts.telegram} target="_blank" rel="noopener">{contacts.telegram.replace(/^https?:\/\//, "")}</a></div></div>}
             <div className="ss-contact-i urgent"><div className="ss-ic"><CoIcon name="phone" size={18} /></div><div><h4>{lv("Экстренная линия", "Shoshilinch liniya", "Emergency line")}</h4><a href={"tel:" + String(contacts.phone || "").replace(/[^+\d]/g, "")}>{contacts.phone}</a></div></div>
           </div>
-          <div className="ss-photo ss-map-ph" data-label={lv("Карта — адрес сервисного центра", "Xarita — servis markazi manzili", "Map — service center address")}><span className="ph-ic"><CoIcon name="pin" size={26} /></span></div>
         </div>
       </section>
 
