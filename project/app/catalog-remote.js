@@ -126,7 +126,11 @@
         brand: p.manufacturerId || (p.manufacturer && p.manufacturer.id) || null,
         price: priceRow && priceRow.price != null ? Number(priceRow.price) : null,
         old: priceRow && priceRow.oldPrice != null ? Number(priceRow.oldPrice) : null,
-        stock: p.inStock ? "in" : "preorder",
+        /* attrs._stock — заданный в админке точный статус ("in"/"order"/"preorder"),
+           перекрывает булево inStock. Раньше наличие сводилось только к двум
+           состояниям (in/preorder) — «Под заказ» (order) нигде не мог
+           появиться, хотя фильтр, сортировка и бейдж под него уже были готовы. */
+        stock: attrs._stock || (p.inStock ? "in" : "preorder"),
         badge: p.badge || null,
         pop: p.popularity || 60,
         isNew: !!p.isNew,

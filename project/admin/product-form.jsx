@@ -63,7 +63,7 @@ function AdminProductForm({ go, editId }) {
   const blank = {
     sku: "", status: "DRAFT",
     name: { ru: "", uz: "", en: "" }, description: { ru: "", uz: "", en: "" },
-    manufacturerId: "", isNew: false, inStock: true, popularity: 60,
+    manufacturerId: "", isNew: false, inStock: true, stockStatus: "", popularity: 60,
     groupIds: [], specCategoryIds: [], attrs: {},
     price: "", oldPrice: "", wholesalePrice: "", currency: "UZS", priceOnRequest: false, qty: "",
     /* images — вся галерея, а не одно «главное фото»: раньше форма несла
@@ -140,7 +140,8 @@ function AdminProductForm({ go, editId }) {
         ...blank,
         sku: p.sku || "", status: p.status || "DRAFT",
         name: p.name || blank.name, description: p.description || blank.description,
-        manufacturerId: p.manufacturerId || "", isNew: !!p.isNew, inStock: p.inStock !== false, popularity: p.popularity || 60,
+        manufacturerId: p.manufacturerId || "", isNew: !!p.isNew, inStock: p.inStock !== false,
+        stockStatus: (p.attrs && p.attrs._stock) || "", popularity: p.popularity || 60,
         groupIds: (p.groups || []).map(g => g.groupId), specCategoryIds: (p.specs || []).map(s => s.specId), attrs: p.attrs || {},
         price: price.price != null ? price.price : "", oldPrice: price.oldPrice != null ? price.oldPrice : "",
         wholesalePrice: price.wholesalePrice != null ? price.wholesalePrice : "", currency: price.currency || "UZS",
@@ -185,6 +186,7 @@ function AdminProductForm({ go, editId }) {
         attrs: (() => {
           const a = { ...form.attrs };
           if (form.videoUrl.trim()) a._video = form.videoUrl.trim(); else delete a._video;
+          if (form.stockStatus) a._stock = form.stockStatus; else delete a._stock;
           return a;
         })(),
         groupIds: form.groupIds, specCategoryIds: form.specCategoryIds,
@@ -323,6 +325,21 @@ function AdminProductForm({ go, editId }) {
                 <PfToggle checked={form.isNew} onChange={v => set("isNew", v)} label="Новинка" />
                 <PfToggle checked={form.inStock} onChange={v => set("inStock", v)} label="В наличии" />
               </div>
+              {/* Раньше наличие было одним булевым переключателем — на витрине
+                  это сводилось только к «В наличии» / «Ожидается поставка»,
+                  хотя фильтр, сортировка и бейдж каталога уже умели показывать
+                  и «Под заказ» отдельно. Точный статус хранится в attrs._stock
+                  и на витрине перекрывает переключатель выше; «Авто» оставляет
+                  прежнее поведение по переключателю, ничего не ломая для уже
+                  заведённых товаров. */}
+              <Field label="Статус наличия (для каталога)" hint="переопределяет переключатель «В наличии» на витрине; «Авто» — по переключателю">
+                <select className="adm-input" value={form.stockStatus} onChange={e => set("stockStatus", e.target.value)}>
+                  <option value="">Авто (по переключателю «В наличии»)</option>
+                  <option value="in">В наличии</option>
+                  <option value="order">Под заказ</option>
+                  <option value="preorder">Ожидается поставка</option>
+                </select>
+              </Field>
             </div>
           </PfAcc>
 
