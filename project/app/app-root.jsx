@@ -321,6 +321,20 @@ function App(props) {
       window.scrollTo({ top: 0, behavior: "instant" });
       return;
     }
+    /* Разделы, которых нет в этом роутере (partners, tenders, about…) —
+       раньше всё равно проходили через общий путь ниже: setRoute() рисовал
+       их локально (см. CatalogCorpRedirect), но go() ЗАОДНО безусловно слал
+       родителю "soi-route", а тот воспринимает любой view как внутренний
+       под-раздел каталога (см. catHashFromRoute/catNavFromRoute — для
+       незнакомого view они молча собирают "/catalog/<view>"). Этот пришедший
+       следом ответ (catNav) перезаписывал только что показанный редирект и
+       откатывал каталог обратно на витрину. Короткий путь, как у "news"
+       выше, — не выполнять локальный переход и общий "soi-route" вовсе. */
+    if (CORP_ONLY_VIEWS.indexOf(view) >= 0 && EMBED_ON) {
+      try { (window.parent || window).postMessage({ type: "soi-conav", view, from: "catalog" }, "*"); } catch (e) {}
+      window.scrollTo({ top: 0, behavior: "instant" });
+      return;
+    }
     setRoute({ view, params });
     if (EMBED_ON) {
       try { (window.parent || window).postMessage({ type: "soi-route", view, params }, "*"); } catch (e) {}
