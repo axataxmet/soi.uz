@@ -72,7 +72,11 @@ function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
   return (
     <div className="pdp-buy">
       <div className="pdp-buy-status">
-        <span className="pdp-instock">{t.in_stock || "В наличии"}</span>
+        {/* Раньше здесь всегда стояло «В наличии» независимо от p.stock —
+            для товара «Под заказ»/«Ожидается поставка» рядом с формой
+            «Сообщить о поступлении» (см. NotifyAvailable) это читалось как
+            противоречие: бейдж говорит «есть», форма — «ещё нет». */}
+        <span className="pdp-instock">{p.stock === "order" ? t.on_order : p.stock === "preorder" ? t.preorder : t.in_stock}</span>
         <span className="pdp-vat-static">{t.vat_incl_12 || t.vat_note}</span>
       </div>
       <div className="pdp-price-lg"><Price value={basePrice} t={t} size="lg" /></div>
