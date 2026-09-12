@@ -67,6 +67,19 @@ function parseSegments(seg) {
     try { if (new URLSearchParams(location.search).get("view") === "grid") q = "?view=grid"; } catch (e) {}
     return { view: "catalog", cat: { sub: "listing", param: [catPart].concat(tail).join("/") + q } };
   }
+  /* Каталожные под-разделы (cart/wishlist/compare/...) канонически живут
+     под /catalog/<sub> — go()/catHashFromRoute всегда пишут адрес именно
+     так. Но /cart, /wishlist и т.п. без префикса — естественный адрес,
+     который посетитель может набрать, забуксить или отправить коллеге; он
+     не входит ни в один из двух списков маршрутов (не /catalog/..., не
+     корпоративный слаг), поэтому просто откатывался на главную, будто
+     ссылка не существует. "news" сюда не включаем — это имя занято
+     корпоративной страницей новостей (CORP_SLUG_TO_VIEW), и /news уже
+     работает через неё. */
+  const BARE_CAT_SUB_ALIASES = ["cart", "wishlist", "compare", "price", "faq", "sitemap", "tracking", "account", "calc", "kits"];
+  if (seg.length === 1 && BARE_CAT_SUB_ALIASES.indexOf(seg[0]) >= 0) {
+    return { view: "catalog", cat: { sub: seg[0], param: "" } };
+  }
   const view = CORP_SLUG_TO_VIEW[seg[0]];
   return { view: view || "home", cat: null };
 }
