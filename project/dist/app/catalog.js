@@ -35,7 +35,7 @@ var SUBCAT_ICON={diagnostics:"stethoscope",obstetrics:"venus",anesthesiology:"lu
 .clp-brands-row { display:flex; flex-wrap:wrap; gap:12px; }
 .clp-brand-chip { display:flex; align-items:center; justify-content:center; height:64px; padding:0 20px; border:1px solid var(--c-border,var(--line-soft)); border-radius:var(--r); background:var(--c-surface,#fff); cursor:pointer; transition:border-color .18s,box-shadow .18s; font-weight:700; color:var(--c-muted,var(--slate-500)); font-size:var(--fs-3); }
 .clp-brand-chip:hover { border-color:var(--blue-400); box-shadow:var(--sh-sm); color:var(--blue-600); }
-.clp-brand-chip img { max-height:32px; max-width:120px; object-fit:contain; }
+.clp-brand-chip img { height:32px; width:auto; max-width:120px; object-fit:contain; }
 @media(max-width:991px){ .clp-popular-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media(max-width:767px){ .clp-popular-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:540px){ .clp-popular-grid{ grid-template-columns:1fr; } }
