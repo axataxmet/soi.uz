@@ -299,7 +299,9 @@ function ReviewsPage({ t, lang, go }) {
           "Благодарственные письма от клиник, больниц и партнёров-производителей медицинского оборудования",
           "Klinikalar, kasalxonalar va tibbiy uskunalar ishlab chiqaruvchilarining minnatdorchilik xatlari",
           "Letters of appreciation from clinics, hospitals and medical equipment manufacturer partners"
-        )} />
+        )}
+        badge={lv("Отзывы клиентов", "Mijozlar sharhlari", "Client testimonials")}
+        actions={[{ label: lv("Стать клиентом", "Mijoz bo'lish", "Become a client"), onClick: () => window.__openQuote && window.__openQuote() }]} />
 
       <section className="section">
         <div className="wrap">

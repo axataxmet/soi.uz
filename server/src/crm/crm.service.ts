@@ -17,11 +17,57 @@ const DEFAULTS: UpdateCrmConfigDto = {
   telegramChatId: '',
 };
 
+// Подписи для самых частых ключей meta трёх форм («Регистрация МИ», «Обучение
+// персонала», «Сервисная заявка») — остальные ключи просто разбиваются из
+// camelCase, чтобы форма, добавленная позже, тоже не терялась молча.
+const META_LABELS: Record<string, string> = {
+  org: 'Организация', position: 'Должность', country: 'Страна', role: 'Роль',
+  city: 'Город', orgType: 'Тип учреждения',
+  device: 'Изделие/оборудование', name: 'Наименование', maker: 'Производитель',
+  makerCountry: 'Страна производителя', purpose: 'Назначение', category: 'Категория',
+  riskClass: 'Класс риска', models: 'Модели', sterile: 'Стерильное', invasive: 'Инвазивное',
+  measuring: 'С функцией измерения', software: 'Со встроенным ПО', ai: 'С ИИ',
+  consumables: 'Расходные материалы', model: 'Модель', qty: 'Количество',
+  registration: 'Регистрация', inCountry: 'Зарегистрировано в РУз', inOthers: 'В др. странах',
+  ceFda: 'Есть CE/FDA', uzBefore: 'Ранее регистрировалось', needed: 'Нужная процедура',
+  documents: 'Приложенные документы', urgency: 'Срочно', devStatus: 'Статус поставки',
+  format: 'Формат обучения', participants: 'Число участников', date: 'Желаемая дата',
+  equipment: 'Оборудование', type: 'Тип', serial: 'Серийный номер', inn: 'ИНН',
+};
+const YN: Record<string, string> = { yes: 'Да', no: 'Нет', unknown: 'Не знаю', true: 'Да', false: 'Нет' };
+function metaLabel(k: string): string {
+  return META_LABELS[k] || k.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, (c) => c.toUpperCase());
+}
+
 @Injectable()
 export class CrmService {
   private readonly logger = new Logger(CrmService.name);
 
   constructor(private readonly prisma: PrismaService) {}
+
+  /* Разворачивает meta формы в плоский список строк «Подпись: значение» —
+     раньше и в Telegram, и в примечании amoCRM уходил только огрызок meta
+     (org/productName/services), а детали формы (изделие, регистрация,
+     оборудование, участники обучения и т.д.) не попадали в уведомление
+     вовсе — их узнавали только вручную из БД. skipKeys — то, что уже
+     выведено отдельной строкой заранее (не дублируем). attachments
+     собираются отдельно вызывающим кодом, тут пропускаются. */
+  private formatMetaDetails(meta: Record<string, any>, skipKeys: string[] = [], prefix = ''): string[] {
+    const lines: string[] = [];
+    for (const [k, v] of Object.entries(meta || {})) {
+      if (v === undefined || v === null || v === '' || k === 'attachments') continue;
+      if (!prefix && skipKeys.includes(k)) continue;
+      const label = prefix + metaLabel(k);
+      if (Array.isArray(v)) {
+        if (v.length) lines.push(`${label}: ${v.join(', ')}`);
+      } else if (typeof v === 'object') {
+        lines.push(...this.formatMetaDetails(v, [], label + ' — '));
+      } else {
+        lines.push(`${label}: ${YN[String(v)] || String(v)}`);
+      }
+    }
+    return lines;
+  }
 
   /* Отдаём только поля настроек, без служебных колонок строки.
      Раньше здесь был `{ ...DEFAULTS, ...row }`, и наружу утекали id и
@@ -220,6 +266,10 @@ export class CrmService {
 
       const meta = (dto.meta || {}) as Record<string, any>;
       const leadName = `Заявка: ${meta.org || dto.name}${meta.productName ? ' — ' + meta.productName : ''}`;
+      // Остальные поля meta (изделие, регистрация, оборудование, участники и
+      // т.п.) — org/productName/services уже выведены отдельной строкой выше.
+      const metaDetails = this.formatMetaDetails(meta, ['org', 'productName', 'services']);
+      const attachments: Array<{ url: string; name?: string }> = Array.isArray(meta.attachments) ? meta.attachments : [];
       const noteText = [
         meta.org && `Организация: ${meta.org}`,
         `Контакт: ${dto.name}`,
@@ -228,6 +278,8 @@ export class CrmService {
         meta.productName && `Товар: ${meta.productName}`,
         Array.isArray(meta.services) && meta.services.length && `Услуги: ${meta.services.join(', ')}`,
         dto.message && `Комментарий: ${dto.message}`,
+        ...metaDetails,
+        attachments.length && `Вложения: ${attachments.map((a) => a.url).join(', ')}`,
         `Источник: ${dto.source || 'Форма на сайте'}`,
       ].filter(Boolean).join('\n');
 
@@ -296,6 +348,11 @@ export class CrmService {
           dto.email && `<b>Email:</b> ${dto.email}`,
           meta.productName && `<b>Товар:</b> ${meta.productName}`,
           dto.message && `<b>Комментарий:</b> ${dto.message}`,
+          ...metaDetails.map((l) => {
+            const i = l.indexOf(': ');
+            return i < 0 ? l : `<b>${l.slice(0, i)}:</b> ${l.slice(i + 2)}`;
+          }),
+          attachments.length && ['', '<b>Вложения:</b>', ...attachments.map((a) => a.url)].join('\n'),
           '',
           `<i>Источник: ${dto.source || 'Форма на сайте'}</i>`,
         ].filter(Boolean).join('\n');

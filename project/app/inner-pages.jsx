@@ -1,12 +1,25 @@
 /* ИНДУСТРИЯ ЗДОРОВЬЯ — inner pages */
 
-function PageHero({ t, lang, go, title, sub }) {
+/* badge и actions необязательны — по решению заказчика (12.09) все Hero
+   разделов «О компании» и «Услуги» приводятся к единому виду лендинга,
+   как у /staff-training и /service-support (бейдж + заголовок + подзаголовок
+   + кнопки CTA), а не к минимальному «заголовок+подзаголовок», который был
+   раньше. actions: [{label, onClick, variant:"pri"|"ghost"}]. */
+function PageHero({ t, lang, go, title, sub, badge, actions }) {
   return (
     <section className="page-hero">
       <div className="pw"></div>
       <div className="wrap">
-        <h1 data-comment-anchor="2b7cd50f74-h1-9-9">{title}</h1>
-        {sub && <p data-comment-anchor="77600593e5-p-10-17">{sub}</p>}
+        {badge && <div className="hero-badges reveal"><span className="hero-badge"><CoIcon name="check" size={14} />{badge}</span></div>}
+        <h1 data-comment-anchor="2b7cd50f74-h1-9-9" style={actions ? { maxWidth: 760 } : undefined}>{title}</h1>
+        {sub && <p data-comment-anchor="77600593e5-p-10-17" style={actions ? { maxWidth: 720 } : undefined}>{sub}</p>}
+        {actions && actions.length > 0 && (
+          <div className="hero-actions" style={{ marginTop: 26 }}>
+            {actions.map((a, i) => (
+              <button key={i} className={"btn btn-lg " + (a.variant === "ghost" ? "btn-ghost" : "btn-pri")} onClick={a.onClick}>{a.label}</button>
+            ))}
+          </div>
+        )}
       </div>
     </section>);
 
@@ -102,7 +115,12 @@ function AboutPage({ t, lang, go }) {
       <PageHero t={t} lang={lang} go={go} title={t.nav_about}
       sub={lv("«ИНДУСТРИЯ ЗДОРОВЬЯ» — поставщик и интегратор медицинского оборудования для государственных и частных медицинских учреждений Узбекистана.",
       founded + " yildan O'zbekistonda tibbiy uskunalarni rasmiy yetkazib beruvchi va integrator.",
-      "Official supplier and integrator of medical equipment in Uzbekistan since " + founded + ".")} />
+      "Official supplier and integrator of medical equipment in Uzbekistan since " + founded + ".")}
+      badge={lv(yrs + "+ лет на рынке Узбекистана", yrs + "+ yil O'zbekiston bozorida", yrs + "+ years in the Uzbekistan market")}
+      actions={[
+        { label: lv("Смотреть проекты", "Loyihalarni ko'rish", "View projects"), onClick: () => go("projects") },
+        { label: lv("Связаться с нами", "Biz bilan bog'lanish", "Contact us"), variant: "ghost", onClick: () => window.__openQuote && window.__openQuote() },
+      ]} />
       <section className="section" style={{ paddingBottom: 0 }}>
         <div className="wrap">
           {/* Второй заход на дизайн (10.09.2026): первая правка убрала мёртвый
@@ -282,13 +300,21 @@ function ProjectsPage({ t, lang, go }) {
   // нормализуем в единый вид карточки
   const source = cmsCases.map((c) => ({ id: c.id, tag: c.tag, t: c.title, d: c.desc, year: c.year, scope: c.scope, loc: c.region, type: c.type, image: c.image }));
 
-  const list = source.filter((p) => f === "all" || p.type === f);
+  /* Новые сверху: сортируем по году кейса (его вводят вручную в админке —
+     это единственное поле, которое реально отражает «когда это было», в
+     отличие от порядка добавления записи в CMS). При совпадении года — по
+     id: cuid устроен так, что более новая запись лексикографически больше. */
+  const list = source
+    .filter((p) => f === "all" || p.type === f)
+    .sort((a, b) => (Number(b.year) || 0) - (Number(a.year) || 0) || String(b.id).localeCompare(String(a.id)));
   const filters = [["all", lv("Все", "Barchasi", "All")], ["gov", lv("Госучреждения", "Davlat", "Public")], ["private", lv("Частные клиники", "Xususiy", "Private")]];
   const locText = (p) => typeof p.loc === "string" ? p.loc : tr(lang, p.loc);
   const imgUrl = (im) => !im ? "" : typeof im === "string" ? im : im.data || im.url || im.src || "";
   return (
     <div>
-      <PageHero t={t} lang={lang} go={go} title={t.nav_projects} sub={t.pr_sub} />
+      <PageHero t={t} lang={lang} go={go} title={t.nav_projects} sub={t.pr_sub}
+      badge={lv("Реализованные проекты", "Amalga oshirilgan loyihalar", "Completed projects")}
+      actions={[{ label: lv("Обсудить свой проект", "Loyihangizni muhokama qiling", "Discuss your project"), onClick: () => window.__openQuote && window.__openQuote() }]} />
       <section className="section">
         <div className="wrap">
           <div style={{ display: "flex", gap: 10, marginBottom: 36, flexWrap: "wrap" }}>
@@ -386,7 +412,9 @@ function PartnersPage({ t, lang, go, goCat }) {
   const pageItems = brands.slice((pageSafe - 1) * PER, pageSafe * PER);
   return (
     <div>
-      <PageHero t={t} lang={lang} go={go} title={t.nav_partners} sub={t.br_sub} />
+      <PageHero t={t} lang={lang} go={go} title={t.nav_partners} sub={t.br_sub}
+      badge={lv("22+ мировых производителя", "22+ jahon ishlab chiqaruvchisi", "22+ global manufacturers")}
+      actions={[{ label: lv("Стать партнёром", "Hamkor bo'lish", "Become a partner"), onClick: () => window.__openQuote && window.__openQuote() }]} />
       {/* Заголовок секции снят по прямому запросу (10.09.2026) — страница
           уже называется «Партнёры» (см. PageHero выше), повтор был лишним. */}
       {!!brands.length &&
@@ -632,7 +660,9 @@ function LicensesPage({ t, lang, go }) {
       <PageHero t={t} lang={lang} go={go} title={t.nav_licenses}
       sub={lv("Реквизиты, регистрационные документы, условия поставки, гарантии, сервисная информация и правовые документы ООО «ИНДУСТРИЯ ЗДОРОВЬЯ».",
       "Kompaniyaning rekvizitlari, ro'yxatga olish hujjatlari, yetkazib berish shartlari, kafolatlar va huquqiy hujjatlari.",
-      "Company details, registration documents, delivery terms, warranties, service information and legal documents of HEALTH INDUSTRY LLC.")} />
+      "Company details, registration documents, delivery terms, warranties, service information and legal documents of HEALTH INDUSTRY LLC.")}
+      badge={lv("Лицензии и сертификаты", "Litsenziyalar va sertifikatlar", "Licenses and certificates")}
+      actions={[{ label: lv("Задать вопрос", "Savol berish", "Ask a question"), onClick: () => window.__openQuote && window.__openQuote() }]} />
       <section className="section">
         <div className="wrap">
           {(() => {
@@ -681,7 +711,12 @@ function ServicesPage({ t, lang, go }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   return (
     <div>
-      <PageHero t={t} lang={lang} go={go} title={t.nav_services} sub={t.svc_sub} />
+      <PageHero t={t} lang={lang} go={go} title={t.nav_services} sub={t.svc_sub}
+      badge={lv("Полный цикл сопровождения", "To'liq hamrohlik sikli", "Full support cycle")}
+      actions={[
+        { label: lv("Подать сервисную заявку", "Servis so'rovini yuborish", "Submit a service request"), onClick: () => go("serviceSupport") },
+        { label: lv("Получить консультацию", "Konsultatsiya olish", "Get a consultation"), variant: "ghost", onClick: () => window.__openQuote && window.__openQuote() },
+      ]} />
       <section className="section">
         <div className="wrap">
           <div className="grid-2" style={{ gap: 22 }}>

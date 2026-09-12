@@ -9,6 +9,43 @@ function SubBadge({ status }) {
   const o = SUB_STATUSES.find(x => x.v === status) || SUB_STATUSES[0];
   return <span style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 700, color: o.c, background: o.c + "1A", border: "1px solid " + o.c + "55", borderRadius: 7, padding: "3px 9px" }}><span style={{ width: 6, height: 6, borderRadius: "50%", background: o.c }} />{o.l}</span>;
 }
+/* Человекочитаемые подписи для полей meta трёх форм («Регистрация МИ»,
+   «Обучение персонала», «Сервисная заявка») — раньше meta вообще не
+   рендерилась в карточке заявки (данные писались в БД, уходили в
+   Telegram/amoCRM обрывочно, а в самой админке менеджер видел только имя,
+   телефон, email и комментарий — детали по оборудованию/изделию исчезали).
+   Ключ не найден в словаре — просто разбиваем camelCase на слова, чтобы
+   любая будущая форма тоже не терялась молча. */
+const META_LABELS = {
+  org: "Организация", position: "Должность", country: "Страна", role: "Роль",
+  city: "Город", orgType: "Тип учреждения",
+  device: "Изделие / оборудование", name: "Наименование", maker: "Производитель",
+  makerCountry: "Страна производителя", purpose: "Назначение", category: "Категория",
+  riskClass: "Класс риска", models: "Модели", sterile: "Стерильное", invasive: "Инвазивное",
+  measuring: "С функцией измерения", software: "Со встроенным ПО", ai: "С ИИ/автоинтерпретацией",
+  consumables: "Расходные материалы", model: "Модель", qty: "Количество",
+  registration: "Регистрация", inCountry: "Зарегистрировано в РУз", inOthers: "Зарегистрировано в др. странах",
+  ceFda: "Есть CE/FDA", uzBefore: "Ранее регистрировалось в РУз", needed: "Нужная процедура",
+  documents: "Приложенные документы", urgency: "Срочно", devStatus: "Статус поставки",
+  format: "Формат обучения", participants: "Число участников", date: "Желаемая дата",
+  equipment: "Оборудование", type: "Тип", serial: "Серийный номер",
+  productName: "Товар", services: "Услуги", inn: "ИНН",
+};
+const metaLabel = (k) => META_LABELS[k] || k.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (c) => c.toUpperCase());
+const YN = { yes: "Да", no: "Нет", unknown: "Не знаю", true: "Да", false: "Нет" };
+function metaRows(meta, prefix = "") {
+  if (!meta || typeof meta !== "object") return [];
+  let rows = [];
+  for (const [k, v] of Object.entries(meta)) {
+    if (v === undefined || v === null || v === "") continue;
+    if (k === "attachments") { rows.push([prefix + metaLabel(k), { attachments: v }]); continue; }
+    if (Array.isArray(v)) { if (v.length) rows.push([prefix + metaLabel(k), v.join(", ")]); continue; }
+    if (typeof v === "object") { rows = rows.concat(metaRows(v, prefix + metaLabel(k) + " — ")); continue; }
+    rows.push([prefix + metaLabel(k), YN[v] || String(v)]);
+  }
+  return rows;
+}
+
 function AdminSubmissions() {
   const { useState, useMemo } = React;
   const [items] = useCMS("submissions");
@@ -123,8 +160,27 @@ function AdminSubmissions() {
               ["Тип заявки", viewing.type || viewing._type || "КП"],
             ].filter(r => r[1]).map(([k, v]) => (
               <div key={k} style={{ display: "flex", gap: 12 }}>
-                <div style={{ width: 120, flexShrink: 0, fontWeight: 600, fontSize: 13, color: "var(--c-muted)" }}>{k}</div>
+                <div style={{ width: 150, flexShrink: 0, fontWeight: 600, fontSize: 13, color: "var(--c-muted)" }}>{k}</div>
                 <div style={{ fontSize: 14, flex: 1 }}>{v}</div>
+              </div>
+            ))}
+            {/* Всё остальное, что форма записала в meta (устройство, регистрация,
+                оборудование, вложения и т.д.) — раньше терялось молча, хотя
+                менеджеру для обработки заявки нужны именно эти детали. */}
+            {metaRows(viewing.meta).map(([k, v], i) => (
+              <div key={"m" + i} style={{ display: "flex", gap: 12 }}>
+                <div style={{ width: 150, flexShrink: 0, fontWeight: 600, fontSize: 13, color: "var(--c-muted)" }}>{k}</div>
+                <div style={{ fontSize: 14, flex: 1 }}>
+                  {v && v.attachments
+                    ? <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                        {v.attachments.map((a, j) => (
+                          <a key={j} href={a.url} target="_blank" rel="noopener" style={{ color: "var(--c-primary)" }}>
+                            {a.name || a.url}{a.size ? ` (${Math.round(a.size / 1024)} КБ)` : ""}
+                          </a>
+                        ))}
+                      </div>
+                    : v}
+                </div>
               </div>
             ))}
           </div>
