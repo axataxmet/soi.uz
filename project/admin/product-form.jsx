@@ -66,7 +66,13 @@ function AdminProductForm({ go, editId }) {
     manufacturerId: "", isNew: false, inStock: true, popularity: 60,
     groupIds: [], specCategoryIds: [], attrs: {},
     price: "", oldPrice: "", wholesalePrice: "", currency: "UZS", priceOnRequest: false, qty: "",
-    image: "",
+    /* images — вся галерея, а не одно «главное фото»: раньше форма несла
+       единственный form.image, и при загрузке товара на редактирование
+       (см. ниже) в него клался только один снимок (isMain || media[0]) —
+       остальные фото ProductMedia существующего товара при сохранении
+       молча исчезали, потому что форма о них вообще не знала. Элемент:
+       { id? (есть только у уже сохранённого в БД снимка), url, isMain }. */
+    images: [],
   };
 
   const [form, setForm] = useState(blank);
@@ -79,6 +85,9 @@ function AdminProductForm({ go, editId }) {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const mainRef = useRef();
+  // Снимок form.images на момент загрузки товара — с чем сравнивать при
+  // сохранении, чтобы понять, что удалено/изменено, а что трогать не надо.
+  const originalImagesRef = useRef([]);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const setName = (lang, v) => setForm(f => ({ ...f, name: { ...f.name, [lang]: v } }));
@@ -116,7 +125,10 @@ function AdminProductForm({ go, editId }) {
     window.CatalogAPI.getProduct(editId).then(p => {
       const price = (p.prices && p.prices[0]) || {};
       const stock = (p.stocks && p.stocks[0]) || {};
-      const main = (p.media || []).find(m => m.isMain) || (p.media || [])[0];
+      const images = (p.media || [])
+        .slice()
+        .sort((a, b) => (b.isMain ? 1 : 0) - (a.isMain ? 1 : 0) || (a.order || 0) - (b.order || 0))
+        .map(m => ({ id: m.id, url: m.url, isMain: !!m.isMain }));
       setForm({
         ...blank,
         sku: p.sku || "", status: p.status || "DRAFT",
@@ -126,8 +138,9 @@ function AdminProductForm({ go, editId }) {
         price: price.price != null ? price.price : "", oldPrice: price.oldPrice != null ? price.oldPrice : "",
         wholesalePrice: price.wholesalePrice != null ? price.wholesalePrice : "", currency: price.currency || "UZS",
         priceOnRequest: !!price.priceOnRequest, qty: stock.qty != null ? stock.qty : "",
-        image: main ? main.url : "",
+        images,
       });
+      originalImagesRef.current = images;
       setLoading(false);
     }).catch(e => { toast(e.message || "Ошибка загрузки товара", "error"); setLoading(false); });
   }, [editId]);
@@ -188,9 +201,26 @@ function AdminProductForm({ go, editId }) {
         priceOnRequest: form.priceOnRequest, currency: form.currency, active: true,
       });
       if (form.qty !== "") await window.CatalogAPI.setStock(pid, { qty: Number(form.qty) || 0 });
-      if (form.image && form.image.indexOf("data:") === 0) {
-        const up = await window.api.uploadDataUrl(form.image);
-        await window.CatalogAPI.addMedia(pid, { url: up.url, type: "PHOTO", isMain: true });
+
+      /* Галерея: удалённые из формы фото — удаляем; изменившийся статус
+         «главное»/порядок у уже сохранённых — обновляем на месте (PATCH);
+         новые снимки (data:URL, ещё не в MinIO) — грузим и создаём запись.
+         Нетронутые записи не трогаем вовсе, без лишних запросов. */
+      const orig = originalImagesRef.current;
+      if (isEdit) {
+        for (const o of orig) {
+          if (!form.images.some(x => x.id === o.id)) await window.CatalogAPI.removeMedia(o.id);
+        }
+      }
+      for (let i = 0; i < form.images.length; i++) {
+        const img = form.images[i];
+        if (!img.id) {
+          const url = img.url.indexOf("data:") === 0 ? (await window.api.uploadDataUrl(img.url)).url : img.url;
+          await window.CatalogAPI.addMedia(pid, { url, type: "PHOTO", isMain: !!img.isMain, order: i });
+          continue;
+        }
+        const o = orig.find(x => x.id === img.id);
+        if (o && (!!o.isMain !== !!img.isMain)) await window.CatalogAPI.updateMedia(img.id, { isMain: !!img.isMain, order: i });
       }
 
       toast(isEdit ? "Товар обновлён" : "Товар создан");
@@ -204,7 +234,7 @@ function AdminProductForm({ go, editId }) {
   const badges = {
     cats: form.groupIds.length + form.specCategoryIds.length,
     attrs: schema.fields.length,
-    media: form.image ? 1 : 0,
+    media: form.images.length,
   };
   const NAV = [
     { key: "basic", label: "Основная информация" },
@@ -346,19 +376,57 @@ function AdminProductForm({ go, editId }) {
             </div>
           </PfAcc>
 
-          {/* 5. Фото */}
+          {/* 5. Фото — вся галерея, не одно «главное фото»: можно добавить
+              сразу несколько файлов, выбрать среди них главный и удалить
+              любой, порядок — как добавлены (первым — сделанный главным). */}
           <PfAcc id="media" title="Фото" badge={badges.media} isOpen={!!open.media} onToggle={toggleSection}>
             <div className="adm-form">
-              <Field label="Главное фото">
-                {form.image ? (
-                  <div>
-                    <img src={form.image} alt="" style={{ maxHeight: 200, maxWidth: "100%", objectFit: "contain", borderRadius: 8, border: "1px solid var(--c-border)" }} />
-                    <div style={{ marginTop: 8 }}><button className="btn btn-secondary btn-sm" onClick={() => set("image", "")} type="button"><AdminIcon name="x" size={12} /> Убрать</button></div>
+              <Field label={`Фото (${form.images.length})`}>
+                {form.images.length > 0 && (
+                  <div className="pf-gallery">
+                    {form.images.map((img, i) => (
+                      <div className="pf-gallery-item" key={img.id || img.url}>
+                        <img src={img.url} alt="" />
+                        {img.isMain && <span className="pf-gallery-main-badge">Главное</span>}
+                        <div className="pf-gallery-actions">
+                          {!img.isMain && (
+                            <button type="button" className="btn btn-secondary btn-sm"
+                              onClick={() => set("images", form.images.map((x, j) => ({ ...x, isMain: j === i })))}>
+                              Сделать главным
+                            </button>
+                          )}
+                          <button type="button" className="btn btn-secondary btn-sm"
+                            onClick={() => {
+                              const next = form.images.filter((_, j) => j !== i);
+                              // Убрали главное — им становится следующее по порядку, иначе товар остаётся без главного фото вовсе.
+                              if (img.isMain && next.length) next[0] = { ...next[0], isMain: true };
+                              set("images", next);
+                            }}>
+                            <AdminIcon name="x" size={12} /> Удалить
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ) : (
-                  <div className="pf-main-upload" onClick={() => mainRef.current.click()}><AdminIcon name="upload" size={24} /><div style={{ marginTop: 8, fontSize: 13 }}>Нажмите для загрузки</div></div>
                 )}
-                <input ref={mainRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files[0]; if (!f) return; const r = new FileReader(); r.onload = ev => set("image", ev.target.result); r.readAsDataURL(f); e.target.value = ""; }} />
+                <div className="pf-main-upload" onClick={() => mainRef.current.click()} style={{ marginTop: form.images.length ? 12 : 0 }}>
+                  <AdminIcon name="upload" size={24} /><div style={{ marginTop: 8, fontSize: 13 }}>Добавить фото (можно несколько сразу)</div>
+                </div>
+                <input ref={mainRef} type="file" accept="image/*" multiple style={{ display: "none" }} onChange={e => {
+                  const files = [...e.target.files];
+                  e.target.value = "";
+                  /* setForm с функцией-апдейтером, а не set("images", ...): несколько
+                     файлов читаются асинхронно и параллельно (FileReader), и каждый
+                     onload должен видеть результат добавления предыдущего, а не
+                     form.images, захваченный в замыкании на момент клика — иначе
+                     при выборе сразу нескольких файлов в галерею попадал только
+                     последний. */
+                  files.forEach(f => {
+                    const r = new FileReader();
+                    r.onload = ev => setForm(cur => ({ ...cur, images: [...cur.images, { url: ev.target.result, isMain: cur.images.length === 0 }] }));
+                    r.readAsDataURL(f);
+                  });
+                }} />
               </Field>
             </div>
           </PfAcc>
