@@ -107,6 +107,7 @@
       }).filter(Boolean);
       var kit = Array.isArray(attrs._kit) ? attrs._kit : [];
       var shipping = attrs._shipping || null;
+      var video = attrs._video || null; // ссылка на YouTube — задаётся в админке, читает product-detail.jsx
       var desc = tx(p.description); // { ru, uz, en } — вкладка «Описание» на карточке товара
 
       var extraCats = groups.slice(1).map(function (gi) {
@@ -132,7 +133,7 @@
         img: main, images: allImages, gallery: allImages.map(function (src) { return { src: src, alt: name.ru }; }),
         specs: specs,
         attrs: attrs, // сырые значения — по ним фасеты уровня 5 фильтруют товары
-        kit: kit, shipping: shipping,
+        kit: kit, shipping: shipping, video: video,
         descFull_ru: desc.ru, descFull_uz: desc.uz, descFull_en: desc.en,
         related: p.related || [], accessories: [], consumables: [],
         glyph: "pulse", _remote: true,

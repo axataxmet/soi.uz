@@ -73,6 +73,13 @@ function AdminProductForm({ go, editId }) {
        молча исчезали, потому что форма о них вообще не знала. Элемент:
        { id? (есть только у уже сохранённого в БД снимка), url, isMain }. */
     images: [],
+    /* Ссылка на YouTube — не отдельная колонка в БД (её там нет и не будет
+       ради одного поля), а зарезервированный ключ attrs._video, тем же
+       приёмом, что уже используют attrs._kit/_shipping (см. catalog-remote.js
+       buildProducts — ключи с "_" не идут в таблицу характеристик). Публичная
+       страница товара уже умеет показывать видео в галерее (product-detail.jsx
+       читает p.video) — не хватало только способа его туда положить. */
+    videoUrl: "",
   };
 
   const [form, setForm] = useState(blank);
@@ -139,6 +146,7 @@ function AdminProductForm({ go, editId }) {
         wholesalePrice: price.wholesalePrice != null ? price.wholesalePrice : "", currency: price.currency || "UZS",
         priceOnRequest: !!price.priceOnRequest, qty: stock.qty != null ? stock.qty : "",
         images,
+        videoUrl: (p.attrs && p.attrs._video) || "",
       });
       originalImagesRef.current = images;
       setLoading(false);
@@ -174,7 +182,12 @@ function AdminProductForm({ go, editId }) {
         manufacturerId: form.manufacturerId || undefined,
         status: form.status,
         isNew: form.isNew, inStock: form.inStock, popularity: Number(form.popularity) || 60,
-        attrs: form.attrs, groupIds: form.groupIds, specCategoryIds: form.specCategoryIds,
+        attrs: (() => {
+          const a = { ...form.attrs };
+          if (form.videoUrl.trim()) a._video = form.videoUrl.trim(); else delete a._video;
+          return a;
+        })(),
+        groupIds: form.groupIds, specCategoryIds: form.specCategoryIds,
       };
       /* Номер выдан на клиенте, поэтому два одновременно открытых бланка могут
          получить один и тот же — БД такой товар не примет (sku @unique).
@@ -234,14 +247,14 @@ function AdminProductForm({ go, editId }) {
   const badges = {
     cats: form.groupIds.length + form.specCategoryIds.length,
     attrs: schema.fields.length,
-    media: form.images.length,
+    media: form.images.length + (form.videoUrl.trim() ? 1 : 0),
   };
   const NAV = [
     { key: "basic", label: "Основная информация" },
     { key: "cats", label: "Классификация" },
     { key: "attrs", label: "Характеристики" },
     { key: "price", label: "Цена и наличие" },
-    { key: "media", label: "Фото" },
+    { key: "media", label: "Фото и видео" },
   ];
 
   if (loading) return <div style={{ padding: 40 }} className="adm-text-muted">Загрузка товара…</div>;
@@ -379,7 +392,7 @@ function AdminProductForm({ go, editId }) {
           {/* 5. Фото — вся галерея, не одно «главное фото»: можно добавить
               сразу несколько файлов, выбрать среди них главный и удалить
               любой, порядок — как добавлены (первым — сделанный главным). */}
-          <PfAcc id="media" title="Фото" badge={badges.media} isOpen={!!open.media} onToggle={toggleSection}>
+          <PfAcc id="media" title="Фото и видео" badge={badges.media} isOpen={!!open.media} onToggle={toggleSection}>
             <div className="adm-form">
               <Field label={`Фото (${form.images.length})`}>
                 {form.images.length > 0 && (
@@ -427,6 +440,11 @@ function AdminProductForm({ go, editId }) {
                     r.readAsDataURL(f);
                   });
                 }} />
+              </Field>
+              <Field label="Видео (ссылка на YouTube)">
+                <input className="adm-input" value={form.videoUrl} onChange={e => set("videoUrl", e.target.value)}
+                  placeholder="https://youtube.com/watch?v=..." />
+                <div className="adm-hint">Необязательно. Ролик появится в галерее товара последним кадром.</div>
               </Field>
             </div>
           </PfAcc>
