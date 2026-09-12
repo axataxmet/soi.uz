@@ -79,7 +79,7 @@ function LoginForm({ lang, lv, t, go, onLogin, regMode, setRegMode }) {
         <h1 style={{fontSize:26,fontWeight:800,marginBottom:6}}>{regMode?lv("Регистрация","Ro'yxatdan o'tish","Register"):lv("Вход в кабинет","Kirish","Sign in")}</h1>
         <p style={{color:"var(--slate-500)",fontSize:14,marginBottom:24}}>{regMode?lv("Создайте аккаунт для управления заявками","Arizalarni boshqarish uchun hisob yarating","Create an account to manage your requests"):lv("Войдите, чтобы управлять заявками и КП","Ariza va KP boshqarish uchun kiring","Sign in to manage your requests and quotes")}</p>
         <form onSubmit={e=>{e.preventDefault();const fd=new FormData(e.target);onLogin({email:fd.get("email"),name:fd.get("name")||fd.get("email").split("@")[0],org:fd.get("org")||""});}}>
-          {regMode && <div className="field"><label>{lv("Имя и фамилия","Ism va familiya","Full name")}</label><input name="name" required /></div>}
+          {regMode && <div className="field"><label>{lv("Имя и фамилия","Ism va familiya","Full name")}</label><input name="name" required placeholder={lv("Иванов Иван","Familiya Ism","Full name")} /></div>}
           <div className="field"><label>{lv("E-mail","E-mail","E-mail")}</label><input name="email" type="email" required placeholder="mail@clinic.uz"/></div>
           {regMode && <div className="field"><label>{lv("Организация","Tashkilot","Organization")}</label><input name="org" placeholder={lv("Название клиники","Klinika nomi","Clinic name")}/></div>}
           <button type="submit" className="btn btn-primary btn-block btn-lg" style={{marginTop:8}}>{regMode?lv("Зарегистрироваться","Ro'yxatdan o'tish","Register"):lv("Войти","Kirish","Sign in")}</button>
@@ -199,7 +199,7 @@ function AccProfile({ lv, acc, onSave }) {
       <h2 className="acc-sec-title">{lv("Профиль","Profil","Profile")}</h2>
       <form className="acc-form" onSubmit={e=>{e.preventDefault();const fd=new FormData(e.target);onSave({name:fd.get("name"),phone:fd.get("phone")});}}>
         <div className="field-row">
-          <div className="field"><label>{lv("Имя","Ism","Name")}</label><input name="name" defaultValue={acc.name||""} required /></div>
+          <div className="field"><label>{lv("Имя","Ism","Name")}</label><input name="name" defaultValue={acc.name||""} required placeholder={lv("Иванов Иван","Familiya Ism","Full name")} /></div>
           <div className="field"><label>{lv("E-mail","E-mail","E-mail")}</label><input type="email" defaultValue={acc.email||""} disabled style={{opacity:.6}}/></div>
         </div>
         <div className="field"><label>{lv("Телефон","Telefon","Phone")}</label><input name="phone" defaultValue={acc.phone||""} placeholder="+998 __ ___-__-__"/></div>

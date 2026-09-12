@@ -2,7 +2,14 @@
 
 function CartPage({ t, lang, store, go }) {
   const items = store.cart.map((c) => { const pr = window.DATA.PRODUCTS.find((p) => p.id === c.id); return pr ? { ...pr, q: c.q } : null; }).filter(Boolean);
-  const subtotal = items.reduce((s, p) => s + p.price * p.q, 0);
+  /* price=null ("цена по запросу") умножается на количество как 0, а не как
+     "неизвестно" — сумма по всем товарам без цены складывалась в буквальный
+     0, и корзина показывала «Итого 0 сум», как будто всё бесплатно. Если
+     хоть один товар в корзине без цены, итог тоже не может быть точным
+     числом — показываем «Цена по запросу» вместо суммы. */
+  const hasUnpriced = items.some((p) => p.price == null || isNaN(p.price));
+  const subtotal = items.reduce((s, p) => s + (p.price || 0) * p.q, 0);
+  const subtotalText = hasUnpriced ? t.price_on_request : (fmtPrice(subtotal) + " " + t.currency);
   const contacts = useSiteContacts();
 
   function downloadCartPDF() {
@@ -10,7 +17,10 @@ function CartPage({ t, lang, store, go }) {
     const num  = "КП-" + Date.now().toString().slice(-6);
     const rows = items.map((p, i) => {
       const name = tri(lang, p.ru, p.uz, p.en);
-      return `<tr><td style="text-align:center">${i + 1}</td><td>${name}</td><td style="font-family:monospace;color:#555">${p.sku || "—"}</td><td style="text-align:center">${p.q}</td><td style="text-align:right">${fmtPrice(p.price)} ${t.currency}</td><td style="text-align:right;font-weight:700">${fmtPrice(p.price * p.q)} ${t.currency}</td></tr>`;
+      const noPrice = p.price == null || isNaN(p.price);
+      const priceCell = noPrice ? t.price_on_request : (fmtPrice(p.price) + " " + t.currency);
+      const sumCell = noPrice ? t.price_on_request : (fmtPrice(p.price * p.q) + " " + t.currency);
+      return `<tr><td style="text-align:center">${i + 1}</td><td>${name}</td><td style="font-family:monospace;color:#555">${p.sku || "—"}</td><td style="text-align:center">${p.q}</td><td style="text-align:right">${priceCell}</td><td style="text-align:right;font-weight:700">${sumCell}</td></tr>`;
     }).join("");
     const html = `<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/>
 <title>${num} — ИНДУСТРИЯ ЗДОРОВЬЯ</title>
@@ -46,7 +56,7 @@ function CartPage({ t, lang, store, go }) {
 <table>
   <tr><th style="width:36px;text-align:center">№</th><th>Наименование</th><th>Артикул</th><th style="text-align:center">Кол-во</th><th style="text-align:right">Цена</th><th style="text-align:right">Сумма</th></tr>
   ${rows}
-  <tr class="total-row"><td colspan="5" style="text-align:right">Итого</td><td style="text-align:right">${fmtPrice(subtotal)} ${t.currency}</td></tr>
+  <tr class="total-row"><td colspan="5" style="text-align:right">Итого</td><td style="text-align:right">${hasUnpriced ? t.price_on_request : (fmtPrice(subtotal) + " " + t.currency)}</td></tr>
 </table>
 <div class="footer-note">
   Цены указаны без НДС и носят справочный характер. Для получения актуального коммерческого предложения менеджер ИНДУСТРИЯ ЗДОРОВЬЯ свяжется с вами в течение одного рабочего дня.
@@ -115,12 +125,14 @@ function CartPage({ t, lang, store, go }) {
 
         <div className="cart-sum">
           <h3>{t.cart_total}</h3>
-          <div className="sum-row"><span>{t.cart_subtotal} ({store.cartCount})</span><span className="mono" style={{ fontWeight: 700 }}>{fmtPrice(subtotal)} {t.currency}</span></div>
+          <div className="sum-row"><span>{t.cart_subtotal} ({store.cartCount})</span><span className="mono" style={{ fontWeight: 700 }}>{subtotalText}</span></div>
           <div className="sum-row total">
             <span>{t.cart_total}</span>
             <div style={{ textAlign: "right" }}>
-              <div className="st-val">{fmtPrice(subtotal)} <span style={{ fontSize: 15, color: "var(--slate-500)", fontWeight: 600 }}>{t.currency}</span></div>
-              <div className="sum-vat">{t.cart_vat}</div>
+              {hasUnpriced
+                ? <div className="st-val">{t.price_on_request}</div>
+                : <div className="st-val">{fmtPrice(subtotal)} <span style={{ fontSize: 15, color: "var(--slate-500)", fontWeight: 600 }}>{t.currency}</span></div>}
+              <div className="sum-vat">{hasUnpriced ? t.price_on_request_note : t.cart_vat}</div>
             </div>
           </div>
           <button className="btn btn-primary btn-block" style={{ marginTop: 18 }} onClick={() => window.__openQuote && window.__openQuote()}>
@@ -385,7 +397,13 @@ ${formData.comment ? `<table>
               <form onSubmit={handleSubmit}>
                 <div className="field"><label>{t.quote_org}</label><input name="org" required placeholder={lv("Название клиники / организации", "Klinika / tashkilot nomi", "Clinic / organization name")} /></div>
                 <div className="field-row">
-                  <div className="field"><label>{t.quote_name}</label><input name="name" required /></div>
+                  {/* :invalid:not(:placeholder-shown) в index.html красит рамку
+                      красным только пока placeholder не виден — у поля без
+                      placeholder :placeholder-shown никогда не матчится,
+                      поэтому :invalid один решал, и пустое обязательное поле
+                      подсвечивалось красным сразу при открытии формы, до
+                      единственного нажатия клавиши. */}
+                  <div className="field"><label>{t.quote_name}</label><input name="name" required placeholder={lv("Иванов Иван", "Familiya Ism", "Full name")} /></div>
                   <div className="field"><label>{t.quote_phone}</label><input name="phone" required placeholder="+998 __ ___-__-__" /></div>
                 </div>
                 <div className="field"><label>{t.quote_email}</label><input name="email" type="email" placeholder="mail@clinic.uz" /></div>
