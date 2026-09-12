@@ -517,16 +517,6 @@ function CatalogPage({ t, lang, store, go, params }) {
           </div>
 
           <div className="flt-grp">
-            <h4>{lvf("Дополнительно", "Qo'shimcha", "Additional")}</h4>
-            {featOpts.map((f) => (
-              <Checkbox key={f.id} label={f.label}
-                count={base.filter(f.test).length}
-                on={featSel.includes(f.id)}
-                onClick={() => toggle(featSel, setFeatSel, f.id)} />
-            ))}
-          </div>
-
-          <div className="flt-grp">
             <h4>{t.cat_price}</h4>
             <div className="flt-price">
               <input className="mono" inputMode="numeric" placeholder={t.from + " 0"} value={minP}
