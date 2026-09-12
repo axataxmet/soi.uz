@@ -176,7 +176,10 @@ function BrandPage({ t, lang, store, go, params }) {
                 {info.founded && <span><Icon name="award" size={14} style={{verticalAlign:"middle",marginRight:5}} />{lv("Основана в","Asoslangan","Founded")} {info.founded}</span>}
                 <span><Icon name="grid" size={14} style={{verticalAlign:"middle",marginRight:5}} />{prods.length} {t.items_count}</span>
               </div>
-              {desc && <p className="brand-hero-desc">{desc}</p>}
+              {/* Когда для бренда есть отдельный блок «История производителя»
+                  внизу страницы, не дублируем историю ещё и в шапке —
+                  верхний блок остаётся коротким, подробности только внизу. */}
+              {desc && !info.history_ru && !info.history_en && <p className="brand-hero-desc">{desc}</p>}
             </div>
             <button className="btn btn-primary" onClick={() => window.__openQuote && window.__openQuote()}>
               <Icon name="phone" size={18} />{lv("Связаться с менеджером","Menejer bilan bog'lanish","Contact manager")}
