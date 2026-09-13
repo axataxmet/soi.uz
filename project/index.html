@@ -2423,14 +2423,17 @@ body{background:var(--surface)}
 .cmpbar .cm-clear{color:var(--slate-500);font-size:var(--fs-3);font-weight:600}
 .cmpbar .cm-clear:hover{color:var(--danger)}
 @media(max-width:860px){
-  /* sit above the bottom tab bar, not over it */
-  .cmpbar{bottom:62px;z-index:49}
+  /* Нижняя панель каталога (.mob-bottom-nav) удалена — панель сравнения
+     теперь садится к самому низу экрана, а не повисает над пустотой. */
+  .cmpbar{bottom:0;z-index:49}
   .cmpbar .wrap{gap:10px;height:64px;padding:0 14px}
-  .cmpbar .cm-tx{font-size:var(--fs-2);flex:1;min-width:0}
+  /* Текст «К сравнению добавлено N» переносился на несколько строк внутри
+     64px-й панели и обрезался криво — запрет переноса с многоточием. */
+  .cmpbar .cm-tx{font-size:var(--fs-2);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .cmpbar .cm-thumbs{display:none}
   .cmpbar .cm-act{gap:8px}
   .cmpbar .cm-act .btn{height:40px;padding:0 14px;font-size:var(--fs-3);white-space:nowrap}
-  .cmpbar .cm-clear{font-size:var(--fs-2)}
+  .cmpbar .cm-clear{font-size:var(--fs-2);white-space:nowrap}
 }
 
 /* ===== SKELETON LOADERS ===== */
