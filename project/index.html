@@ -678,15 +678,17 @@ img{max-width:100%;display:block}
 .z-corp .drawer.on{transform:none}
 .z-corp .drawer a{padding:13px 14px;border-radius:var(--r-sm);font-size:var(--fs-5);font-weight:600;color:var(--slate-700)}
 .z-corp .drawer a:hover, .z-corp .drawer a.on{background:var(--bg);color:var(--blue-600)}
-.z-corp .drawer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.z-corp .drawer-head .theme-btn{width:44px;height:44px;border-radius:var(--r-sm);border:1px solid var(--line-soft);background:var(--surface);color:var(--slate-700);font-size:17px;flex-shrink:0}
-/* Сравнение / избранное / корзина внутри выезжающего меню — те же три
-   действия, что раньше были круглыми иконками в баре шапки (решение
-   заказчика 13.09.2026, см. Actions в certificates.jsx). */
-.z-corp .drawer-actions{display:flex;flex-direction:column;gap:2px;margin:4px 0 14px;padding-bottom:14px;border-bottom:1px solid var(--line-soft)}
-.z-corp .drawer-action{position:relative;display:flex;align-items:center;gap:12px;min-height:48px;padding:10px 14px;border-radius:var(--r-sm);font-size:var(--fs-5);font-weight:600;color:var(--slate-700);background:none;border:none;width:100%;text-align:left;cursor:pointer;font-family:var(--font)}
-.z-corp .drawer-action:hover{background:var(--bg);color:var(--blue-600)}
-.z-corp .drawer-action .co-badge{position:static;margin-left:auto}
+.z-corp .drawer-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.z-corp .drawer-head .burger{margin-left:auto}
+/* Сравнение / избранное / корзина / тема — иконки без подписи, в одном ряду
+   с языком (решение заказчика 13.09.2026) — раньше были отдельными строками
+   с текстом ниже поиска, до этого — круглыми иконками в баре шапки. */
+.z-corp .drawer-icon-row{display:flex;align-items:center;gap:6px}
+.z-corp .drawer-icon-btn,
+.z-corp .drawer-head .theme-btn{position:relative;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-sm);border:1px solid var(--line-soft);background:var(--surface);color:var(--slate-700);font-size:16px;flex-shrink:0;cursor:pointer}
+.z-corp .drawer-icon-btn:hover,
+.z-corp .drawer-head .theme-btn:hover{background:var(--bg);color:var(--blue-600)}
+.z-corp .drawer-icon-btn .co-badge{top:-4px;right:-4px}
 
 
 /* Шапка раздела без заливки: фон страниц — только белый. От прежнего блока
@@ -1075,7 +1077,6 @@ img{max-width:100%;display:block}
 [data-theme="dark"] .z-corp .co-search{background:#0c1726;border-color:#22344e}
 [data-theme="dark"] .z-corp .co-search:focus-within{background:#0f1f36}
 [data-theme="dark"] .z-corp .co-act:hover{background:#16273f}
-.z-corp .co-search-m{display:none}
 
 /* Панель подменю каталога (.cat-sticky / .cs-*) удалена вместе с разметкой
    в app/certificates.jsx — навигация осталась одна, в шапке. */
@@ -1086,8 +1087,6 @@ img{max-width:100%;display:block}
 @media(max-width:980px){
   .z-corp .co-search,.z-corp .co-actions{display:none}
   .z-corp .nav-row2{display:none}
-  .z-corp .co-search-m{display:flex;flex:none;width:auto;margin:6px 0 14px}
-  .z-corp .co-search-m input{width:100%}
 }
 </style>
 <style>/* ===== UzMedEx design system ===== */
@@ -3721,22 +3720,30 @@ body:has(.cmpbar.show){--btt-bottom:96px}
 }
 @media(max-width:620px){
   .z-corp{--soi-head-h:calc(62px + env(safe-area-inset-top,0px))}
-  .z-corp .co-nav .co-nav-wrap{height:64px;display:grid;grid-template-columns:42px 40px minmax(82px,1fr);align-items:center;column-gap:8px;row-gap:0}
+  /* Было display:grid с тремя жёсткими колонками (лого/поиск/остальное) —
+     расчёт держался на том, что колонка поиска всегда занята. На страницах
+     без каталожного поиска (например, на главной) она пустует, и авто-
+     размещение грида утаскивало бургер во ВТОРУЮ (40px) колонку вплотную к
+     лого вместо правого края — на глаз казалось, что кнопки перепутаны или
+     дублируют друг друга. Flexbox не зависит от того, сколько элементов
+     между лого и бургером реально присутствует — бургер всегда прижат к
+     правому краю через margin-left:auto (решение заказчика 13.09.2026). */
+  .z-corp .co-nav .co-nav-wrap{height:64px;display:flex;align-items:center;gap:8px}
   .z-corp .co-nav.scrolled .co-nav-wrap{height:58px;gap:10px}
   .z-corp .co-nav .co-brand{width:42px;height:42px}
   .z-corp .co-nav .co-brand-mark{width:42px;height:42px}
   .z-corp .co-nav.scrolled .co-brand,.z-corp .co-nav.scrolled .co-brand-mark{width:40px;height:40px}
   .z-corp .co-nav .nav-sp{display:none}
-  .z-corp .co-nav .co-brand{order:1}
-  .z-corp .co-nav .co-cat-search{order:2;justify-self:start}
-  .z-corp .co-nav .co-mobile-actions{order:3;justify-self:end;margin-left:0;display:flex;align-items:center;gap:6px}
+  .z-corp .co-nav .co-brand{order:1;flex-shrink:0}
+  .z-corp .co-nav .co-cat-search{order:2}
+  .z-corp .co-nav .co-mobile-actions{order:3;margin-left:auto;display:flex;align-items:center;gap:6px}
   .z-corp .co-nav .nav-utils{display:none}
   /* On mobile the header collapses to logo/search/burger — the consult
      pill has no slot in that grid and would sit on top of the logo. It moves
      into the drawer (.drawer-cta) instead, so it stays reachable. */
   .z-corp .co-nav .nav-cta{display:none}
   .z-corp .co-nav .co-actions{display:none!important}
-  .z-corp .co-nav .burger{order:5;margin-left:auto}
+  .z-corp .co-nav .burger{order:5;margin-left:auto;flex-shrink:0}
   .z-corp .co-nav .lang-dd-btn{min-width:38px;height:38px;padding:0 7px;gap:0;font-size:var(--fs-3)}
   .z-corp .co-nav .lang-dd-btn svg,.z-corp .co-nav .lang-dd-chevron{display:none}
   .z-corp .co-nav .theme-btn{display:none}
@@ -4064,7 +4071,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789210367"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
-<script src="dist/app/certificates.js?v=1789303800"></script>
+<script src="dist/app/certificates.js?v=1789303900"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
 <script src="dist/app/inner-pages.js?v=1789250101"></script>
 <script src="dist/app/testimonials.js?v=1789250101"></script>

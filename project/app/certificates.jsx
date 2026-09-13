@@ -434,38 +434,26 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
       <aside className={"drawer" + (drawer ? " on" : "")}>
         <div className="drawer-head">
           <Langs place="drawer" />
-          {/* Переключатель темы переехал сюда же — раньше стоял в баре
-              вместе с языком, сравнением, избранным и корзиной и на мобильном
-              загромождал шапку (решение заказчика 13.09.2026). */}
-          <ThemeBtn />
+          {/* Сравнение / избранное / корзина — теперь иконки без подписи, в
+              одном ряду с языком (решение заказчика 13.09.2026); тема — тут
+              же, была в баре шапки вместе с ними и туда же переехала. */}
+          <div className="drawer-icon-row">
+            <button className="drawer-icon-btn" onClick={() => { goCat("compare"); setDrawer(false); }} aria-label={lang === "uz" ? "Taqqoslash" : lang === "en" ? "Compare" : "Сравнение"} title={lang === "uz" ? "Taqqoslash" : lang === "en" ? "Compare" : "Сравнение"}>
+              <CoIcon name="compare" size={18} />
+              {counts.cmp > 0 && <span className="co-badge">{counts.cmp}</span>}
+            </button>
+            <button className="drawer-icon-btn" onClick={() => { goCat("wishlist"); setDrawer(false); }} aria-label={lang === "uz" ? "Saralangan" : lang === "en" ? "Wishlist" : "Избранное"} title={lang === "uz" ? "Saralangan" : lang === "en" ? "Wishlist" : "Избранное"}>
+              <CoIcon name="heart" size={18} />
+              {counts.wish > 0 && <span className="co-badge">{counts.wish}</span>}
+            </button>
+            <button className="drawer-icon-btn" onClick={() => { goCat("cart"); setDrawer(false); }} aria-label={lang === "uz" ? "Savat / KP" : lang === "en" ? "Cart / RFQ" : "Корзина / Запрос КП"} title={lang === "uz" ? "Savat / KP" : lang === "en" ? "Cart / RFQ" : "Корзина / Запрос КП"}>
+              <CoIcon name="cart" size={18} />
+              {counts.cart > 0 && <span className="co-badge">{counts.cart}</span>}
+            </button>
+            <ThemeBtn />
+          </div>
           <button className="burger" onClick={() => setDrawer(false)} aria-label="Close">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6 6 18" /></svg>
-          </button>
-        </div>
-        <form className="co-search co-search-m" onSubmit={submitSearch}>
-          <CoIcon name="search" size={18} />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={searchPh} aria-label="Search" />
-        </form>
-        {/* Сравнение / избранное / корзина — те же три действия, что были
-            круглыми иконками в баре шапки; переехали сюда по тому же решению.
-            «Заказать консультацию» отсюда убрана по прямому запросу заказчика
-            13.09.2026 — саму заявку оставить по-прежнему можно через
-            плавающий виджет связи. */}
-        <div className="drawer-actions">
-          <button className="drawer-action" onClick={() => { goCat("compare"); setDrawer(false); }}>
-            <CoIcon name="compare" size={20} />
-            <span>{lang === "uz" ? "Taqqoslash" : lang === "en" ? "Compare" : "Сравнение"}</span>
-            {counts.cmp > 0 && <span className="co-badge">{counts.cmp}</span>}
-          </button>
-          <button className="drawer-action" onClick={() => { goCat("wishlist"); setDrawer(false); }}>
-            <CoIcon name="heart" size={20} />
-            <span>{lang === "uz" ? "Saralangan" : lang === "en" ? "Wishlist" : "Избранное"}</span>
-            {counts.wish > 0 && <span className="co-badge">{counts.wish}</span>}
-          </button>
-          <button className="drawer-action" onClick={() => { goCat("cart"); setDrawer(false); }}>
-            <CoIcon name="cart" size={20} />
-            <span>{lang === "uz" ? "Savat / KP" : lang === "en" ? "Cart / RFQ" : "Корзина / Запрос КП"}</span>
-            {counts.cart > 0 && <span className="co-badge">{counts.cart}</span>}
           </button>
         </div>
         {corpNav.flatMap((item) =>
