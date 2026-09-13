@@ -2443,6 +2443,29 @@ function SoiCatalogCards({ lang, go }) {
 @media(min-width:640px){ .sxc-grid.sx-cases, .sxc-grid.sx-news { grid-template-columns:1fr 1fr; } }
 @media(min-width:1024px){ .sxc-grid.sx-cases, .sxc-grid.sx-news { grid-template-columns:repeat(3,1fr); } }
 
+/* ── строка действий под сеткой ───────────────────────────────────────────
+   До этого единственным способом уйти в раздел был клик по заголовку секции
+   (.sx-h2-link): у него нет ни подчёркивания, ни курсора-указателя до
+   наведения, ни роли ссылки — с клавиатуры он вообще недостижим. Здесь два
+   явных элемента: «показать ещё» разворачивает выдачу на месте, второй ведёт
+   на страницу раздела. Обе — настоящие <button>, поэтому фокус и Enter
+   работают сами. */
+.sxc-actions { display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+  gap:12px; margin-top:clamp(28px,3.5vw,40px); }
+.sxc-act { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 22px;
+  border-radius:999px; font-family:inherit; font-size:var(--fs-4); font-weight:700;
+  cursor:pointer; transition:background .16s ease, border-color .16s ease, color .16s ease; }
+/* Первичное — «показать ещё»: оно остаётся на странице, поэтому контурное.
+   Переход в раздел уводит со страницы — он подан спокойнее, текстом. */
+.sxc-act-more { border:1.5px solid var(--sx-line); background:var(--sx-card); color:var(--sx-ink); }
+.sxc-act-more:hover { border-color:var(--blue-500); color:var(--blue-600); }
+.sxc-act-all { border:1.5px solid transparent; background:transparent; color:var(--blue-600); }
+.sxc-act-all:hover { background:var(--blue-50, rgba(37,99,235,.08)); }
+.sxc-act-all svg { transition:transform .16s ease; }
+.sxc-act-all:hover svg { transform:translateX(3px); }
+@media(prefers-reduced-motion:reduce){ .sxc-act, .sxc-act-all svg { transition:none; }
+  .sxc-act-all:hover svg { transform:none; } }
+
 /* Карточка — <a>, поэтому гасим наследие ссылки: подчёркивание и синий цвет
    текста. Цвет заголовка задаёт .sxc-t, но color:inherit нужен, чтобы номер
    и стрелка не позеленели от пользовательских стилей ссылок. */
@@ -2817,6 +2840,15 @@ function SoiBrands({ lang, go }) {
         <div className="sx-mq-fade" />
         {rows.map((list, i) => belt(list, i))}
       </div>
+      {/* Логотипы в ленте кликабельны, но это не читается: они едут, и на них
+          не похоже, что каждый ведёт в раздел. Явная кнопка — единственный
+          стабильный способ уйти на страницу партнёров. */}
+      <div className="sxc-actions">
+        <button type="button" className="sxc-act sxc-act-all" onClick={() => go("partners")}>
+          {_lv(lang, "Все партнёры", "Barcha hamkorlar", "All partners")}
+          <Icon name="arrowRight" size={16} />
+        </button>
+      </div>
     </section>
   );
 }
@@ -2901,6 +2933,11 @@ function CaseModal({ c, lang, tx, img, onClose }) {
   );
 }
 
+/* Шаг показа карточек в «Реализованных проектах» и «Новостях». Три — это ровно
+   один ряд сетки на десктопе (.sx-cases/.sx-news идут по три с 1024px), поэтому
+   после нажатия «показать ещё» ряд достраивается целиком, без хвоста. */
+const SX_STEP = 3;
+
 function SoiCases({ lang, go }) {
   const tx = (o) => (o && (typeof o === "string" ? o : (o[lang] || o.ru))) || "";
   const img = (im) => !im ? "" : typeof im === "string" ? im : (im.data || im.url || im.src || "");
@@ -2915,7 +2952,12 @@ function SoiCases({ lang, go }) {
   let cases = cmsCases.filter((c) => (c.status || "published") === "published");
   // Fallback на статичные CASES_DEFAULT — только когда API реально пуст (по подписке уже дошли данные).
   if (!cases.length && window.SOI_CORE && window.SOI_CORE.CASES_DEFAULT) cases = window.SOI_CORE.CASES_DEFAULT;
-  cases = cases.slice(0, 3);
+  /* Раньше список резался до трёх безвозвратно, и остальные кейсы (их два
+     десятка) существовали только на отдельной странице. Теперь режем при
+     выводе, а «показать ещё» открывает следующий ряд прямо здесь. */
+  const [shown, setShown] = React.useState(SX_STEP);
+  const visible = cases.slice(0, shown);
+  const hasMore = cases.length > shown;
   if (!cases.length) return null;
   return (
     /* Блок приведён к оформлению каталожного: та же обёртка, двухколоночная
@@ -2936,7 +2978,7 @@ function SoiCases({ lang, go }) {
           </div>
         </div>
         <div className="sxc-grid sx-cases">
-          {cases.map((c, i) => (
+          {visible.map((c, i) => (
             <div className="sxc-card sx-case sx-rv" key={c.id || i} style={{ "--i": i }}
               role="button" tabIndex={0}
               onClick={() => setViewer(c)}
@@ -2958,6 +3000,17 @@ function SoiCases({ lang, go }) {
               </div>
             </div>
           ))}
+        </div>
+        <div className="sxc-actions">
+          {hasMore && (
+            <button type="button" className="sxc-act sxc-act-more" onClick={() => setShown((n) => n + SX_STEP)}>
+              {_lv(lang, "Показать ещё", "Yana ko'rsatish", "Show more")}
+            </button>
+          )}
+          <button type="button" className="sxc-act sxc-act-all" onClick={() => go("projects")}>
+            {_lv(lang, "Все проекты", "Barcha loyihalar", "All projects")}
+            <Icon name="arrowRight" size={16} />
+          </button>
         </div>
       </div>
       {viewer && <CaseModal c={viewer} lang={lang} tx={tx} img={img} onClose={() => setViewer(null)} />}
@@ -3013,6 +3066,14 @@ function SoiReviews({ lang, go }) {
   const cmsSuppliers = published.filter(r => rtype(r) === "supplier");
   const items = tab === "buyers" ? cmsBuyers : cmsSuppliers;
 
+  /* Сброс позиции карусели при смене вкладки. Хук стоял ниже раннего возврата
+     по пустому списку: пока отзывы из API не пришли, компонент выходил раньше
+     и этот useEffect не вызывался, а после загрузки рендер доходил до него —
+     хуков становилось на один больше, чем в прошлый раз, и React падал с #310,
+     роняя через error boundary всю главную. Хуки обязаны вызываться
+     безусловно, поэтому он поднят над возвратом. */
+  React.useEffect(() => { setIdx(0); if (ovRef.current) { ovRef.current.style.transform = "translateX(0)"; } }, [tab]);
+
   /* Ни одного опубликованного отзыва — секции на главной нет вовсе. Пустая
      карусель с вкладками и стрелками читалась бы как поломка. Так же
      поступает соседний блок новостей. */
@@ -3020,8 +3081,6 @@ function SoiReviews({ lang, go }) {
 
   const perView = 2;
   const maxIdx = Math.max(0, items.length - perView);
-
-  React.useEffect(() => { setIdx(0); if (ovRef.current) { ovRef.current.style.transform = "translateX(0)"; } }, [tab]);
 
   const shift = (dir) => {
     if (!ovRef.current) return;
@@ -3162,8 +3221,11 @@ function SoiNews({ lang, go }) {
     setCmsNews(window.CMS.list("news"));
     return window.CMS.on("news", () => setCmsNews(window.CMS.list("news")));
   }, []);
-  const news = cmsNews.filter((n) => n.published !== false)
-    .sort((a, b) => (b.date || "").localeCompare(a.date || "")).slice(0, 3);
+  const allNews = cmsNews.filter((n) => n.published !== false)
+    .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  const [shown, setShown] = React.useState(SX_STEP);
+  const news = allNews.slice(0, shown);
+  const hasMore = allNews.length > shown;
   if (!news.length) return null;
   const fmt = (d) => { if (!d) return ""; const x = new Date(d); return isNaN(x) ? d : x.toLocaleDateString(lang === "ru" ? "ru-RU" : lang === "uz" ? "uz-UZ" : "en-US", { day: "2-digit", month: "long", year: "numeric" }); };
   return (
@@ -3213,6 +3275,17 @@ function SoiNews({ lang, go }) {
               </div>
             </button>
           ))}
+        </div>
+        <div className="sxc-actions">
+          {hasMore && (
+            <button type="button" className="sxc-act sxc-act-more" onClick={() => setShown((n) => n + SX_STEP)}>
+              {_lv(lang, "Показать ещё", "Yana ko'rsatish", "Show more")}
+            </button>
+          )}
+          <button type="button" className="sxc-act sxc-act-all" onClick={() => go("news")}>
+            {_lv(lang, "Все новости", "Barcha yangiliklar", "All news")}
+            <Icon name="arrowRight" size={16} />
+          </button>
         </div>
       </div>
       {viewer && <NewsModal n={viewer} lang={lang} tx={tx} cov={cov} fmt={fmt} onClose={() => setViewer(null)} />}

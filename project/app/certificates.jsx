@@ -640,15 +640,19 @@ function CoFooter({ t, lang, go, goCat, setLang }) {
               <button type="button" className="foot-soc" title={lv("Скоро", "Tez orada", "Coming soon")} aria-disabled="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" /></svg></button>
               <button type="button" className="foot-soc" title={lv("Скоро", "Tez orada", "Coming soon")} aria-disabled="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.75 8.55 16.2 12l-6.45 3.45V8.55z" /></svg></button>
             </div>
-            <p className="foot-copy">
-              {lv("© 2026 ООО «ИНДУСТРИЯ ЗДОРОВЬЯ».", "© 2026 «SOG’LIQ INDUSTRIYASI» MChJ.", "© 2026 HEALTH INDUSTRY LLC.")}
-              <br />
-              {lv("Все права защищены.", "Barcha huquqlar himoyalangan.", "All rights reserved.")}
-              <br />
-              {lv("Использование материалов сайта разрешено только с согласия правообладателя.", "Sayt materiallaridan foydalanish faqat huquq egasining roziligi bilan ruxsat etiladi.", "Use of site materials is permitted only with the rightsholder's consent.")}
-            </p>
           </div>
         </div>
+        {/* Копирайт стоял внутри «Следите за нами». Пока та колонка занимала
+            1.7fr, текст туда влезал; после выравнивания сетки под пять колонок
+            в ней остаются только иконки (~175px), и три предложения ломались бы
+            на семь строк. Строка во всю ширину — там же, где дисклеймер. */}
+        <p className="foot-copy">
+          {lv("© 2026 ООО «ИНДУСТРИЯ ЗДОРОВЬЯ».", "© 2026 «SOG’LIQ INDUSTRIYASI» MChJ.", "© 2026 HEALTH INDUSTRY LLC.")}
+          {" "}
+          {lv("Все права защищены.", "Barcha huquqlar himoyalangan.", "All rights reserved.")}
+          {" "}
+          {lv("Использование материалов сайта разрешено только с согласия правообладателя.", "Sayt materiallaridan foydalanish faqat huquq egasining roziligi bilan ruxsat etiladi.", "Use of site materials is permitted only with the rightsholder's consent.")}
+        </p>
         <div className="foot-disclaimer">
           {/* Дисклеймер под требования Республики Узбекистан: документы названы
               так, как называются в РУз. Ссылка на ПКМ № 738 из этого текста

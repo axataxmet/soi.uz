@@ -622,16 +622,18 @@ img{max-width:100%;display:block}
 /* ===== light minimalist footer (corp shell) ===== */
 .z-corp .foot{background:var(--surface);color:var(--slate-600);padding:0;font-size:var(--fs-4)}
 .z-corp .foot .wrap{padding-top:0;padding-bottom:0}
-/* Расстановка по образцу заказчика (06.08.2026): бренд + описание + контакты
-   одной колонкой слева, между ними колонки навигации, справа — соцсети и под
-   ними реквизиты за тонкой линией. Первая колонка шире прочих, потому что
-   несёт три блока; последняя фиксированной доли, чтобы иконки соцсетей не
-   разъезжались. Средних колонок две — «О компании» и «Каталог» (группу
-   «Услуги» из футера убрали, см. footerNavCols). Через repeat(auto-fit,…)
-   это записать нельзя: auto-repeat запрещён рядом с fr-треками, и браузер
-   отбрасывает всё объявление целиком. Появится ещё одна группа — её
-   подхватит grid-auto-columns, сетка не развалится. */
-.z-corp .foot .fcols{grid-template-columns:1.5fr repeat(2,.95fr) 1.7fr;grid-auto-columns:1fr;gap:40px 36px;padding:64px 0 40px;align-items:start}
+/* Расстановка: бренд + описание + контакты одной колонкой слева, три колонки
+   навигации, справа — соцсети. Первая колонка шире прочих, потому что несёт
+   три блока; последняя узкая — в ней только четыре иконки (4×34 + 3×10 = 166px).
+
+   Колонок ровно пять — столько же, сколько детей у .fcols. Прежний шаблон
+   описывал четыре (его писали, когда «Услуги» из футера убрали), а группу
+   потом вернули — пятый блок .fcol-follow не помещался в явные треки и
+   переносился во вторую строку под бренд: справа от него оставалось ~165px
+   пустоты во всю ширину, а «Каталог» растягивался на 1.7fr, заложенные под
+   соцсети. Через repeat(auto-fit,…) это записать нельзя: auto-repeat запрещён
+   рядом с fr-треками, и браузер отбрасывает всё объявление целиком. */
+.z-corp .foot .fcols{grid-template-columns:1.5fr repeat(3,.95fr) .85fr;grid-auto-columns:1fr;gap:40px 36px;padding:64px 0 40px;align-items:start}
 .z-corp .foot .f-brand{display:flex;align-items:center;gap:11px;margin-bottom:16px}
 .z-corp .foot .f-wordmark{font-size:var(--fs-5);font-weight:800;letter-spacing:-.01em;color:var(--ink)}
 .z-corp .foot .fabout{color:var(--slate-600);max-width:320px;margin:0 0 22px}
@@ -646,9 +648,11 @@ img{max-width:100%;display:block}
 .z-corp .foot .fc-ic{color:var(--slate-400);margin-top:3px;flex-shrink:0}
 /* Правая колонка: заголовок, соцсети, копирайт под ними. */
 .z-corp .foot .fcol-follow .foot-socials{margin-bottom:20px}
-/* text-wrap:pretty не даёт «Все права / защищены.» и подобным коротким
-   хвостам оставаться на отдельной строке в узкой колонке. */
-.z-corp .foot .foot-copy{font-size:var(--fs-2);line-height:1.6;color:var(--slate-500);margin:0;text-wrap:pretty}
+/* Копирайт — строка во всю ширину футера, над дисклеймером (см. CoFooter).
+   text-wrap:pretty не даёт коротким хвостам оставаться на отдельной строке. */
+.z-corp .foot .foot-copy{font-size:var(--fs-2);line-height:1.6;color:var(--slate-500);margin:28px 0 0;padding-top:22px;border-top:1px solid var(--line-soft);text-wrap:pretty}
+/* Дисклеймер идёт следом за копирайтом и своей чертой его бы дублировал. */
+.z-corp .foot .foot-copy + .foot-disclaimer{margin-top:14px;padding-top:0}
 .z-corp .foot .fc-map{display:inline-flex;align-items:center;gap:6px;color:var(--blue-600);font-weight:600;cursor:pointer}
 .z-corp .foot .fc-map:hover{text-decoration:underline}
 .z-corp .foot-news-col p{font-size:var(--fs-3);color:var(--slate-500);line-height:1.5;margin:0 0 14px}
@@ -4079,7 +4083,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/ui-atoms.js?v=1789167424"></script>
 <script type="text/soi-deferred" data-src="dist/app/header.js?v=1789226469"></script>
 <script src="dist/app/hero-wave.js?v=1787415411"></script>
-<script src="dist/app/home-page.js?v=1789303700"></script>
+<script src="dist/app/home-page.js?v=1789336777"></script>
 <script type="text/soi-deferred" data-src="dist/app/catalog.js?v=1789226469"></script>
 <script type="text/soi-deferred" data-src="dist/app/product-detail.js?v=1789222559"></script>
 <script type="text/soi-deferred" data-src="dist/app/cart.js?v=1789173178"></script>
@@ -4100,7 +4104,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789304900"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
-<script src="dist/app/certificates.js?v=1789304800"></script>
+<script src="dist/app/certificates.js?v=1789336697"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
 <script src="dist/app/inner-pages.js?v=1789250101"></script>
 <script src="dist/app/testimonials.js?v=1789250101"></script>
