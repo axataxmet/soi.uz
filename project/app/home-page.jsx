@@ -1298,7 +1298,10 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    08.08.2026): 18 → 30px в сетке, 26/24 → 34/30px внутри. Раньше четыре
    карточки читались сплошным массивом — белого поля между ними почти не
    оставалось. */
-.sx-dir-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:30px; }
+/* Зазор и высота карточек сведены к «Экспертиза» (.sxp-grid/.sxp-card:
+   gap:14px, min-height:460px) — было gap:30px без фиксированной высоты,
+   разнобой между блоками (решение заказчика 13.09.2026). */
+.sx-dir-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
 /* Внутренний отступ вернули к 24px (решение от 09.08.2026, поверх записи
    выше от 08.08.2026) — карточки сведены к масштабу readdy.cc. Сетка между
    карточками (gap:30px) не тронута: пользователь просил про отступ внутри
@@ -1308,7 +1311,7 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    заливки, заголовок синеет на hover, без инверсии текста в белый (решение
    заказчика 13.09.2026 — «стиль карточек из Экспертиза применить к
    остальным карточкам главной»). */
-.sx-dir { position:relative; overflow:hidden; display:flex; flex-direction:column; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:28px; box-shadow:var(--sh); transition:box-shadow .25s ease, transform .25s ease; }
+.sx-dir { position:relative; overflow:hidden; display:flex; flex-direction:column; min-height:460px; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:28px; box-shadow:var(--sh); transition:box-shadow .25s ease, transform .25s ease; }
 .sx-dir:hover { box-shadow:var(--sh-lg); transform:translateY(-3px); }
 .sx-dir:hover h3 { color:var(--blue-600); }
 .sx-dir:focus-within { outline:none; }
@@ -2421,7 +2424,9 @@ function SoiCatalogCards({ lang, go }) {
 .sxc-sub { margin:0 0 24px; font-size:var(--fs-4); line-height:1.65; color:var(--sx-mute); }
 [data-theme="dark"] .sxc-sub { color:var(--sx-mute); }
 
-.sxc-grid { display:grid; gap:20px; grid-template-columns:1fr; }
+/* Зазор сведён к «Экспертиза» (gap:14px) — было 20px, разнобой между
+   блоками (решение заказчика 13.09.2026). */
+.sxc-grid { display:grid; gap:14px; grid-template-columns:1fr; }
 @media(min-width:640px){ .sxc-grid { grid-template-columns:1fr 1fr; } }
 @media(min-width:1024px){ .sxc-grid { grid-template-columns:repeat(4,1fr); } }
 
