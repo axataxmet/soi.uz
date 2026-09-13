@@ -2242,11 +2242,13 @@ function SoiExpertise({ lang, go }) {
 
 /* Номер и стрелка раньше стояли сверху карточки (.sxp-top); по просьбе
    заказчика 13.09.2026 верх карточки очищен от них, а стрелка перенесена
-   вниз, к строке «Подробнее» (.sxp-more). Фоновой номер (.sxp-bignum)
-   остался единственной нумерацией — сделан заметнее и поднят повыше. */
-.sxp-bignum { position:absolute; right:14px; bottom:-4px; font-size:4rem; font-weight:800; line-height:1;
-  user-select:none; pointer-events:none; color:rgba(16,21,18,.06); transition:color .35s; }
-.sxp-card:hover .sxp-bignum { color:rgba(255,255,255,.92); }
+   вниз, к строке «Подробнее» (.sxp-more). Номер (.sxp-bignum) сначала висел
+   декоративным фоновым слоем позади карточки, потом — уменьшен; теперь стоит
+   в той же строке, что «Подробнее↗», прижат к правому краю (решение
+   заказчика 13.09.2026). */
+.sxp-bignum { margin-left:auto; font-size:2rem; font-weight:800; line-height:1;
+  user-select:none; color:rgba(16,21,18,.3); transition:color .35s; }
+.sxp-card:hover .sxp-bignum { color:var(--sx-lime-ink); }
 
 .sxp-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
   border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
@@ -2328,7 +2330,6 @@ function SoiExpertise({ lang, go }) {
                   go(it.nav);
                 }}
               >
-                <span className="sxp-bignum" aria-hidden>{no}</span>
                 <h3 className="sxp-t">{L(it.t)}</h3>
                 <p className="sxp-d">{L(it.d)}</p>
                 <div className="sxp-expand">
@@ -2347,6 +2348,7 @@ function SoiExpertise({ lang, go }) {
                 <div className="sxp-more">
                   {_lv(lang, "Подробнее", "Batafsil", "Read more")}
                   <span className="sxp-arrow" aria-hidden>↗</span>
+                  <span className="sxp-bignum" aria-hidden>{no}</span>
                 </div>
               </a>
             );
@@ -2479,13 +2481,13 @@ function SoiCatalogCards({ lang, go }) {
   display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; }
 /* Заголовок увеличен (решение заказчика 13.09.2026). */
 .sxc-card.ov .sxc-t { margin:0; max-width:12rem; font-size:var(--fs-8); line-height:1.15; color:#fff; }
-/* Номер убран из декоративного фонового слоя за карточкой (.sxp-bignum-стиль)
-   и поставлен в обычный поток сразу под «Подробнее↗» — по прямому запросу
-   заказчика 13.09.2026. */
-.sxc-card.ov .sxc-bottom { display:flex; flex-direction:column; align-items:flex-start; gap:10px; }
+/* Номер сначала стоял декоративным фоновым слоем, потом — отдельной строкой
+   под «Подробнее↗»; теперь стоит с ним на одной строке, прижат к правому
+   краю (решение заказчика 13.09.2026). */
+.sxc-card.ov .sxc-bottom { display:flex; align-items:center; gap:10px; width:100%; }
 .sxc-card.ov .sxc-more { display:flex; align-items:center; gap:10px; font-size:var(--fs-1); font-weight:700;
   text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.86); }
-.sxc-card.ov .sxc-bignum { font-size:4rem; font-weight:800; line-height:1; color:rgba(255,255,255,.4);
+.sxc-card.ov .sxc-bignum { margin-left:auto; font-size:2rem; font-weight:800; line-height:1; color:rgba(255,255,255,.55);
   user-select:none; transition:color .35s; }
 .sxc-card.ov:hover .sxc-bignum, .sxc-card.ov:focus-visible .sxc-bignum { color:#fff; }
 .sxc-card.ov .sxc-arr { border:1px solid rgba(255,255,255,.4); background:transparent; color:#fff; font-size:var(--fs-6); }

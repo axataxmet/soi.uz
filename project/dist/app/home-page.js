@@ -899,11 +899,13 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 
 /* Номер и стрелка раньше стояли сверху карточки (.sxp-top); по просьбе
    заказчика 13.09.2026 верх карточки очищен от них, а стрелка перенесена
-   вниз, к строке «Подробнее» (.sxp-more). Фоновой номер (.sxp-bignum)
-   остался единственной нумерацией — сделан заметнее и поднят повыше. */
-.sxp-bignum { position:absolute; right:14px; bottom:-4px; font-size:4rem; font-weight:800; line-height:1;
-  user-select:none; pointer-events:none; color:rgba(16,21,18,.06); transition:color .35s; }
-.sxp-card:hover .sxp-bignum { color:rgba(255,255,255,.92); }
+   вниз, к строке «Подробнее» (.sxp-more). Номер (.sxp-bignum) сначала висел
+   декоративным фоновым слоем позади карточки, потом — уменьшен; теперь стоит
+   в той же строке, что «Подробнее↗», прижат к правому краю (решение
+   заказчика 13.09.2026). */
+.sxp-bignum { margin-left:auto; font-size:2rem; font-weight:800; line-height:1;
+  user-select:none; color:rgba(16,21,18,.3); transition:color .35s; }
+.sxp-card:hover .sxp-bignum { color:var(--sx-lime-ink); }
 
 .sxp-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
   border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
@@ -945,7 +947,7 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 @media (prefers-reduced-motion: reduce){
   .sxp-card, .sxp-arrow, .sxp-expand, .sxp-expand-in { transition:none; }
 }
-    `;document.head.appendChild(s)},[]);var L=o=>o&&(o[lang]||o.ru)||"";return React.createElement("section",{className:"sxp"},React.createElement("div",{className:"sxp-glow"}),React.createElement("div",{className:"sxp-inner"},React.createElement("div",{className:"sxp-head sx-rv"},React.createElement("div",null,React.createElement("p",{className:"sxp-kicker"},_lv(lang,"Экспертиза","Ekspertiza","Expertise")),React.createElement("h2",{className:"sxp-h2"},_lv(lang,"Компетенции полного цикла работы","Toʻliq siklli kompetensiyalar","Full-lifecycle capabilities"))),React.createElement("p",{className:"sxp-sub"},_lv(lang,"Закрываем регуляторные, закупочные, технические и сервисные задачи в едином контуре ответственности.","Tartibga solish, xarid, texnik va servis vazifalarini yagona javobgarlik konturi doirasida hal qilamiz.","We cover regulatory, procurement, technical and service tasks within a single line of accountability."))),React.createElement("div",{className:"sxp-grid"},EXPERTISE_ITEMS.map((it,i)=>{var no=String(i+1).padStart(2,"0");return(React.createElement("a",{key:i,className:"sxp-card sx-rv",style:{"--i":i},href:window.corpViewToPath&&window.corpViewToPath(it.nav)||"/"+it.nav,onClick:e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;e.preventDefault();go(it.nav)}},React.createElement("span",{className:"sxp-bignum","aria-hidden":true},no),React.createElement("h3",{className:"sxp-t"},L(it.t)),React.createElement("p",{className:"sxp-d"},L(it.d)),React.createElement("div",{className:"sxp-expand"},React.createElement("div",{className:"sxp-expand-outer"},React.createElement("div",{className:"sxp-expand-in"},React.createElement("p",{className:"sxp-comp"},_lv(lang,"Компетенция","Kompetensiya","Competence")),React.createElement("p",{className:"sxp-proof"},L(it.proof)),React.createElement("ul",{className:"sxp-list"},L(it.list).map((d,di)=>React.createElement("li",{key:di},React.createElement("span",{className:"sxp-dot","aria-hidden":true}),d)))))),React.createElement("div",{className:"sxp-more"},_lv(lang,"Подробнее","Batafsil","Read more"),React.createElement("span",{className:"sxp-arrow","aria-hidden":true},"↗"))))}))))}var CATALOG_CARDS=[{slug:"equipment",catKey:"equipment",t:{ru:"Медицинское оборудование",uz:"Tibbiy uskunalar",en:"Medical equipment"}},{slug:"furniture",catKey:"furniture",t:{ru:"Медицинская мебель",uz:"Tibbiy mebel",en:"Medical furniture"}},{slug:"instruments",catKey:"instruments",t:{ru:"Медицинские инструменты",uz:"Tibbiy asboblar",en:"Medical instruments"}},{slug:"consumables",catKey:"consumables",t:{ru:"Расходные материалы",uz:"Sarflanadigan materiallar",en:"Consumables"}}];function SoiCatalogCards({lang,go}){var cats=window.DATA&&window.DATA.CATEGORIES||[];useEffect(()=>{var id="soi-catcards-css";if(document.getElementById(id))return;var s=document.createElement("style");s.id=id;s.textContent=`
+    `;document.head.appendChild(s)},[]);var L=o=>o&&(o[lang]||o.ru)||"";return React.createElement("section",{className:"sxp"},React.createElement("div",{className:"sxp-glow"}),React.createElement("div",{className:"sxp-inner"},React.createElement("div",{className:"sxp-head sx-rv"},React.createElement("div",null,React.createElement("p",{className:"sxp-kicker"},_lv(lang,"Экспертиза","Ekspertiza","Expertise")),React.createElement("h2",{className:"sxp-h2"},_lv(lang,"Компетенции полного цикла работы","Toʻliq siklli kompetensiyalar","Full-lifecycle capabilities"))),React.createElement("p",{className:"sxp-sub"},_lv(lang,"Закрываем регуляторные, закупочные, технические и сервисные задачи в едином контуре ответственности.","Tartibga solish, xarid, texnik va servis vazifalarini yagona javobgarlik konturi doirasida hal qilamiz.","We cover regulatory, procurement, technical and service tasks within a single line of accountability."))),React.createElement("div",{className:"sxp-grid"},EXPERTISE_ITEMS.map((it,i)=>{var no=String(i+1).padStart(2,"0");return(React.createElement("a",{key:i,className:"sxp-card sx-rv",style:{"--i":i},href:window.corpViewToPath&&window.corpViewToPath(it.nav)||"/"+it.nav,onClick:e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;e.preventDefault();go(it.nav)}},React.createElement("h3",{className:"sxp-t"},L(it.t)),React.createElement("p",{className:"sxp-d"},L(it.d)),React.createElement("div",{className:"sxp-expand"},React.createElement("div",{className:"sxp-expand-outer"},React.createElement("div",{className:"sxp-expand-in"},React.createElement("p",{className:"sxp-comp"},_lv(lang,"Компетенция","Kompetensiya","Competence")),React.createElement("p",{className:"sxp-proof"},L(it.proof)),React.createElement("ul",{className:"sxp-list"},L(it.list).map((d,di)=>React.createElement("li",{key:di},React.createElement("span",{className:"sxp-dot","aria-hidden":true}),d)))))),React.createElement("div",{className:"sxp-more"},_lv(lang,"Подробнее","Batafsil","Read more"),React.createElement("span",{className:"sxp-arrow","aria-hidden":true},"↗"),React.createElement("span",{className:"sxp-bignum","aria-hidden":true},no))))}))))}var CATALOG_CARDS=[{slug:"equipment",catKey:"equipment",t:{ru:"Медицинское оборудование",uz:"Tibbiy uskunalar",en:"Medical equipment"}},{slug:"furniture",catKey:"furniture",t:{ru:"Медицинская мебель",uz:"Tibbiy mebel",en:"Medical furniture"}},{slug:"instruments",catKey:"instruments",t:{ru:"Медицинские инструменты",uz:"Tibbiy asboblar",en:"Medical instruments"}},{slug:"consumables",catKey:"consumables",t:{ru:"Расходные материалы",uz:"Sarflanadigan materiallar",en:"Consumables"}}];function SoiCatalogCards({lang,go}){var cats=window.DATA&&window.DATA.CATEGORIES||[];useEffect(()=>{var id="soi-catcards-css";if(document.getElementById(id))return;var s=document.createElement("style");s.id=id;s.textContent=`
 .sxc { background:var(--sx-bg); padding:clamp(64px,8vw,112px) 0; }
 [data-theme="dark"] .sxc { background:var(--sx-bg-soft); }
 .sxc-inner { max-width:var(--maxw); margin:0 auto; padding:0 32px; }
@@ -1051,13 +1053,13 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
   display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; }
 /* Заголовок увеличен (решение заказчика 13.09.2026). */
 .sxc-card.ov .sxc-t { margin:0; max-width:12rem; font-size:var(--fs-8); line-height:1.15; color:#fff; }
-/* Номер убран из декоративного фонового слоя за карточкой (.sxp-bignum-стиль)
-   и поставлен в обычный поток сразу под «Подробнее↗» — по прямому запросу
-   заказчика 13.09.2026. */
-.sxc-card.ov .sxc-bottom { display:flex; flex-direction:column; align-items:flex-start; gap:10px; }
+/* Номер сначала стоял декоративным фоновым слоем, потом — отдельной строкой
+   под «Подробнее↗»; теперь стоит с ним на одной строке, прижат к правому
+   краю (решение заказчика 13.09.2026). */
+.sxc-card.ov .sxc-bottom { display:flex; align-items:center; gap:10px; width:100%; }
 .sxc-card.ov .sxc-more { display:flex; align-items:center; gap:10px; font-size:var(--fs-1); font-weight:700;
   text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.86); }
-.sxc-card.ov .sxc-bignum { font-size:4rem; font-weight:800; line-height:1; color:rgba(255,255,255,.4);
+.sxc-card.ov .sxc-bignum { margin-left:auto; font-size:2rem; font-weight:800; line-height:1; color:rgba(255,255,255,.55);
   user-select:none; transition:color .35s; }
 .sxc-card.ov:hover .sxc-bignum, .sxc-card.ov:focus-visible .sxc-bignum { color:#fff; }
 .sxc-card.ov .sxc-arr { border:1px solid rgba(255,255,255,.4); background:transparent; color:#fff; font-size:var(--fs-6); }
