@@ -97,13 +97,35 @@
       var labels = primary ? primary.labels : {};
       /* Ключи с ведущим "_" — служебные (комплектация, транспортировка),
          в таблицу характеристик не идут, разбираются отдельно ниже. */
+      /* Ярлык берём из attrSchema группы, а чего там нет — из словаря
+         SOI_ATTR_I18N (app/attr-i18n.js). Схемой покрыто 48 строк
+         характеристик из 1403: без словаря остальные 1355 печатались русским
+         ключом сразу во все три языка, и узбекская с английской версией
+         карточки выглядели непереведёнными. */
+      var ai = window.SOI_ATTR_I18N;
       var specs = Object.keys(attrs).filter(function (k) { return k.charAt(0) !== "_"; }).map(function (k) {
         var v = attrs[k];
         if (v == null || v === "") return null;
-        var lab = labels[k] || { ru: k, uz: k, en: k, unit: "" };
+        /* Ярлык из схемы берём, только если он реально переведён. В базе у
+           большинства полей attrSchema uz/en повторяют ru — такой ярлык
+           перебивал бы словарь и характеристика осталась бы русской. */
+        var sl = labels[k];
+        var lab;
+        if (sl && (sl.uz !== sl.ru || sl.en !== sl.ru)) {
+          lab = sl;
+        } else {
+          lab = { ru: (sl && sl.ru) || k,
+                  uz: ai ? ai.key(k, "uz") : k,
+                  en: ai ? ai.key(k, "en") : k,
+                  unit: (sl && sl.unit) || "" };
+        }
         var val = Array.isArray(v) ? v.join(", ") : String(v);
         if (lab.unit) val += " " + lab.unit;
-        return { kr: lab.ru, ku: lab.uz, ke: lab.en, v: val, ve: "" };
+        /* Значение переводится, только если оно целиком словесное («есть»,
+           «нержавеющая сталь»); числа, размеры и коды остаются как есть. */
+        var vu = ai ? ai.value(val, "uz") : val;
+        var ve = ai ? ai.value(val, "en") : val;
+        return { kr: lab.ru, ku: lab.uz, ke: lab.en, v: val, vu: vu, ve: ve === val ? "" : ve };
       }).filter(Boolean);
       var kit = Array.isArray(attrs._kit) ? attrs._kit : [];
       var shipping = attrs._shipping || null;

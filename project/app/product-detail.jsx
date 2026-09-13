@@ -408,7 +408,7 @@ function ProductPage({ t, lang, store, go, params }) {
               {(() => { const c = p.country || tri(lang, brand.country_ru, brand.country_uz, brand.country_en); return c ? <tr><td>{t.spec_country}</td><td>{c}</td></tr> : null; })()}
               {p.model && <tr><td>{lang === "uz" ? "Model" : lang === "en" ? "Model" : "Модель"}</td><td>{p.model}</td></tr>}
               {p.specs.map((s, i) => (
-                <tr key={i}><td>{tri(lang, s.kr, s.ku, s.ke)}</td><td>{lang === "en" && s.ve ? s.ve : s.v}</td></tr>
+                <tr key={i}><td>{tri(lang, s.kr, s.ku, s.ke)}</td><td>{tri(lang, s.v, s.vu || s.v, s.ve || s.v)}</td></tr>
               ))}
               {p.warranty && <tr><td>{t.spec_warranty}</td><td>{p.warranty}</td></tr>}
               {p.regNum && <tr><td>{t.spec_reg}</td><td className="mono">{p.regNum}</td></tr>}
