@@ -1346,7 +1346,11 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 /* Размер заголовка синхронизирован с «Экспертиза» и «Электронный каталог»
    (--fs-7 везде) — было --fs-5, разнобой по блокам (решение заказчика
    13.09.2026). */
-.sx-dir h3 { font-size:var(--fs-7); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.2; transition:color .35s; }
+/* overflow-wrap добавлен: после унификации размера (--fs-7) длинные
+   заголовки вроде «Восстановление и специализированное оснащение» вылезали
+   за правый край узкой карточки — слово просто не переносилось (решение
+   заказчика 13.09.2026). */
+.sx-dir h3 { font-size:var(--fs-7); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.2; overflow-wrap:break-word; word-break:break-word; transition:color .35s; }
 .sx-dir:hover h3 { color:inherit; }
 .sx-dir-links { margin-top:14px; display:flex; flex-direction:column; gap:2px; }
 .sx-dir-links a { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:var(--fs-3); color:var(--sx-mute); text-decoration:none; padding:5px 0; transition:color .18s, padding-left .18s; }
@@ -1954,19 +1958,16 @@ function SoiEcosystem({ lang, go }) {
             </div>
             <div className="eco-num"><EcoCount value={liveCatalogNum} /><span>{val("catalog_unit")}</span></div>
             <h3>{_lv(lang, "Электронный каталог оборудования", "Elektron uskunalar katalogi", "Electronic equipment catalog")}</h3>
-            {/* Было расплывчатое «от ведущих мировых производителей» — оценочная
-                формулировка без опоры на цифры. Заменено на проверяемое число
-                брендов (siteFigures().brands, тот же источник, что и на
-                странице каталога) и явную выгоду — подбор по направлению,
-                бренду и наличию, а не просто список категорий. */}
-            <p>{(() => {
-              const n = (window.siteFigures ? window.siteFigures().brands : "") || "";
-              const nn = n ? n + "+ " : "";
-              return _lv(lang,
-                `Медтехника, мебель, инструменты и расходные материалы от ${nn}проверенных мировых производителей. Подбор по направлению, бренду и наличию на складе.`,
-                `Tibbiy texnika, mebel, asboblar va sarf materiallari — ${nn}tekshirilgan jahon ishlab chiqaruvchilaridan. Yo'nalish, brend va mavjudlik bo'yicha tanlov.`,
-                `Equipment, furniture, instruments and consumables from ${nn}vetted global manufacturers. Filter by specialty, brand or stock availability.`);
-            })()}</p>
+            {/* Было расплывчатое «от ведущих мировых производителей», затем —
+                число брендов из siteFigures(). Число снято по прямому запросу
+                заказчика 13.09.2026 (плитка и так уже показывает счётчик
+                выше, во втором числе повторять его незачем) — оставлена
+                проверяемая формулировка без цифр и явная выгода: подбор по
+                направлению, бренду и наличию, а не просто список категорий. */}
+            <p>{_lv(lang,
+              "Медтехника, мебель, инструменты и расходные материалы от проверенных мировых производителей. Подбор по направлению, бренду и наличию на складе.",
+              "Tibbiy texnika, mebel, asboblar va sarf materiallari — tekshirilgan jahon ishlab chiqaruvchilaridan. Yo'nalish, brend va mavjudlik bo'yicha tanlov.",
+              "Equipment, furniture, instruments and consumables from vetted global manufacturers. Filter by specialty, brand or stock availability.")}</p>
             <div className="eco-foot">
               <button className="eco-cta solid" onClick={() => go("catalog")}>
                 {_lv(lang, "Перейти в каталог", "Katalogga o'tish", "Open the catalog")}<Icon name="arrowRight" size={15} />
