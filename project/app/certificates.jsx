@@ -188,13 +188,14 @@ function isHidden(item, hidden) {
 function footerNavCols(lang, hidden) {
   const lvh = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   return corpNavItems(lang, hidden)
-  .filter((it) => it.children && it.id !== "services")
+  .filter((it) => it.children)
   .map((col) => {
     if (col.id !== "company") return col;
-    /* Дописываем в конец, а не вставляем после «Партнёров»: два последних
-       пункта колонки идут именно в этом порядке. */
+    /* «Контакты» — единственный верхнеуровневый пункт без своей колонки
+       (children), поэтому дописывается сюда отдельной строкой. «Услуги»
+       больше не дублируется здесь — теперь у них своя колонка футера
+       (решение заказчика), как и в меню шапки. */
     const children = col.children.concat([
-    { view: "services", label: lvh("Услуги", "Xizmatlar", "Services") },
     { view: "contacts", label: lvh("Контакты", "Kontaktlar", "Contacts") }]);
     return Object.assign({}, col, { children });
   });
@@ -629,11 +630,15 @@ function CoFooter({ t, lang, go, goCat, setLang }) {
               менялись. */}
           <div className="fcol-follow">
             <h5>{lv("Следите за нами", "Bizni kuzating", "Follow us")}</h5>
+            {/* Заглушка вместо рабочих ссылок (решение заказчика): реальных
+                аккаунтов в соцсетях пока нет, поэтому иконки — не <a>, а
+                кнопки без перехода. aria-disabled и не-actionable title —
+                чтобы скринридер и клавиатура тоже не считали их ссылками. */}
             <div className="foot-socials">
-              <a href={contacts.telegram} target="_blank" rel="noopener" title="Telegram" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.07 9.74c-.15.68-.56.85-1.13.53l-3.13-2.3-1.51 1.45c-.17.17-.31.31-.63.31l.22-3.18 5.79-5.23c.25-.22-.06-.35-.39-.12L6.07 13.88l-3.07-.96c-.67-.21-.68-.67.14-.99l11.97-4.62c.55-.2 1.04.13.83.88z" /></svg></a>
-              <a href={contacts.instagram} target="_blank" rel="noopener" title="Instagram" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg></a>
-              <a href={contacts.facebook} target="_blank" rel="noopener" title="Facebook" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" /></svg></a>
-              <a href={contacts.youtube} target="_blank" rel="noopener" title="YouTube" className="foot-soc"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.75 8.55 16.2 12l-6.45 3.45V8.55z" /></svg></a>
+              <button type="button" className="foot-soc" title={lv("Скоро", "Tez orada", "Coming soon")} aria-disabled="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zm5.94 8.19-2.07 9.74c-.15.68-.56.85-1.13.53l-3.13-2.3-1.51 1.45c-.17.17-.31.31-.63.31l.22-3.18 5.79-5.23c.25-.22-.06-.35-.39-.12L6.07 13.88l-3.07-.96c-.67-.21-.68-.67.14-.99l11.97-4.62c.55-.2 1.04.13.83.88z" /></svg></button>
+              <button type="button" className="foot-soc" title={lv("Скоро", "Tez orada", "Coming soon")} aria-disabled="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg></button>
+              <button type="button" className="foot-soc" title={lv("Скоро", "Tez orada", "Coming soon")} aria-disabled="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.267h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z" /></svg></button>
+              <button type="button" className="foot-soc" title={lv("Скоро", "Tez orada", "Coming soon")} aria-disabled="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" clipRule="evenodd" d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.5 12 3.5 12 3.5s-7.5 0-9.4.6A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.6 9.4.6 9.4.6s7.5 0 9.4-.6a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.75 8.55 16.2 12l-6.45 3.45V8.55z" /></svg></button>
             </div>
             <p className="foot-copy">
               {lv("© 2026 ООО «ИНДУСТРИЯ ЗДОРОВЬЯ».", "© 2026 «SOG’LIQ INDUSTRIYASI» MChJ.", "© 2026 HEALTH INDUSTRY LLC.")}

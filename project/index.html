@@ -585,8 +585,13 @@ img{max-width:100%;display:block}
 .z-corp .foot-bot{margin-top:44px;padding-top:24px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:var(--slate-400);font-size:var(--fs-2);line-height:1.6;align-items:center}
 .z-corp .foot-disclaimer{margin-top:40px;padding-top:22px;font-size:var(--fs-1);line-height:1.6;color:rgba(255,255,255,.45)}
 .z-corp .foot-socials{display:flex;gap:10px;flex-shrink:0}
-.z-corp .foot-soc{width:34px;height:34px;border-radius:var(--r-sm);background:rgba(255,255,255,.08);color:var(--slate-300);display:flex;align-items:center;justify-content:center;transition:.16s}
+.z-corp .foot-soc{width:34px;height:34px;border-radius:var(--r-sm);background:rgba(255,255,255,.08);color:var(--slate-300);display:flex;align-items:center;justify-content:center;transition:.16s;border:none}
 .z-corp .foot-soc:hover{background:rgba(255,255,255,.18);color:#fff}
+/* Заглушка вместо рабочей ссылки (решение заказчика — реальных соцсетей
+   пока нет): курсор не-указательный, наведение не подсвечивает, чтобы
+   иконка не выглядела кликабельной ссылкой. */
+.z-corp .foot-soc[aria-disabled="true"]{cursor:default;opacity:.55}
+.z-corp .foot-soc[aria-disabled="true"]:hover{background:rgba(255,255,255,.08);color:var(--slate-300)}
 
 /* ===== зона нажатия ==========================================================
    Норма для пальца — 44×44 px. Часть органов управления меньше: бургер и
@@ -661,6 +666,7 @@ img{max-width:100%;display:block}
 .z-corp .foot-disclaimer{color:var(--slate-500)}
 .z-corp .foot-soc{background:var(--bg-2);color:var(--slate-500)}
 .z-corp .foot-soc:hover{background:var(--blue-600);color:#fff}
+.z-corp .foot-soc[aria-disabled="true"]:hover{background:var(--bg-2);color:var(--slate-500)}
 @media(max-width:1180px){.z-corp .foot .fcols{grid-template-columns:1fr 1fr 1fr}}
 @media(max-width:760px){.z-corp .foot .fcols{grid-template-columns:1fr 1fr;gap:28px 24px}}
 @media(max-width:520px){.z-corp .foot .fcols{grid-template-columns:1fr;padding:44px 0 30px}.z-corp .foot-news{max-width:360px}}
@@ -1886,6 +1892,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .z-corp .foot-lang button.on{background:var(--accent-on-dark);border-color:var(--accent-on-dark);color:#0B1C3A}
 .z-corp .foot-soc{background:rgba(255,255,255,.08);color:#A9BCD8}
 .z-corp .foot-soc:hover{background:var(--accent-on-dark);color:#0B1C3A}
+.z-corp .foot-soc[aria-disabled="true"]:hover{background:rgba(255,255,255,.08);color:#A9BCD8}
 .z-corp .foot-pay span{border-color:rgba(255,255,255,.16)}
 
 /* Весь текст футера — белый. Приглушённые оттенки (--slate-*, полупрозрачный
@@ -4088,7 +4095,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789304700"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
-<script src="dist/app/certificates.js?v=1789304700"></script>
+<script src="dist/app/certificates.js?v=1789304800"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
 <script src="dist/app/inner-pages.js?v=1789250101"></script>
 <script src="dist/app/testimonials.js?v=1789250101"></script>
