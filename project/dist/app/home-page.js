@@ -146,7 +146,7 @@ var{useState,useEffect,useRef}=React;function useHomeSetting(key,def){var[val,se
 .z-corp .sx .eco-t h1, .z-corp .sx .eco-t h2, .z-corp .sx .eco-t h3,
 .z-corp .sx .ctaband h1, .z-corp .sx .ctaband h2, .z-corp .sx .ctaband h3,
 .z-corp .sx [class*="-ctaband"] h1, .z-corp .sx [class*="-ctaband"] h2, .z-corp .sx [class*="-ctaband"] h3,
-.z-corp .sx .sxp-card.feat h1, .z-corp .sx .sxp-card.feat h2, .z-corp .sx .sxp-card.feat h3 { color:inherit; }
+.z-corp .sx .sxp-card:hover h1, .z-corp .sx .sxp-card:hover h2, .z-corp .sx .sxp-card:hover h3 { color:inherit; }
 
 /* Фон главной оставлен чистым: решение заказчика от 06.08.2026 — никаких
    декоративных слоёв поверх подложек. Присланный из Figma паттерн («линзы»)
@@ -881,30 +881,29 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
   border:1px solid var(--sx-line); background:var(--sx-card); color:var(--sx-ink);
   transition:flex-grow .5s ease, background .35s, border-color .35s, transform .35s; }
 @media(min-width:1024px){ .sxp-card { flex:1 1 0; } .sxp-card:hover { flex-grow:1.35; } }
-.sxp-card:hover { border-color:var(--sx-ink-soft); background:var(--sx-card); }
-.sxp-card.feat { background:var(--sx-lime); border-color:transparent; color:var(--sx-lime-ink); }
-.sxp-card.feat:hover { background:color-mix(in srgb, var(--sx-lime) 88%, #fff); }
+/* Раньше цвет (лайм/синий фон) был статично закреплён за первой карточкой
+   (.feat) — по просьбе заказчика 13.09.2026 перекрашивается любая карточка,
+   но только при наведении: в состоянии покоя все четыре одинаковые. */
+.sxp-card:hover { border-color:transparent; background:var(--sx-lime); color:var(--sx-lime-ink); }
 .sxp-card:focus-visible { outline:2px solid var(--sx-ink); outline-offset:3px; }
 
 .sxp-bignum { position:absolute; right:12px; bottom:-48px; font-size:9rem; font-weight:800; line-height:1;
-  user-select:none; pointer-events:none; color:rgba(16,21,18,.04); }
-.sxp-card.feat .sxp-bignum { color:rgba(255,255,255,.14); }
+  user-select:none; pointer-events:none; color:rgba(16,21,18,.04); transition:color .35s; }
+.sxp-card:hover .sxp-bignum { color:rgba(255,255,255,.14); }
 
 .sxp-top { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.sxp-no { font-size:var(--fs-2); font-weight:700; color:var(--sx-mute); }
-.sxp-card.feat .sxp-no { color:rgba(255,255,255,.72); }
+.sxp-no { font-size:var(--fs-2); font-weight:700; color:var(--sx-mute); transition:color .35s; }
+.sxp-card:hover .sxp-no { color:rgba(255,255,255,.72); }
 .sxp-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
   border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
   transition:transform .3s, background .3s, border-color .3s, color .3s; }
-.sxp-card:hover .sxp-arrow { transform:rotate(45deg); background:var(--sx-lime); border-color:var(--sx-lime); color:var(--sx-lime-ink); }
-.sxp-card.feat .sxp-arrow { border-color:rgba(255,255,255,.35); color:var(--sx-lime-ink); }
-.sxp-card.feat:hover .sxp-arrow { background:transparent; }
+.sxp-card:hover .sxp-arrow { transform:rotate(45deg); background:transparent; border-color:rgba(255,255,255,.35); color:var(--sx-lime-ink); }
 
 .sxp-t { position:relative; z-index:1; margin:40px 0 0; max-width:16rem; font-size:var(--fs-7); font-weight:700;
   line-height:1.2; letter-spacing:-.02em; }
 .sxp-d { position:relative; z-index:1; margin:12px 0 0; max-width:20rem; font-size:var(--fs-4); line-height:1.6;
-  color:var(--sx-mute); }
-.sxp-card.feat .sxp-d { color:rgba(255,255,255,.82); }
+  color:var(--sx-mute); transition:color .35s; }
+.sxp-card:hover .sxp-d { color:rgba(255,255,255,.82); }
 
 /* grid-rows 0fr→1fr: высота подстраивается ровно под контент */
 .sxp-expand { position:relative; z-index:1; display:grid; grid-template-rows:0fr;
@@ -914,28 +913,28 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 .sxp-expand-in { padding-top:16px; opacity:0; transition:opacity .3s ease .1s; }
 .sxp-card:hover .sxp-expand-in, .sxp-card:focus-visible .sxp-expand-in { opacity:1; }
 .sxp-comp { margin:0; font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em;
-  color:var(--sx-mute); }
-.sxp-card.feat .sxp-comp { color:rgba(255,255,255,.68); }
-.sxp-proof { margin:4px 0 0; font-size:var(--fs-3); font-weight:500; color:var(--sx-ink); }
-.sxp-card.feat .sxp-proof { color:var(--sx-lime-ink); }
+  color:var(--sx-mute); transition:color .35s; }
+.sxp-card:hover .sxp-comp { color:rgba(255,255,255,.68); }
+.sxp-proof { margin:4px 0 0; font-size:var(--fs-3); font-weight:500; color:var(--sx-ink); transition:color .35s; }
+.sxp-card:hover .sxp-proof { color:var(--sx-lime-ink); }
 .sxp-list { list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:6px; }
 .sxp-list li { display:flex; align-items:flex-start; gap:8px; font-size:var(--fs-2); line-height:1.4;
-  color:var(--sx-mute); }
-.sxp-card.feat .sxp-list li { color:rgba(255,255,255,.82); }
-.sxp-dot { flex-shrink:0; width:6px; height:6px; margin-top:5px; border-radius:50%; background:var(--sx-accent); }
-.sxp-card.feat .sxp-dot { background:var(--sx-lime-ink); }
+  color:var(--sx-mute); transition:color .35s; }
+.sxp-card:hover .sxp-list li { color:rgba(255,255,255,.82); }
+.sxp-dot { flex-shrink:0; width:6px; height:6px; margin-top:5px; border-radius:50%; background:var(--sx-accent); transition:background .35s; }
+.sxp-card:hover .sxp-dot { background:var(--sx-lime-ink); }
 
 .sxp-more {position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between;
   gap:8px; margin-top:auto; padding-top:16px;
-  font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--sx-ink)}
-.sxp-card.feat .sxp-more {border-top-color:rgba(255,255,255,.24); color:var(--sx-lime-ink)}
+  font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--sx-ink); transition:color .35s, border-top-color .35s;}
+.sxp-card:hover .sxp-more {border-top-color:rgba(255,255,255,.24); color:var(--sx-lime-ink)}
 .sxp-more-arr { font-size:var(--fs-5); transition:transform .3s; }
 .sxp-card:hover .sxp-more-arr { transform:translateX(4px); }
 
 @media (prefers-reduced-motion: reduce){
   .sxp-card, .sxp-arrow, .sxp-expand, .sxp-expand-in, .sxp-more-arr { transition:none; }
 }
-    `;document.head.appendChild(s)},[]);var L=o=>o&&(o[lang]||o.ru)||"";return React.createElement("section",{className:"sxp"},React.createElement("div",{className:"sxp-glow"}),React.createElement("div",{className:"sxp-inner"},React.createElement("div",{className:"sxp-head sx-rv"},React.createElement("div",null,React.createElement("p",{className:"sxp-kicker"},_lv(lang,"Экспертиза","Ekspertiza","Expertise")),React.createElement("h2",{className:"sxp-h2"},_lv(lang,"Компетенции полного цикла работы","Toʻliq siklli kompetensiyalar","Full-lifecycle capabilities"))),React.createElement("p",{className:"sxp-sub"},_lv(lang,"Закрываем регуляторные, закупочные, технические и сервисные задачи в едином контуре ответственности.","Tartibga solish, xarid, texnik va servis vazifalarini yagona javobgarlik konturi doirasida hal qilamiz.","We cover regulatory, procurement, technical and service tasks within a single line of accountability."))),React.createElement("div",{className:"sxp-grid"},EXPERTISE_ITEMS.map((it,i)=>{var no=String(i+1).padStart(2,"0");return(React.createElement("a",{key:i,className:"sxp-card sx-rv"+(i===0?" feat":""),style:{"--i":i},href:window.corpViewToPath&&window.corpViewToPath(it.nav)||"/"+it.nav,onClick:e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;e.preventDefault();go(it.nav)}},React.createElement("span",{className:"sxp-bignum","aria-hidden":true},no),React.createElement("div",{className:"sxp-top"},React.createElement("span",{className:"sxp-no"},no),React.createElement("span",{className:"sxp-arrow","aria-hidden":true},"↗")),React.createElement("h3",{className:"sxp-t"},L(it.t)),React.createElement("p",{className:"sxp-d"},L(it.d)),React.createElement("div",{className:"sxp-expand"},React.createElement("div",{className:"sxp-expand-outer"},React.createElement("div",{className:"sxp-expand-in"},React.createElement("p",{className:"sxp-comp"},_lv(lang,"Компетенция","Kompetensiya","Competence")),React.createElement("p",{className:"sxp-proof"},L(it.proof)),React.createElement("ul",{className:"sxp-list"},L(it.list).map((d,di)=>React.createElement("li",{key:di},React.createElement("span",{className:"sxp-dot","aria-hidden":true}),d)))))),React.createElement("div",{className:"sxp-more"},_lv(lang,"Подробнее","Batafsil","Read more"),React.createElement("span",{className:"sxp-more-arr","aria-hidden":true},"→"))))}))))}var CATALOG_CARDS=[{slug:"equipment",catKey:"equipment",t:{ru:"Медицинское оборудование",uz:"Tibbiy uskunalar",en:"Medical equipment"}},{slug:"furniture",catKey:"furniture",t:{ru:"Медицинская мебель",uz:"Tibbiy mebel",en:"Medical furniture"}},{slug:"instruments",catKey:"instruments",t:{ru:"Медицинские инструменты",uz:"Tibbiy asboblar",en:"Medical instruments"}},{slug:"consumables",catKey:"consumables",t:{ru:"Расходные материалы",uz:"Sarflanadigan materiallar",en:"Consumables"}}];function SoiCatalogCards({lang,go}){var cats=window.DATA&&window.DATA.CATEGORIES||[];useEffect(()=>{var id="soi-catcards-css";if(document.getElementById(id))return;var s=document.createElement("style");s.id=id;s.textContent=`
+    `;document.head.appendChild(s)},[]);var L=o=>o&&(o[lang]||o.ru)||"";return React.createElement("section",{className:"sxp"},React.createElement("div",{className:"sxp-glow"}),React.createElement("div",{className:"sxp-inner"},React.createElement("div",{className:"sxp-head sx-rv"},React.createElement("div",null,React.createElement("p",{className:"sxp-kicker"},_lv(lang,"Экспертиза","Ekspertiza","Expertise")),React.createElement("h2",{className:"sxp-h2"},_lv(lang,"Компетенции полного цикла работы","Toʻliq siklli kompetensiyalar","Full-lifecycle capabilities"))),React.createElement("p",{className:"sxp-sub"},_lv(lang,"Закрываем регуляторные, закупочные, технические и сервисные задачи в едином контуре ответственности.","Tartibga solish, xarid, texnik va servis vazifalarini yagona javobgarlik konturi doirasida hal qilamiz.","We cover regulatory, procurement, technical and service tasks within a single line of accountability."))),React.createElement("div",{className:"sxp-grid"},EXPERTISE_ITEMS.map((it,i)=>{var no=String(i+1).padStart(2,"0");return(React.createElement("a",{key:i,className:"sxp-card sx-rv",style:{"--i":i},href:window.corpViewToPath&&window.corpViewToPath(it.nav)||"/"+it.nav,onClick:e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey||e.button!==0)return;e.preventDefault();go(it.nav)}},React.createElement("span",{className:"sxp-bignum","aria-hidden":true},no),React.createElement("div",{className:"sxp-top"},React.createElement("span",{className:"sxp-no"},no),React.createElement("span",{className:"sxp-arrow","aria-hidden":true},"↗")),React.createElement("h3",{className:"sxp-t"},L(it.t)),React.createElement("p",{className:"sxp-d"},L(it.d)),React.createElement("div",{className:"sxp-expand"},React.createElement("div",{className:"sxp-expand-outer"},React.createElement("div",{className:"sxp-expand-in"},React.createElement("p",{className:"sxp-comp"},_lv(lang,"Компетенция","Kompetensiya","Competence")),React.createElement("p",{className:"sxp-proof"},L(it.proof)),React.createElement("ul",{className:"sxp-list"},L(it.list).map((d,di)=>React.createElement("li",{key:di},React.createElement("span",{className:"sxp-dot","aria-hidden":true}),d)))))),React.createElement("div",{className:"sxp-more"},_lv(lang,"Подробнее","Batafsil","Read more"),React.createElement("span",{className:"sxp-more-arr","aria-hidden":true},"→"))))}))))}var CATALOG_CARDS=[{slug:"equipment",catKey:"equipment",t:{ru:"Медицинское оборудование",uz:"Tibbiy uskunalar",en:"Medical equipment"}},{slug:"furniture",catKey:"furniture",t:{ru:"Медицинская мебель",uz:"Tibbiy mebel",en:"Medical furniture"}},{slug:"instruments",catKey:"instruments",t:{ru:"Медицинские инструменты",uz:"Tibbiy asboblar",en:"Medical instruments"}},{slug:"consumables",catKey:"consumables",t:{ru:"Расходные материалы",uz:"Sarflanadigan materiallar",en:"Consumables"}}];function SoiCatalogCards({lang,go}){var cats=window.DATA&&window.DATA.CATEGORIES||[];useEffect(()=>{var id="soi-catcards-css";if(document.getElementById(id))return;var s=document.createElement("style");s.id=id;s.textContent=`
 .sxc { background:var(--sx-bg); padding:clamp(64px,8vw,112px) 0; }
 [data-theme="dark"] .sxc { background:var(--sx-bg-soft); }
 .sxc-inner { max-width:var(--maxw); margin:0 auto; padding:0 32px; }
