@@ -661,6 +661,11 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    карточки»); заголовок вместо этого синеет, как везде на главной. */
 .sx-case { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; display:flex; flex-direction:column; }
 .sx-case:hover h3 { color:var(--blue-600); }
+/* Подсветка контура (border-color:var(--sx-ink-soft) из общего .sxc-card:hover)
+   убрана по прямому запросу заказчика 13.09.2026 — рамка на hover больше не
+   меняет цвет, только тень. Двойной класс нужен для специфичности: иначе
+   общее правило .sxc-card:hover, идущее в файле позже, перебивало бы это. */
+.sxc-card.sx-case:hover { border-color:var(--sx-line); }
 /* Два класса в селекторе — чтобы победить .sxc-media (3/4), который лежит
    ниже по файлу и достался обложке заодно: этот же элемент носит оба класса,
    и при равной специфичности выигрывал более поздний. Портретная пропорция
@@ -705,6 +710,10 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    заголовок вместо этого синеет. */
 .sx-ncard { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; }
 .sx-ncard:hover h3 { color:var(--blue-600); }
+/* Подсветка контура убрана по тому же запросу заказчика 13.09.2026, что и
+   у «Реализованные проекты» — только тень, без смены цвета рамки. Двойной
+   класс — для специфичности выше, чем у общего .sxc-card:hover. */
+.sxc-card.sx-ncard:hover { border-color:var(--sx-line); }
 /* Два класса — по той же причине, что и у обложки проекта: перебиваем
    портретный 3/4 из .sxc-media. */
 .sxc-media.sx-ncard-cover { aspect-ratio:16/9; background:linear-gradient(135deg,var(--sx-bg-soft),var(--sx-line-2)); display:flex; align-items:center; justify-content:center; color:var(--sx-mute); overflow:hidden; }
