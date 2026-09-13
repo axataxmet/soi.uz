@@ -1760,6 +1760,11 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   letter-spacing:.06em;text-transform:uppercase;color:#fff}
 .z-corp .foot .fc-grp a{color:inherit}
 .z-corp .foot .fc-grp a:hover{color:var(--accent-on-dark)}
+/* Раньше строки телефонов разводил <br/> между <a> — на мобильной ширине
+   он добавлял лишнюю пустую строку (высотой в line-height) между каждым
+   номером. <br/> убран из разметки, а перенос строки теперь держит один
+   этот display:block — работает одинаково на любой ширине экрана. */
+.z-corp .foot .foot-contact a{display:block}
 
 /* Дисклеймер и строка реквизитов выключены по формату: абзац длинный и
    идёт во всю ширину, при рваном правом крае он выглядел обрывком. */
@@ -4108,7 +4113,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789304300"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
-<script src="dist/app/certificates.js?v=1789304400"></script>
+<script src="dist/app/certificates.js?v=1789304600"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
 <script src="dist/app/inner-pages.js?v=1789250101"></script>
 <script src="dist/app/testimonials.js?v=1789250101"></script>

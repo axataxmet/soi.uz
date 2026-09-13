@@ -574,8 +574,8 @@ function CoFooter({ t, lang, go, goCat, setLang }) {
               <li className="fc-grp">
                 <CoIcon name="phone" size={16} className="fc-ic" />
                 <span>
-                  <a href={telHref(contacts.phone)}>{lv("Приёмная","Qabulxona","Reception")}: {contacts.phone}</a><br />
-                  <a href={telHref(contacts.phone2)}>{lv("Отдел продаж","Sotuv bo'limi","Sales")}: {contacts.phone2}</a><br />
+                  <a href={telHref(contacts.phone)}>{lv("Приёмная","Qabulxona","Reception")}: {contacts.phone}</a>
+                  <a href={telHref(contacts.phone2)}>{lv("Отдел продаж","Sotuv bo'limi","Sales")}: {contacts.phone2}</a>
                   <a href={telHref("+998772230001")}>{lv("Сервисный отдел","Servis bo'limi","Service department")}: +998 (77) 223-00-01</a>
                 </span>
               </li>
