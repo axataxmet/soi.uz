@@ -3125,13 +3125,16 @@ body:has(.cmpbar.show){--btt-bottom:96px}
 .cr-cur{font-size:var(--fs-6);font-weight:600;color:var(--slate-500)}
 .cr-range{font-size:var(--fs-3);color:var(--slate-500);margin-top:8px}
 @media(max-width:860px){.calc-layout{grid-template-columns:1fr}.mob-hamburger{display:flex}.mob-bottom-nav{display:grid;grid-template-columns:repeat(5,1fr)}.head .search{max-width:200px}.app-main{padding-bottom:72px}.hero-form-row{grid-template-columns:1fr}.hero-form{max-width:100%}.nav{display:none}.ubar .ubar-links,.ubar .ubar-info.delivery{display:none}
-  /* .mob-bottom-nav only ever renders in app/compare.jsx — scoped with :has()
-     so this doesn't blanket-hide the chat FAB on every other page too. It
-     used to be a bare `.fab-wrap{display:none}`, which nuked the widget on
-     every corporate page below 860px (home, about, services…) even though
-     none of them has a bottom nav to duplicate it — the chat button was
-     simply missing on mobile. Решение заказчика 13.09.2026. */
-  body:has(.mob-bottom-nav) .fab-wrap{display:none}}
+  /* Правило `.fab-wrap{display:none}` полностью убрано (решение заказчика
+     13.09.2026: «добавить в мобильной версии чат-виджет»). Комментарий
+     рядом объяснял его как «у bottom-nav уже есть кнопка звонка, чат был бы
+     дублем» — но .mob-bottom-nav (app/compare.jsx) на самом деле лежит в
+     DOM на КАЖДОЙ странице как неактивная, скрытая копия старого шелла
+     (та же история, что и с двумя параллельными <main>), поэтому попытка
+     ограничить правило через :has(.mob-bottom-nav) не сработала — оно
+     matches everywhere. Само правило просто гасило чат-виджет на всех
+     страницах сайта на мобильном, включая единственный настоящий мобильный
+     шелл (корпоративный) — без замены. */}
 
 /* ===== multi-cat: also-in tags ===== */
 .pdp-also-in{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:6px 0 10px;font-size:var(--fs-3);color:var(--slate-500)}
