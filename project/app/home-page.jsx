@@ -2165,7 +2165,7 @@ const EXPERTISE_ITEMS = [
   {
     nav: "registration",
     t: { ru: "Регистрация медицинских изделий", uz: "Tibbiy buyumlarni ro'yxatdan o'tkazish", en: "Medical device registration" },
-    d: { ru: "Досье, экспертиза и взаимодействие с регулятором — выводим изделие на рынок под ключ.", uz: "Hujjatlar, ekspertiza va regulyator bilan ishlash — buyumni bozorga kalit topshirish sharti bilan chiqaramiz.", en: "Dossier, expert review and regulator liaison — we bring your device to market turnkey." },
+    d: { ru: "Досье, экспертиза и взаимодействие с регулятором — выводим изделие на рынок.", uz: "Hujjatlar, ekspertiza va regulyator bilan ishlash — buyumni bozorga chiqaramiz.", en: "Dossier, expert review and regulator liaison — we bring your device to market." },
     proof: { ru: "Сопровождение в соответствии с ПКМ №738", uz: "PKM №738 talablariga muvofiq hamrohlik", en: "Handled per Resolution No. 738" },
     list: {
       ru: ["Анализ изделия и документов", "Подготовка регистрационного досье", "Испытания и получение РУ"],
