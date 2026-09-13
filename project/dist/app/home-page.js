@@ -929,8 +929,10 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 .sxp-dot { flex-shrink:0; width:6px; height:6px; margin-top:5px; border-radius:50%; background:var(--sx-accent); transition:background .35s; }
 .sxp-card:hover .sxp-dot { background:var(--sx-lime-ink); }
 
-.sxp-more {position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between;
-  gap:8px; margin-top:auto; padding-top:16px;
+/* Стрелка стояла у правого края карточки (justify-content:space-between);
+   по просьбе заказчика 13.09.2026 перенесена вплотную к слову «Подробнее». */
+.sxp-more {position:relative; z-index:1; display:flex; align-items:center; justify-content:flex-start;
+  gap:10px; margin-top:auto; padding-top:16px;
   font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--sx-ink); transition:color .35s, border-top-color .35s;}
 .sxp-card:hover .sxp-more {border-top-color:rgba(255,255,255,.24); color:var(--sx-lime-ink)}
 
