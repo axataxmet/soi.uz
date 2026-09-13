@@ -1431,8 +1431,13 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    ниже по файлу и достался обложке заодно: этот же элемент носит оба класса,
    и при равной специфичности выигрывал более поздний. Портретная пропорция
    каталога здесь неуместна — у проекта в кадре здание, а не витрина. */
-.sxc-media.sx-case-cover { aspect-ratio:16/10; background:linear-gradient(135deg,var(--sx-bg-soft),var(--sx-line-2)); display:flex; align-items:center; justify-content:center; color:var(--sx-mute); overflow:hidden; }
+.sxc-media.sx-case-cover { position:relative; aspect-ratio:16/10; background:linear-gradient(135deg,var(--sx-bg-soft),var(--sx-line-2)); display:flex; align-items:center; justify-content:center; color:var(--sx-mute); overflow:hidden; }
 .sx-case-cover img { width:100%; height:100%; object-fit:cover; }
+/* Фирменный знак на фото карточки — верхний правый угол, по просьбе
+   заказчика 13.09.2026. */
+.sx-case-mark { position:absolute; z-index:1; top:14px; right:14px; width:36px; height:36px; border-radius:50%;
+  background:rgba(4,10,20,.4); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; }
+.sx-case-mark img { width:18px; height:18px; object-fit:contain; }
 .sx-case-body { padding:20px 22px; flex:1; display:flex; flex-direction:column; }
 /* Бейдж типа проекта: нейтральная серая пилюля, не синяя плашка (09.08.2026,
    по образцу readdy.cc). Синий на ней конкурировал с синими заголовками
@@ -2907,7 +2912,10 @@ function SoiCases({ lang, go }) {
               onClick={() => setViewer(c)}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setViewer(c); } }}
               aria-label={_lv(lang, "Открыть кейс", "Keysni ochish", "Open case") + ": " + tx(c.title)}>
-              <div className="sxc-media sx-case-cover">{img(c.image) ? <img src={img(c.image)} alt={tx(c.title)} loading="lazy" /> : <Icon name="pin" size={34} />}</div>
+              <div className="sxc-media sx-case-cover">
+                {img(c.image) ? <img src={img(c.image)} alt={tx(c.title)} loading="lazy" /> : <Icon name="pin" size={34} />}
+                <span className="sx-case-mark" aria-hidden="true"><img src={window.__asset("assets/soi-mark-white.svg")} alt="" /></span>
+              </div>
               <div className="sx-case-body">
                 {c.tag && <span className="sx-case-tag">{tx(c.tag)}</span>}
                 <h3>{tx(c.title)}</h3>
