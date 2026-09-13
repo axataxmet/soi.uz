@@ -699,8 +699,12 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    не был проставлен в разметке вовсе, а по специфичности он всё равно проиграл
    бы четырём колонкам .sxc-grid. Новости из-за этого шли по четыре в ряд —
    вернее, три занимали три колонки из четырёх, оставляя пустоту справа. */
-.sx-ncard { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; transition:transform .3s, border-color .3s; }
-.sx-ncard:hover { transform:translateY(-4px); border-color:var(--sx-accent); }
+/* Своя рамка-подсветка и translateY убраны — карточка уже несёт класс
+   .sxc-card с тенью+подъёмом на hover (решение заказчика 13.09.2026:
+   «карточки в блоках Реализованные проекты и Новости — как в Экспертиза»);
+   заголовок вместо этого синеет. */
+.sx-ncard { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; }
+.sx-ncard:hover h3 { color:var(--blue-600); }
 /* Два класса — по той же причине, что и у обложки проекта: перебиваем
    портретный 3/4 из .sxc-media. */
 .sxc-media.sx-ncard-cover { aspect-ratio:16/9; background:linear-gradient(135deg,var(--sx-bg-soft),var(--sx-line-2)); display:flex; align-items:center; justify-content:center; color:var(--sx-mute); overflow:hidden; }
@@ -709,7 +713,7 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 /* Дата в разрядку заглавными (09.08.2026, по образцу readdy.cc): так она
    читается как рубрика-надзаголовок, а не как часть заголовка новости. */
 .sx-ncard-date { font-size:var(--fs-1); color:var(--sx-mute); font-weight:700; text-transform:uppercase; letter-spacing:.1em; }
-.sx-ncard h3 { font-size:var(--fs-5); font-weight:700; color:var(--sx-ink); line-height:1.35; margin-top:10px; }
+.sx-ncard h3 { font-size:var(--fs-5); font-weight:700; color:var(--sx-ink); line-height:1.35; margin-top:10px; transition:color .25s ease; }
 /* Явное приглашение открыть статью: раньше карточка была кликабельна целиком,
    но ничем об этом не сообщала. */
 .sx-ncard-more { display:inline-flex; align-items:center; gap:8px; margin-top:14px;
