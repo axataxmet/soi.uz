@@ -684,11 +684,10 @@ img{max-width:100%;display:block}
 .z-corp .drawer-link{display:flex;align-items:center;gap:10px}
 .z-corp .drawer-link svg{flex-shrink:0;color:var(--slate-500)}
 .z-corp .drawer-link.on svg,.z-corp .drawer-link:hover svg{color:var(--blue-600)}
-/* position:sticky — классический паттерн «липких» заголовков разделов
-   (как в контактах iOS): при прокрутке видно, в каком разделе меню сейчас
-   находится пользователь, без JS. Раньше при долгом списке это было
-   неочевидно (решение заказчика 13.09.2026). */
-.z-corp .drawer-section-h{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:7px;margin:0 -24px;padding:10px 24px 2px;background:var(--surface);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-500);font-weight:600}
+/* «Липкие» заголовки разделов убраны (решение заказчика 13.09.2026,
+   повторно): при прокрутке заголовок зависал отдельной строкой поверх
+   списка и выглядел как лишний фиксированный элемент. Обычный, не sticky. */
+.z-corp .drawer-section-h{display:flex;align-items:center;gap:7px;margin:0 -24px;padding:10px 24px 2px;background:var(--surface);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-500);font-weight:600}
 .z-corp .drawer-section-h svg{flex-shrink:0}
 /* Язык / сравнение / избранное / корзина / тема / закрыть — один ряд
    (решение заказчика 13.09.2026): две строки читались как разрозненные
