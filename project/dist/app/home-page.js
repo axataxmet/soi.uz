@@ -177,7 +177,7 @@ var{useState,useEffect,useRef}=React;function useHomeSetting(key,def){var[val,se
    grey caption — the heading under it is doing the work now. */
 /* Надзаголовок секции. Один вид на все секции главной: два правила были
    побайтово одинаковыми и жили в разных концах файла. */
-.sx-h2 { font-size:clamp(32px,4.4vw,54px); font-weight:800; line-height:1.04; letter-spacing:-.035em; color:var(--sx-ink); margin:14px 0 0; text-wrap:balance; }
+.sx-h2 { font-size:clamp(32px,4.4vw,46px); font-weight:800; line-height:1.04; letter-spacing:-.035em; color:var(--sx-ink); margin:14px 0 0; text-wrap:balance; }
 .sx-sub { font-size:clamp(16px,1.5vw,18px); line-height:1.6; color:var(--sx-mute); margin-top:14px; max-width:600px; }
 .sx-head { margin-bottom:44px; }
 .sx-head.center { text-align:center; }
@@ -856,7 +856,7 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 @media(min-width:1024px){ .sxp-head { grid-template-columns:1.15fr .85fr; align-items:end; gap:64px; } }
 .sxp-kicker { margin:0 0 16px; font-size:var(--fs-1); font-weight:700; text-transform:uppercase;
   letter-spacing:.16em; color:var(--sx-mute); }
-.sxp-h2 { margin:0; font-size:clamp(34px,5vw,60px); font-weight:800; line-height:.95;
+.sxp-h2 { margin:0; font-size:clamp(30px,4.2vw,46px); font-weight:800; line-height:.95;
   letter-spacing:-.035em; color:var(--sx-ink); }
 .sxp-sub { margin:0; max-width:28rem; font-size:var(--fs-4); line-height:1.65; color:var(--sx-mute); }
 
@@ -938,7 +938,7 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 }
 .sxc-kicker { margin:0 0 16px; font-size:var(--fs-2); font-weight:700; text-transform:uppercase;
   letter-spacing:.16em; color:var(--sx-mute); }
-.sxc-h2 { margin:0; font-size:clamp(30px,4.2vw,48px); font-weight:800; line-height:1.02;
+.sxc-h2 { margin:0; font-size:clamp(30px,4.2vw,46px); font-weight:800; line-height:1.02;
   letter-spacing:-.035em; color:var(--sx-ink); }
 [data-theme="dark"] .sxc-h2 { color:var(--sx-ink); }
 /* Заголовки секций, ведущие на свою страницу. Подсветка по наведению без
