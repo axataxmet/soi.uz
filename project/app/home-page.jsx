@@ -263,18 +263,6 @@ const HERO_SLIDES = [
     ],
   },
   {
-    id: "slide-registration",
-    theme: "light",
-    video: "assets/hero-lab.mp4",
-    bg: "linear-gradient(135deg, #FFFFFF 0%, var(--blue-50) 55%, var(--line-soft) 100%)",
-    badge: { ru: "Услуга", uz: "Xizmat", en: "Service" },
-    title: { ru: "Регистрация медицинских изделий в Узбекистане", uz: "O'zbekistonda tibbiy buyumlarni ro'yxatdan o'tkazish", en: "Medical device registration in Uzbekistan" },
-    subtitle: { ru: "Полное сопровождение: досье, экспертиза, взаимодействие с регулятором — под ключ.", uz: "To'liq hamrohlik: hujjatlar, ekspertiza, regulyator bilan ishlash — kalit topshirish sharti bilan.", en: "Full support: dossier, expertise, regulator liaison — turnkey." },
-    ctas: [
-      { label: { ru: "Подробнее об услуге", uz: "Xizmat haqida batafsil", en: "Learn more" }, action: "registration", style: "primary" },
-    ],
-  },
-  {
     id: "slide-service",
     theme: "dark",
     video: "assets/hero-service.mp4",
