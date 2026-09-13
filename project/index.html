@@ -678,14 +678,27 @@ img{max-width:100%;display:block}
 .z-corp .drawer.on{transform:none}
 .z-corp .drawer a{padding:13px 14px;border-radius:var(--r-sm);font-size:var(--fs-5);font-weight:600;color:var(--slate-700)}
 .z-corp .drawer a:hover, .z-corp .drawer a.on{background:var(--bg);color:var(--blue-600)}
-.z-corp .drawer-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+/* Иконки у заголовков разделов и у пунктов без вложенного списка («Контакты»)
+   — список из 14+ пунктов плохо сканировался сплошным текстом (решение
+   заказчика 13.09.2026). */
+.z-corp .drawer-link{display:flex;align-items:center;gap:10px}
+.z-corp .drawer-link svg{flex-shrink:0;color:var(--slate-500)}
+.z-corp .drawer-link.on svg,.z-corp .drawer-link:hover svg{color:var(--blue-600)}
+/* position:sticky — классический паттерн «липких» заголовков разделов
+   (как в контактах iOS): при прокрутке видно, в каком разделе меню сейчас
+   находится пользователь, без JS. Раньше при долгом списке это было
+   неочевидно (решение заказчика 13.09.2026). */
+.z-corp .drawer-section-h{position:sticky;top:0;z-index:1;display:flex;align-items:center;gap:7px;margin:0 -24px;padding:12px 24px 4px;background:var(--surface);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-500);font-weight:600}
+.z-corp .drawer-section-h svg{flex-shrink:0}
+.z-corp .drawer-head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
 .z-corp .drawer-head .burger{margin-left:auto}
-/* Сравнение / избранное / корзина / тема — иконки без подписи, в одном ряду
-   с языком (решение заказчика 13.09.2026) — раньше были отдельными строками
-   с текстом ниже поиска, до этого — круглыми иконками в баре шапки. */
-/* 44×44 — минимальный touch-таргет (WCAG 2.5.5 / Apple HIG), как у
-   остальных кнопок меню (язык, крестик закрытия); было 38px. */
-.z-corp .drawer-icon-row{display:flex;align-items:center;gap:6px}
+/* Сравнение / избранное / корзина / тема — своя строка иконок под
+   языком+крестиком (решение заказчика 13.09.2026) — были в одном ряду с
+   языком, но при переносе крестик «отваливался» на отдельную строку сам по
+   себе и смотрелся случайно; до этого — отдельными строками с текстом ниже
+   поиска, ещё раньше — круглыми иконками в баре шапки.
+   44×44 — минимальный touch-таргет (WCAG 2.5.5 / Apple HIG). */
+.z-corp .drawer-icon-row{display:flex;align-items:center;gap:6px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line-soft)}
 .z-corp .drawer-icon-btn,
 .z-corp .drawer-head .theme-btn{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-sm);border:1px solid var(--line-soft);background:var(--surface);color:var(--slate-700);font-size:17px;flex-shrink:0;cursor:pointer}
 .z-corp .drawer-icon-btn:hover,
@@ -4073,7 +4086,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789210367"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
-<script src="dist/app/certificates.js?v=1789303900"></script>
+<script src="dist/app/certificates.js?v=1789304000"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
 <script src="dist/app/inner-pages.js?v=1789250101"></script>
 <script src="dist/app/testimonials.js?v=1789250101"></script>

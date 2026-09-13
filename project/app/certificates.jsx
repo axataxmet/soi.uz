@@ -29,7 +29,12 @@ const SI_ICONS = {
   /* Весы — принятый в рознице знак сравнения. Коромысло прямое, а не
      провисающее: на 20px изгиб сливался со чашами и рисунок читался пятном. */
   compare: '<path d="M12 4v16M8.5 20h7"/><path d="M4 8h16"/><path d="m4 8-2.4 6.2a4.2 4.2 0 0 0 4.8 0Z"/><path d="m20 8 2.4 6.2a4.2 4.2 0 0 1-4.8 0Z"/>',
-  user: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/>'
+  user: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6"/>',
+  /* Иконки для заголовков разделов выезжающего меню — по прямому запросу
+     заказчика 13.09.2026, список из 14+ пунктов сплошным текстом плохо
+     сканировался. */
+  wrench: '<path d="M14.5 6a4 4 0 0 0-5.3 5.3L4 16.5 7.5 20l5.2-5.2A4 4 0 0 0 18 9.5L15.5 12 12 8.5 14.5 6Z"/>',
+  grid: '<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>'
 };
 
 function CoIcon({ name, size = 24, className = "", style = {} }) {
@@ -136,7 +141,7 @@ function useHiddenViews() {
 function corpNavItems(lang, hidden) {
   const lvh = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   return [
-  { id: "company", label: lvh("О компании", "Kompaniya haqida", "About"), children: [
+  { id: "company", icon: "building", label: lvh("О компании", "Kompaniya haqida", "About"), children: [
     { view: "about",     label: lvh("Об ИНДУСТРИЯ ЗДОРОВЬЯ",  "SOG’LIQ INDUSTRIYASI haqida",   "About HEALTH INDUSTRY") },
     { view: "documents", label: lvh("Документы компании",      "Kompaniya hujjatlari",          "Company documents") },
     { view: "projects",  label: lvh("Реализованные проекты",   "Amalga oshirilgan loyihalar",   "Completed projects") },
@@ -144,7 +149,7 @@ function corpNavItems(lang, hidden) {
     { view: "partners",  label: lvh("Партнёры",                "Hamkorlar",                     "Partners") },
     { view: "news",      label: lvh("Новости",                 "Yangiliklar",                   "News") }] },
 
-  { id: "services", label: lvh("Услуги", "Xizmatlar", "Services"), children: [
+  { id: "services", icon: "wrench", label: lvh("Услуги", "Xizmatlar", "Services"), children: [
     { view: "registration",   label: lvh("Регистрация медицинских изделий", "Tibbiy buyumlarni ro‘yxatdan o‘tkazish", "Medical device registration") },
     { view: "tenders",        label: lvh("Тендеры и государственные закупки", "Tenderlar va davlat xaridlari",        "Tenders and public procurement") },
     { view: "staffTraining",  label: lvh("Обучение персонала",   "Xodimlarni o‘qitish", "Staff training") },
@@ -152,7 +157,7 @@ function corpNavItems(lang, hidden) {
 
   // Каталог: подменю повторяет структуру 3000. Категории резолвятся по клику
   // (catKey) — если каталог из API ещё не загружен, открывается общий каталог.
-  { id: "catalog", label: lvh("Каталог", "Katalog", "Catalog"), children: [
+  { id: "catalog", icon: "grid", label: lvh("Каталог", "Katalog", "Catalog"), children: [
     { view: "catalog", catKey: "equipment",   label: lvh("Медицинское оборудование", "Tibbiy uskunalar",        "Medical equipment") },
     { view: "catalog", catKey: "furniture",   label: lvh("Медицинская мебель",       "Tibbiy mebel",            "Medical furniture") },
     { view: "catalog", catKey: "instruments", label: lvh("Медицинские инструменты",  "Tibbiy asboblar",         "Medical instruments") },
@@ -161,7 +166,7 @@ function corpNavItems(lang, hidden) {
        корпоративный go() знает только корп-страницы и на «price» дал бы пустой экран. */
     { catSub: "price", label: lvh("Каталог / прайс-лист", "Katalog / narxlar ro‘yxati", "Catalog / price list") }] },
 
-  { view: "contacts", label: lvh("Контакты", "Kontaktlar", "Contacts") }]
+  { view: "contacts", icon: "phone", label: lvh("Контакты", "Kontaktlar", "Contacts") }]
   /* Скрываем пункты без содержимого и следом — группы, которые из-за этого
      остались пустыми. Порядок важен: сначала дети, потом родитель. */
   .map((it) => (it.children
@@ -434,36 +439,44 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
       <aside className={"drawer" + (drawer ? " on" : "")}>
         <div className="drawer-head">
           <Langs place="drawer" />
-          {/* Сравнение / избранное / корзина — теперь иконки без подписи, в
-              одном ряду с языком (решение заказчика 13.09.2026); тема — тут
-              же, была в баре шапки вместе с ними и туда же переехала. */}
-          <div className="drawer-icon-row">
-            <button className="drawer-icon-btn" onClick={() => { goCat("compare"); setDrawer(false); }} aria-label={lang === "uz" ? "Taqqoslash" : lang === "en" ? "Compare" : "Сравнение"} title={lang === "uz" ? "Taqqoslash" : lang === "en" ? "Compare" : "Сравнение"}>
-              <CoIcon name="compare" size={18} />
-              {counts.cmp > 0 && <span className="co-badge">{counts.cmp}</span>}
-            </button>
-            <button className="drawer-icon-btn" onClick={() => { goCat("wishlist"); setDrawer(false); }} aria-label={lang === "uz" ? "Saralangan" : lang === "en" ? "Wishlist" : "Избранное"} title={lang === "uz" ? "Saralangan" : lang === "en" ? "Wishlist" : "Избранное"}>
-              <CoIcon name="heart" size={18} />
-              {counts.wish > 0 && <span className="co-badge">{counts.wish}</span>}
-            </button>
-            <button className="drawer-icon-btn" onClick={() => { goCat("cart"); setDrawer(false); }} aria-label={lang === "uz" ? "Savat / KP" : lang === "en" ? "Cart / RFQ" : "Корзина / Запрос КП"} title={lang === "uz" ? "Savat / KP" : lang === "en" ? "Cart / RFQ" : "Корзина / Запрос КП"}>
-              <CoIcon name="cart" size={18} />
-              {counts.cart > 0 && <span className="co-badge">{counts.cart}</span>}
-            </button>
-            <ThemeBtn />
-          </div>
           <button className="burger" onClick={() => setDrawer(false)} aria-label="Close">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6 6 18" /></svg>
           </button>
         </div>
+        {/* Сравнение / избранное / корзина / тема — своя строка иконок под
+            языком+крестиком, а не втиснуты в один с ними ряд: при переносе
+            крестик «отваливался» на отдельную строку сам по себе и выглядел
+            случайным (решение заказчика 13.09.2026 — развести на два чётких
+            ряда). */}
+        <div className="drawer-icon-row">
+          <button className="drawer-icon-btn" onClick={() => { goCat("compare"); setDrawer(false); }} aria-label={lang === "uz" ? "Taqqoslash" : lang === "en" ? "Compare" : "Сравнение"} title={lang === "uz" ? "Taqqoslash" : lang === "en" ? "Compare" : "Сравнение"}>
+            <CoIcon name="compare" size={18} />
+            {counts.cmp > 0 && <span className="co-badge">{counts.cmp}</span>}
+          </button>
+          <button className="drawer-icon-btn" onClick={() => { goCat("wishlist"); setDrawer(false); }} aria-label={lang === "uz" ? "Saralangan" : lang === "en" ? "Wishlist" : "Избранное"} title={lang === "uz" ? "Saralangan" : lang === "en" ? "Wishlist" : "Избранное"}>
+            <CoIcon name="heart" size={18} />
+            {counts.wish > 0 && <span className="co-badge">{counts.wish}</span>}
+          </button>
+          <button className="drawer-icon-btn" onClick={() => { goCat("cart"); setDrawer(false); }} aria-label={lang === "uz" ? "Savat / KP" : lang === "en" ? "Cart / RFQ" : "Корзина / Запрос КП"} title={lang === "uz" ? "Savat / KP" : lang === "en" ? "Cart / RFQ" : "Корзина / Запрос КП"}>
+            <CoIcon name="cart" size={18} />
+            {counts.cart > 0 && <span className="co-badge">{counts.cart}</span>}
+          </button>
+          <ThemeBtn />
+        </div>
         {corpNav.flatMap((item) =>
         item.children
-          ? [{ _heading: true, label: item.label, key: "h-" + item.id }].concat(item.children.map((c, i) => ({ ...c, key: item.id + "-" + i })))
+          ? [{ _heading: true, icon: item.icon, label: item.label, key: "h-" + item.id }].concat(item.children.map((c, i) => ({ ...c, key: item.id + "-" + i })))
           : [{ ...item, key: item.view }]
         ).map((it) =>
         it._heading
-          ? <div key={it.key} style={{ padding: "12px 0 4px", fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--c-muted, var(--slate-500))", fontWeight: 600 }}>{it.label}</div>
-          : <a key={it.key} className={route.view === it.view ? "on" : ""} onClick={() => { it.catSub ? goCat(it.catSub) : go(it.view, navParams(it)); setDrawer(false); }} style={it.primary ? { color: "var(--blue-600, var(--blue-600))", fontWeight: 600 } : undefined}>{it.label}</a>
+          ? <div key={it.key} className="drawer-section-h">
+              {it.icon && <CoIcon name={it.icon} size={14} />}
+              {it.label}
+            </div>
+          : <a key={it.key} className={"drawer-link" + (route.view === it.view ? " on" : "")} onClick={() => { it.catSub ? goCat(it.catSub) : go(it.view, navParams(it)); setDrawer(false); }} style={it.primary ? { color: "var(--blue-600, var(--blue-600))", fontWeight: 600 } : undefined}>
+              {it.icon && <CoIcon name={it.icon} size={16} />}
+              {it.label}
+            </a>
         )}
       </aside>
     </>);
