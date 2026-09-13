@@ -148,9 +148,6 @@ function MobileBottomNav({ t, lang, store, go }) {
         <Icon name="grid" size={22}/>
         <span>{t.foot_catalog}</span>
       </button>
-      <button className="mbn-item fab" onClick={() => window.__openQuote&&window.__openQuote()}>
-        <Icon name="phone" size={24} sw={2}/>
-      </button>
       <button className="mbn-item" onClick={() => go("wishlist",{})}>
         <Icon name="heart" size={22}/>
         {store.wishlist.length > 0 && <span className="mbn-cnt">{store.wishlist.length}</span>}
