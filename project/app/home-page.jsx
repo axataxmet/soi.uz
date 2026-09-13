@@ -2277,8 +2277,24 @@ function SoiExpertise({ lang, go }) {
   color:var(--sx-mute); }
 .sxp-dot { flex-shrink:0; width:6px; height:6px; margin-top:5px; border-radius:50%; background:var(--sx-accent); }
 
+/* Номер и «Подробнее» со стрелкой возвращены по прямому запросу заказчика
+   13.09.2026 (были убраны предыдущей правкой вместе с цветной заливкой) —
+   теперь в цветах нового, «каталожного» оформления карточки: приглушённый
+   номер и рамочная стрелка синеют при наведении вместо заливки. */
+.sxp-more { position:relative; z-index:1; display:flex; align-items:center; gap:10px; margin-top:auto;
+  padding-top:16px; font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em;
+  color:var(--sx-ink); transition:color .25s ease; }
+.sxp-card:hover .sxp-more { color:var(--blue-600); }
+.sxp-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
+  border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
+  transition:transform .3s, border-color .3s, color .3s; }
+.sxp-card:hover .sxp-arrow { transform:rotate(45deg); border-color:var(--blue-600); color:var(--blue-600); }
+.sxp-bignum { margin-left:auto; font-size:2rem; font-weight:800; line-height:1; color:var(--sx-mute);
+  user-select:none; transition:color .25s ease; }
+.sxp-card:hover .sxp-bignum { color:var(--blue-600); }
+
 @media (prefers-reduced-motion: reduce){
-  .sxp-card, .sxp-expand, .sxp-expand-in { transition:none; }
+  .sxp-card, .sxp-expand, .sxp-expand-in, .sxp-arrow { transition:none; }
 }
     `;
     document.head.appendChild(s);
@@ -2303,6 +2319,7 @@ function SoiExpertise({ lang, go }) {
 
         <div className="sxp-grid">
           {EXPERTISE_ITEMS.map((it, i) => {
+            const no = String(i + 1).padStart(2, "0");
             return (
               /* Ссылка, а не div с role="button": карточка ведёт на страницу
                  услуги, и подменять её кнопкой значит терять средний клик,
@@ -2333,6 +2350,11 @@ function SoiExpertise({ lang, go }) {
                       </ul>
                     </div>
                   </div>
+                </div>
+                <div className="sxp-more">
+                  {_lv(lang, "Подробнее", "Batafsil", "Read more")}
+                  <span className="sxp-arrow" aria-hidden>↗</span>
+                  <span className="sxp-bignum" aria-hidden>{no}</span>
                 </div>
               </a>
             );
