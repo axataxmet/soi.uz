@@ -1010,12 +1010,19 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    два класса носят карточки «Реализованных проектов» (.sx-case) и «Новостей»
    (.sx-ncard) — там подпись остаётся под фотографией, и правка базы сломала
    бы обе секции разом. */
-.sxc-card.ov { position:relative; display:block; aspect-ratio:3/4; }
+/* Размер и hover-поведение подогнаны под карточки «Экспертиза» (.sxp-card):
+   та же высота (460px) и фирменный синий тон, проступающий при наведении,
+   вместо простого затемнения — по просьбе заказчика 13.09.2026. */
+.sxc-card.ov { position:relative; display:block; min-height:460px; }
 .sxc-card.ov .sxc-media { position:absolute; inset:0; aspect-ratio:auto; }
 /* Градиент — псевдоэлемент подложки, а не слой в разметке: подпись должна
    читаться на любом снимке, что бы на нём ни было. */
 .sxc-card.ov .sxc-media::after { content:""; position:absolute; inset:0;
-  background:linear-gradient(180deg, transparent 42%, rgba(4,10,20,.74) 100%); pointer-events:none; }
+  background:linear-gradient(180deg, transparent 42%, rgba(4,10,20,.74) 100%);
+  transition:background .35s ease; pointer-events:none; }
+.sxc-card.ov:hover .sxc-media::after,
+.sxc-card.ov:focus-visible .sxc-media::after {
+  background:linear-gradient(180deg, rgba(14,74,198,.5) 0%, rgba(6,32,84,.86) 100%); }
 /* Номер увеличен и притушен (по образцу .sxp-bignum в блоке «Экспертиза»),
    на hover становится белоснежным — то же поведение, что у карточек
    «Экспертиза» и «Навигация по направлениям», для единого языка блоков. */
