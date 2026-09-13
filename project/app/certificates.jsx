@@ -289,7 +289,6 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
           <path d="M12 2a15 15 0 000 20" />
         </svg>
         <span>{lang.toUpperCase()}</span>
-        <span className="lang-dd-chevron">▾</span>
       </button>
       {open &&
         <div className="lang-dd-menu">
@@ -439,16 +438,6 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
       <aside className={"drawer" + (drawer ? " on" : "")}>
         <div className="drawer-head">
           <Langs place="drawer" />
-          <button className="burger" onClick={() => setDrawer(false)} aria-label="Close">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6 6 18" /></svg>
-          </button>
-        </div>
-        {/* Сравнение / избранное / корзина / тема — своя строка иконок под
-            языком+крестиком, а не втиснуты в один с ними ряд: при переносе
-            крестик «отваливался» на отдельную строку сам по себе и выглядел
-            случайным (решение заказчика 13.09.2026 — развести на два чётких
-            ряда). */}
-        <div className="drawer-icon-row">
           <button className="drawer-icon-btn" onClick={() => { goCat("compare"); setDrawer(false); }} aria-label={lang === "uz" ? "Taqqoslash" : lang === "en" ? "Compare" : "Сравнение"} title={lang === "uz" ? "Taqqoslash" : lang === "en" ? "Compare" : "Сравнение"}>
             <CoIcon name="compare" size={18} />
             {counts.cmp > 0 && <span className="co-badge">{counts.cmp}</span>}
@@ -462,6 +451,9 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
             {counts.cart > 0 && <span className="co-badge">{counts.cart}</span>}
           </button>
           <ThemeBtn />
+          <button className="burger" onClick={() => setDrawer(false)} aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6 6 18" /></svg>
+          </button>
         </div>
         {corpNav.flatMap((item) =>
         item.children
