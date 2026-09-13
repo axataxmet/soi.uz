@@ -1041,8 +1041,13 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
   font-weight:800; line-height:1; color:rgba(255,255,255,.14); user-select:none; pointer-events:none;
   transition:color .35s; }
 .sxc-card.ov:hover .sxc-bignum, .sxc-card.ov:focus-visible .sxc-bignum { color:rgba(255,255,255,.92); }
-.sxc-card.ov .sxc-foot { position:absolute; z-index:1; inset:auto 16px 18px 20px; padding:0;
-  display:flex; flex-direction:column; align-items:flex-start; gap:14px; }
+/* Заголовок стоял внизу вместе с «Подробнее» — у «Экспертиза» заголовок
+   наверху карточки, а «Подробнее»+стрелка отдельно внизу. Область .sxc-foot
+   растянута на всю карточку (inset почти на всю высоту) и разведена по
+   вертикали через justify-content:space-between, чтобы повторить тот же
+   порядок (по просьбе заказчика 13.09.2026). */
+.sxc-card.ov .sxc-foot { position:absolute; z-index:1; inset:22px 16px 18px 20px; padding:0;
+  display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; }
 .sxc-card.ov .sxc-t { margin:0; max-width:12rem; font-size:var(--fs-7); line-height:1.2; color:#fff; }
 .sxc-card.ov .sxc-more { display:flex; align-items:center; gap:10px; font-size:var(--fs-1); font-weight:700;
   text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.86); }
