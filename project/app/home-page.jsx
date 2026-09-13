@@ -2257,6 +2257,12 @@ function SoiExpertise({ lang, go }) {
 .sxp-card:focus-visible { outline:none; border-color:var(--blue-600); box-shadow:var(--sh-lg); transform:translateY(-3px); }
 .sxp-card:focus-visible .sxp-t { color:var(--blue-600); }
 
+/* Заголовок и описание разной длины на разных карточках сдвигали
+   «Компетенцию» на разную высоту — обёрнуты в блок фиксированной высоты,
+   чтобы она вставала на одном уровне у всех карточек (решение заказчика
+   13.09.2026). Высота — под 3 строки заголовка + 3 строки описания, больше
+   реальному контенту не требуется. */
+.sxp-top-text { min-height:158px; }
 .sxp-t { position:relative; z-index:1; margin:0; max-width:16rem; font-size:var(--fs-7); font-weight:700;
   line-height:1.2; letter-spacing:-.02em; transition:color .25s ease; }
 .sxp-d { position:relative; z-index:1; margin:12px 0 0; max-width:20rem; font-size:var(--fs-4); line-height:1.6;
@@ -2268,8 +2274,12 @@ function SoiExpertise({ lang, go }) {
    всегда, без анимации раскрытия. */
 .sxp-expand-outer { overflow:hidden; }
 .sxp-expand-in { padding-top:16px; }
-.sxp-comp { margin:0; font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em;
-  color:var(--sx-mute); }
+/* Надпись выделена акцентным цветом и плашкой — по прямому запросу
+   заказчика 13.09.2026 («выделить Компетенция»), была обычным приглушённым
+   текстом наравне с остальными подписями. */
+.sxp-comp { display:inline-block; margin:0 0 2px; font-size:var(--fs-1); font-weight:800; text-transform:uppercase;
+  letter-spacing:.08em; color:var(--blue-600); background:color-mix(in srgb, var(--blue-600) 12%, transparent);
+  padding:4px 10px; border-radius:999px; }
 .sxp-proof { margin:4px 0 0; font-size:var(--fs-3); font-weight:500; color:var(--sx-ink); }
 .sxp-list { list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:6px; }
 .sxp-list li { display:flex; align-items:flex-start; gap:8px; font-size:var(--fs-2); line-height:1.4;
@@ -2335,8 +2345,10 @@ function SoiExpertise({ lang, go }) {
                   go(it.nav);
                 }}
               >
-                <h3 className="sxp-t">{L(it.t)}</h3>
-                <p className="sxp-d">{L(it.d)}</p>
+                <div className="sxp-top-text">
+                  <h3 className="sxp-t">{L(it.t)}</h3>
+                  <p className="sxp-d">{L(it.d)}</p>
+                </div>
                 <div className="sxp-expand-outer">
                   <div className="sxp-expand-in">
                     <p className="sxp-comp">{_lv(lang, "Компетенция", "Kompetensiya", "Competence")}</p>
