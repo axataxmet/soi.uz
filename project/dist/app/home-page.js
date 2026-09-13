@@ -1016,7 +1016,12 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    читаться на любом снимке, что бы на нём ни было. */
 .sxc-card.ov .sxc-media::after { content:""; position:absolute; inset:0;
   background:linear-gradient(180deg, transparent 42%, rgba(4,10,20,.74) 100%); pointer-events:none; }
-.sxc-card.ov .sxc-no { position:absolute; z-index:1; top:16px; left:20px; color:rgba(255,255,255,.82); }
+/* Номер увеличен и притушен (по образцу .sxp-bignum в блоке «Экспертиза»),
+   на hover становится белоснежным — то же поведение, что у карточек
+   «Экспертиза» и «Навигация по направлениям», для единого языка блоков. */
+.sxc-card.ov .sxc-no { position:absolute; z-index:1; top:16px; left:20px; font-size:2.4rem; font-weight:800;
+  color:rgba(255,255,255,.5); transition:color .35s; }
+.sxc-card.ov:hover .sxc-no, .sxc-card.ov:focus-visible .sxc-no { color:#fff; }
 .sxc-card.ov .sxc-foot { position:absolute; z-index:1; inset:auto 16px 18px 20px; padding:0;
   align-items:flex-end; }
 .sxc-card.ov .sxc-t { margin:0; color:#fff; }
