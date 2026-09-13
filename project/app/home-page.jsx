@@ -2457,18 +2457,17 @@ function SoiCatalogCards({ lang, go }) {
 .sxc-card.ov:hover .sxc-media::after,
 .sxc-card.ov:focus-visible .sxc-media::after {
   background:linear-gradient(180deg, rgba(14,74,198,.5) 0%, rgba(6,32,84,.86) 100%); }
-/* Номер увеличен и притушен (по образцу .sxp-bignum в блоке «Экспертиза»),
-   на hover становится белоснежным — то же поведение, что у карточек
-   «Экспертиза» и «Навигация по направлениям», для единого языка блоков. */
-.sxc-card.ov .sxc-no { position:absolute; z-index:1; top:16px; left:20px; font-size:2.4rem; font-weight:800;
-  color:rgba(255,255,255,.5); transition:color .35s; }
-.sxc-card.ov:hover .sxc-no, .sxc-card.ov:focus-visible .sxc-no { color:#fff; }
-/* Стрелка была прижата к правому краю карточки (justify-content:space-between,
-   унаследовано от .sxc-foot) — по образцу «Экспертиза» перенесена вплотную
-   к заголовку. */
+/* Номер, заголовок и «Подробнее» со стрелкой сведены в нижнюю часть карточки
+   по образцу «Экспертиза» (.sxp-bignum / .sxp-t / .sxp-more) — по просьбе
+   заказчика 13.09.2026: было — номер в углу снимка сверху, заголовок и
+   стрелка отдельно у низа. */
+.sxc-card.ov .sxc-bignum { position:absolute; z-index:0; right:14px; bottom:8px; font-size:5.5rem;
+  font-weight:800; line-height:1; color:rgba(255,255,255,.18); user-select:none; pointer-events:none; }
 .sxc-card.ov .sxc-foot { position:absolute; z-index:1; inset:auto 16px 18px 20px; padding:0;
-  align-items:flex-start; justify-content:flex-start; flex-wrap:wrap; row-gap:12px; }
-.sxc-card.ov .sxc-t { flex:1 1 100%; margin:0; color:#fff; }
+  display:flex; flex-direction:column; align-items:flex-start; gap:14px; }
+.sxc-card.ov .sxc-t { margin:0; max-width:12rem; font-size:var(--fs-7); line-height:1.2; color:#fff; }
+.sxc-card.ov .sxc-more { display:flex; align-items:center; gap:10px; font-size:var(--fs-1); font-weight:700;
+  text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.86); }
 .sxc-card.ov .sxc-arr { border:none; background:rgba(255,255,255,.96); color:var(--sx-ink); }
 .sxc-card.ov:hover .sxc-arr,
 .sxc-card.ov:focus-visible .sxc-arr { background:var(--sx-accent); color:#fff; }
@@ -2530,12 +2529,16 @@ function SoiCatalogCards({ lang, go }) {
               <div className="sxc-media">
                 <img src={window.__asset("assets/catalog/" + card.slug + ".jpg")} alt="" loading="lazy" />
               </div>
-              {/* Номер вынесен из .sxc-foot: в варианте .ov он стоит в верхнем
-                  углу снимка, а подпись со стрелкой — в нижнем. */}
-              <span className="sxc-no">{String(i + 1).padStart(2, "0")}</span>
+              {/* Номер, заголовок и «Подробнее» со стрелкой — всё внизу
+                  карточки, по образцу «Экспертиза» (.sxp-bignum / .sxp-t /
+                  .sxp-more), вместо прежнего номера в верхнем углу. */}
+              <span className="sxc-bignum" aria-hidden>{String(i + 1).padStart(2, "0")}</span>
               <div className="sxc-foot">
                 <h3 className="sxc-t">{_lv(lang, card.t.ru, card.t.uz, card.t.en)}</h3>
-                <span className="sxc-arr" aria-hidden><Icon name="arrowRight" size={18} /></span>
+                <div className="sxc-more">
+                  {_lv(lang, "Подробнее", "Batafsil", "Read more")}
+                  <span className="sxc-arr" aria-hidden><Icon name="arrowRight" size={18} /></span>
+                </div>
               </div>
             </a>
           ))}
