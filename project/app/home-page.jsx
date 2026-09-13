@@ -2969,6 +2969,14 @@ function SoiCases({ lang, go }) {
   const tx = (o) => (o && (typeof o === "string" ? o : (o[lang] || o.ru))) || "";
   const img = (im) => !im ? "" : typeof im === "string" ? im : (im.data || im.url || im.src || "");
   const [viewer, setViewer] = React.useState(null);
+  /* Свой вызов reveal-наблюдателя. Тот, что стоит в родителе, отрабатывает на
+     его рендере — а карточки кейсов появляются позже, когда придут данные из
+     CMS, и обновляется при этом только эта секция. Наблюдатель их не получал,
+     класс .sx-in не проставлялся, и карточки так и оставались с opacity:0:
+     на боевом сайте блок «Реализованные проекты» показывал пустоту под
+     заголовком. Здесь хук перезапускается на каждом рендере секции, поэтому
+     видит и первую загрузку, и любую следующую страницу. */
+  useSoiReveal();
   // Реактивная подписка: cms-remote грузит cases из API асинхронно и делает CMS.emit("cases").
   const [cmsCases, setCmsCases] = React.useState(() => window.CMS ? window.CMS.list("cases") : []);
   React.useEffect(() => {
@@ -2983,6 +2991,14 @@ function SoiCases({ lang, go }) {
      десятка) существовали только на отдельной странице. Теперь ряд листается
      стрелками, высота секции при этом не меняется. */
   const [page, setPage] = React.useState(0);
+  /* Входная анимация (.sx-rv) вешается наблюдателем из useSoiReveal, а тот
+     живёт в родителе и перезапускается только при его перерисовке. setPage
+     обновляет одну эту секцию, поэтому карточки следующей страницы — новые
+     узлы с .sx-rv — наблюдателю не достаются и остаются с opacity:0, то есть
+     просто исчезают. После первого же листания класс больше не вешаем:
+     700-миллисекундное проявление при перелистывании и не нужно. */
+  const [paged, setPaged] = React.useState(false);
+  const goPage = (n) => { setPaged(true); setPage(n); };
   const pages = Math.max(1, Math.ceil(cases.length / SX_STEP));
   const cur = Math.min(page, pages - 1);
   const visible = cases.slice(cur * SX_STEP, cur * SX_STEP + SX_STEP);
@@ -3013,7 +3029,7 @@ function SoiCases({ lang, go }) {
         </div>
         <div className="sxc-grid sx-cases">
           {visible.map((c, i) => (
-            <div className="sxc-card sx-case sx-rv" key={c.id || i} style={{ "--i": i }}
+            <div className={"sxc-card sx-case" + (paged ? "" : " sx-rv")} key={c.id || i} style={{ "--i": i }}
               role="button" tabIndex={0}
               onClick={() => setViewer(c)}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setViewer(c); } }}
@@ -3038,13 +3054,13 @@ function SoiCases({ lang, go }) {
         {pages > 1 && (
           <div className="sxc-nav">
             <button type="button" className="sxc-arrow sxc-arrow-prev" disabled={cur === 0}
-              onClick={() => setPage(cur - 1)}
+              onClick={() => goPage(cur - 1)}
               aria-label={_lv(lang, "Предыдущие проекты", "Oldingi loyihalar", "Previous projects")}>
               <Icon name="arrowRight" size={18} />
             </button>
             <span className="sxc-nav-count">{(cur + 1) + " / " + pages}</span>
             <button type="button" className="sxc-arrow" disabled={cur >= pages - 1}
-              onClick={() => setPage(cur + 1)}
+              onClick={() => goPage(cur + 1)}
               aria-label={_lv(lang, "Следующие проекты", "Keyingi loyihalar", "Next projects")}>
               <Icon name="arrowRight" size={18} />
             </button>
@@ -3252,6 +3268,9 @@ function SoiNews({ lang, go }) {
   const tx = (o) => (o && (o[lang] || o.ru)) || "";
   const cov = (c) => !c ? null : (typeof c === "string" ? c : (c.data || c.src || null));
   const [viewer, setViewer] = React.useState(null);
+  // См. комментарий в SoiCases: без своего вызова карточки, пришедшие из CMS
+  // после рендера родителя, остаются невидимыми.
+  useSoiReveal();
   // Реактивная подписка: cms-remote грузит news из API асинхронно и делает CMS.emit("news").
   const [cmsNews, setCmsNews] = React.useState(() => window.CMS ? window.CMS.list("news") : []);
   React.useEffect(() => {
@@ -3262,6 +3281,10 @@ function SoiNews({ lang, go }) {
   const allNews = cmsNews.filter((n) => n.published !== false)
     .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
   const [page, setPage] = React.useState(0);
+  /* См. тот же комментарий в SoiCases: наблюдатель .sx-rv не видит карточки,
+     созданные при листании, и они остаются невидимыми. */
+  const [paged, setPaged] = React.useState(false);
+  const goPage = (n) => { setPaged(true); setPage(n); };
   const pages = Math.max(1, Math.ceil(allNews.length / SX_STEP));
   const cur = Math.min(page, pages - 1);
   const news = allNews.slice(cur * SX_STEP, cur * SX_STEP + SX_STEP);
@@ -3300,7 +3323,7 @@ function SoiNews({ lang, go }) {
             <button
               type="button"
               key={n.id || i}
-              className="sxc-card sx-ncard sx-rv"
+              className={"sxc-card sx-ncard" + (paged ? "" : " sx-rv")}
               style={{ "--i": i }}
               onClick={() => setViewer(n)}
               aria-label={_lv(lang, "Открыть новость", "Yangilikni ochish", "Open news item") + ": " + tx(n.title)}
@@ -3324,13 +3347,13 @@ function SoiNews({ lang, go }) {
         {pages > 1 && (
           <div className="sxc-nav">
             <button type="button" className="sxc-arrow sxc-arrow-prev" disabled={cur === 0}
-              onClick={() => setPage(cur - 1)}
+              onClick={() => goPage(cur - 1)}
               aria-label={_lv(lang, "Предыдущие новости", "Oldingi yangiliklar", "Previous news")}>
               <Icon name="arrowRight" size={18} />
             </button>
             <span className="sxc-nav-count">{(cur + 1) + " / " + pages}</span>
             <button type="button" className="sxc-arrow" disabled={cur >= pages - 1}
-              onClick={() => setPage(cur + 1)}
+              onClick={() => goPage(cur + 1)}
               aria-label={_lv(lang, "Следующие новости", "Keyingi yangiliklar", "Next news")}>
               <Icon name="arrowRight" size={18} />
             </button>
