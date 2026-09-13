@@ -2208,7 +2208,7 @@ function SoiExpertise({ lang, go }) {
 .sxp-inner { position:relative; max-width:var(--maxw); margin:0 auto; padding:0 32px; }
 
 .sxp-head { display:grid; gap:32px; margin-bottom:clamp(40px,5vw,64px); }
-@media(min-width:1024px){ .sxp-head { grid-template-columns:1.15fr .85fr; align-items:end; gap:64px; } }
+@media(min-width:1024px){ .sxp-head { grid-template-columns:1.15fr .85fr; align-items:start; gap:64px; } }
 .sxp-kicker { margin:0 0 16px; font-size:var(--fs-1); font-weight:700; text-transform:uppercase;
   letter-spacing:.16em; color:var(--sx-mute); }
 .sxp-h2 { margin:0; font-size:clamp(30px,4.2vw,46px); font-weight:800; line-height:.95;
