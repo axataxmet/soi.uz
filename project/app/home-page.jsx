@@ -1303,26 +1303,26 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    выше от 08.08.2026) — карточки сведены к масштабу readdy.cc. Сетка между
    карточками (gap:30px) не тронута: пользователь просил про отступ внутри
    карточки, не про воздух между ними. */
-/* Стиль карточки полностью сведён к «Экспертиза» (.sxp-card) — по просьбе
-   заказчика 13.09.2026: цвет заливает всю карточку только при наведении
-   (а не постоянная рамка + сдвиг по Y), номер белеет на hover, стрелка —
-   прозрачный круг с разворотом на 45°, без заливки. */
-.sx-dir { position:relative; overflow:hidden; display:flex; flex-direction:column; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:28px; transition:background .35s, border-color .35s, color .35s; }
-.sx-dir:hover { border-color:transparent; background:var(--sx-lime); color:var(--sx-lime-ink); }
-/* Стрелка и номер стояли сверху рядом с иконкой; по просьбе заказчика
-   13.09.2026 перенесены вниз, в строку «Подробнее» — на одном уровне, как
-   в «Экспертиза» и «Электронный каталог». */
+/* Стиль карточки приведён к «Экспертиза» (.sxp-card), а та в свою очередь —
+   к карточке каталога (.sc-card на /catalog/equipment): тень вместо цветной
+   заливки, заголовок синеет на hover, без инверсии текста в белый (решение
+   заказчика 13.09.2026 — «стиль карточек из Экспертиза применить к
+   остальным карточкам главной»). */
+.sx-dir { position:relative; overflow:hidden; display:flex; flex-direction:column; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:28px; box-shadow:var(--sh); transition:box-shadow .25s ease, transform .25s ease; }
+.sx-dir:hover { box-shadow:var(--sh-lg); transform:translateY(-3px); }
+.sx-dir:hover h3 { color:var(--blue-600); }
+.sx-dir:focus-within { outline:none; }
 .sx-dir-more { position:relative; z-index:1; display:flex; align-items:center; gap:10px; margin-top:auto; padding-top:20px;
   font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--sx-ink);
-  transition:color .35s; }
-.sx-dir:hover .sx-dir-more { color:var(--sx-lime-ink); }
+  transition:color .25s ease; }
+.sx-dir:hover .sx-dir-more { color:var(--blue-600); }
 .sx-dir-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
   border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
-  transition:transform .3s, background .3s, border-color .3s, color .3s; }
-.sx-dir:hover .sx-dir-arrow { transform:rotate(45deg); background:transparent; border-color:rgba(255,255,255,.35); color:var(--sx-lime-ink); }
-.sx-dir-bignum { margin-left:auto; font-size:2rem; font-weight:800; line-height:1; color:rgba(16,21,18,.3);
-  user-select:none; transition:color .35s; }
-.sx-dir:hover .sx-dir-bignum { color:var(--sx-lime-ink); }
+  transition:transform .3s, border-color .3s, color .3s; }
+.sx-dir:hover .sx-dir-arrow { transform:rotate(45deg); border-color:var(--blue-600); color:var(--blue-600); }
+.sx-dir-bignum { margin-left:auto; font-size:2rem; font-weight:800; line-height:1; color:var(--sx-mute);
+  user-select:none; transition:color .25s ease; }
+.sx-dir:hover .sx-dir-bignum { color:var(--blue-600); }
 /* Заголовок — единственная ссылка карточки; её зона нажатия растянута на всю
    карточку. cursor:pointer держится на этом слое, а не на самом блоке: иначе
    палец-курсор появлялся бы и там, где нажимать нечего. */
@@ -1331,36 +1331,25 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 /* Ссылки на отдельные направления лежат над растянутой зоной, иначе она
    перехватывала бы клики по ним. */
 .sx-dir-links { position:relative; z-index:1; }
-/* Фокус с клавиатуры показываем на всей карточке, а не на строке заголовка —
-   нажатие всё равно относится к ней целиком. */
-.sx-dir:focus-within { outline:2px solid var(--sx-accent); outline-offset:3px; }
 .sx-dir-t:focus-visible { outline:none; }
-/* Иконка: один фирменный тон на все группы, подложка — он же в 10%; на hover
-   карточки (уже синяя) переходит в полупрозрачную белую. Контейнер вырос с
-   50 до 72px следом за глифом (26 → 39px), чтобы вокруг знака остался тот же
-   воздух, а не впритык к краям. */
+/* Иконка: один фирменный тон на все группы, подложка — он же в 10%.
+   Контейнер вырос с 50 до 72px следом за глифом (26 → 39px), чтобы вокруг
+   знака остался тот же воздух, а не впритык к краям. */
 .sx-dir-ic { width:72px; height:72px; margin-bottom:22px; border-radius:var(--r); display:flex; align-items:center; justify-content:center;
-  background:rgba(14,74,198,.10); color:var(--sx-accent); transition:background .35s, color .35s; }
-.sx-dir:hover .sx-dir-ic { background:rgba(255,255,255,.18); color:#fff; }
+  background:rgba(14,74,198,.10); color:var(--sx-accent); }
 /* Размер заголовка синхронизирован с «Экспертиза» и «Электронный каталог»
    (--fs-7 везде) — было --fs-5, разнобой по блокам (решение заказчика
-   13.09.2026). */
-/* overflow-wrap добавлен: после унификации размера (--fs-7) длинные
-   заголовки вроде «Восстановление и специализированное оснащение» вылезали
-   за правый край узкой карточки — слово просто не переносилось (решение
-   заказчика 13.09.2026). */
-.sx-dir h3 { font-size:var(--fs-7); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.2; overflow-wrap:break-word; word-break:break-word; transition:color .35s; }
-.sx-dir:hover h3 { color:inherit; }
+   13.09.2026). overflow-wrap добавлен: длинные заголовки вроде
+   «Восстановление и специализированное оснащение» вылезали за правый край
+   узкой карточки — слово просто не переносилось. */
+.sx-dir h3 { font-size:var(--fs-7); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.2; overflow-wrap:break-word; word-break:break-word; transition:color .25s ease; }
 .sx-dir-links { margin-top:14px; display:flex; flex-direction:column; gap:2px; }
 .sx-dir-links a { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:var(--fs-3); color:var(--sx-mute); text-decoration:none; padding:5px 0; transition:color .18s, padding-left .18s; }
 .sx-dir-links a:hover { color:var(--sx-blue); padding-left:5px; }
-.sx-dir:hover .sx-dir-links a { color:rgba(255,255,255,.82); }
-.sx-dir:hover .sx-dir-links a:hover { color:#fff; }
 /* Счётчик реальных товаров по направлению — раньше блок показывал все 22
    направления вне зависимости от того, есть ли под ними товары; теперь
    пустые скрыты выше (dirCards), а здесь просто видно, сколько нашлось. */
-.sx-dir-cnt { flex:0 0 auto; font-size:var(--fs-1); color:var(--sx-mute); opacity:.7; font-variant-numeric:tabular-nums; transition:color .35s; }
-.sx-dir:hover .sx-dir-cnt { color:rgba(255,255,255,.7); opacity:1; }
+.sx-dir-cnt { flex:0 0 auto; font-size:var(--fs-1); color:var(--sx-mute); opacity:.7; font-variant-numeric:tabular-nums; }
 
 /* ── impact band (dark interlude) ───────────────────── */
 /* Three navy slabs — impact, catalog portal, closing CTA — were the page's
@@ -2479,12 +2468,13 @@ function SoiCatalogCards({ lang, go }) {
    (потолок, стены), заголовок терялся. Добавлено затемнение и сверху, плюс
    text-shadow на самом тексте как страховка — по прямому запросу заказчика
    сделать текст читаемым. */
+/* Синий тон на hover убран (решение заказчика 13.09.2026: «стиль карточек
+   из Экспертиза применить к остальным карточкам») — как и у «Экспертиза»,
+   при наведении карточка не перекрашивается, только приподнимается тенью
+   (см. box-shadow у .sxc-card выше). Градиент один и тот же всегда. */
 .sxc-card.ov .sxc-media::after { content:""; position:absolute; inset:0;
   background:linear-gradient(180deg, rgba(4,10,20,.62) 0%, rgba(4,10,20,.08) 28%, rgba(4,10,20,.08) 52%, rgba(4,10,20,.82) 100%);
-  transition:background .35s ease; pointer-events:none; }
-.sxc-card.ov:hover .sxc-media::after,
-.sxc-card.ov:focus-visible .sxc-media::after {
-  background:linear-gradient(180deg, rgba(6,32,84,.7) 0%, rgba(14,74,198,.25) 28%, rgba(14,74,198,.25) 52%, rgba(6,32,84,.88) 100%); }
+  pointer-events:none; }
 /* Номер, заголовок и «Подробнее» со стрелкой сведены в нижнюю часть карточки
    по образцу «Экспертиза» (.sxp-bignum / .sxp-t / .sxp-more) — по просьбе
    заказчика 13.09.2026: было — номер в углу снимка сверху, заголовок и
