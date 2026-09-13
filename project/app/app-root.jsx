@@ -473,15 +473,27 @@ function App(props) {
           так что все ссылки футера в каталоге вели в пустую страницу.
 
           Каталожные адреса (категории) остаются на локальном
-          go() — внешняя оболочка для них не нужна. */}
-      <CoFooter
-        t={t} lang={lang} setLang={setLang}
-        go={(view, params) => {
-          if (view === "catalog") return go("catalog", params || {});
-          try { (window.parent || window).postMessage({ type: "soi-conav", view, from: "catalog" }, "*"); } catch (e) {}
-          window.scrollTo({ top: 0, behavior: "instant" });
-        }}
-        goCat={(sub, param, q) => go(sub || "catalog", { param, q })} />
+          go() — внешняя оболочка для них не нужна.
+
+          Обёртка .z-corp: вся вёрстка футера (сетка колонок, отступы,
+          заглушки соцсетей — все правки этой сессии) написана селекторами
+          вида «.z-corp .foot …», потому что на главной CoFooter уже стоит
+          внутри такого контейнера. Без него здесь подхватывались старые
+          несвязанные правила голого «.foot» — футер каталога визуально
+          расходился с футером остальных страниц (решение заказчика). Два
+          базовых свойства самого .z-corp (min-height:100dvh, padding-top
+          под шапку) не нужны обёртке из одного футера — они сброшены
+          отдельным правилом «.app .z-corp» в index.html. */}
+      <div className="z-corp">
+        <CoFooter
+          t={t} lang={lang} setLang={setLang}
+          go={(view, params) => {
+            if (view === "catalog") return go("catalog", params || {});
+            try { (window.parent || window).postMessage({ type: "soi-conav", view, from: "catalog" }, "*"); } catch (e) {}
+            window.scrollTo({ top: 0, behavior: "instant" });
+          }}
+          goCat={(sub, param, q) => go(sub || "catalog", { param, q })} />
+      </div>
       <CompareBar t={t} lang={lang} store={store} go={go} />
       {/* Модалка КП уходит порталом в body. Она живёт в каталожной оболочке, а
           та на корпоративных страницах скрыта (display:none) — модалка

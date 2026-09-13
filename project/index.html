@@ -1928,6 +1928,11 @@ body{background:var(--surface)}
 .z-corp{min-height:100dvh;display:flex;flex-direction:column}
 .z-corp > main{flex:1 0 auto}
 .z-corp .foot{flex-shrink:0}
+/* Каталожная оболочка (.app, app-root.jsx) оборачивает CoFooter в свой
+   собственный .z-corp — только чтобы получить ту же вёрстку футера, что и
+   на остальных страницах. min-height:100dvh и padding-top под шапку тут не
+   нужны: обёртка держит один футер, а не всю страницу. */
+.app .z-corp{min-height:0;padding-top:0}
 .z-corp .foot-bot span{font-size:var(--fs-2)}
 .z-corp .foot ul a:hover,
 .z-corp .foot .fc-grp a:hover,
@@ -4092,7 +4097,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/wishlist.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/order-track.js?v=1789304700"></script>
 <script src="dist/app/error-boundary.js?v=1787415411"></script>
-<script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789304700"></script>
+<script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789304900"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
 <script src="dist/app/certificates.js?v=1789304800"></script>
