@@ -2443,27 +2443,54 @@ function SoiCatalogCards({ lang, go }) {
 @media(min-width:640px){ .sxc-grid.sx-cases, .sxc-grid.sx-news { grid-template-columns:1fr 1fr; } }
 @media(min-width:1024px){ .sxc-grid.sx-cases, .sxc-grid.sx-news { grid-template-columns:repeat(3,1fr); } }
 
-/* ── строка действий под сеткой ───────────────────────────────────────────
-   До этого единственным способом уйти в раздел был клик по заголовку секции
-   (.sx-h2-link): у него нет ни подчёркивания, ни курсора-указателя до
-   наведения, ни роли ссылки — с клавиатуры он вообще недостижим. Здесь два
-   явных элемента: «показать ещё» разворачивает выдачу на месте, второй ведёт
-   на страницу раздела. Обе — настоящие <button>, поэтому фокус и Enter
-   работают сами. */
-.sxc-actions { display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
-  gap:12px; margin-top:clamp(28px,3.5vw,40px); }
-.sxc-act { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 22px;
+/* ── переход в раздел рядом с заголовком ──────────────────────────────────
+   До этого уйти в раздел можно было только кликом по самому заголовку
+   (.sx-h2-link): ни подчёркивания, ни курсора до наведения, ни роли ссылки —
+   с клавиатуры недостижим. Теперь рядом с заголовком стоит настоящая <button>.
+   align-items:baseline сажает её на базовую линию последней строки заголовка,
+   а не по центру его высоты — иначе рядом с кеглем 46px она «всплывала». */
+.sxc-h2-row { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 20px; }
+/* Базис, а не auto: при auto гипотетическая ширина заголовка равна его
+   max-content, строка переполняется и flex-wrap уносит кнопку вниз, вместо
+   того чтобы сжать заголовок. С базисом 260px пара «заголовок + кнопка»
+   помещается в строку, и заголовок дорастает до остатка, перенося свой текст
+   внутри себя. Если же остатка меньше 260px (узкая колонка), строка честно
+   переносится — кнопка уходит под заголовок. min-width:0 снимает
+   авто-минимум flex-элемента, иначе длинное слово не даст сжаться. */
+.sxc-h2-row > h2 { flex:1 1 260px; min-width:0; }
+.sxc-h2-row > .sxc-act { flex:0 0 auto; }
+/* У «Партнёров» шапка во всю ширину, а заголовок — одно короткое слово. Расти
+   ему здесь нельзя: иначе кнопка уезжает к правому краю за 800px от слова,
+   к которому относится. Без growth она встаёт сразу за ним. */
+.sx-mq-head .sxc-h2-row { justify-content:flex-start; }
+.sx-mq-head .sxc-h2-row > h2 { flex:0 1 auto; }
+.sxc-act { display:inline-flex; align-items:center; gap:8px; min-height:44px; padding:0 18px;
   border-radius:999px; font-family:inherit; font-size:var(--fs-4); font-weight:700;
   cursor:pointer; transition:background .16s ease, border-color .16s ease, color .16s ease; }
-/* Первичное — «показать ещё»: оно остаётся на странице, поэтому контурное.
-   Переход в раздел уводит со страницы — он подан спокойнее, текстом. */
-.sxc-act-more { border:1.5px solid var(--sx-line); background:var(--sx-card); color:var(--sx-ink); }
-.sxc-act-more:hover { border-color:var(--blue-500); color:var(--blue-600); }
-.sxc-act-all { border:1.5px solid transparent; background:transparent; color:var(--blue-600); }
+.sxc-act-all { border:1.5px solid transparent; background:transparent; color:var(--blue-600);
+  white-space:nowrap; }
 .sxc-act-all:hover { background:var(--blue-50, rgba(37,99,235,.08)); }
 .sxc-act-all svg { transition:transform .16s ease; }
 .sxc-act-all:hover svg { transform:translateX(3px); }
-@media(prefers-reduced-motion:reduce){ .sxc-act, .sxc-act-all svg { transition:none; }
+
+/* ── стрелки листания под сеткой ──────────────────────────────────────────
+   Пришли на место «показать ещё»: тот наращивал высоту секции с каждым
+   нажатием и не давал вернуться назад. Листание держит секцию одной высоты.
+   48px — выше минимума тач-цели в 44px. Левая стрелка — та же иконка,
+   развёрнутая на 180°: отдельной arrowLeft в наборе нет. */
+.sxc-nav { display:flex; justify-content:center; align-items:center; gap:12px;
+  margin-top:clamp(28px,3.5vw,40px); }
+.sxc-arrow { width:48px; height:48px; border-radius:999px; border:1.5px solid var(--sx-line);
+  background:var(--sx-card); color:var(--sx-ink); display:inline-flex; align-items:center;
+  justify-content:center; cursor:pointer;
+  transition:border-color .16s ease, color .16s ease, opacity .16s ease; }
+.sxc-arrow:hover:not(:disabled) { border-color:var(--blue-500); color:var(--blue-600); }
+.sxc-arrow:disabled { opacity:.35; cursor:default; }
+.sxc-arrow-prev svg { transform:rotate(180deg); }
+/* Счётчик страниц: без него у стрелок нет обратной связи о том, где ты. */
+.sxc-nav-count { font-size:var(--fs-3); font-weight:700; color:var(--sx-mute);
+  min-width:56px; text-align:center; font-variant-numeric:tabular-nums; }
+@media(prefers-reduced-motion:reduce){ .sxc-act, .sxc-arrow, .sxc-act-all svg { transition:none; }
   .sxc-act-all:hover svg { transform:none; } }
 
 /* Карточка — <a>, поэтому гасим наследие ссылки: подчёркивание и синий цвет
@@ -2832,22 +2859,22 @@ function SoiBrands({ lang, go }) {
   return (
     <section className="sx-mq-sec">
       <div className="sx-mq-head">
-        <h2 className="sx-h2 sx-brands-title sx-rv sx-h2-link" onClick={() => go("partners")} style={{ margin: 0 }}>
-          {_lv(lang, "Партнёры", "Hamkorlar", "Partners")}
-        </h2>
+        {/* Логотипы в ленте кликабельны, но это не читается: они едут, и на них
+            не похоже, что каждый ведёт в раздел. Явная кнопка у заголовка —
+            единственный стабильный способ уйти на страницу партнёров. */}
+        <div className="sxc-h2-row">
+          <h2 className="sx-h2 sx-brands-title sx-rv sx-h2-link" onClick={() => go("partners")} style={{ margin: 0 }}>
+            {_lv(lang, "Партнёры", "Hamkorlar", "Partners")}
+          </h2>
+          <button type="button" className="sxc-act sxc-act-all" onClick={() => go("partners")}>
+            {_lv(lang, "Все партнёры", "Barcha hamkorlar", "All partners")}
+            <Icon name="arrowRight" size={16} />
+          </button>
+        </div>
       </div>
       <div className="sx-mq-vp">
         <div className="sx-mq-fade" />
         {rows.map((list, i) => belt(list, i))}
-      </div>
-      {/* Логотипы в ленте кликабельны, но это не читается: они едут, и на них
-          не похоже, что каждый ведёт в раздел. Явная кнопка — единственный
-          стабильный способ уйти на страницу партнёров. */}
-      <div className="sxc-actions">
-        <button type="button" className="sxc-act sxc-act-all" onClick={() => go("partners")}>
-          {_lv(lang, "Все партнёры", "Barcha hamkorlar", "All partners")}
-          <Icon name="arrowRight" size={16} />
-        </button>
       </div>
     </section>
   );
@@ -2953,11 +2980,12 @@ function SoiCases({ lang, go }) {
   // Fallback на статичные CASES_DEFAULT — только когда API реально пуст (по подписке уже дошли данные).
   if (!cases.length && window.SOI_CORE && window.SOI_CORE.CASES_DEFAULT) cases = window.SOI_CORE.CASES_DEFAULT;
   /* Раньше список резался до трёх безвозвратно, и остальные кейсы (их два
-     десятка) существовали только на отдельной странице. Теперь режем при
-     выводе, а «показать ещё» открывает следующий ряд прямо здесь. */
-  const [shown, setShown] = React.useState(SX_STEP);
-  const visible = cases.slice(0, shown);
-  const hasMore = cases.length > shown;
+     десятка) существовали только на отдельной странице. Теперь ряд листается
+     стрелками, высота секции при этом не меняется. */
+  const [page, setPage] = React.useState(0);
+  const pages = Math.max(1, Math.ceil(cases.length / SX_STEP));
+  const cur = Math.min(page, pages - 1);
+  const visible = cases.slice(cur * SX_STEP, cur * SX_STEP + SX_STEP);
   if (!cases.length) return null;
   return (
     /* Блок приведён к оформлению каталожного: та же обёртка, двухколоночная
@@ -2968,7 +2996,13 @@ function SoiCases({ lang, go }) {
         <div className="sxc-head sx-rv">
           <div>
             <p className="sxc-kicker">{_lv(lang, "Реализованные проекты", "Amalga oshirilgan loyihalar", "Delivered projects")}</p>
-            <h2 className="sxc-h2 sx-h2-link" onClick={() => go("projects")}>{_lv(lang, "Как мы оснащаем медицину Узбекистана", "O'zbekiston tibbiyotini qanday jihozlaymiz", "How we equip Uzbekistan's healthcare")}</h2>
+            <div className="sxc-h2-row">
+              <h2 className="sxc-h2 sx-h2-link" onClick={() => go("projects")}>{_lv(lang, "Как мы оснащаем медицину Узбекистана", "O'zbekiston tibbiyotini qanday jihozlaymiz", "How we equip Uzbekistan's healthcare")}</h2>
+              <button type="button" className="sxc-act sxc-act-all" onClick={() => go("projects")}>
+                {_lv(lang, "Все проекты", "Barcha loyihalar", "All projects")}
+                <Icon name="arrowRight" size={16} />
+              </button>
+            </div>
           </div>
           <div>
             <p className="sxc-sub">{_lv(lang,
@@ -3001,17 +3035,21 @@ function SoiCases({ lang, go }) {
             </div>
           ))}
         </div>
-        <div className="sxc-actions">
-          {hasMore && (
-            <button type="button" className="sxc-act sxc-act-more" onClick={() => setShown((n) => n + SX_STEP)}>
-              {_lv(lang, "Показать ещё", "Yana ko'rsatish", "Show more")}
+        {pages > 1 && (
+          <div className="sxc-nav">
+            <button type="button" className="sxc-arrow sxc-arrow-prev" disabled={cur === 0}
+              onClick={() => setPage(cur - 1)}
+              aria-label={_lv(lang, "Предыдущие проекты", "Oldingi loyihalar", "Previous projects")}>
+              <Icon name="arrowRight" size={18} />
             </button>
-          )}
-          <button type="button" className="sxc-act sxc-act-all" onClick={() => go("projects")}>
-            {_lv(lang, "Все проекты", "Barcha loyihalar", "All projects")}
-            <Icon name="arrowRight" size={16} />
-          </button>
-        </div>
+            <span className="sxc-nav-count">{(cur + 1) + " / " + pages}</span>
+            <button type="button" className="sxc-arrow" disabled={cur >= pages - 1}
+              onClick={() => setPage(cur + 1)}
+              aria-label={_lv(lang, "Следующие проекты", "Keyingi loyihalar", "Next projects")}>
+              <Icon name="arrowRight" size={18} />
+            </button>
+          </div>
+        )}
       </div>
       {viewer && <CaseModal c={viewer} lang={lang} tx={tx} img={img} onClose={() => setViewer(null)} />}
     </section>
@@ -3223,9 +3261,10 @@ function SoiNews({ lang, go }) {
   }, []);
   const allNews = cmsNews.filter((n) => n.published !== false)
     .sort((a, b) => (b.date || "").localeCompare(a.date || ""));
-  const [shown, setShown] = React.useState(SX_STEP);
-  const news = allNews.slice(0, shown);
-  const hasMore = allNews.length > shown;
+  const [page, setPage] = React.useState(0);
+  const pages = Math.max(1, Math.ceil(allNews.length / SX_STEP));
+  const cur = Math.min(page, pages - 1);
+  const news = allNews.slice(cur * SX_STEP, cur * SX_STEP + SX_STEP);
   if (!news.length) return null;
   const fmt = (d) => { if (!d) return ""; const x = new Date(d); return isNaN(x) ? d : x.toLocaleDateString(lang === "ru" ? "ru-RU" : lang === "uz" ? "uz-UZ" : "en-US", { day: "2-digit", month: "long", year: "numeric" }); };
   return (
@@ -3237,7 +3276,13 @@ function SoiNews({ lang, go }) {
         <div className="sxc-head sx-rv">
           <div>
             <p className="sxc-kicker">{_lv(lang, "Новости", "Yangiliklar", "News")}</p>
-            <h2 className="sxc-h2 sx-h2-link" onClick={() => go("news")}>{_lv(lang, "Что нового в индустрии", "Sohada nima yangilik", "What's new in the industry")}</h2>
+            <div className="sxc-h2-row">
+              <h2 className="sxc-h2 sx-h2-link" onClick={() => go("news")}>{_lv(lang, "Что нового в индустрии", "Sohada nima yangilik", "What's new in the industry")}</h2>
+              <button type="button" className="sxc-act sxc-act-all" onClick={() => go("news")}>
+                {_lv(lang, "Все новости", "Barcha yangiliklar", "All news")}
+                <Icon name="arrowRight" size={16} />
+              </button>
+            </div>
           </div>
           <div>
             <p className="sxc-sub">{_lv(lang,
@@ -3276,17 +3321,21 @@ function SoiNews({ lang, go }) {
             </button>
           ))}
         </div>
-        <div className="sxc-actions">
-          {hasMore && (
-            <button type="button" className="sxc-act sxc-act-more" onClick={() => setShown((n) => n + SX_STEP)}>
-              {_lv(lang, "Показать ещё", "Yana ko'rsatish", "Show more")}
+        {pages > 1 && (
+          <div className="sxc-nav">
+            <button type="button" className="sxc-arrow sxc-arrow-prev" disabled={cur === 0}
+              onClick={() => setPage(cur - 1)}
+              aria-label={_lv(lang, "Предыдущие новости", "Oldingi yangiliklar", "Previous news")}>
+              <Icon name="arrowRight" size={18} />
             </button>
-          )}
-          <button type="button" className="sxc-act sxc-act-all" onClick={() => go("news")}>
-            {_lv(lang, "Все новости", "Barcha yangiliklar", "All news")}
-            <Icon name="arrowRight" size={16} />
-          </button>
-        </div>
+            <span className="sxc-nav-count">{(cur + 1) + " / " + pages}</span>
+            <button type="button" className="sxc-arrow" disabled={cur >= pages - 1}
+              onClick={() => setPage(cur + 1)}
+              aria-label={_lv(lang, "Следующие новости", "Keyingi yangiliklar", "Next news")}>
+              <Icon name="arrowRight" size={18} />
+            </button>
+          </div>
+        )}
       </div>
       {viewer && <NewsModal n={viewer} lang={lang} tx={tx} cov={cov} fmt={fmt} onClose={() => setViewer(null)} />}
     </section>
