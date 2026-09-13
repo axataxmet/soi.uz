@@ -1304,11 +1304,23 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    выше от 08.08.2026) — карточки сведены к масштабу readdy.cc. Сетка между
    карточками (gap:30px) не тронута: пользователь просил про отступ внутри
    карточки, не про воздух между ними. */
-.sx-dir { position:relative; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:24px; transition:transform .3s cubic-bezier(.16,1,.3,1), border-color .3s; }
+.sx-dir { position:relative; overflow:hidden; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:24px; transition:transform .3s cubic-bezier(.16,1,.3,1), border-color .3s; }
 /* Тень на hover заменена подсветкой рамки — readdy.cc держит карточки
    полностью плоскими (box-shadow:none) во всех состояниях, глубину даёт
    только смена цвета рамки и сдвиг по Y. */
-.sx-dir:hover { transform:translateY(-4px); border-color:var(--sx-accent); }
+.sx-dir:hover { transform:translateY(-4px); border-color:var(--sx-ink-soft); }
+/* Оформление подогнано под карточки «Экспертиза» (.sxp-card): круглая стрелка
+   в углу, разворачивающаяся на hover, и приглушённый фоновой номер карточки
+   — по просьбе заказчика 13.09.2026 сделать блок «Навигация по направлениям»
+   таким же, как «Экспертиза». */
+.sx-dir-top { position:relative; z-index:1; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:22px; }
+.sx-dir-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
+  border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
+  transition:transform .3s, background .3s, border-color .3s, color .3s; }
+.sx-dir:hover .sx-dir-arrow { transform:rotate(45deg); background:var(--sx-accent); border-color:var(--sx-accent); color:#fff; }
+.sx-dir-bignum { position:absolute; right:12px; bottom:-48px; font-size:9rem; font-weight:800; line-height:1;
+  user-select:none; pointer-events:none; color:rgba(22,35,59,.045); }
+[data-theme="dark"] .sx-dir-bignum { color:rgba(255,255,255,.05); }
 /* Заголовок — единственная ссылка карточки; её зона нажатия растянута на всю
    карточку. cursor:pointer держится на этом слое, а не на самом блоке: иначе
    палец-курсор появлялся бы и там, где нажимать нечего. */
@@ -1324,7 +1336,7 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 /* Иконка: один фирменный тон на все группы, подложка — он же в 10%.
    Контейнер вырос с 50 до 72px следом за глифом (26 → 39px), чтобы вокруг
    знака остался тот же воздух, а не впритык к краям. */
-.sx-dir-ic { width:72px; height:72px; border-radius:var(--r); display:flex; align-items:center; justify-content:center; margin-bottom:22px;
+.sx-dir-ic { width:72px; height:72px; border-radius:var(--r); display:flex; align-items:center; justify-content:center;
   background:rgba(14,74,198,.10); color:var(--sx-accent); }
 .sx-dir h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.25; }
 .sx-dir-links { margin-top:14px; display:flex; flex-direction:column; gap:2px; }
@@ -1925,10 +1937,19 @@ function SoiEcosystem({ lang, go }) {
             </div>
             <div className="eco-num"><EcoCount value={liveCatalogNum} /><span>{val("catalog_unit")}</span></div>
             <h3>{_lv(lang, "Электронный каталог оборудования", "Elektron uskunalar katalogi", "Electronic equipment catalog")}</h3>
-            <p>{_lv(lang,
-              "Медтехника, мебель, инструменты и расходные материалы от ведущих мировых производителей.",
-              "Tibbiy texnika, mebel, asboblar va sarf materiallari — yetakchi jahon ishlab chiqaruvchilaridan.",
-              "Equipment, furniture, instruments and consumables from leading global manufacturers.")}</p>
+            {/* Было расплывчатое «от ведущих мировых производителей» — оценочная
+                формулировка без опоры на цифры. Заменено на проверяемое число
+                брендов (siteFigures().brands, тот же источник, что и на
+                странице каталога) и явную выгоду — подбор по направлению,
+                бренду и наличию, а не просто список категорий. */}
+            <p>{(() => {
+              const n = (window.siteFigures ? window.siteFigures().brands : "") || "";
+              const nn = n ? n + "+ " : "";
+              return _lv(lang,
+                `Медтехника, мебель, инструменты и расходные материалы от ${nn}проверенных мировых производителей. Подбор по направлению, бренду и наличию на складе.`,
+                `Tibbiy texnika, mebel, asboblar va sarf materiallari — ${nn}tekshirilgan jahon ishlab chiqaruvchilaridan. Yo'nalish, brend va mavjudlik bo'yicha tanlov.`,
+                `Equipment, furniture, instruments and consumables from ${nn}vetted global manufacturers. Filter by specialty, brand or stock availability.`);
+            })()}</p>
             <div className="eco-foot">
               <button className="eco-cta solid" onClick={() => go("catalog")}>
                 {_lv(lang, "Перейти в каталог", "Katalogga o'tish", "Open the catalog")}<Icon name="arrowRight" size={15} />
@@ -2568,12 +2589,16 @@ function SoiDirections({ lang, go }) {
                  (.sx-dir-t::after). Внутренние ссылки подняты над этим слоем и
                  продолжают работать сами по себе. */
               <div className="sx-dir sx-rv" key={g.id} style={{ "--i": i }}>
-                {/* Цвет иконки больше не берётся из g.color: данные групп несут
-                    свои оттенки (среди них зелёный и бирюзовый), и на белой
-                    странице с одним фирменным синим это читалось разнобоем.
-                    Цвет и подложка заданы в CSS — один тон на все группы.
-                    Глиф увеличен с 26 до 39px, как просили — в полтора раза. */}
-                <div className="sx-dir-ic"><Icon name={g.icon} size={39} /></div>
+                <span className="sx-dir-bignum" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+                <div className="sx-dir-top">
+                  {/* Цвет иконки больше не берётся из g.color: данные групп несут
+                      свои оттенки (среди них зелёный и бирюзовый), и на белой
+                      странице с одним фирменным синим это читалось разнобоем.
+                      Цвет и подложка заданы в CSS — один тон на все группы.
+                      Глиф увеличен с 26 до 39px, как просили — в полтора раза. */}
+                  <div className="sx-dir-ic"><Icon name={g.icon} size={39} /></div>
+                  <span className="sx-dir-arrow" aria-hidden="true">↗</span>
+                </div>
                 <h3>
                   <a
                     className="sx-dir-t"
