@@ -4000,11 +4000,12 @@ html{scroll-padding-top:72px}
   .z-corp .foot .fcol-acc > summary::-webkit-details-marker{display:none}
   .z-corp .foot .fcol-acc > summary h5{margin:0}
 
-  /* Ссылки подвала были 16px высотой — строка текста без всякого запаса.
-     44px делает их такой же целью, как кнопки в шапке. */
+  /* 44px-й тач-таргет убран по просьбе заказчика — он и создавал видимый
+     отступ между пунктами (не gap, а высота самой ссылки). Список плотный,
+     без зазора между строками. */
   .z-corp .foot ul a,
   .z-corp .foot .foot-contact a{
-    min-height:44px;display:flex;align-items:center;
+    display:block;
   }
   /* Телефоны идут тремя строками внутри одного <span>: flex разорвал бы их
      раскладку, поэтому здесь высота набирается вертикальными полями.
