@@ -893,7 +893,7 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    остался единственной нумерацией — сделан заметнее и поднят повыше. */
 .sxp-bignum { position:absolute; right:12px; bottom:-30px; font-size:9rem; font-weight:800; line-height:1;
   user-select:none; pointer-events:none; color:rgba(16,21,18,.06); transition:color .35s; }
-.sxp-card:hover .sxp-bignum { color:rgba(255,255,255,.28); }
+.sxp-card:hover .sxp-bignum { color:rgba(255,255,255,.92); }
 
 .sxp-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
   border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
