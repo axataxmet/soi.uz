@@ -2262,13 +2262,12 @@ function SoiExpertise({ lang, go }) {
 .sxp-d { position:relative; z-index:1; margin:12px 0 0; max-width:20rem; font-size:var(--fs-4); line-height:1.6;
   color:var(--sx-mute); }
 
-/* grid-rows 0fr→1fr: высота подстраивается ровно под контент */
-.sxp-expand { position:relative; z-index:1; display:grid; grid-template-rows:0fr;
-  transition:grid-template-rows .4s ease; }
-.sxp-card:hover .sxp-expand, .sxp-card:focus-visible .sxp-expand { grid-template-rows:1fr; }
+/* Блок «Компетенция» + список раньше раскрывался только на hover
+   (grid-rows 0fr→1fr) — на сенсорных экранах, где hover не работает, текст
+   был недоступен вовсе. По прямому запросу заказчика 13.09.2026 показан
+   всегда, без анимации раскрытия. */
 .sxp-expand-outer { overflow:hidden; }
-.sxp-expand-in { padding-top:16px; opacity:0; transition:opacity .3s ease .1s; }
-.sxp-card:hover .sxp-expand-in, .sxp-card:focus-visible .sxp-expand-in { opacity:1; }
+.sxp-expand-in { padding-top:16px; }
 .sxp-comp { margin:0; font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em;
   color:var(--sx-mute); }
 .sxp-proof { margin:4px 0 0; font-size:var(--fs-3); font-weight:500; color:var(--sx-ink); }
@@ -2294,7 +2293,7 @@ function SoiExpertise({ lang, go }) {
 .sxp-card:hover .sxp-bignum { color:var(--blue-600); }
 
 @media (prefers-reduced-motion: reduce){
-  .sxp-card, .sxp-expand, .sxp-expand-in, .sxp-arrow { transition:none; }
+  .sxp-card, .sxp-arrow { transition:none; }
 }
     `;
     document.head.appendChild(s);
@@ -2338,17 +2337,15 @@ function SoiExpertise({ lang, go }) {
               >
                 <h3 className="sxp-t">{L(it.t)}</h3>
                 <p className="sxp-d">{L(it.d)}</p>
-                <div className="sxp-expand">
-                  <div className="sxp-expand-outer">
-                    <div className="sxp-expand-in">
-                      <p className="sxp-comp">{_lv(lang, "Компетенция", "Kompetensiya", "Competence")}</p>
-                      <p className="sxp-proof">{L(it.proof)}</p>
-                      <ul className="sxp-list">
-                        {L(it.list).map((d, di) => (
-                          <li key={di}><span className="sxp-dot" aria-hidden />{d}</li>
-                        ))}
-                      </ul>
-                    </div>
+                <div className="sxp-expand-outer">
+                  <div className="sxp-expand-in">
+                    <p className="sxp-comp">{_lv(lang, "Компетенция", "Kompetensiya", "Competence")}</p>
+                    <p className="sxp-proof">{L(it.proof)}</p>
+                    <ul className="sxp-list">
+                      {L(it.list).map((d, di) => (
+                        <li key={di}><span className="sxp-dot" aria-hidden />{d}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
                 <div className="sxp-more">
