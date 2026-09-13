@@ -865,7 +865,11 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 .sxp-inner { position:relative; max-width:var(--maxw); margin:0 auto; padding:0 32px; }
 
 .sxp-head { display:grid; gap:32px; margin-bottom:clamp(40px,5vw,64px); }
-@media(min-width:1024px){ .sxp-head { grid-template-columns:1.15fr .85fr; align-items:start; gap:64px; } }
+@media(min-width:1024px){ .sxp-head { grid-template-columns:1.15fr .85fr; align-items:start; gap:64px; }
+  /* Правая колонка опущена на высоту надзаголовка «Экспертиза», чтобы текст
+     справа вставал вровень с первой строкой h2 слева, а не с надзаголовком
+     над ним (решение заказчика 13.09.2026). */
+  .sxp-head > *:last-child { padding-top:calc(var(--fs-1) * 1.4 + 16px); } }
 .sxp-kicker { margin:0 0 16px; font-size:var(--fs-1); font-weight:700; text-transform:uppercase;
   letter-spacing:.16em; color:var(--sx-mute); }
 .sxp-h2 { margin:0; font-size:clamp(30px,4.2vw,46px); font-weight:800; line-height:.95;
