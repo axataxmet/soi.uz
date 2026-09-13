@@ -2390,11 +2390,12 @@ function SoiCatalogCards({ lang, go }) {
    и стрелка не позеленели от пользовательских стилей ссылок. */
 .sxc-card { overflow:hidden; border-radius:var(--sx-r); border:1px solid var(--sx-line); background:var(--sx-card);
   cursor:pointer; text-align:left; padding:0; font-family:inherit; display:flex; flex-direction:column;
-  text-decoration:none; color:inherit;
-  transition:box-shadow .3s, border-color .3s; }
+  text-decoration:none; color:inherit; box-shadow:0 1px 2px rgba(22,35,59,.04), 0 8px 24px rgba(22,35,59,.05);
+  transition:box-shadow .3s, border-color .3s, transform .3s; }
 .sxc-card:hover { text-decoration:none; }
-[data-theme="dark"] .sxc-card { background:var(--sx-card); border-color:var(--sx-line); }
-.sxc-card:hover { border-color:var(--sx-ink-soft); }
+[data-theme="dark"] .sxc-card { background:var(--sx-card); border-color:var(--sx-line); box-shadow:0 1px 2px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.25); }
+.sxc-card:hover { border-color:var(--sx-ink-soft); box-shadow:0 4px 10px rgba(22,35,59,.06), 0 16px 36px rgba(22,35,59,.09); transform:translateY(-2px); }
+[data-theme="dark"] .sxc-card:hover { box-shadow:0 4px 10px rgba(0,0,0,.28), 0 16px 36px rgba(0,0,0,.32); }
 .sxc-card:focus-visible { outline:2px solid var(--sx-ink); outline-offset:3px; }
 .sxc-media { aspect-ratio:3/4; overflow:hidden; }
 .sxc-media img { display:block; width:100%; height:100%; object-fit:cover;
