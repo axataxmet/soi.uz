@@ -113,7 +113,6 @@ function MobileDrawer({ t, lang, go, store, open, onClose }) {
         {/* nav links */}
         <div className="mob-section-title" style={{marginTop:16}}>{lv("Разделы","Bo'limlar","Sections")}</div>
         {[
-          {label:lv("Прайс-лист","Narxlar","Price list"), view:"price"},
           {label:lv("Тендеры","Tenderlar","Tenders"), view:"tenders"},
           {label:lv("Новости","Yangiliklar","News"), view:"news"},
           {label:lv("О компании","Haqimizda","About"), view:"about"},

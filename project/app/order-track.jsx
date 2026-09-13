@@ -81,7 +81,6 @@ function SitemapPage({ t, lang, go }) {
           <Link onClick={() => { try { (window.parent || window).postMessage({ type: "soi-conav", view: "partners" }, "*"); } catch (e) {} }}>{lv("Поставщикам", "Yetkazib beruvchilarga", "For suppliers")}</Link>
           <Link onClick={() => go("info", { p: "gov" })}>{lv("Для государственных закупок", "Davlat xaridlari uchun", "Government procurement")}</Link>
           <Link onClick={() => go("tracking", {})}>{lv("Отслеживание заказа", "Buyurtmani kuzatish", "Order tracking")}</Link>
-          <Link onClick={() => go("price", {})}>{lv("Прайс-лист", "Narxlar ro'yxati", "Price list")}</Link>
         </Section>
 
         <Section title={lv("Компания", "Kompaniya", "Company")}>

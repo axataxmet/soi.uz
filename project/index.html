@@ -3008,32 +3008,6 @@ body:has(.cmpbar.show){--btt-bottom:96px}
   .bento-cell{grid-column:auto !important;grid-row:auto !important;aspect-ratio:auto !important}
 }
 
-/* ===== price list page ===== */
-.pl-hero{background:linear-gradient(160deg,var(--bg-2) 0%,var(--blue-50) 60%,var(--bg-2) 100%);padding:32px 0 28px}
-.pl-hero-inner{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
-.pl-title{font-size:var(--fs-9);font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
-.pl-sub{font-size:var(--fs-4);color:var(--slate-500)}
-.pl-dl-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.pl-dl-btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:var(--fs-4);height:44px;padding:0 20px;border-radius:var(--r-sm);cursor:pointer;border:1.5px solid;transition:.13s;font-family:var(--font)}
-.pl-dl-btn.excel{background:var(--line-2);color:var(--accent);border-color:var(--line)}
-.pl-dl-btn.excel:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
-.pl-dl-btn.pdf{background:var(--bg-2);color:var(--danger);border-color:#fca5a5}
-.pl-dl-btn.pdf:hover{background:var(--danger);color:#fff;border-color:var(--danger)}
-.pl-dl-ok{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-3);font-weight:700;color:var(--success);animation:fade .2s}
-.pl-filters{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
-.pl-count{font-size:var(--fs-3);color:var(--slate-500);font-weight:700;white-space:nowrap;margin-left:auto}
-.pl-table-wrap{background:#fff;border:1px solid var(--line);border-radius:var(--r-lg);overflow:auto;box-shadow:var(--sh-sm)}
-.pl-table{width:100%;border-collapse:collapse;font-size:var(--fs-4)}
-.pl-table th{background:var(--navy-900);color:#fff;padding:11px 14px;text-align:left;font-size:var(--fs-1);font-weight:800;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;position:sticky;top:0;z-index:2}
-.pl-table td{padding:11px 14px;vertical-align:middle}
-.pl-row{cursor:pointer;transition:.1s}
-.pl-row:hover td{background:rgba(26,95,208,.03)}
-.pl-row:last-child td{}
-.pl-cat-row td{background:var(--bg-2);padding:8px 14px}
-.pl-cat-label{display:inline-flex;align-items:center;gap:8px;font-size:var(--fs-2);font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--slate-500)}
-.pl-cat-cnt{background:var(--line);border-radius:var(--r-pill);padding:1px 8px;font-size:var(--fs-1);font-weight:800;color:var(--slate-500)}
-.pl-table tfoot td{background:var(--bg)}
-@media(max-width:820px){.pl-hero-inner{flex-direction:column;align-items:flex-start}.pl-filters{gap:8px}.pl-table th:nth-child(4),.pl-table td:nth-child(4),.pl-table th:nth-child(5),.pl-table td:nth-child(5){display:none}}
 .rev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
 /* ===== directions grid ===== */
 .dir-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px;margin-bottom:32px}
@@ -3425,7 +3399,7 @@ body:has(.cmpbar.show){--btt-bottom:96px}
 [data-theme="dark"] .pdp-buy,[data-theme="dark"] .pdp-icact,[data-theme="dark"] .cmpbar,
 [data-theme="dark"] .modal,[data-theme="dark"] .cart-items,[data-theme="dark"] .cart-sum,
 [data-theme="dark"] .icc,[data-theme="dark"] .acc-login-card,[data-theme="dark"] .acc-side,
-[data-theme="dark"] .acc-main,[data-theme="dark"] .pl-table-wrap,[data-theme="dark"] .dir-card,
+[data-theme="dark"] .acc-main,[data-theme="dark"] .dir-card,
 [data-theme="dark"] .info-stat,[data-theme="dark"] .hero-card,[data-theme="dark"] .hc-tile,
 [data-theme="dark"] .modal-close{background:var(--surface);border-color:var(--line)}
 [data-theme="dark"] .btn-buy{background:var(--bg-2);border-color:var(--line)}
@@ -4103,20 +4077,18 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/account.js?v=1789173088"></script>
 <script src="dist/app/footer.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/app-entry.js?v=1787415411"></script>
-<script type="text/soi-deferred" data-src="dist/app/compare.js?v=1789304300"></script>
-<script type="text/soi-deferred" data-src="dist/app/filters.js?v=1787415411"></script>
-<script type="text/soi-deferred" data-src="dist/app/catalog-tree.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/compare.js?v=1789304700"></script><script type="text/soi-deferred" data-src="dist/app/catalog-tree.js?v=1787415411"></script>
 <script src="dist/app/map.js?v=1789229717"></script>
-<script type="text/soi-deferred" data-src="dist/app/quiz.js?v=1787415411"></script>
+<script type="text/soi-deferred" data-src="dist/app/quiz.js?v=1789304700"></script>
 <script type="text/soi-deferred" data-src="dist/app/reviews.js?v=1787415411"></script>
 <script src="dist/app/auth.js?v=1788545608"></script>
 <script type="text/soi-deferred" data-src="dist/app/wishlist.js?v=1787415411"></script>
-<script type="text/soi-deferred" data-src="dist/app/order-track.js?v=1788878786"></script>
+<script type="text/soi-deferred" data-src="dist/app/order-track.js?v=1789304700"></script>
 <script src="dist/app/error-boundary.js?v=1787415411"></script>
-<script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789304300"></script>
+<script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789304700"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
-<script src="dist/app/certificates.js?v=1789304600"></script>
+<script src="dist/app/certificates.js?v=1789304700"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
 <script src="dist/app/inner-pages.js?v=1789250101"></script>
 <script src="dist/app/testimonials.js?v=1789250101"></script>
@@ -4124,7 +4096,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/staff-training.js?v=1787415411"></script>
 <script src="dist/app/service-support.js?v=1789279921"></script>
 <script src="dist/app/checkout.js?v=1789250101"></script>
-<script src="dist/app/news.js?v=1789173324"></script>
+<script src="dist/app/news.js?v=1789304700"></script>
 
 
 

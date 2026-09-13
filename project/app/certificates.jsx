@@ -161,10 +161,7 @@ function corpNavItems(lang, hidden) {
     { view: "catalog", catKey: "equipment",   label: lvh("Медицинское оборудование", "Tibbiy uskunalar",        "Medical equipment") },
     { view: "catalog", catKey: "furniture",   label: lvh("Медицинская мебель",       "Tibbiy mebel",            "Medical furniture") },
     { view: "catalog", catKey: "instruments", label: lvh("Медицинские инструменты",  "Tibbiy asboblar",         "Medical instruments") },
-    { view: "catalog", catKey: "consumables", label: lvh("Расходные материалы",      "Sarflanadigan materiallar", "Consumables") },
-    /* Прайс-лист живёт в каталожной оболочке, поэтому открывается через goCat:
-       корпоративный go() знает только корп-страницы и на «price» дал бы пустой экран. */
-    { catSub: "price", label: lvh("Каталог / прайс-лист", "Katalog / narxlar ro‘yxati", "Catalog / price list") }] },
+    { view: "catalog", catKey: "consumables", label: lvh("Расходные материалы",      "Sarflanadigan materiallar", "Consumables") }] },
 
   { view: "contacts", icon: "phone", label: lvh("Контакты", "Kontaktlar", "Contacts") }]
   /* Скрываем пункты без содержимого и следом — группы, которые из-за этого
@@ -588,8 +585,8 @@ function CoFooter({ t, lang, go, goCat, setLang }) {
           {/* Колонки навигации собираются из той же структуры, что и меню в
               шапке (corpNavItems): раньше футер держал свой список ссылок и
               расходился с меню при каждой правке навигации. Пункты, которые
-              умеет открывать только каталожная оболочка (прайс-лист), уходят
-              через goCat — корпоративный go() дал бы на них пустой экран. */}
+              умеет открывать только каталожная оболочка, уходят через goCat —
+              корпоративный go() дал бы на них пустой экран. */}
           {/* Колонка «Услуги» из футера убрана (решение заказчика), а сам пункт
               переехал в «О компании» под «Партнёры» и ведёт на страницу услуг.
               Перестроение локальное: corpNavItems — общий источник для меню в

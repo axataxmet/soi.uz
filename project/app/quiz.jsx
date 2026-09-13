@@ -108,7 +108,7 @@ function HomeSkeleton() {
 }
 
 function PageSkeleton({ view }) {
-  if (view === "catalog" || view === "wishlist" || view === "compare" || view === "price") return <CatalogSkeleton />;
+  if (view === "catalog" || view === "wishlist" || view === "compare") return <CatalogSkeleton />;
   if (view === "product") return <ProductSkeleton />;
   if (view === "home") return <HomeSkeleton />;
   // generic fallback

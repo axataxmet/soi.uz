@@ -32,7 +32,7 @@ window.corpViewToPath = (view) => "/" + (CORP_VIEW_TO_SLUG[view] || view || "");
 // catalog category pretty slug <-> data id
 const CAT_SLUG_TO_ID = { equipment: "equipment", "medical-furniture": "furniture", instruments: "instruments", consumables: "consumables", diagnostics: "diagnostics", surgery: "surgery", sterilization: "sterilization", physio: "physio", emergency: "emergency" };
 const CAT_ID_TO_SLUG = { furniture: "medical-furniture" };
-const CAT_SUBS = ["home", "product", "listing", "brand", "info", "cart", "wishlist", "compare", "calc", "price", "news", "kits", "tracking", "account", "faq", "sitemap", "brands"];
+const CAT_SUBS = ["home", "product", "listing", "brand", "info", "cart", "wishlist", "compare", "calc", "news", "kits", "tracking", "account", "faq", "sitemap", "brands"];
 /* ── маршрутизация по пути, а не по якорю ───────────────────────────────────
    Раздел живёт на обычном адресе — /contacts, /catalog/equipment. Фрагмент
    после # на сервер не уходил вовсе, поэтому поисковик, логи и превью ссылок
@@ -76,7 +76,7 @@ function parseSegments(seg) {
      ссылка не существует. "news" сюда не включаем — это имя занято
      корпоративной страницей новостей (CORP_SLUG_TO_VIEW), и /news уже
      работает через неё. */
-  const BARE_CAT_SUB_ALIASES = ["cart", "wishlist", "compare", "price", "faq", "sitemap", "tracking", "account", "calc", "kits"];
+  const BARE_CAT_SUB_ALIASES = ["cart", "wishlist", "compare", "faq", "sitemap", "tracking", "account", "calc", "kits"];
   if (seg.length === 1 && BARE_CAT_SUB_ALIASES.indexOf(seg[0]) >= 0) {
     return { view: "catalog", cat: { sub: seg[0], param: "" } };
   }

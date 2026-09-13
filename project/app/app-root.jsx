@@ -429,10 +429,9 @@ function App(props) {
   else if (v === "wishlist") page = <SimpleListPage t={t} lang={lang} store={store} go={go} ids={store.wishlist} title={t.wishlist} emptyTitle={lang === "uz" ? "Saralangan boʻsh" : lang === "en" ? "Your wishlist is empty" : "В избранном пусто"} emptyIcon="heart" />;
   else if (v === "compare") page = <ComparePage t={t} lang={lang} store={store} go={go} />;
   else if (v === "brand")   page = <BrandPage t={t} lang={lang} store={store} go={go} params={p} />;
-  /* Страницы «Комплекты», «Калькулятор» и список брендов удалены: в меню каталога
-     их нет, разделы каталога ограничены пятью категориями и прайс-листом. */
+  /* Страницы «Комплекты», «Калькулятор», список брендов и прайс-лист удалены:
+     в меню каталога их нет, разделы каталога ограничены четырьмя категориями. */
   else if (v === "account") page = <AccountPage t={t} lang={lang} store={store} go={go} />;
-  else if (v === "price")    page = <PricePage t={t} lang={lang} store={store} go={go} />;
   else if (v === "news")     page = <CatalogNewsRedirect embed={EMBED_ON} />;
   else if (v === "tracking") page = <TrackingPage t={t} lang={lang} go={go} />;
   else if (v === "info")    page = <InfoPage t={t} lang={lang} go={go} params={p} />;
@@ -473,7 +472,7 @@ function App(props) {
           soi.uz.html — файла с таким именем в проекте нет ни одного коммита,
           так что все ссылки футера в каталоге вели в пустую страницу.
 
-          Каталожные адреса (категории, прайс-лист) остаются на локальном
+          Каталожные адреса (категории) остаются на локальном
           go() — внешняя оболочка для них не нужна. */}
       <CoFooter
         t={t} lang={lang} setLang={setLang}
