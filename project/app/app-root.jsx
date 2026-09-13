@@ -500,7 +500,6 @@ function App(props) {
           {t.added}
         </div>
       )}
-      <MobileBottomNav t={t} lang={lang} store={store} go={go} />
       <FloatingWidgets lang={lang} go={go} />
       {/* CookieBanner переехал в корпоративную оболочку (App в news.jsx):
           здесь он показывался только тем, кто открыл каталог, потому что эта

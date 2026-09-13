@@ -3103,11 +3103,6 @@ body:has(.cmpbar.show){--btt-bottom:96px}
 .mob-acc-sub.mob-acc-all{color:var(--blue-700);font-weight:700}
 [data-theme="dark"] .mob-acc-head:hover,[data-theme="dark"] .mob-acc-sub:hover{background:var(--bg-2)}
 .mob-phone{display:flex;align-items:center;gap:10px;margin:18px;font-weight:800;font-size:var(--fs-5);color:var(--blue-700)}
-.mob-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:50;background:var(--surface);border-top:1px solid var(--line);height:62px;padding-bottom:env(safe-area-inset-bottom);box-shadow:var(--sh-lg)}
-.mbn-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:100%;min-width:44px;color:var(--slate-500);font-size:var(--fs-1);font-weight:700;position:relative;padding:0 4px}
-.mbn-item:hover,.mbn-item:active{color:var(--blue-600)}
-.mbn-item.fab{width:52px;height:52px;border-radius:50%;background:var(--grad-brand);color:var(--cta-ink);margin-top:-12px;box-shadow:var(--sh)}
-.mbn-cnt{position:absolute;top:4px;right:4px;min-width:16px;height:16px;background:var(--blue-600);color:#fff;border-radius:99px;font-size:var(--fs-1);font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 3px;border:2px solid #fff}
 /* ===== online + view counter ===== */
 .online-widget{display:inline-flex;align-items:center;gap:7px;background:var(--line-2);border:1px solid var(--line);border-radius:var(--r-pill);padding:5px 13px;font-size:var(--fs-3);font-weight:700;color:var(--accent);margin-bottom:14px}
 .ow-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);animation:ow-pulse 2s ease-in-out infinite;flex-shrink:0}
@@ -3135,7 +3130,7 @@ body:has(.cmpbar.show){--btt-bottom:96px}
 .cr-val{font-size:var(--fs-9);font-weight:800;letter-spacing:-.03em;color:var(--blue-700);line-height:1}
 .cr-cur{font-size:var(--fs-6);font-weight:600;color:var(--slate-500)}
 .cr-range{font-size:var(--fs-3);color:var(--slate-500);margin-top:8px}
-@media(max-width:860px){.calc-layout{grid-template-columns:1fr}.mob-hamburger{display:flex}.mob-bottom-nav{display:grid;grid-template-columns:repeat(4,1fr)}.head .search{max-width:200px}.app-main{padding-bottom:72px}.hero-form-row{grid-template-columns:1fr}.hero-form{max-width:100%}.nav{display:none}.ubar .ubar-links,.ubar .ubar-info.delivery{display:none}
+@media(max-width:860px){.calc-layout{grid-template-columns:1fr}.mob-hamburger{display:flex}.head .search{max-width:200px}.hero-form-row{grid-template-columns:1fr}.hero-form{max-width:100%}.nav{display:none}.ubar .ubar-links,.ubar .ubar-info.delivery{display:none}
   /* Правило `.fab-wrap{display:none}` полностью убрано (решение заказчика
      13.09.2026: «добавить в мобильной версии чат-виджет»). Комментарий
      рядом объяснял его как «у bottom-nav уже есть кнопка звонка, чат был бы
@@ -4068,7 +4063,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/account.js?v=1789173088"></script>
 <script src="dist/app/footer.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/app-entry.js?v=1787415411"></script>
-<script type="text/soi-deferred" data-src="dist/app/compare.js?v=1789304200"></script>
+<script type="text/soi-deferred" data-src="dist/app/compare.js?v=1789304300"></script>
 <script type="text/soi-deferred" data-src="dist/app/filters.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/catalog-tree.js?v=1787415411"></script>
 <script src="dist/app/map.js?v=1789229717"></script>
@@ -4078,7 +4073,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/wishlist.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/order-track.js?v=1788878786"></script>
 <script src="dist/app/error-boundary.js?v=1787415411"></script>
-<script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789210367"></script>
+<script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789304300"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
 <script src="dist/app/certificates.js?v=1789304100"></script>

@@ -134,35 +134,6 @@ function MobileDrawer({ t, lang, go, store, open, onClose }) {
 }
 
 /* ============================================================
-   MOBILE BOTTOM NAV
-   ============================================================ */
-function MobileBottomNav({ t, lang, store, go }) {
-  const lv = (ru, uz, en) => lang==="uz"?uz:lang==="en"?en:ru;
-  return (
-    <nav className="mob-bottom-nav">
-      <button className="mbn-item" onClick={() => go("home",{})}>
-        <Icon name="home" size={22}/>
-        <span>{lv("Главная","Bosh","Home")}</span>
-      </button>
-      <button className="mbn-item" onClick={() => go("catalog",{})}>
-        <Icon name="grid" size={22}/>
-        <span>{t.foot_catalog}</span>
-      </button>
-      <button className="mbn-item" onClick={() => go("wishlist",{})}>
-        <Icon name="heart" size={22}/>
-        {store.wishlist.length > 0 && <span className="mbn-cnt">{store.wishlist.length}</span>}
-        <span>{t.wishlist}</span>
-      </button>
-      <button className="mbn-item" onClick={() => go("cart",{})}>
-        <Icon name="cart" size={22}/>
-        {store.cartCount > 0 && <span className="mbn-cnt">{store.cartCount}</span>}
-        <span>{t.cart}</span>
-      </button>
-    </nav>
-  );
-}
-
-/* ============================================================
    EQUIPMENT COST CALCULATOR
    ============================================================ */
 const CALC_PRESETS = {
@@ -182,4 +153,4 @@ const BASE_PRICES = { diagnostics:28000000, surgery:62000000, sterilization:1800
 const SCALE = [1,2,3,4,5,6,7,8,10,12,15,20];
 
 /* CalcPage удалён: страницы нет в меню каталога. */
-Object.assign(window, { MobileDrawer, MobileBottomNav, OnlineWidget, ViewCounter });
+Object.assign(window, { MobileDrawer, OnlineWidget, ViewCounter });
