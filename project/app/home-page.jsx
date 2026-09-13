@@ -910,8 +910,7 @@ function SoiPlatformCSS() {
 .z-corp .sx .soi-chero-stage h1, .z-corp .sx .soi-chero-stage h2, .z-corp .sx .soi-chero-stage h3,
 .z-corp .sx .eco-t h1, .z-corp .sx .eco-t h2, .z-corp .sx .eco-t h3,
 .z-corp .sx .ctaband h1, .z-corp .sx .ctaband h2, .z-corp .sx .ctaband h3,
-.z-corp .sx [class*="-ctaband"] h1, .z-corp .sx [class*="-ctaband"] h2, .z-corp .sx [class*="-ctaband"] h3,
-.z-corp .sx .sxp-card:hover h1, .z-corp .sx .sxp-card:hover h2, .z-corp .sx .sxp-card:hover h3 { color:inherit; }
+.z-corp .sx [class*="-ctaband"] h1, .z-corp .sx [class*="-ctaband"] h2, .z-corp .sx [class*="-ctaband"] h3 { color:inherit; }
 
 /* Фон главной оставлен чистым: решение заказчика от 06.08.2026 — никаких
    декоративных слоёв поверх подложек. Присланный из Figma паттерн («линзы»)
@@ -2241,37 +2240,27 @@ function SoiExpertise({ lang, go }) {
 @media(min-width:640px){ .sxp-grid { grid-template-columns:1fr 1fr; } }
 @media(min-width:1024px){ .sxp-grid { display:flex; flex-wrap:nowrap; align-items:stretch; } }
 
+/* Карточка приведена к виду карточки каталога (.sc-card на
+   /catalog/equipment) — по прямому запросу заказчика 13.09.2026: белая
+   карточка, тень вместо цветной заливки, без крупного номера и без строки
+   «Подробнее». Раньше при наведении вся карточка заливалась цветом (лайм) —
+   теперь только тень приподнимает карточку и заголовок синеет, как у
+   .sc-card на странице каталога. */
 .sxp-card { position:relative; display:flex; flex-direction:column; overflow:hidden; text-align:left;
   min-height:460px; padding:28px; border-radius:var(--sx-r); cursor:pointer; font-family:inherit;
   border:1px solid var(--sx-line); background:var(--sx-card); color:var(--sx-ink);
-  transition:flex-grow .5s ease, background .35s, border-color .35s, transform .35s; }
+  box-shadow:var(--sh);
+  transition:flex-grow .5s ease, box-shadow .25s ease, transform .25s ease, border-color .25s ease; }
 @media(min-width:1024px){ .sxp-card { flex:1 1 0; } .sxp-card:hover { flex-grow:1.35; } }
-/* Раньше цвет (лайм/синий фон) был статично закреплён за первой карточкой
-   (.feat) — по просьбе заказчика 13.09.2026 перекрашивается любая карточка,
-   но только при наведении: в состоянии покоя все четыре одинаковые. */
-.sxp-card:hover { border-color:transparent; background:var(--sx-lime); color:var(--sx-lime-ink); }
-.sxp-card:focus-visible { outline:2px solid var(--sx-ink); outline-offset:3px; }
-
-/* Номер и стрелка раньше стояли сверху карточки (.sxp-top); по просьбе
-   заказчика 13.09.2026 верх карточки очищен от них, а стрелка перенесена
-   вниз, к строке «Подробнее» (.sxp-more). Номер (.sxp-bignum) сначала висел
-   декоративным фоновым слоем позади карточки, потом — уменьшен; теперь стоит
-   в той же строке, что «Подробнее↗», прижат к правому краю (решение
-   заказчика 13.09.2026). */
-.sxp-bignum { margin-left:auto; font-size:2rem; font-weight:800; line-height:1;
-  user-select:none; color:rgba(16,21,18,.3); transition:color .35s; }
-.sxp-card:hover .sxp-bignum { color:var(--sx-lime-ink); }
-
-.sxp-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
-  border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
-  transition:transform .3s, background .3s, border-color .3s, color .3s; }
-.sxp-card:hover .sxp-arrow { transform:rotate(45deg); background:transparent; border-color:rgba(255,255,255,.35); color:var(--sx-lime-ink); }
+.sxp-card:hover { box-shadow:var(--sh-lg); transform:translateY(-3px); border-color:var(--sx-line); }
+.sxp-card:hover .sxp-t { color:var(--blue-600); }
+.sxp-card:focus-visible { outline:none; border-color:var(--blue-600); box-shadow:var(--sh-lg); transform:translateY(-3px); }
+.sxp-card:focus-visible .sxp-t { color:var(--blue-600); }
 
 .sxp-t { position:relative; z-index:1; margin:0; max-width:16rem; font-size:var(--fs-7); font-weight:700;
-  line-height:1.2; letter-spacing:-.02em; }
+  line-height:1.2; letter-spacing:-.02em; transition:color .25s ease; }
 .sxp-d { position:relative; z-index:1; margin:12px 0 0; max-width:20rem; font-size:var(--fs-4); line-height:1.6;
-  color:var(--sx-mute); transition:color .35s; }
-.sxp-card:hover .sxp-d { color:rgba(255,255,255,.82); }
+  color:var(--sx-mute); }
 
 /* grid-rows 0fr→1fr: высота подстраивается ровно под контент */
 .sxp-expand { position:relative; z-index:1; display:grid; grid-template-rows:0fr;
@@ -2281,26 +2270,15 @@ function SoiExpertise({ lang, go }) {
 .sxp-expand-in { padding-top:16px; opacity:0; transition:opacity .3s ease .1s; }
 .sxp-card:hover .sxp-expand-in, .sxp-card:focus-visible .sxp-expand-in { opacity:1; }
 .sxp-comp { margin:0; font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em;
-  color:var(--sx-mute); transition:color .35s; }
-.sxp-card:hover .sxp-comp { color:rgba(255,255,255,.68); }
-.sxp-proof { margin:4px 0 0; font-size:var(--fs-3); font-weight:500; color:var(--sx-ink); transition:color .35s; }
-.sxp-card:hover .sxp-proof { color:var(--sx-lime-ink); }
+  color:var(--sx-mute); }
+.sxp-proof { margin:4px 0 0; font-size:var(--fs-3); font-weight:500; color:var(--sx-ink); }
 .sxp-list { list-style:none; margin:12px 0 0; padding:0; display:flex; flex-direction:column; gap:6px; }
 .sxp-list li { display:flex; align-items:flex-start; gap:8px; font-size:var(--fs-2); line-height:1.4;
-  color:var(--sx-mute); transition:color .35s; }
-.sxp-card:hover .sxp-list li { color:rgba(255,255,255,.82); }
-.sxp-dot { flex-shrink:0; width:6px; height:6px; margin-top:5px; border-radius:50%; background:var(--sx-accent); transition:background .35s; }
-.sxp-card:hover .sxp-dot { background:var(--sx-lime-ink); }
-
-/* Стрелка стояла у правого края карточки (justify-content:space-between);
-   по просьбе заказчика 13.09.2026 перенесена вплотную к слову «Подробнее». */
-.sxp-more {position:relative; z-index:1; display:flex; align-items:center; justify-content:flex-start;
-  gap:10px; margin-top:auto; padding-top:16px;
-  font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--sx-ink); transition:color .35s, border-top-color .35s;}
-.sxp-card:hover .sxp-more {border-top-color:rgba(255,255,255,.24); color:var(--sx-lime-ink)}
+  color:var(--sx-mute); }
+.sxp-dot { flex-shrink:0; width:6px; height:6px; margin-top:5px; border-radius:50%; background:var(--sx-accent); }
 
 @media (prefers-reduced-motion: reduce){
-  .sxp-card, .sxp-arrow, .sxp-expand, .sxp-expand-in { transition:none; }
+  .sxp-card, .sxp-expand, .sxp-expand-in { transition:none; }
 }
     `;
     document.head.appendChild(s);
@@ -2325,7 +2303,6 @@ function SoiExpertise({ lang, go }) {
 
         <div className="sxp-grid">
           {EXPERTISE_ITEMS.map((it, i) => {
-            const no = String(i + 1).padStart(2, "0");
             return (
               /* Ссылка, а не div с role="button": карточка ведёт на страницу
                  услуги, и подменять её кнопкой значит терять средний клик,
@@ -2356,11 +2333,6 @@ function SoiExpertise({ lang, go }) {
                       </ul>
                     </div>
                   </div>
-                </div>
-                <div className="sxp-more">
-                  {_lv(lang, "Подробнее", "Batafsil", "Read more")}
-                  <span className="sxp-arrow" aria-hidden>↗</span>
-                  <span className="sxp-bignum" aria-hidden>{no}</span>
                 </div>
               </a>
             );
