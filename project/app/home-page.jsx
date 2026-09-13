@@ -252,7 +252,9 @@ const HERO_SLIDES = [
   {
     id: "slide-equip",
     theme: "dark",
-    video: "assets/hero-equipment.mp4",
+    /* Оба видео сведены в первый слайд — играют друг за другом по кругу
+       (решение заказчика 13.09.2026); со второго слайда видео убрано. */
+    videos: ["assets/hero-equipment.mp4", "assets/hero-service.mp4"],
     bg: "linear-gradient(120deg, #050a14 0%, var(--navy-800) 55%, var(--blue-600) 100%)",
     badge: { ru: "ИНДУСТРИЯ ЗДОРОВЬЯ", uz: "SOGʻLIQ INDUSTRIYASI", en: "HEALTH INDUSTRY" },
     title: { ru: "Медицинские изделия и оснащение", uz: "Tibbiy buyumlar va jihozlash", en: "Medical devices and equipping" },
@@ -265,7 +267,6 @@ const HERO_SLIDES = [
   {
     id: "slide-service",
     theme: "dark",
-    video: "assets/hero-service.mp4",
     bg: "linear-gradient(120deg, #040c18 0%, var(--blue-700) 70%, var(--blue-500) 100%)",
     badge: { ru: "Сервис", uz: "Servis", en: "Service" },
     title: { ru: "Сервис и обучение персонала", uz: "Servis va xodimlarni o'qitish", en: "Maintenance and staff training" },
@@ -285,6 +286,11 @@ function Hero({ t, lang, go }) {
   const [paused, setPaused] = useState(false);
   const parallaxRef = useRef(null);
   const reduced = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // Первый слайд несёт два видео (assets/hero-equipment.mp4 +
+  // assets/hero-service.mp4) и проигрывает их по очереди по кругу; индекс
+  // сбрасывается при уходе со слайда, чтобы возврат всегда начинал с первого.
+  const [heroVidIdx, setHeroVidIdx] = useState(0);
+  useEffect(() => { if (slideIdx !== 0) setHeroVidIdx(0); }, [slideIdx]);
 
   // autoplay
   useEffect(() => {
@@ -452,12 +458,14 @@ function Hero({ t, lang, go }) {
             >
               <div className="soi-chero-bg">
                 <div className="soi-chero-bg-inner" data-hero-bg>
-                  {s.video ? (
+                  {s.videos ? (
                     <video
+                      key={s.videos[heroVidIdx % s.videos.length]}
                       className="soi-chero-vid"
-                      src={window.__asset(s.video)}
-                      autoPlay muted loop playsInline
+                      src={window.__asset(s.videos[heroVidIdx % s.videos.length])}
+                      autoPlay muted playsInline
                       preload={i === 0 ? "auto" : "none"}
+                      onEnded={() => setHeroVidIdx((v) => v + 1)}
                     />
                   ) : (
                     <div className="soi-chero-fill" style={{ background: s.bg }} />
