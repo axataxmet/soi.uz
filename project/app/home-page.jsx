@@ -2230,19 +2230,20 @@ function SoiExpertise({ lang, go }) {
 .sxp-card:hover { border-color:transparent; background:var(--sx-lime); color:var(--sx-lime-ink); }
 .sxp-card:focus-visible { outline:2px solid var(--sx-ink); outline-offset:3px; }
 
-.sxp-bignum { position:absolute; right:12px; bottom:-48px; font-size:9rem; font-weight:800; line-height:1;
-  user-select:none; pointer-events:none; color:rgba(16,21,18,.04); transition:color .35s; }
-.sxp-card:hover .sxp-bignum { color:rgba(255,255,255,.14); }
+/* Номер и стрелка раньше стояли сверху карточки (.sxp-top); по просьбе
+   заказчика 13.09.2026 верх карточки очищен от них, а стрелка перенесена
+   вниз, к строке «Подробнее» (.sxp-more). Фоновой номер (.sxp-bignum)
+   остался единственной нумерацией — сделан заметнее и поднят повыше. */
+.sxp-bignum { position:absolute; right:12px; bottom:-30px; font-size:9rem; font-weight:800; line-height:1;
+  user-select:none; pointer-events:none; color:rgba(16,21,18,.06); transition:color .35s; }
+.sxp-card:hover .sxp-bignum { color:rgba(255,255,255,.28); }
 
-.sxp-top { position:relative; z-index:1; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.sxp-no { font-size:var(--fs-2); font-weight:700; color:var(--sx-mute); transition:color .35s; }
-.sxp-card:hover .sxp-no { color:rgba(255,255,255,.72); }
 .sxp-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
   border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
   transition:transform .3s, background .3s, border-color .3s, color .3s; }
 .sxp-card:hover .sxp-arrow { transform:rotate(45deg); background:transparent; border-color:rgba(255,255,255,.35); color:var(--sx-lime-ink); }
 
-.sxp-t { position:relative; z-index:1; margin:40px 0 0; max-width:16rem; font-size:var(--fs-7); font-weight:700;
+.sxp-t { position:relative; z-index:1; margin:0; max-width:16rem; font-size:var(--fs-7); font-weight:700;
   line-height:1.2; letter-spacing:-.02em; }
 .sxp-d { position:relative; z-index:1; margin:12px 0 0; max-width:20rem; font-size:var(--fs-4); line-height:1.6;
   color:var(--sx-mute); transition:color .35s; }
@@ -2271,11 +2272,9 @@ function SoiExpertise({ lang, go }) {
   gap:8px; margin-top:auto; padding-top:16px;
   font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--sx-ink); transition:color .35s, border-top-color .35s;}
 .sxp-card:hover .sxp-more {border-top-color:rgba(255,255,255,.24); color:var(--sx-lime-ink)}
-.sxp-more-arr { font-size:var(--fs-5); transition:transform .3s; }
-.sxp-card:hover .sxp-more-arr { transform:translateX(4px); }
 
 @media (prefers-reduced-motion: reduce){
-  .sxp-card, .sxp-arrow, .sxp-expand, .sxp-expand-in, .sxp-more-arr { transition:none; }
+  .sxp-card, .sxp-arrow, .sxp-expand, .sxp-expand-in { transition:none; }
 }
     `;
     document.head.appendChild(s);
@@ -2318,10 +2317,6 @@ function SoiExpertise({ lang, go }) {
                 }}
               >
                 <span className="sxp-bignum" aria-hidden>{no}</span>
-                <div className="sxp-top">
-                  <span className="sxp-no">{no}</span>
-                  <span className="sxp-arrow" aria-hidden>↗</span>
-                </div>
                 <h3 className="sxp-t">{L(it.t)}</h3>
                 <p className="sxp-d">{L(it.d)}</p>
                 <div className="sxp-expand">
@@ -2339,7 +2334,7 @@ function SoiExpertise({ lang, go }) {
                 </div>
                 <div className="sxp-more">
                   {_lv(lang, "Подробнее", "Batafsil", "Read more")}
-                  <span className="sxp-more-arr" aria-hidden>→</span>
+                  <span className="sxp-arrow" aria-hidden>↗</span>
                 </div>
               </a>
             );
