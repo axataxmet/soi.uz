@@ -614,7 +614,9 @@ function ServiceSupportPage({ t, lang, go, goCat }) {
             <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="pin" size={18} /></div><div><h4>{lv("Адрес", "Manzil", "Address")}</h4><div className="v">{contacts.address || lv("100069, Ташкент, Узбекистан", "100069, Toshkent, O‘zbekiston", "100069, Tashkent, Uzbekistan")}</div></div></div>
             <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="clock" size={18} /></div><div><h4>{lv("Режим работы", "Ish rejimi", "Working hours")}</h4><div className="v">{lv("Пн–Пт, 9:00–18:00", "Du–Ju, 9:00–18:00", "Mon–Fri, 9:00–18:00")}</div></div></div>
             {contacts.telegram && <div className="ss-contact-i"><div className="ss-ic"><CoIcon name="globe" size={18} /></div><div><h4>Telegram</h4><a href={contacts.telegram} target="_blank" rel="noopener">{contacts.telegram.replace(/^https?:\/\//, "")}</a></div></div>}
-            <div className="ss-contact-i urgent"><div className="ss-ic"><CoIcon name="phone" size={18} /></div><div><h4>{lv("Экстренная линия", "Shoshilinch liniya", "Emergency line")}</h4><a href={"tel:" + String(contacts.phone || "").replace(/[^+\d]/g, "")}>{contacts.phone}</a></div></div>
+            {/* Отдельный номер экстренной линии — не общий contacts.phone,
+                как было раньше (по прямому запросу заказчика 12.09). */}
+            <div className="ss-contact-i urgent"><div className="ss-ic"><CoIcon name="phone" size={18} /></div><div><h4>{lv("Экстренная линия", "Shoshilinch liniya", "Emergency line")}</h4><a href="tel:+998772230001">+998 (77) 223-00-01</a></div></div>
           </div>
         </div>
       </section>
