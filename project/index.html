@@ -3967,7 +3967,10 @@ html{scroll-padding-top:72px}
     display:flex;flex-direction:column;gap:2px;
     padding:4px 0 12px;
   }
-  .z-corp .foot .fcol-acc{border-bottom:1px solid rgba(255,255,255,.10)}
+  /* Граница — сверху, не снизу: тогда линия отделяет каждый блок (контакты,
+     «О компании», «Каталог», «Следите за нами») от предыдущего одинаково,
+     а не только некоторые друг от друга. */
+  .z-corp .foot .fcol-acc{border-top:1px solid rgba(255,255,255,.10)}
   .z-corp .foot .fcol-acc > summary{
     display:flex;align-items:center;justify-content:space-between;gap:12px;
     min-height:40px;cursor:default;list-style:none;
@@ -3990,8 +3993,8 @@ html{scroll-padding-top:72px}
   .z-corp .foot-socials{gap:12px}
 
   .z-corp .foot .fcols{gap:0}
-  .z-corp .foot .fcol-brand,
-  .z-corp .foot .fcol-follow{padding-bottom:20px}
+  .z-corp .foot .fcol-brand{padding-bottom:20px}
+  .z-corp .foot .fcol-follow{border-top:1px solid rgba(255,255,255,.10);padding:14px 0 20px}
 }
 
 /* На широком экране группы раскрыты атрибутом open (его ставит CoFooter), а
