@@ -1035,9 +1035,12 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 .sxc-card.ov .sxc-no { position:absolute; z-index:1; top:16px; left:20px; font-size:2.4rem; font-weight:800;
   color:rgba(255,255,255,.5); transition:color .35s; }
 .sxc-card.ov:hover .sxc-no, .sxc-card.ov:focus-visible .sxc-no { color:#fff; }
+/* Стрелка была прижата к правому краю карточки (justify-content:space-between,
+   унаследовано от .sxc-foot) — по образцу «Экспертиза» перенесена вплотную
+   к заголовку. */
 .sxc-card.ov .sxc-foot { position:absolute; z-index:1; inset:auto 16px 18px 20px; padding:0;
-  align-items:flex-end; }
-.sxc-card.ov .sxc-t { margin:0; color:#fff; }
+  align-items:flex-start; justify-content:flex-start; flex-wrap:wrap; row-gap:12px; }
+.sxc-card.ov .sxc-t { flex:1 1 100%; margin:0; color:#fff; }
 .sxc-card.ov .sxc-arr { border:none; background:rgba(255,255,255,.96); color:var(--sx-ink); }
 .sxc-card.ov:hover .sxc-arr,
 .sxc-card.ov:focus-visible .sxc-arr { background:var(--sx-accent); color:#fff; }
