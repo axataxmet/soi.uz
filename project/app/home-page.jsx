@@ -2465,21 +2465,23 @@ function SoiCatalogCards({ lang, go }) {
    в «Экспертиза»: тот же размер номера и переход от приглушённого к
    белоснежному, та же прозрачная стрелка с разворотом на 45° вместо заливки
    — по просьбе заказчика 13.09.2026 (стиль нумерации и стрелки отличался). */
-.sxc-card.ov .sxc-bignum { position:absolute; z-index:0; right:12px; bottom:-30px; font-size:9rem;
-  font-weight:800; line-height:1; color:rgba(255,255,255,.14); user-select:none; pointer-events:none;
-  transition:color .35s; }
-.sxc-card.ov:hover .sxc-bignum, .sxc-card.ov:focus-visible .sxc-bignum { color:rgba(255,255,255,.92); }
 /* Заголовок стоял внизу вместе с «Подробнее» — у «Экспертиза» заголовок
    наверху карточки, а «Подробнее»+стрелка отдельно внизу. Область .sxc-foot
    растянута на всю карточку с теми же отступами, что и padding:28px у
-   .sxp-card, и разведена по вертикали через justify-content:space-between —
-   номер и «Подробнее↗» встают ровно там же, где у «Экспертиза» (решение
-   заказчика 13.09.2026). */
+   .sxp-card, и разведена по вертикали через justify-content:space-between. */
 .sxc-card.ov .sxc-foot { position:absolute; z-index:1; inset:28px; padding:0;
   display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; }
-.sxc-card.ov .sxc-t { margin:0; max-width:12rem; font-size:var(--fs-7); line-height:1.2; color:#fff; }
+/* Заголовок увеличен (решение заказчика 13.09.2026). */
+.sxc-card.ov .sxc-t { margin:0; max-width:12rem; font-size:var(--fs-8); line-height:1.15; color:#fff; }
+/* Номер убран из декоративного фонового слоя за карточкой (.sxp-bignum-стиль)
+   и поставлен в обычный поток сразу под «Подробнее↗» — по прямому запросу
+   заказчика 13.09.2026. */
+.sxc-card.ov .sxc-bottom { display:flex; flex-direction:column; align-items:flex-start; gap:10px; }
 .sxc-card.ov .sxc-more { display:flex; align-items:center; gap:10px; font-size:var(--fs-1); font-weight:700;
   text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.86); }
+.sxc-card.ov .sxc-bignum { font-size:3rem; font-weight:800; line-height:1; color:rgba(255,255,255,.4);
+  user-select:none; transition:color .35s; }
+.sxc-card.ov:hover .sxc-bignum, .sxc-card.ov:focus-visible .sxc-bignum { color:#fff; }
 .sxc-card.ov .sxc-arr { border:1px solid rgba(255,255,255,.4); background:transparent; color:#fff; font-size:var(--fs-6); }
 .sxc-card.ov:hover .sxc-arr,
 .sxc-card.ov:focus-visible .sxc-arr { transform:rotate(45deg); background:transparent; border-color:rgba(255,255,255,.7); color:#fff; }
@@ -2541,15 +2543,16 @@ function SoiCatalogCards({ lang, go }) {
               <div className="sxc-media">
                 <img src={window.__asset("assets/catalog/" + card.slug + ".jpg")} alt="" loading="lazy" />
               </div>
-              {/* Номер, заголовок и «Подробнее» со стрелкой — всё внизу
-                  карточки, по образцу «Экспертиза» (.sxp-bignum / .sxp-t /
-                  .sxp-more), вместо прежнего номера в верхнем углу. */}
-              <span className="sxc-bignum" aria-hidden>{String(i + 1).padStart(2, "0")}</span>
+              {/* Заголовок наверху, «Подробнее» со стрелкой и номер — внизу,
+                  номер отдельной строкой под «Подробнее↗». */}
               <div className="sxc-foot">
                 <h3 className="sxc-t">{_lv(lang, card.t.ru, card.t.uz, card.t.en)}</h3>
-                <div className="sxc-more">
-                  {_lv(lang, "Подробнее", "Batafsil", "Read more")}
-                  <span className="sxc-arr" aria-hidden>↗</span>
+                <div className="sxc-bottom">
+                  <div className="sxc-more">
+                    {_lv(lang, "Подробнее", "Batafsil", "Read more")}
+                    <span className="sxc-arr" aria-hidden>↗</span>
+                  </div>
+                  <span className="sxc-bignum" aria-hidden>{String(i + 1).padStart(2, "0")}</span>
                 </div>
               </div>
             </a>
