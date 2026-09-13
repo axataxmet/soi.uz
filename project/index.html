@@ -1773,6 +1773,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .z-corp .foot-disclaimer{margin-top:20px;padding-top:0}
 .z-corp .foot-bot{margin-top:20px;padding-top:0;padding-bottom:20px}
 
+/* На телефоне последние строки дисклеймера утыкались в плавающие кнопки
+   чата и «наверх» (position:fixed, z-index:66) — текст читался наполовину
+   закрытым круглой кнопкой. Запас снизу по высоте стопки кнопок
+   (28 отступ + 48 кнопка + 10 зазор + 48 кнопка ≈ 134px). */
+@media(max-width:620px){
+  .z-corp .foot-disclaimer{padding-bottom:150px}
+}
+
 /* Колонки навигации и контактов набраны на ступень мельче бренда: заголовки
    --fs-1 (11 px), ссылки и строки контактов --fs-3 (13 px). Колонка бренда
    свой кегль сохраняет — она несёт название компании и телефон. */
