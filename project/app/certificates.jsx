@@ -204,7 +204,6 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
   goCat = goCat || ((sub, param, q) => go("catalog"));
   const counts = useCatCounts();
   const [drawer, setDrawer] = useState(false);
-  const [qqOpen, setQqOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
   // Body scroll lock while the drawer is open — otherwise the page behind it
@@ -435,6 +434,10 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
       <aside className={"drawer" + (drawer ? " on" : "")}>
         <div className="drawer-head">
           <Langs place="drawer" />
+          {/* Переключатель темы переехал сюда же — раньше стоял в баре
+              вместе с языком, сравнением, избранным и корзиной и на мобильном
+              загромождал шапку (решение заказчика 13.09.2026). */}
+          <ThemeBtn />
           <button className="burger" onClick={() => setDrawer(false)} aria-label="Close">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6 6 18" /></svg>
           </button>
@@ -443,10 +446,28 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
           <CoIcon name="search" size={18} />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={searchPh} aria-label="Search" />
         </form>
-        <button className="btn btn-pri btn-block drawer-cta" onClick={() => { setDrawer(false); setQqOpen(true); }}>
-          <CoIcon name="phone" size={16} />
-          {lvh("Заказать консультацию", "Konsultatsiya buyurtma qilish", "Request a consultation")}
-        </button>
+        {/* Сравнение / избранное / корзина — те же три действия, что были
+            круглыми иконками в баре шапки; переехали сюда по тому же решению.
+            «Заказать консультацию» отсюда убрана по прямому запросу заказчика
+            13.09.2026 — саму заявку оставить по-прежнему можно через
+            плавающий виджет связи. */}
+        <div className="drawer-actions">
+          <button className="drawer-action" onClick={() => { goCat("compare"); setDrawer(false); }}>
+            <CoIcon name="compare" size={20} />
+            <span>{lang === "uz" ? "Taqqoslash" : lang === "en" ? "Compare" : "Сравнение"}</span>
+            {counts.cmp > 0 && <span className="co-badge">{counts.cmp}</span>}
+          </button>
+          <button className="drawer-action" onClick={() => { goCat("wishlist"); setDrawer(false); }}>
+            <CoIcon name="heart" size={20} />
+            <span>{lang === "uz" ? "Saralangan" : lang === "en" ? "Wishlist" : "Избранное"}</span>
+            {counts.wish > 0 && <span className="co-badge">{counts.wish}</span>}
+          </button>
+          <button className="drawer-action" onClick={() => { goCat("cart"); setDrawer(false); }}>
+            <CoIcon name="cart" size={20} />
+            <span>{lang === "uz" ? "Savat / KP" : lang === "en" ? "Cart / RFQ" : "Корзина / Запрос КП"}</span>
+            {counts.cart > 0 && <span className="co-badge">{counts.cart}</span>}
+          </button>
+        </div>
         {corpNav.flatMap((item) =>
         item.children
           ? [{ _heading: true, label: item.label, key: "h-" + item.id }].concat(item.children.map((c, i) => ({ ...c, key: item.id + "-" + i })))
@@ -457,7 +478,6 @@ function CoHeader({ t, lang, setLang, go, goCat, route, theme, toggleTheme }) {
           : <a key={it.key} className={route.view === it.view ? "on" : ""} onClick={() => { it.catSub ? goCat(it.catSub) : go(it.view, navParams(it)); setDrawer(false); }} style={it.primary ? { color: "var(--blue-600, var(--blue-600))", fontWeight: 600 } : undefined}>{it.label}</a>
         )}
       </aside>
-      {qqOpen && <QuickQuoteModal lang={lang} onClose={() => setQqOpen(false)} />}
     </>);
 
 }

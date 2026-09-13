@@ -679,6 +679,14 @@ img{max-width:100%;display:block}
 .z-corp .drawer a{padding:13px 14px;border-radius:var(--r-sm);font-size:var(--fs-5);font-weight:600;color:var(--slate-700)}
 .z-corp .drawer a:hover, .z-corp .drawer a.on{background:var(--bg);color:var(--blue-600)}
 .z-corp .drawer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.z-corp .drawer-head .theme-btn{width:44px;height:44px;border-radius:var(--r-sm);border:1px solid var(--line-soft);background:var(--surface);color:var(--slate-700);font-size:17px;flex-shrink:0}
+/* Сравнение / избранное / корзина внутри выезжающего меню — те же три
+   действия, что раньше были круглыми иконками в баре шапки (решение
+   заказчика 13.09.2026, см. Actions в certificates.jsx). */
+.z-corp .drawer-actions{display:flex;flex-direction:column;gap:2px;margin:4px 0 14px;padding-bottom:14px;border-bottom:1px solid var(--line-soft)}
+.z-corp .drawer-action{position:relative;display:flex;align-items:center;gap:12px;min-height:48px;padding:10px 14px;border-radius:var(--r-sm);font-size:var(--fs-5);font-weight:600;color:var(--slate-700);background:none;border:none;width:100%;text-align:left;cursor:pointer;font-family:var(--font)}
+.z-corp .drawer-action:hover{background:var(--bg);color:var(--blue-600)}
+.z-corp .drawer-action .co-badge{position:static;margin-left:auto}
 
 
 /* Шапка раздела без заливки: фон страниц — только белый. От прежнего блока
@@ -3117,8 +3125,13 @@ body:has(.cmpbar.show){--btt-bottom:96px}
 .cr-cur{font-size:var(--fs-6);font-weight:600;color:var(--slate-500)}
 .cr-range{font-size:var(--fs-3);color:var(--slate-500);margin-top:8px}
 @media(max-width:860px){.calc-layout{grid-template-columns:1fr}.mob-hamburger{display:flex}.mob-bottom-nav{display:grid;grid-template-columns:repeat(5,1fr)}.head .search{max-width:200px}.app-main{padding-bottom:72px}.hero-form-row{grid-template-columns:1fr}.hero-form{max-width:100%}.nav{display:none}.ubar .ubar-links,.ubar .ubar-info.delivery{display:none}
-  /* bottom nav already has a call button — hide the floating FAB to avoid a duplicate that overlaps the cart icon */
-  .fab-wrap{display:none}}
+  /* .mob-bottom-nav only ever renders in app/compare.jsx — scoped with :has()
+     so this doesn't blanket-hide the chat FAB on every other page too. It
+     used to be a bare `.fab-wrap{display:none}`, which nuked the widget on
+     every corporate page below 860px (home, about, services…) even though
+     none of them has a bottom nav to duplicate it — the chat button was
+     simply missing on mobile. Решение заказчика 13.09.2026. */
+  body:has(.mob-bottom-nav) .fab-wrap{display:none}}
 
 /* ===== multi-cat: also-in tags ===== */
 .pdp-also-in{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:6px 0 10px;font-size:var(--fs-3);color:var(--slate-500)}
@@ -3687,14 +3700,17 @@ body:has(.cmpbar.show){--btt-bottom:96px}
   .z-corp .co-nav.scrolled .co-nav-wrap{height:60px}
   .z-corp .co-nav .co-nav-links{display:none}
   .z-corp .co-nav .nav-cta{display:none}
-  .z-corp .co-nav .nav-utils{margin-left:auto}
   .z-corp .co-nav .co-brand-mark{width:48px;height:48px}
   .z-corp .co-nav.scrolled .co-brand,.z-corp .co-nav.scrolled .co-brand-mark{width:44px;height:44px}
+  /* Язык/тема/сравнение/избранное/корзина убраны из мобильного бара целиком
+     (было — сначала сжимались до одной корзины, но бар всё равно оставался
+     переполнен рядом с бургером) — по прямому запросу заказчика 13.09.2026:
+     всё это переехало внутрь выезжающего меню (.drawer-utils ниже), в баре
+     остаются только лого и бургер, прижатый к правому краю. */
+  .z-corp .co-nav .nav-utils{display:none!important}
   .z-corp .co-nav .nav-sep{display:none}
-  .z-corp .co-nav .co-actions{display:flex!important}
-  .z-corp .co-nav .co-act:not(.co-act-cart){display:none!important}
-  .z-corp .co-nav .co-act.co-act-cart{display:flex!important}
-  .z-corp .co-nav .burger{display:flex!important}
+  .z-corp .co-nav .co-actions{display:none!important}
+  .z-corp .co-nav .burger{display:flex!important;margin-left:auto}
   .embed .z-catalog .nav{display:block!important}
   .embed .z-catalog .nav .wrap{height:54px;padding-left:12px;padding-right:12px}
   .embed .z-catalog .cat-btn{height:40px;padding:0 13px;font-size:var(--fs-3)}
@@ -3712,21 +3728,20 @@ body:has(.cmpbar.show){--btt-bottom:96px}
   .z-corp .co-nav .co-cat-search{order:2;justify-self:start}
   .z-corp .co-nav .co-mobile-actions{order:3;justify-self:end;margin-left:0;display:flex;align-items:center;gap:6px}
   .z-corp .co-nav .nav-utils{display:none}
-  /* On mobile the header collapses to logo/search/cart/burger — the consult
+  /* On mobile the header collapses to logo/search/burger — the consult
      pill has no slot in that grid and would sit on top of the logo. It moves
      into the drawer (.drawer-cta) instead, so it stays reachable. */
   .z-corp .co-nav .nav-cta{display:none}
-  .z-corp .co-nav .co-actions{order:4;margin-left:auto}
-  .z-corp .co-nav .burger{order:5}
+  .z-corp .co-nav .co-actions{display:none!important}
+  .z-corp .co-nav .burger{order:5;margin-left:auto}
   .z-corp .co-nav .lang-dd-btn{min-width:38px;height:38px;padding:0 7px;gap:0;font-size:var(--fs-3)}
   .z-corp .co-nav .lang-dd-btn svg,.z-corp .co-nav .lang-dd-chevron{display:none}
   .z-corp .co-nav .theme-btn{display:none}
-  /* На каталоге кнопки корзины/меню уже даёт .co-mobile-actions — обычные
-     .co-actions и .burger там дублируют их и скрываются. На остальных
-     страницах .co-mobile-actions не рендерится вовсе, поэтому burger и
-     корзина — единственный способ открыть меню и остаются видимыми. */
-  .z-corp .co-nav-wrap:has(.co-mobile-actions) .co-actions{position:static;right:auto;top:auto;display:none!important;gap:0;transform:none;z-index:955}
-  .z-corp .co-nav .co-act.co-act-cart{display:flex!important}
+  /* Корзина убрана и из каталожного мобильного тулбара (co-mobile-actions) —
+     по прямому запросу заказчика 13.09.2026 её больше нет в баре ни на одной
+     странице, она переехала в выезжающее меню; в тулбаре остаётся только
+     кнопка «Меню». */
+  .z-corp .co-mobile-cart{display:none!important}
   .z-corp .co-nav-wrap:has(.co-mobile-actions) .burger{position:static;right:auto;top:auto;display:none!important;transform:none;z-index:955}
   .z-corp .co-nav .co-actions{position:static;right:auto;top:auto;gap:0;transform:none;z-index:955}
   .z-corp .co-nav .burger{position:static;right:auto;top:auto;transform:none;z-index:955}
@@ -4046,7 +4061,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789210367"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
-<script src="dist/app/certificates.js?v=1788878786"></script>
+<script src="dist/app/certificates.js?v=1789303800"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
 <script src="dist/app/inner-pages.js?v=1789250101"></script>
 <script src="dist/app/testimonials.js?v=1789250101"></script>
