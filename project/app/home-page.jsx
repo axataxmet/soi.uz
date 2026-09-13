@@ -1420,8 +1420,12 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    Флексовые flex/max-width/min-width с карточки убраны: в grid они не работали
    как задумано, а max-width:33.333% зажимал карточку внутри и без того более
    узкой колонки, оставляя пустоту справа. */
-.sx-case { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; transition:transform .3s cubic-bezier(.16,1,.3,1), border-color .3s; display:flex; flex-direction:column; }
-.sx-case:hover { transform:translateY(-5px); border-color:var(--sx-accent); }
+/* Своя рамка-подсветка (border-color:var(--sx-accent)) и лишний translateY
+   убраны — карточка уже несёт класс .sxc-card с тенью+подъёмом на hover
+   (решение заказчика 13.09.2026: «стиль Экспертиза — на остальные
+   карточки»); заголовок вместо этого синеет, как везде на главной. */
+.sx-case { border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); overflow:hidden; cursor:pointer; display:flex; flex-direction:column; }
+.sx-case:hover h3 { color:var(--blue-600); }
 /* Два класса в селекторе — чтобы победить .sxc-media (3/4), который лежит
    ниже по файлу и достался обложке заодно: этот же элемент носит оба класса,
    и при равной специфичности выигрывал более поздний. Портретная пропорция
@@ -1446,7 +1450,7 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    «в обрыв», без многоточия. */
 .sx-case-tag { display:block; width:fit-content; align-self:flex-start; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   font-size:var(--fs-1); font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--sx-ink-soft); background:var(--sx-bg-soft); padding:6px 12px; border-radius:var(--r-pill); margin-bottom:13px; }
-.sx-case h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); line-height:1.25; letter-spacing:-.01em; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.sx-case h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); line-height:1.25; letter-spacing:-.01em; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; transition:color .25s ease; }
 .sx-case p { font-size:var(--fs-4); color:var(--sx-mute); line-height:1.55; margin:8px 0 0; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
 /* Мета отбита волосяной линией и держится на иконках вместо подписей
    «Год:»/«Регион:» — булавка и календарь читаются быстрее слова. */
