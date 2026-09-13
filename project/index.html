@@ -3958,26 +3958,19 @@ html{scroll-padding-top:72px}
 /* --- 3. Подвал ----------------------------------------------------------- */
 
 @media(max-width:620px){
-  /* Подвал вытягивался на 1199px: четыре блока ссылок, поставленные в одну
-     колонку, приходилось пролистывать целиком, чтобы дойти до соцсетей и
-     копирайта. Группы ссылок свёрнуты в аккордеон на <details> — без
-     скриптов, с клавиатурой и скринридером «из коробки». */
+  /* Сворачивание убрано (решение заказчика): группы ссылок в подвале
+     всегда развёрнуты, включая мобильную версию — без стрелки и клика. */
   .z-corp .foot .fcol-acc > ul{
     display:flex;flex-direction:column;gap:2px;
     padding:4px 0 12px;
   }
-  .z-corp .foot .fcol-acc:not([open]) > ul{display:none}
   .z-corp .foot .fcol-acc{border-bottom:1px solid rgba(255,255,255,.10)}
   .z-corp .foot .fcol-acc > summary{
     display:flex;align-items:center;justify-content:space-between;gap:12px;
-    min-height:52px;cursor:pointer;list-style:none;
+    min-height:40px;cursor:default;list-style:none;
   }
   .z-corp .foot .fcol-acc > summary::-webkit-details-marker{display:none}
   .z-corp .foot .fcol-acc > summary h5{margin:0}
-  .z-corp .foot .fcol-acc-chev{
-    flex:none;transition:transform .2s ease;color:var(--slate-400);
-  }
-  .z-corp .foot .fcol-acc[open] .fcol-acc-chev{transform:rotate(180deg)}
 
   /* Ссылки подвала были 16px высотой — строка текста без всякого запаса.
      44px делает их такой же целью, как кнопки в шапке. */
@@ -3987,7 +3980,7 @@ html{scroll-padding-top:72px}
   }
   /* Телефоны идут тремя строками внутри одного <span>: flex разорвал бы их
      раскладку, поэтому здесь высота набирается вертикальными полями. */
-  .z-corp .foot .foot-contact a{display:block;padding:7px 0;min-height:0}
+  .z-corp .foot .foot-contact a{display:block;padding:2px 0;min-height:0}
 
   /* Иконки соцсетей 34×34 — ниже минимума и заметно мельче всего вокруг. */
   .z-corp .foot-soc{width:44px;height:44px}
@@ -4084,7 +4077,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/app-root.js?v=1789304300"></script>
 
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
-<script src="dist/app/certificates.js?v=1789304100"></script>
+<script src="dist/app/certificates.js?v=1789304400"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
 <script src="dist/app/inner-pages.js?v=1789250101"></script>
 <script src="dist/app/testimonials.js?v=1789250101"></script>
