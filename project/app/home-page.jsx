@@ -1308,19 +1308,22 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    заказчика 13.09.2026: цвет заливает всю карточку только при наведении
    (а не постоянная рамка + сдвиг по Y), номер белеет на hover, стрелка —
    прозрачный круг с разворотом на 45°, без заливки. */
-.sx-dir { position:relative; overflow:hidden; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:28px; transition:background .35s, border-color .35s, color .35s; }
+.sx-dir { position:relative; overflow:hidden; display:flex; flex-direction:column; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:28px; transition:background .35s, border-color .35s, color .35s; }
 .sx-dir:hover { border-color:transparent; background:var(--sx-lime); color:var(--sx-lime-ink); }
-.sx-dir-top { position:relative; z-index:1; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:22px; }
+/* Стрелка и номер стояли сверху рядом с иконкой; по просьбе заказчика
+   13.09.2026 перенесены вниз, в строку «Подробнее» — на одном уровне, как
+   в «Экспертиза» и «Электронный каталог». */
+.sx-dir-more { position:relative; z-index:1; display:flex; align-items:center; gap:10px; margin-top:auto; padding-top:20px;
+  font-size:var(--fs-1); font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:var(--sx-ink);
+  transition:color .35s; }
+.sx-dir:hover .sx-dir-more { color:var(--sx-lime-ink); }
 .sx-dir-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
   border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
   transition:transform .3s, background .3s, border-color .3s, color .3s; }
 .sx-dir:hover .sx-dir-arrow { transform:rotate(45deg); background:transparent; border-color:rgba(255,255,255,.35); color:var(--sx-lime-ink); }
-/* Размер уменьшен и синхронизирован с остальными карточками главной
-   («Экспертиза», «Электронный каталог») — было 9rem, разнобой по блокам
-   (решение заказчика 13.09.2026). */
-.sx-dir-bignum { position:absolute; z-index:0; right:14px; bottom:-4px; font-size:4rem; font-weight:800; line-height:1;
-  user-select:none; pointer-events:none; color:rgba(16,21,18,.06); transition:color .35s; }
-.sx-dir:hover .sx-dir-bignum { color:rgba(255,255,255,.92); }
+.sx-dir-bignum { margin-left:auto; font-size:2rem; font-weight:800; line-height:1; color:rgba(16,21,18,.3);
+  user-select:none; transition:color .35s; }
+.sx-dir:hover .sx-dir-bignum { color:var(--sx-lime-ink); }
 /* Заголовок — единственная ссылка карточки; её зона нажатия растянута на всю
    карточку. cursor:pointer держится на этом слое, а не на самом блоке: иначе
    палец-курсор появлялся бы и там, где нажимать нечего. */
@@ -1337,7 +1340,7 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    карточки (уже синяя) переходит в полупрозрачную белую. Контейнер вырос с
    50 до 72px следом за глифом (26 → 39px), чтобы вокруг знака остался тот же
    воздух, а не впритык к краям. */
-.sx-dir-ic { width:72px; height:72px; border-radius:var(--r); display:flex; align-items:center; justify-content:center;
+.sx-dir-ic { width:72px; height:72px; margin-bottom:22px; border-radius:var(--r); display:flex; align-items:center; justify-content:center;
   background:rgba(14,74,198,.10); color:var(--sx-accent); transition:background .35s, color .35s; }
 .sx-dir:hover .sx-dir-ic { background:rgba(255,255,255,.18); color:#fff; }
 .sx-dir h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.25; transition:color .35s; }
@@ -2458,13 +2461,18 @@ function SoiCatalogCards({ lang, go }) {
 .sxc-card.ov { position:relative; display:block; min-height:460px; }
 .sxc-card.ov .sxc-media { position:absolute; inset:0; aspect-ratio:auto; }
 /* Градиент — псевдоэлемент подложки, а не слой в разметке: подпись должна
-   читаться на любом снимке, что бы на нём ни было. */
+   читаться на любом снимке, что бы на нём ни было. Заголовок теперь стоит
+   наверху карточки (решение заказчика 13.09.2026 «заголовок наверх»), а
+   прежний градиент темнел только снизу — сверху, где часто светлый снимок
+   (потолок, стены), заголовок терялся. Добавлено затемнение и сверху, плюс
+   text-shadow на самом тексте как страховка — по прямому запросу заказчика
+   сделать текст читаемым. */
 .sxc-card.ov .sxc-media::after { content:""; position:absolute; inset:0;
-  background:linear-gradient(180deg, transparent 42%, rgba(4,10,20,.74) 100%);
+  background:linear-gradient(180deg, rgba(4,10,20,.62) 0%, rgba(4,10,20,.08) 28%, rgba(4,10,20,.08) 52%, rgba(4,10,20,.82) 100%);
   transition:background .35s ease; pointer-events:none; }
 .sxc-card.ov:hover .sxc-media::after,
 .sxc-card.ov:focus-visible .sxc-media::after {
-  background:linear-gradient(180deg, rgba(14,74,198,.5) 0%, rgba(6,32,84,.86) 100%); }
+  background:linear-gradient(180deg, rgba(6,32,84,.7) 0%, rgba(14,74,198,.25) 28%, rgba(14,74,198,.25) 52%, rgba(6,32,84,.88) 100%); }
 /* Номер, заголовок и «Подробнее» со стрелкой сведены в нижнюю часть карточки
    по образцу «Экспертиза» (.sxp-bignum / .sxp-t / .sxp-more) — по просьбе
    заказчика 13.09.2026: было — номер в углу снимка сверху, заголовок и
@@ -2480,7 +2488,7 @@ function SoiCatalogCards({ lang, go }) {
 .sxc-card.ov .sxc-foot { position:absolute; z-index:1; inset:28px; padding:0;
   display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; }
 /* Заголовок увеличен (решение заказчика 13.09.2026). */
-.sxc-card.ov .sxc-t { margin:0; max-width:12rem; font-size:var(--fs-8); line-height:1.15; color:#fff; }
+.sxc-card.ov .sxc-t { margin:0; max-width:12rem; font-size:var(--fs-8); line-height:1.15; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.45), 0 1px 12px rgba(0,0,0,.3); }
 /* Номер сначала стоял декоративным фоновым слоем, потом — отдельной строкой
    под «Подробнее↗»; теперь стоит с ним на одной строке, прижат к правому
    краю (решение заказчика 13.09.2026). */
@@ -2630,16 +2638,12 @@ function SoiDirections({ lang, go }) {
                  (.sx-dir-t::after). Внутренние ссылки подняты над этим слоем и
                  продолжают работать сами по себе. */
               <div className="sx-dir sx-rv" key={g.id} style={{ "--i": i }}>
-                <span className="sx-dir-bignum" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
-                <div className="sx-dir-top">
-                  {/* Цвет иконки больше не берётся из g.color: данные групп несут
-                      свои оттенки (среди них зелёный и бирюзовый), и на белой
-                      странице с одним фирменным синим это читалось разнобоем.
-                      Цвет и подложка заданы в CSS — один тон на все группы.
-                      Глиф увеличен с 26 до 39px, как просили — в полтора раза. */}
-                  <div className="sx-dir-ic"><Icon name={g.icon} size={39} /></div>
-                  <span className="sx-dir-arrow" aria-hidden="true">↗</span>
-                </div>
+                {/* Цвет иконки больше не берётся из g.color: данные групп несут
+                    свои оттенки (среди них зелёный и бирюзовый), и на белой
+                    странице с одним фирменным синим это читалось разнобоем.
+                    Цвет и подложка заданы в CSS — один тон на все группы.
+                    Глиф увеличен с 26 до 39px, как просили — в полтора раза. */}
+                <div className="sx-dir-ic"><Icon name={g.icon} size={39} /></div>
                 <h3>
                   <a
                     className="sx-dir-t"
@@ -2663,6 +2667,11 @@ function SoiDirections({ lang, go }) {
                       }}
                     >{_lv(lang, d.ru, d.uz, d.en)} <span className="sx-dir-cnt">{cnt}</span></a>
                   ))}
+                </div>
+                <div className="sx-dir-more">
+                  {_lv(lang, "Подробнее", "Batafsil", "Read more")}
+                  <span className="sx-dir-arrow" aria-hidden="true">↗</span>
+                  <span className="sx-dir-bignum" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
                 </div>
               </div>
             );
