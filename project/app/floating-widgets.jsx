@@ -127,6 +127,23 @@ function QuickQuoteModal({ lang, onClose }) {
 function FloatingWidgets({ lang, go }) {
   const [open, setOpen] = useStateW(false);
   const [pulse, setPulse] = useStateW(true);
+  /* На телефоне кнопка чата — круг у правого края, который на ходу прокрутки
+     оказывается ровно над кнопкой «Купить» или последней строкой карточки
+     (сама кнопка тоже прижата к правому краю). Приглушаем её, пока страница
+     активно скроллится, и возвращаем в полный вид через 500мс простоя —
+     тот же приём, что у BackToTop, только наоборот (не показать, а не мешать). */
+  const [scrolling, setScrolling] = useStateW(false);
+  useEffectW(() => {
+    if (open) return;
+    let t;
+    const onScroll = () => {
+      setScrolling(true);
+      clearTimeout(t);
+      t = setTimeout(() => setScrolling(false), 500);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); clearTimeout(t); };
+  }, [open]);
 
   // stop pulse after first open
   const handleOpen = () => { setOpen(!open); setPulse(false); };
@@ -141,7 +158,7 @@ function FloatingWidgets({ lang, go }) {
 
   return (
     <>
-      <div className="fab-wrap">
+      <div className={"fab-wrap" + (scrolling ? " scrolling" : "")}>
         {open && (
           <div className="fab-channels">
             {CHANNELS.map((ch,i)=>(

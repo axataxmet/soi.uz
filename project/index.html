@@ -2110,7 +2110,8 @@ body{background:var(--surface)}
 .sc-media{height:150px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;
   color:var(--slate-400);transition:color .3s ease}
 .sc-name{min-height:41px;margin:0 0 8px;font-size:var(--fs-4);font-weight:600;line-height:20px;color:var(--ink);
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .3s ease}
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;transition:color .3s ease;
+  overflow-wrap:break-word;word-break:break-word}
 .sc-cnt{margin-top:auto;font-size:var(--fs-3);line-height:20px;color:var(--slate-500)}
 
 /* Раньше при наведении менялся только цвет текста — тень (та же var(--sh),
@@ -2762,7 +2763,15 @@ body{background:var(--surface)}
 .fab-wrap{position:fixed;z-index:66;display:flex;flex-direction:column;align-items:flex-end;gap:10px;
   bottom:calc(var(--btt-bottom) + var(--btt-size) + var(--corner-gap));
   right:calc(var(--btt-right) + (var(--btt-size) - var(--fab-size)) / 2);
-  transition:bottom .3s cubic-bezier(.16,1,.3,1)}
+  transition:bottom .3s cubic-bezier(.16,1,.3,1),opacity .2s ease}
+/* На телефоне круг чата на ходу прокрутки оказывается поверх текста или
+   кнопки, прижатой к тому же правому краю (напр. «Купить» на карточке
+   товара, часы склада на «Контактах») — во время активной прокрутки гасим
+   его и отдаём клики контенту под ним; полная непрозрачность и клики
+   возвращаются через 500мс простоя (app/floating-widgets.jsx). */
+@media(max-width:620px){
+  .fab-wrap.scrolling{opacity:.4;pointer-events:none}
+}
 /* Панель сравнения поднимает всю стопку: переопределяем только --btt-bottom,
    и виджет уезжает вверх вслед за кнопкой сам. */
 body:has(.cmpbar.show){--btt-bottom:96px}
@@ -4066,7 +4075,7 @@ html{scroll-padding-top:72px}
 <script type="text/soi-deferred" data-src="dist/app/cart.js?v=1789173178"></script>
 <script type="text/soi-deferred" data-src="dist/app/brand-profile.js?v=1789242097"></script>
 <script type="text/soi-deferred" data-src="dist/app/company-info.js?v=1788878786"></script>
-<script src="dist/app/floating-widgets.js?v=1787415411"></script>
+<script src="dist/app/floating-widgets.js?v=1789304500"></script>
 <script type="text/soi-deferred" data-src="dist/app/account.js?v=1789173088"></script>
 <script src="dist/app/footer.js?v=1787415411"></script>
 <script type="text/soi-deferred" data-src="dist/app/app-entry.js?v=1787415411"></script>
