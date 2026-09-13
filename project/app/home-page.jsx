@@ -1315,7 +1315,10 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
   border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
   transition:transform .3s, background .3s, border-color .3s, color .3s; }
 .sx-dir:hover .sx-dir-arrow { transform:rotate(45deg); background:transparent; border-color:rgba(255,255,255,.35); color:var(--sx-lime-ink); }
-.sx-dir-bignum { position:absolute; z-index:0; right:12px; bottom:-30px; font-size:9rem; font-weight:800; line-height:1;
+/* Размер уменьшен и синхронизирован с остальными карточками главной
+   («Экспертиза», «Электронный каталог») — было 9rem, разнобой по блокам
+   (решение заказчика 13.09.2026). */
+.sx-dir-bignum { position:absolute; z-index:0; right:14px; bottom:-4px; font-size:4rem; font-weight:800; line-height:1;
   user-select:none; pointer-events:none; color:rgba(16,21,18,.06); transition:color .35s; }
 .sx-dir:hover .sx-dir-bignum { color:rgba(255,255,255,.92); }
 /* Заголовок — единственная ссылка карточки; её зона нажатия растянута на всю
@@ -2241,7 +2244,7 @@ function SoiExpertise({ lang, go }) {
    заказчика 13.09.2026 верх карточки очищен от них, а стрелка перенесена
    вниз, к строке «Подробнее» (.sxp-more). Фоновой номер (.sxp-bignum)
    остался единственной нумерацией — сделан заметнее и поднят повыше. */
-.sxp-bignum { position:absolute; right:12px; bottom:-30px; font-size:9rem; font-weight:800; line-height:1;
+.sxp-bignum { position:absolute; right:14px; bottom:-4px; font-size:4rem; font-weight:800; line-height:1;
   user-select:none; pointer-events:none; color:rgba(16,21,18,.06); transition:color .35s; }
 .sxp-card:hover .sxp-bignum { color:rgba(255,255,255,.92); }
 
@@ -2482,7 +2485,7 @@ function SoiCatalogCards({ lang, go }) {
 .sxc-card.ov .sxc-bottom { display:flex; flex-direction:column; align-items:flex-start; gap:10px; }
 .sxc-card.ov .sxc-more { display:flex; align-items:center; gap:10px; font-size:var(--fs-1); font-weight:700;
   text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.86); }
-.sxc-card.ov .sxc-bignum { font-size:3rem; font-weight:800; line-height:1; color:rgba(255,255,255,.4);
+.sxc-card.ov .sxc-bignum { font-size:4rem; font-weight:800; line-height:1; color:rgba(255,255,255,.4);
   user-select:none; transition:color .35s; }
 .sxc-card.ov:hover .sxc-bignum, .sxc-card.ov:focus-visible .sxc-bignum { color:#fff; }
 .sxc-card.ov .sxc-arr { border:1px solid rgba(255,255,255,.4); background:transparent; color:#fff; font-size:var(--fs-6); }
