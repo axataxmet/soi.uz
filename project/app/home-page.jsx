@@ -2461,16 +2461,22 @@ function SoiCatalogCards({ lang, go }) {
    по образцу «Экспертиза» (.sxp-bignum / .sxp-t / .sxp-more) — по просьбе
    заказчика 13.09.2026: было — номер в углу снимка сверху, заголовок и
    стрелка отдельно у низа. */
-.sxc-card.ov .sxc-bignum { position:absolute; z-index:0; right:14px; bottom:8px; font-size:5.5rem;
-  font-weight:800; line-height:1; color:rgba(255,255,255,.18); user-select:none; pointer-events:none; }
+/* Номер и стрелка приведены к той же механике, что у .sxp-bignum/.sxp-arrow
+   в «Экспертиза»: тот же размер номера и переход от приглушённого к
+   белоснежному, та же прозрачная стрелка с разворотом на 45° вместо заливки
+   — по просьбе заказчика 13.09.2026 (стиль нумерации и стрелки отличался). */
+.sxc-card.ov .sxc-bignum { position:absolute; z-index:0; right:14px; bottom:8px; font-size:9rem;
+  font-weight:800; line-height:1; color:rgba(255,255,255,.14); user-select:none; pointer-events:none;
+  transition:color .35s; }
+.sxc-card.ov:hover .sxc-bignum, .sxc-card.ov:focus-visible .sxc-bignum { color:rgba(255,255,255,.92); }
 .sxc-card.ov .sxc-foot { position:absolute; z-index:1; inset:auto 16px 18px 20px; padding:0;
   display:flex; flex-direction:column; align-items:flex-start; gap:14px; }
 .sxc-card.ov .sxc-t { margin:0; max-width:12rem; font-size:var(--fs-7); line-height:1.2; color:#fff; }
 .sxc-card.ov .sxc-more { display:flex; align-items:center; gap:10px; font-size:var(--fs-1); font-weight:700;
   text-transform:uppercase; letter-spacing:.08em; color:rgba(255,255,255,.86); }
-.sxc-card.ov .sxc-arr { border:none; background:rgba(255,255,255,.96); color:var(--sx-ink); }
+.sxc-card.ov .sxc-arr { border:1px solid rgba(255,255,255,.4); background:transparent; color:#fff; }
 .sxc-card.ov:hover .sxc-arr,
-.sxc-card.ov:focus-visible .sxc-arr { background:var(--sx-accent); color:#fff; }
+.sxc-card.ov:focus-visible .sxc-arr { transform:rotate(45deg); background:transparent; border-color:rgba(255,255,255,.7); color:#fff; }
 
 @media (prefers-reduced-motion: reduce){
   .sxc-card, .sxc-media img, .sxc-arr,   .sxc-card:hover .sxc-media img { transform:none; }
