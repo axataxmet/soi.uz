@@ -539,23 +539,20 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    выше от 08.08.2026) — карточки сведены к масштабу readdy.cc. Сетка между
    карточками (gap:30px) не тронута: пользователь просил про отступ внутри
    карточки, не про воздух между ними. */
-.sx-dir { position:relative; overflow:hidden; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:24px; transition:transform .3s cubic-bezier(.16,1,.3,1), border-color .3s; }
-/* Тень на hover заменена подсветкой рамки — readdy.cc держит карточки
-   полностью плоскими (box-shadow:none) во всех состояниях, глубину даёт
-   только смена цвета рамки и сдвиг по Y. */
-.sx-dir:hover { transform:translateY(-4px); border-color:var(--sx-ink-soft); }
-/* Оформление подогнано под карточки «Экспертиза» (.sxp-card): круглая стрелка
-   в углу, разворачивающаяся на hover, и приглушённый фоновой номер карточки
-   — по просьбе заказчика 13.09.2026 сделать блок «Навигация по направлениям»
-   таким же, как «Экспертиза». */
+/* Стиль карточки полностью сведён к «Экспертиза» (.sxp-card) — по просьбе
+   заказчика 13.09.2026: цвет заливает всю карточку только при наведении
+   (а не постоянная рамка + сдвиг по Y), номер белеет на hover, стрелка —
+   прозрачный круг с разворотом на 45°, без заливки. */
+.sx-dir { position:relative; overflow:hidden; border:1px solid var(--sx-line); border-radius:var(--sx-r); background:var(--sx-card); padding:28px; transition:background .35s, border-color .35s, color .35s; }
+.sx-dir:hover { border-color:transparent; background:var(--sx-lime); color:var(--sx-lime-ink); }
 .sx-dir-top { position:relative; z-index:1; display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:22px; }
 .sx-dir-arrow { display:flex; align-items:center; justify-content:center; width:44px; height:44px; flex-shrink:0;
   border-radius:50%; border:1px solid var(--sx-line); font-size:var(--fs-6); color:var(--sx-ink);
   transition:transform .3s, background .3s, border-color .3s, color .3s; }
-.sx-dir:hover .sx-dir-arrow { transform:rotate(45deg); background:var(--sx-accent); border-color:var(--sx-accent); color:#fff; }
-.sx-dir-bignum { position:absolute; right:12px; bottom:-48px; font-size:9rem; font-weight:800; line-height:1;
-  user-select:none; pointer-events:none; color:rgba(22,35,59,.045); }
-[data-theme="dark"] .sx-dir-bignum { color:rgba(255,255,255,.05); }
+.sx-dir:hover .sx-dir-arrow { transform:rotate(45deg); background:transparent; border-color:rgba(255,255,255,.35); color:var(--sx-lime-ink); }
+.sx-dir-bignum { position:absolute; z-index:0; right:12px; bottom:-30px; font-size:9rem; font-weight:800; line-height:1;
+  user-select:none; pointer-events:none; color:rgba(16,21,18,.06); transition:color .35s; }
+.sx-dir:hover .sx-dir-bignum { color:rgba(255,255,255,.92); }
 /* Заголовок — единственная ссылка карточки; её зона нажатия растянута на всю
    карточку. cursor:pointer держится на этом слое, а не на самом блоке: иначе
    палец-курсор появлялся бы и там, где нажимать нечего. */
@@ -568,19 +565,25 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
    нажатие всё равно относится к ней целиком. */
 .sx-dir:focus-within { outline:2px solid var(--sx-accent); outline-offset:3px; }
 .sx-dir-t:focus-visible { outline:none; }
-/* Иконка: один фирменный тон на все группы, подложка — он же в 10%.
-   Контейнер вырос с 50 до 72px следом за глифом (26 → 39px), чтобы вокруг
-   знака остался тот же воздух, а не впритык к краям. */
+/* Иконка: один фирменный тон на все группы, подложка — он же в 10%; на hover
+   карточки (уже синяя) переходит в полупрозрачную белую. Контейнер вырос с
+   50 до 72px следом за глифом (26 → 39px), чтобы вокруг знака остался тот же
+   воздух, а не впритык к краям. */
 .sx-dir-ic { width:72px; height:72px; border-radius:var(--r); display:flex; align-items:center; justify-content:center;
-  background:rgba(14,74,198,.10); color:var(--sx-accent); }
-.sx-dir h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.25; }
+  background:rgba(14,74,198,.10); color:var(--sx-accent); transition:background .35s, color .35s; }
+.sx-dir:hover .sx-dir-ic { background:rgba(255,255,255,.18); color:#fff; }
+.sx-dir h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.25; transition:color .35s; }
+.sx-dir:hover h3 { color:inherit; }
 .sx-dir-links { margin-top:14px; display:flex; flex-direction:column; gap:2px; }
 .sx-dir-links a { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:var(--fs-3); color:var(--sx-mute); text-decoration:none; padding:5px 0; transition:color .18s, padding-left .18s; }
 .sx-dir-links a:hover { color:var(--sx-blue); padding-left:5px; }
+.sx-dir:hover .sx-dir-links a { color:rgba(255,255,255,.82); }
+.sx-dir:hover .sx-dir-links a:hover { color:#fff; }
 /* Счётчик реальных товаров по направлению — раньше блок показывал все 22
    направления вне зависимости от того, есть ли под ними товары; теперь
    пустые скрыты выше (dirCards), а здесь просто видно, сколько нашлось. */
-.sx-dir-cnt { flex:0 0 auto; font-size:var(--fs-1); color:var(--sx-mute); opacity:.7; font-variant-numeric:tabular-nums; }
+.sx-dir-cnt { flex:0 0 auto; font-size:var(--fs-1); color:var(--sx-mute); opacity:.7; font-variant-numeric:tabular-nums; transition:color .35s; }
+.sx-dir:hover .sx-dir-cnt { color:rgba(255,255,255,.7); opacity:1; }
 
 /* ── impact band (dark interlude) ───────────────────── */
 /* Three navy slabs — impact, catalog portal, closing CTA — were the page's
