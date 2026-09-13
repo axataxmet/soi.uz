@@ -1343,7 +1343,10 @@ a.tnd-row, button.tnd-row { cursor:pointer; }
 .sx-dir-ic { width:72px; height:72px; margin-bottom:22px; border-radius:var(--r); display:flex; align-items:center; justify-content:center;
   background:rgba(14,74,198,.10); color:var(--sx-accent); transition:background .35s, color .35s; }
 .sx-dir:hover .sx-dir-ic { background:rgba(255,255,255,.18); color:#fff; }
-.sx-dir h3 { font-size:var(--fs-5); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.25; transition:color .35s; }
+/* Размер заголовка синхронизирован с «Экспертиза» и «Электронный каталог»
+   (--fs-7 везде) — было --fs-5, разнобой по блокам (решение заказчика
+   13.09.2026). */
+.sx-dir h3 { font-size:var(--fs-7); font-weight:800; color:var(--sx-ink); letter-spacing:-.01em; line-height:1.2; transition:color .35s; }
 .sx-dir:hover h3 { color:inherit; }
 .sx-dir-links { margin-top:14px; display:flex; flex-direction:column; gap:2px; }
 .sx-dir-links a { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:var(--fs-3); color:var(--sx-mute); text-decoration:none; padding:5px 0; transition:color .18s, padding-left .18s; }
@@ -2493,7 +2496,10 @@ function SoiCatalogCards({ lang, go }) {
 .sxc-card.ov .sxc-foot { position:absolute; z-index:1; inset:28px; padding:0;
   display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; }
 /* Заголовок увеличен (решение заказчика 13.09.2026). */
-.sxc-card.ov .sxc-t { margin:0; max-width:12rem; font-size:var(--fs-8); line-height:1.15; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.45), 0 1px 12px rgba(0,0,0,.3); }
+/* Размер заголовка синхронизирован с «Экспертиза» и «Навигация по
+   направлениям» (--fs-7 везде) — было --fs-8, разнобой по блокам (решение
+   заказчика 13.09.2026). */
+.sxc-card.ov .sxc-t { margin:0; max-width:12rem; font-size:var(--fs-7); line-height:1.2; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.45), 0 1px 12px rgba(0,0,0,.3); }
 /* Номер сначала стоял декоративным фоновым слоем, потом — отдельной строкой
    под «Подробнее↗»; теперь стоит с ним на одной строке, прижат к правому
    краю (решение заказчика 13.09.2026). */
