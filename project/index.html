@@ -2571,14 +2571,23 @@ body{background:var(--surface)}
 .brands-page-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .brand-tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);cursor:pointer;transition:.16s;box-shadow:var(--sh-sm);overflow:hidden}
 .brand-tile:hover{box-shadow:var(--sh-lg);transform:translateY(-2px);border-color:var(--blue-300,var(--line))}
-.bt-logo{width:100%;aspect-ratio:4/3;background:var(--blue-50);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.bt-logo{width:100%;aspect-ratio:4/3;background:var(--blue-50);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+/* Белая подложка под логотип. Файлы у брендов разные: часть — PNG с
+   прозрачностью (сливались с голубым фоном), часть — непрозрачные с белой
+   заливкой (давали белый прямоугольник произвольного размера). Из-за этого
+   карточки выглядели по-разному. Подложка одинакова для всех и не зависит
+   от того, есть ли в файле прозрачность. */
+.bt-logo::before{content:"";position:absolute;left:8%;right:8%;top:10%;bottom:10%;
+  background:#fff;border-radius:var(--r-sm);box-shadow:0 1px 2px rgba(9,24,48,.06)}
 /* Реальные логотипы партнёров — это в основном горизонтальные вордмарки
    (например, «ЕЛАМЕД» шириной 178×41), а .bt-logo — коробка 4:3. С cover
    такой логотип обрезался почти пополам по бокам: на карточке партнёра
    было видно «РОМЕТ» вместо «ПРОМЕТ». contain показывает лого целиком,
    с полями по краям — обрезка бренда хуже, чем свободное поле. */
-.bt-logo img{max-width:100%;max-height:100%;object-fit:contain;padding:14px;box-sizing:border-box}
-.bt-mono{font-size:var(--fs-9);font-weight:900;letter-spacing:-.02em;color:var(--blue-600)}
+.bt-logo img{position:relative;z-index:1;max-width:76%;max-height:66%;object-fit:contain;box-sizing:border-box}
+/* Заглушка без логотипа — поверх той же подложки, чтобы карточка без файла
+   не выбивалась из ряда. */
+.bt-mono{position:relative;z-index:1;font-size:var(--fs-9);font-weight:900;letter-spacing:-.02em;color:var(--blue-600)}
 .bt-body{padding:14px 16px 16px}
 .bt-name{font-size:var(--fs-4);font-weight:800;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* Карточка партнёра раньше заканчивалась на названии и стране — только
