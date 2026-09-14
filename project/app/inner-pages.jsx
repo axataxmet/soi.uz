@@ -314,7 +314,8 @@ function ProjectsPage({ t, lang, go }) {
     <div>
       <PageHero t={t} lang={lang} go={go} title={t.nav_projects} sub={t.pr_sub}
       badge={lv("Реализованные проекты", "Amalga oshirilgan loyihalar", "Completed projects")}
-      actions={[{ label: lv("Обсудить свой проект", "Loyihangizni muhokama qiling", "Discuss your project"), onClick: () => window.__openQuote && window.__openQuote() }]} />
+      /* Кнопка «Обсудить свой проект» снята по запросу заказчика (15.09.2026).
+         Связаться по-прежнему можно из шапки и футера. */ />
       <section className="section">
         <div className="wrap">
           <div style={{ display: "flex", gap: 10, marginBottom: 36, flexWrap: "wrap" }}>

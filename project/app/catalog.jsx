@@ -807,21 +807,13 @@ function ensureClpCss() {
 .clp-sec-all { display:inline-flex; align-items:center; gap:6px; background:none; border:none; color:var(--blue-600); font-weight:700; font-size:var(--fs-4); cursor:pointer; padding:0; }
 .clp-sec-all:hover { text-decoration:underline; }
 .clp-popular-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px; }
-.clp-brands-row { display:flex; flex-wrap:wrap; gap:12px; }
-.clp-brand-chip { display:flex; align-items:center; justify-content:center; height:64px; padding:0 20px; border:1px solid var(--c-border,var(--line-soft)); border-radius:var(--r); background:var(--c-surface,#fff); cursor:pointer; transition:border-color .18s,box-shadow .18s; font-weight:700; color:var(--c-muted,var(--slate-500)); font-size:var(--fs-3); }
-.clp-brand-chip:hover { border-color:var(--blue-400); box-shadow:var(--sh-sm); color:var(--blue-600); }
-.clp-brand-chip img { height:32px; width:auto; max-width:120px; object-fit:contain; }
 @media(max-width:991px){ .clp-popular-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
 @media(max-width:767px){ .clp-popular-grid{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:540px){ .clp-popular-grid{ grid-template-columns:1fr; } }
 
 /* Полоса статистики: заливка убрана, разделители держатся на рамке. */
-.clp-stats { display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line-soft); border-radius:var(--r-lg); overflow:hidden; margin:clamp(24px,3vw,40px) 0; }
-.clp-stat { background:var(--c-surface,#fff); padding:28px 24px; text-align:center; }
-.clp-stat-n { font-size:clamp(32px,4vw,46px); font-weight:800; letter-spacing:-.03em; background:linear-gradient(120deg,var(--blue-500),var(--blue-500)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; line-height:1; }
-.clp-stat-l { font-size:var(--fs-4); color:var(--c-muted,var(--slate-400)); margin-top:8px; }
 
-@media(max-width:800px){ .clp-cats-grid{ grid-template-columns:repeat(2,1fr); } .clp-stats{ grid-template-columns:1fr 1fr 1fr; } }
+@media(max-width:800px){ .clp-cats-grid{ grid-template-columns:repeat(2,1fr); } }
 @media(max-width:540px){ .clp-cats-grid{ grid-template-columns:1fr 1fr; } .clp-cat-tile{ padding:20px 16px; } }
 
 .clp-cat-tile:focus-visible { outline:2px solid var(--ta,var(--blue-500)); outline-offset:2px; }
@@ -957,47 +949,6 @@ function CatalogLandingPage({ t, lang, store, go }) {
 
       {/* Бренды — раздел «Trust/Safety» из той же типовой структуры: подтверждение,
           что за карточками стоят реальные производители, а не заглушка. */}
-      {(() => {
-        const brandList = ((window.DATA && window.DATA.BRANDS) || []).filter(b => b && b.name).slice(0, 10);
-        if (brandList.length < 3) return null;
-        return (
-          <div className="clp-wrap clp-brands">
-            <div className="clp-sec-head">
-              <h2>{lv("Бренды в каталоге", "Katalogdagi brendlar", "Brands in the catalog")}</h2>
-              <button className="clp-sec-all" onClick={() => go("partners")}>
-                {lv("Все бренды", "Barcha brendlar", "All brands")}<Icon name="arrowRight" size={15} />
-              </button>
-            </div>
-            <div className="clp-brands-row">
-              {brandList.map(b => (
-                <button key={b.id} className="clp-brand-chip" onClick={() => go("catalog", { brand: b.id })} title={b.name}>
-                  {b.logo ? <img src={b.logo} alt={b.name} loading="lazy" /> : <span>{b.name}</span>}
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-      })()}
-
-      {/* Stats */}
-      <div className="clp-wrap">
-        <div className="clp-stats">
-          {/* Цифры — из общего источника (siteFigures в home-page.jsx), а не
-              вписаны здесь: раньше витрина и главная расходились. */}
-          {(() => { const F = window.siteFigures ? window.siteFigures() : { catalog: "", brands: "", regions: "14" }; return [
-            { v: F.catalog, n: F.catalog + "+", l: lv("позиций оборудования", "uskuna pozitsiyasi", "equipment items") },
-            { v: F.brands,  n: F.brands + "+",  l: lv("мировых брендов",       "jahon brendlari",    "global brands")   },
-            { v: F.regions, n: F.regions,       l: lv("регионов доставки",     "yetkazish hududi",   "delivery regions")},
-          /* Плитка без значения не превращается в «+» без числа — она просто
-             не выводится, и ряд смыкается. */
-          ].filter((s) => s.v); })().map((s,i) => (
-            <div key={i} className="clp-stat">
-              <div className="clp-stat-n">{s.n}</div>
-              <div className="clp-stat-l">{s.l}</div>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
