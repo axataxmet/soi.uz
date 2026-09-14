@@ -5,7 +5,13 @@
 function rtIsHtmlSite(s) { return /<(p|h[1-6]|ul|ol|li|strong|em|b|i|br|div)\b/i.test(String(s || "")); }
 
 const VAT_RATE = 0.12;
-const ON_REQUEST_THRESHOLD = 90000000; // дорогое капитальное оборудование — цена по запросу
+/* Порог, выше которого цена пряталась под «Цена по запросу» (было 90 000 000
+   сум), снят по запросу заказчика 15.09.2026. Он появился, когда дорогих
+   позиций почти не было, а после простановки цен стал прятать реальные суммы:
+   ЛОР-комбайн Элема-Н ЛК1 за 151 360 000 сум показывался без цены, хотя она
+   есть и в базе, и в API — расхождение с админкой сбивало с толку.
+   «Цена по запросу» осталась там, где ей и место: priceOnRequest у позиции,
+   снятый показ цены или отсутствие цены вовсе. */
 
 /* обложка-заглушка для документа без превью (та же схема, что в LicensesPage) */
 function PdpDocFallback() {
@@ -52,7 +58,7 @@ function PdpDocThumb({ url }) {
    без опта, переключателя НДС и второстепенных кнопок (wishlist/compare/КП) —
    только статус НДС, цена, количество и «Купить». */
 function B2BPriceBlock({ p, t, lang, basePrice, qty, setQty, store }) {
-  const onRequest = p.priceOnRequest || p.showPrice === false || !(basePrice > 0) || basePrice >= ON_REQUEST_THRESHOLD;
+  const onRequest = p.priceOnRequest || p.showPrice === false || !(basePrice > 0);
   const inCart = store.cart.some((c) => c.id === p.id);
 
   if (onRequest) {
