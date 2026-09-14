@@ -2571,14 +2571,12 @@ body{background:var(--surface)}
 .brands-page-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .brand-tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);cursor:pointer;transition:.16s;box-shadow:var(--sh-sm);overflow:hidden}
 .brand-tile:hover{box-shadow:var(--sh-lg);transform:translateY(-2px);border-color:var(--blue-300,var(--line))}
-.bt-logo{width:100%;aspect-ratio:4/3;background:var(--blue-50);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-/* Белая подложка под логотип. Файлы у брендов разные: часть — PNG с
-   прозрачностью (сливались с голубым фоном), часть — непрозрачные с белой
-   заливкой (давали белый прямоугольник произвольного размера). Из-за этого
-   карточки выглядели по-разному. Подложка одинакова для всех и не зависит
-   от того, есть ли в файле прозрачность. */
-.bt-logo::before{content:"";position:absolute;left:8%;right:8%;top:10%;bottom:10%;
-  background:#fff;border-radius:var(--r-sm);box-shadow:0 1px 2px rgba(9,24,48,.06)}
+.bt-logo{width:100%;aspect-ratio:4/3;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+/* Область логотипа целиком белая (решение заказчика 15.09.2026). Отдельная
+   подложка больше не нужна: и прозрачные PNG, и непрозрачные файлы с белой
+   заливкой ложатся на один и тот же фон и выглядят одинаково. Ограничение
+   размера оставлено — иначе масштаб логотипа диктуется пропорциями файла и
+   карточки в ряду разъезжаются. */
 /* Реальные логотипы партнёров — это в основном горизонтальные вордмарки
    (например, «ЕЛАМЕД» шириной 178×41), а .bt-logo — коробка 4:3. С cover
    такой логотип обрезался почти пополам по бокам: на карточке партнёра
@@ -2608,7 +2606,7 @@ body{background:var(--surface)}
 .brand-tile:hover .bt-view svg{transform:translateX(2px)}
 .bt-site{font-size:var(--fs-1);color:var(--slate-500);font-weight:600;text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:45%}
 .bt-site:hover{color:var(--blue-600);text-decoration:underline}
-[data-theme="dark"] .bt-logo{background:#16273f}
+[data-theme="dark"] .bt-logo{background:#fff}
 .brands-pager{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:36px;flex-wrap:wrap}
 .bp-btn{min-width:36px;height:36px;padding:0 6px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);color:var(--slate-600);font-size:var(--fs-3);font-weight:700;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:.14s}
 .bp-btn:hover:not(:disabled){border-color:var(--blue-300,var(--line));color:var(--blue-600)}
@@ -4116,7 +4114,7 @@ html{scroll-padding-top:72px}
 <script src="dist/app/tweaks-panel.js?v=1787415411"></script>
 <script src="dist/app/certificates.js?v=1789336697"></script>
 <script src="dist/app/home-sections.js?v=1787415411"></script>
-<script src="dist/app/inner-pages.js?v=1789418528"></script>
+<script src="dist/app/inner-pages.js?v=1789419470"></script>
 <script src="dist/app/testimonials.js?v=1789250101"></script>
 <script src="dist/app/search.js?v=1787415411"></script>
 <script src="dist/app/staff-training.js?v=1787415411"></script>
