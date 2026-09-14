@@ -29,6 +29,9 @@ const HERO_DEFAULTS = {
   ctaPrimary: { ru: "О компании", uz: "Kompaniya haqida", en: "About us" },
   ctaSecondary: { ru: "Электронный каталог", uz: "Elektron katalog", en: "E-catalog" },
   trust1: { ru: "5+ лет опыта", uz: "5+ yil tajriba", en: "5+ years" },
+  /* Этот блок (HERO_DEFAULTS) на сайте не читается: значения нигде не
+     подставляются. Цифру здесь не оживлял — иначе выглядело бы так, будто
+     она где-то показывается. */
   trust2: { ru: "22+ мировых брендов", uz: "22+ jahon brendi", en: "22+ global brands" },
   trust3: { ru: "14 регионов Узбекистана", uz: "O'zbekistonning 14 hududi", en: "14 regions" },
 };
@@ -57,12 +60,32 @@ const SITE_FIGURES_DEFAULTS = {
   service: "50",          // успешно выполненных сервисных работ
   regions: "14",          // регионов доставки
 };
+/* Число брендов и позиций каталога раньше было константой (22 и 133) и
+   устаревало при каждом пополнении: к 15.09.2026 производителей стало 26, а
+   товаров — под три сотни, и на сайте по-прежнему висело «22+». Считаем по
+   факту из загруженного каталога; константы остаются запасным вариантом на
+   случай, если данные ещё не приехали. Значение, заданное в админке
+   (site_figures), по-прежнему главнее — иначе его нельзя было бы переопределить. */
 function siteFigures() {
   const cms = (window.CMS && window.CMS.getSetting) ? window.CMS.getSetting("site_figures", null) : null;
   const f = Object.assign({}, SITE_FIGURES_DEFAULTS, cms || {});
+  const D = window.DATA || {};
+  const setCms = cms || {};
+  if (!setCms.brands && D.BRANDS && D.BRANDS.length) f.brands = String(D.BRANDS.length);
+  if (!setCms.catalog && D.PRODUCTS && D.PRODUCTS.length) f.catalog = String(D.PRODUCTS.length);
   f.years = String(Math.max(1, new Date().getFullYear() - parseInt(f.founded, 10)));
   return f;
 }
+
+/* Русское склонение после числа: 21 бренд, 22 бренда, 26 брендов. Цифра стала
+   переменной, поэтому вшитая форма слова («22+ брендов») теперь врёт. */
+function plural(n, one, few, many) {
+  const d10 = n % 10, d100 = n % 100;
+  if (d10 === 1 && d100 !== 11) return one;
+  if (d10 >= 2 && d10 <= 4 && (d100 < 12 || d100 > 14)) return few;
+  return many;
+}
+window.soiPlural = plural;
 window.siteFigures = siteFigures;
 window.SITE_FIGURES_DEFAULTS = SITE_FIGURES_DEFAULTS;
 
@@ -207,8 +230,8 @@ function HeroVideoSlot({ t, lang }) {
           {/* animated stat cards */}
           <div className="hvs-stats">
             {[
-              {n:"133+", l:"наименований", ic:"grid", c:"var(--blue-600)"},
-              {n:"22+",   l:"брендов",       ic:"award", c:"var(--accent)"},
+              {n:siteFigures().catalog+"+", l:plural(+siteFigures().catalog,"наименование","наименования","наименований"), ic:"grid", c:"var(--blue-600)"},
+              {n:siteFigures().brands+"+",  l:plural(+siteFigures().brands,"бренд","бренда","брендов"), ic:"award", c:"var(--accent)"},
               {n:"14",    l:"регионов",      ic:"pin",   c:"var(--danger)"},
               {n:(new Date().getFullYear() - parseInt(localStorage.getItem("soi_founded_year")||"2021",10))+"+",    l:"лет на рынке",  ic:"star",  c:"#7c5cbf"},
             ].map((s,i) => (
@@ -548,11 +571,13 @@ function HeroSignals({ lang, go }) {
   const lv = (ru, uz, en) => lang === "uz" ? uz : lang === "en" ? en : ru;
   const sigs = [
     { ic: "grid",  cls: "s1", bg: "var(--blue-50)", c: "var(--blue-600)",
-      t: lv("133+ позиций", "133+ pozitsiya", "133+ items"),
+      t: (() => { const n=+siteFigures().catalog;
+            return lv(n+"+ "+plural(n,"позиция","позиции","позиций"), n+"+ pozitsiya", n+"+ items"); })(),
       d: lv("в наличии и под заказ", "mavjud va buyurtmaga", "in stock & to order"),
       act: () => go("catalog", {}) },
     { ic: "check", cls: "s2", bg: "var(--line-2)", c: "var(--accent)",
-      t: lv("22+ брендов", "22+ brend", "22+ brands"),
+      t: (() => { const n=+siteFigures().brands;
+            return lv(n+"+ "+plural(n,"бренд","бренда","брендов"), n+"+ brend", n+"+ brands"); })(),
       d: lv("официальные поставки", "rasmiy yetkazib berish", "official supply"),
       act: () => go("brands", {}) },
     { ic: "truck", cls: "s3", bg: "var(--bg-2)", c: "var(--blue-600)",
@@ -3442,7 +3467,9 @@ function SoiCatalogPortal({ lang, go }) {
 
             <div>
               <span className="sx-cp-eyebrow">{lv("Электронный каталог", "Elektron katalog", "Electronic catalog")}</span>
-              <h2 className="sx-cp-h2">{lv("133+ единиц оборудования для медицины", "Tibbiyot uchun 133+ birlik uskunalar", "133+ units of medical equipment")}</h2>
+              <h2 className="sx-cp-h2">{(() => { const n=+siteFigures().catalog;
+                return lv(n+"+ "+plural(n,"единица","единицы","единиц")+" оборудования для медицины",
+                          "Tibbiyot uchun "+n+"+ birlik uskunalar", n+"+ units of medical equipment"); })()}</h2>
               <p className="sx-cp-sub">{lv(
                 "Медтехника, мебель, инструменты и расходные материалы. Поиск по бренду, направлению и наличию на складе.",
                 "Tibbiy texnika, mebel, asboblar va sarf materiallari. Brend va yo'nalish bo'yicha qidiruv.",

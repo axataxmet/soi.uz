@@ -413,7 +413,16 @@ function PartnersPage({ t, lang, go, goCat }) {
   return (
     <div>
       <PageHero t={t} lang={lang} go={go} title={t.nav_partners} sub={t.br_sub}
-      badge={lv("22+ мировых производителя", "22+ jahon ishlab chiqaruvchisi", "22+ global manufacturers")}
+      /* Было «22+» константой и устарело — к 15.09.2026 производителей 26.
+         Берём число из того же источника, что и остальные цифры сайта, и
+         склоняем слово: 21 производитель, 22 производителя, 26 производителей. */
+      badge={(() => {
+        const n = parseInt((window.siteFigures ? window.siteFigures().brands : 0), 10) || brands.length;
+        const w = window.soiPlural
+          ? window.soiPlural(n, "производитель", "производителя", "производителей")
+          : "производителей";
+        return lv(n + "+ мировых " + w, n + "+ jahon ishlab chiqaruvchisi", n + "+ global manufacturers");
+      })()}
       actions={[{ label: lv("Стать партнёром", "Hamkor bo'lish", "Become a partner"), onClick: () => window.__openQuote && window.__openQuote() }]} />
       {/* Заголовок секции снят по прямому запросу (10.09.2026) — страница
           уже называется «Партнёры» (см. PageHero выше), повтор был лишним. */}
