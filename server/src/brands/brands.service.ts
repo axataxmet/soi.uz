@@ -29,6 +29,13 @@ export class BrandsService extends BaseCrudService {
     return this.update(id, this.toData(dto));
   }
 
+  /* Сайт производителя в модели называется website, а наружу и в админку он
+     всегда ходил как url (см. ADAPTERS.brands в app/cms-remote.js: toFE читает
+     r.website и кладёт в url, toAPI отправляет url обратно). Здесь url уходил
+     в Prisma как есть — поля с таким именем у Manufacturer нет, и запрос падал
+     с PrismaClientValidationError, то есть «Некорректные данные запроса».
+     Undefined Prisma отбрасывает молча, поэтому ломались только бренды с
+     заполненным сайтом — а это почти все. Принимаем оба имени, пишем в website. */
   private toData(dto: CreateBrandDto | UpdateBrandDto) {
     return {
       name: dto.name,
@@ -37,7 +44,7 @@ export class BrandsService extends BaseCrudService {
       country: dto.country,
       inn: dto.inn,
       logoUrl: dto.logoUrl,
-      url: dto.url,
+      website: dto.website ?? dto.url,
       fixed: dto.fixed,
       order: dto.order,
     };

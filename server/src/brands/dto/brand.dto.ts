@@ -30,7 +30,14 @@ export class CreateBrandDto {
   @IsOptional() @IsString()
   logoUrl?: string;
 
-  @ApiPropertyOptional()
+  /* Сайт производителя. В модели поле называется website; url — историческое
+     имя, под которым его шлёт админка и отдаёт публичный адаптер. Принимаем
+     оба, сервис пишет в website. */
+  @ApiPropertyOptional({ description: 'Сайт производителя' })
+  @IsOptional() @IsString()
+  website?: string;
+
+  @ApiPropertyOptional({ deprecated: true, description: 'Синоним website (историческое имя поля)' })
   @IsOptional() @IsString()
   url?: string;
 
